@@ -32,3 +32,29 @@ export {
 	type GameProgram,
 	type SkillCategoryDef
 } from './gamedata';
+
+export {
+	character,
+	currentStep,
+	currentStepIndex,
+	remainingBP,
+	bpBreakdown,
+	hasMetatype,
+	startNewCharacter,
+	setWizardStep,
+	nextWizardStep,
+	prevWizardStep,
+	setMetatype,
+	setAttribute,
+	addQuality,
+	removeQuality,
+	setSkill,
+	removeSkill,
+	addContact,
+	removeContact,
+	updateIdentity,
+	WIZARD_STEPS,
+	type WizardStep,
+	type WizardStepConfig,
+	type AttributeValueKey
+} from './character';

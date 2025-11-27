@@ -12,9 +12,10 @@ export type {
 	AttributeLimits,
 	AttributeValue,
 	Attribute,
-	CharacterAttributes,
 	MetatypeAttributes
 } from './attributes';
+
+export { type CharacterAttributes } from './attributes';
 
 export {
 	DEFAULT_ATTRIBUTE_VALUE,
