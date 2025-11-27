@@ -1956,5 +1956,64 @@ export function updateCondition(type: 'physical' | 'stun', value: number): void 
 	});
 }
 
+/**
+ * Update current Edge points.
+ * Used for tracking Edge spending/recovery during gameplay.
+ */
+export function updateEdge(value: number): void {
+	characterStore.update((c) => {
+		if (!c) return c;
+
+		const maxEdge = c.attributes.edg.base + c.attributes.edg.bonus;
+		const clampedValue = Math.max(0, Math.min(value, maxEdge));
+
+		return {
+			...c,
+			condition: {
+				...c.condition,
+				edgeCurrent: clampedValue
+			}
+		};
+	});
+}
+
+/**
+ * Spend Edge point(s).
+ * Returns false if not enough Edge available.
+ */
+export function spendEdge(amount: number = 1): boolean {
+	const char = get(characterStore);
+	if (!char) return false;
+
+	const current = char.condition.edgeCurrent;
+	if (current < amount) return false;
+
+	updateEdge(current - amount);
+	return true;
+}
+
+/**
+ * Recover Edge point(s).
+ */
+export function recoverEdge(amount: number = 1): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const current = char.condition.edgeCurrent;
+	const maxEdge = char.attributes.edg.base + char.attributes.edg.bonus;
+	updateEdge(Math.min(current + amount, maxEdge));
+}
+
+/**
+ * Fully refresh Edge to maximum.
+ */
+export function refreshEdge(): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const maxEdge = char.attributes.edg.base + char.attributes.edg.bonus;
+	updateEdge(maxEdge);
+}
+
 /** Re-export CharacterSummary type for convenience. */
 export type { CharacterSummary };

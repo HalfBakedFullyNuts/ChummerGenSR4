@@ -16,6 +16,7 @@
 		rollSkill: { name: string; pool: number; attribute: AttributeCode };
 		rollAttribute: { name: string; pool: number };
 		damageChanged: { type: 'physical' | 'stun'; value: number };
+		edgeChanged: { value: number };
 	}>();
 
 	/** Get skill definition by name. */
@@ -95,8 +96,41 @@
 		dispatch('damageChanged', { type, value: newValue });
 	}
 
+	/** Handle Edge point click. */
+	function handleEdgeClick(pointIndex: number): void {
+		if (!interactive) return;
+
+		const currentEdge = char.condition.edgeCurrent;
+
+		// Clicking a filled point spends it, clicking empty recovers to that point
+		let newValue: number;
+		if (pointIndex < currentEdge) {
+			// Clicking a filled point - spend down to that point
+			newValue = pointIndex;
+		} else {
+			// Clicking an empty point - recover to that point (inclusive)
+			newValue = pointIndex + 1;
+		}
+
+		dispatch('edgeChanged', { value: newValue });
+	}
+
+	/** Refresh all Edge. */
+	function handleEdgeRefresh(): void {
+		if (!interactive) return;
+		dispatch('edgeChanged', { value: maxEdge });
+	}
+
+	/** Max Edge points. */
+	$: maxEdge = getAttrTotal(char.attributes.edg);
+
 	/** Get initiative. */
 	$: initiative = getAttrTotal(char.attributes.rea) + getAttrTotal(char.attributes.int);
+
+	/** Calculate wound modifier (every 3 boxes filled = -1). */
+	$: physicalWoundMod = Math.floor(char.condition.physicalCurrent / 3);
+	$: stunWoundMod = Math.floor(char.condition.stunCurrent / 3);
+	$: totalWoundMod = physicalWoundMod + stunWoundMod;
 
 	/** Get composure. */
 	$: composure = getAttrTotal(char.attributes.cha) + getAttrTotal(char.attributes.wil);
@@ -145,6 +179,50 @@
 				<div class="text-accent-cyan">Nuyen: {formatNuyen(char.nuyen)}</div>
 			</div>
 		</div>
+
+		<!-- Edge Tracker -->
+		{#if maxEdge > 0}
+			<div class="mt-4 pt-4 border-t border-border">
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-2">
+						<span class="text-accent-primary font-medium">Edge</span>
+						<span class="text-secondary-text text-sm">
+							{char.condition.edgeCurrent} / {maxEdge}
+						</span>
+					</div>
+					{#if interactive}
+						<button
+							type="button"
+							class="cw-btn text-xs"
+							on:click={handleEdgeRefresh}
+							disabled={char.condition.edgeCurrent >= maxEdge}
+						>
+							Refresh
+						</button>
+					{/if}
+				</div>
+				<div class="flex gap-1 mt-2">
+					{#each Array(maxEdge) as _, i}
+						<button
+							type="button"
+							class="w-6 h-6 rounded-full border-2 text-center text-xs font-bold transition-colors
+								{i < char.condition.edgeCurrent
+									? 'bg-accent-primary border-accent-primary text-surface'
+									: 'border-accent-primary/50 text-accent-primary/50'}
+								{interactive ? 'hover:border-accent-primary cursor-pointer' : ''}"
+							on:click={() => handleEdgeClick(i)}
+							disabled={!interactive}
+							title={interactive ? (i < char.condition.edgeCurrent ? 'Spend Edge' : 'Recover Edge') : ''}
+						>
+							{i < char.condition.edgeCurrent ? '★' : '☆'}
+						</button>
+					{/each}
+				</div>
+				{#if interactive}
+					<p class="text-muted-text text-xs mt-1">Click to spend/recover Edge</p>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
 	<!-- Main Stats Grid -->
@@ -308,6 +386,21 @@
 						{/each}
 					</div>
 				</div>
+
+				<!-- Wound Modifier -->
+				{#if totalWoundMod > 0}
+					<div class="mt-3 pt-3 border-t border-border">
+						<div class="flex items-center justify-between">
+							<span class="text-secondary-text text-sm">Wound Modifier</span>
+							<span class="font-mono font-bold text-accent-danger">-{totalWoundMod}</span>
+						</div>
+						<p class="text-muted-text text-xs mt-1">
+							Applied to all tests ({physicalWoundMod > 0 ? `Physical: -${physicalWoundMod}` : ''}
+							{physicalWoundMod > 0 && stunWoundMod > 0 ? ', ' : ''}
+							{stunWoundMod > 0 ? `Stun: -${stunWoundMod}` : ''})
+						</p>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>

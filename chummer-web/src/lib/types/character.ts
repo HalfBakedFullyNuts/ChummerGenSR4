@@ -146,7 +146,7 @@ export interface CharacterReputation {
 
 /**
  * Condition monitor tracking.
- * Physical and stun damage boxes.
+ * Physical and stun damage boxes, plus Edge points.
  */
 export interface ConditionMonitor {
 	readonly physicalMax: number;
@@ -154,6 +154,7 @@ export interface ConditionMonitor {
 	readonly stunMax: number;
 	readonly stunCurrent: number;
 	readonly overflow: number;
+	readonly edgeCurrent: number;
 }
 
 /**
@@ -441,7 +442,8 @@ export function createEmptyCharacter(
 			physicalCurrent: 0,
 			stunMax: 10,
 			stunCurrent: 0,
-			overflow: 0
+			overflow: 0,
+			edgeCurrent: 0
 		},
 		expenseLog: [],
 		createdAt: now,
