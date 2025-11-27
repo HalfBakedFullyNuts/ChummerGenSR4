@@ -11,10 +11,11 @@
 	/** Enable clickable skills for rolling. */
 	export let interactive = false;
 
-	/** Dispatch roll events. */
+	/** Dispatch events. */
 	const dispatch = createEventDispatcher<{
 		rollSkill: { name: string; pool: number; attribute: AttributeCode };
 		rollAttribute: { name: string; pool: number };
+		damageChanged: { type: 'physical' | 'stun'; value: number };
 	}>();
 
 	/** Get skill definition by name. */
@@ -73,6 +74,25 @@
 	function handleDerivedRoll(name: string, pool: number): void {
 		if (!interactive) return;
 		dispatch('rollAttribute', { name, pool });
+	}
+
+	/** Handle condition box click. */
+	function handleConditionClick(type: 'physical' | 'stun', boxIndex: number, maxBoxes: number): void {
+		if (!interactive) return;
+
+		const currentValue = type === 'physical' ? char.condition.physicalCurrent : char.condition.stunCurrent;
+
+		// Clicking a marked box clears it and all after, clicking unmarked marks it and all before
+		let newValue: number;
+		if (boxIndex < currentValue) {
+			// Clicking a marked box - set damage to that box (exclusive)
+			newValue = boxIndex;
+		} else {
+			// Clicking an unmarked box - mark it (inclusive)
+			newValue = Math.min(boxIndex + 1, maxBoxes);
+		}
+
+		dispatch('damageChanged', { type, value: newValue });
 	}
 
 	/** Get initiative. */
@@ -238,6 +258,9 @@
 		<!-- Condition Monitor -->
 		<div class="cw-card">
 			<h2 class="cw-card-header">Condition Monitor</h2>
+			{#if interactive}
+				<p class="text-muted-text text-xs mb-2">Click boxes to track damage</p>
+			{/if}
 			<div class="space-y-3">
 				<div>
 					<div class="flex justify-between text-sm mb-1">
@@ -246,14 +269,19 @@
 					</div>
 					<div class="flex flex-wrap gap-1">
 						{#each Array(physicalBoxes) as _, i}
-							<div
-								class="w-5 h-5 border rounded text-center text-xs leading-5
+							<button
+								type="button"
+								class="w-5 h-5 border rounded text-center text-xs leading-5 transition-colors
 									{i < char.condition.physicalCurrent
 										? 'bg-accent-danger border-accent-danger text-surface'
-										: 'border-border text-muted-text'}"
+										: 'border-border text-muted-text'}
+									{interactive ? 'hover:border-accent-danger cursor-pointer' : ''}"
+								on:click={() => handleConditionClick('physical', i, physicalBoxes)}
+								disabled={!interactive}
+								title={interactive ? (i < char.condition.physicalCurrent ? 'Click to heal' : 'Click to mark damage') : ''}
 							>
 								{i < char.condition.physicalCurrent ? 'X' : ''}
-							</div>
+							</button>
 						{/each}
 					</div>
 				</div>
@@ -264,14 +292,19 @@
 					</div>
 					<div class="flex flex-wrap gap-1">
 						{#each Array(stunBoxes) as _, i}
-							<div
-								class="w-5 h-5 border rounded text-center text-xs leading-5
+							<button
+								type="button"
+								class="w-5 h-5 border rounded text-center text-xs leading-5 transition-colors
 									{i < char.condition.stunCurrent
 										? 'bg-accent-warning border-accent-warning text-surface'
-										: 'border-border text-muted-text'}"
+										: 'border-border text-muted-text'}
+									{interactive ? 'hover:border-accent-warning cursor-pointer' : ''}"
+								on:click={() => handleConditionClick('stun', i, stunBoxes)}
+								disabled={!interactive}
+								title={interactive ? (i < char.condition.stunCurrent ? 'Click to heal' : 'Click to mark damage') : ''}
 							>
 								{i < char.condition.stunCurrent ? 'X' : ''}
-							</div>
+							</button>
 						{/each}
 					</div>
 				</div>
