@@ -12,6 +12,7 @@ import {
 	parseAP,
 	parseFireModes,
 	calculateRecoilPenalty,
+	calculateArmorStacking,
 	WEAPON_SKILL_MAP,
 	FIRING_MODES,
 	type RollResult
@@ -557,6 +558,115 @@ describe('Dice Rolling Utilities', () => {
 			// RC 0, no previous shots, firing BF (3 recoil)
 			// Cumulative = 0 + 3 = 3, RC + 1 = 1, uncompensated = max(0, 3-1) = 2
 			expect(calculateRecoilPenalty(0, 0, FIRING_MODES.BF)).toBe(-2);
+		});
+	});
+});
+
+describe('Armor Stacking', () => {
+	describe('calculateArmorStacking', () => {
+		it('should return zeros for no armor', () => {
+			const result = calculateArmorStacking([], 5);
+			expect(result.ballistic).toBe(0);
+			expect(result.impact).toBe(0);
+			expect(result.encumbrancePenalty).toBe(0);
+			expect(result.hasArmor).toBe(false);
+		});
+
+		it('should return zeros for no equipped armor', () => {
+			const armor = [
+				{ name: 'Jacket', ballistic: 8, impact: 6, equipped: false }
+			];
+			const result = calculateArmorStacking(armor, 5);
+			expect(result.ballistic).toBe(0);
+			expect(result.impact).toBe(0);
+			expect(result.hasArmor).toBe(false);
+		});
+
+		it('should use single armor values directly', () => {
+			const armor = [
+				{ name: 'Armor Jacket', ballistic: 8, impact: 6, equipped: true }
+			];
+			const result = calculateArmorStacking(armor, 5);
+			expect(result.ballistic).toBe(8);
+			expect(result.impact).toBe(6);
+			expect(result.hasArmor).toBe(true);
+		});
+
+		it('should stack multiple armors (highest + half of others)', () => {
+			// Jacket (8/6) + Vest (6/4)
+			// Ballistic: 8 + 3 = 11
+			// Impact: 6 + 2 = 8
+			const armor = [
+				{ name: 'Armor Jacket', ballistic: 8, impact: 6, equipped: true },
+				{ name: 'Armor Vest', ballistic: 6, impact: 4, equipped: true }
+			];
+			const result = calculateArmorStacking(armor, 5);
+			expect(result.ballistic).toBe(11); // 8 + floor(6/2)
+			expect(result.impact).toBe(8); // 6 + floor(4/2)
+		});
+
+		it('should stack three armors correctly', () => {
+			// Jacket (8/6) + Vest (6/4) + Helmet (2/2)
+			// Ballistic: 8 + 3 + 1 = 12
+			// Impact: 6 + 2 + 1 = 9
+			const armor = [
+				{ name: 'Armor Jacket', ballistic: 8, impact: 6, equipped: true },
+				{ name: 'Armor Vest', ballistic: 6, impact: 4, equipped: true },
+				{ name: 'Helmet', ballistic: 2, impact: 2, equipped: true }
+			];
+			const result = calculateArmorStacking(armor, 5);
+			expect(result.ballistic).toBe(12); // 8 + 3 + 1
+			expect(result.impact).toBe(9); // 6 + 2 + 1
+		});
+
+		it('should calculate encumbrance penalty when armor exceeds Body', () => {
+			const armor = [
+				{ name: 'Armor Jacket', ballistic: 8, impact: 6, equipped: true }
+			];
+			// Body 5, armor 8 = -3 penalty
+			const result = calculateArmorStacking(armor, 5);
+			expect(result.encumbrancePenalty).toBe(-3);
+		});
+
+		it('should have no encumbrance when armor equals Body', () => {
+			const armor = [
+				{ name: 'Armor Jacket', ballistic: 5, impact: 4, equipped: true }
+			];
+			// Body 5, armor 5 = no penalty
+			const result = calculateArmorStacking(armor, 5);
+			expect(result.encumbrancePenalty).toBe(0);
+		});
+
+		it('should have no encumbrance when armor is below Body', () => {
+			const armor = [
+				{ name: 'Light Armor', ballistic: 3, impact: 2, equipped: true }
+			];
+			// Body 5, armor 3 = no penalty
+			const result = calculateArmorStacking(armor, 5);
+			expect(result.encumbrancePenalty).toBe(0);
+		});
+
+		it('should only count equipped armor', () => {
+			const armor = [
+				{ name: 'Armor Jacket', ballistic: 8, impact: 6, equipped: true },
+				{ name: 'Full Body Armor', ballistic: 14, impact: 10, equipped: false } // not equipped
+			];
+			const result = calculateArmorStacking(armor, 5);
+			expect(result.ballistic).toBe(8);
+			expect(result.impact).toBe(6);
+		});
+
+		it('should round down secondary armor contributions', () => {
+			// Jacket (8/6) + Vest (5/3)
+			// Ballistic: 8 + floor(5/2) = 8 + 2 = 10
+			// Impact: 6 + floor(3/2) = 6 + 1 = 7
+			const armor = [
+				{ name: 'Armor Jacket', ballistic: 8, impact: 6, equipped: true },
+				{ name: 'Armor Vest', ballistic: 5, impact: 3, equipped: true }
+			];
+			const result = calculateArmorStacking(armor, 10);
+			expect(result.ballistic).toBe(10);
+			expect(result.impact).toBe(7);
 		});
 	});
 });

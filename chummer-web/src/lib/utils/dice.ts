@@ -406,3 +406,75 @@ export function calculateRecoilPenalty(totalRC: number, shotsThisTurn: number, m
 	// Avoid returning -0 (use || 0 to convert -0 to 0)
 	return -uncompensated || 0;
 }
+
+/* ============================================
+ * Armor Stacking
+ * ============================================ */
+
+/** Result of armor stacking calculation. */
+export interface ArmorStackResult {
+	/** Total ballistic armor after stacking. */
+	ballistic: number;
+	/** Total impact armor after stacking. */
+	impact: number;
+	/** Encumbrance penalty (negative modifier) if armor exceeds Body. */
+	encumbrancePenalty: number;
+	/** Whether there's any armor equipped. */
+	hasArmor: boolean;
+}
+
+/** Input armor piece for stacking calculation. */
+export interface ArmorPiece {
+	name: string;
+	ballistic: number;
+	impact: number;
+	equipped: boolean;
+}
+
+/**
+ * Calculate stacked armor values according to SR4 rules.
+ * - The highest value is primary
+ * - Secondary armor adds half its value (rounded down)
+ * - Encumbrance penalty if total exceeds Body
+ *
+ * @param armorPieces - Array of armor pieces
+ * @param body - Character's Body attribute
+ * @returns Stacked armor values and encumbrance penalty
+ */
+export function calculateArmorStacking(armorPieces: ArmorPiece[], body: number): ArmorStackResult {
+	// Filter to equipped armor only
+	const equipped = armorPieces.filter(a => a.equipped);
+
+	if (equipped.length === 0) {
+		return { ballistic: 0, impact: 0, encumbrancePenalty: 0, hasArmor: false };
+	}
+
+	// Sort by ballistic value descending for stacking
+	const sortedByBallistic = [...equipped].sort((a, b) => b.ballistic - a.ballistic);
+	const sortedByImpact = [...equipped].sort((a, b) => b.impact - a.impact);
+
+	// Calculate stacked values
+	// Primary armor (highest) + half of each secondary (rounded down)
+	let totalBallistic = sortedByBallistic[0]?.ballistic ?? 0;
+	let totalImpact = sortedByImpact[0]?.impact ?? 0;
+
+	// Add half of secondary armors (SR4 layered armor rules)
+	for (let i = 1; i < sortedByBallistic.length; i++) {
+		totalBallistic += Math.floor(sortedByBallistic[i].ballistic / 2);
+	}
+	for (let i = 1; i < sortedByImpact.length; i++) {
+		totalImpact += Math.floor(sortedByImpact[i].impact / 2);
+	}
+
+	// Calculate encumbrance penalty
+	// If total armor exceeds Body, -1 penalty per point over
+	const highestArmor = Math.max(totalBallistic, totalImpact);
+	const encumbrancePenalty = highestArmor > body ? -(highestArmor - body) : 0;
+
+	return {
+		ballistic: totalBallistic,
+		impact: totalImpact,
+		encumbrancePenalty,
+		hasArmor: true
+	};
+}
