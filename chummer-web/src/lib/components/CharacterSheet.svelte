@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { Character, SkillDefinition, AttributeCode, CharacterWeapon, CharacterSpell } from '$types';
-	import { getWeaponSkill, parseDamage, parseAP, parseFireModes, type FiringMode } from '$lib/utils/dice';
+	import { getWeaponSkill, parseDamage, parseAP, parseFireModes, calculateArmorStacking, type FiringMode } from '$lib/utils/dice';
 
 	/** Character to display. */
 	export let char: Character;
@@ -259,13 +259,14 @@
 	/** Defense pool (REA + Dodge) - apply wound modifier. */
 	$: defensePool = Math.max(0, getAttrTotal(char.attributes.rea) + dodgeRating - totalWoundMod);
 
-	/** Get total equipped armor (ballistic + impact / 2 for simplicity, or just ballistic). */
-	$: equippedArmor = char.equipment.armor.filter(a => a.equipped);
-	$: totalBallistic = equippedArmor.reduce((sum, a) => sum + a.ballistic, 0);
-	$: totalImpact = equippedArmor.reduce((sum, a) => sum + a.impact, 0);
-
-	/** Body for soak. */
+	/** Body for soak and encumbrance. */
 	$: bodyTotal = getAttrTotal(char.attributes.bod);
+
+	/** Calculate stacked armor values (SR4 layering rules). */
+	$: armorStack = calculateArmorStacking(char.equipment.armor, bodyTotal);
+	$: totalBallistic = armorStack.ballistic;
+	$: totalImpact = armorStack.impact;
+	$: armorEncumbrance = armorStack.encumbrancePenalty;
 
 	/** Soak pool for ballistic (Body + Ballistic armor). */
 	$: soakPoolBallistic = bodyTotal + totalBallistic;
@@ -583,7 +584,15 @@
 						</div>
 						<p class="text-muted-text text-xs mt-1">
 							Armor: B{totalBallistic}/I{totalImpact} | Body: {bodyTotal}
+							{#if char.equipment.armor.filter(a => a.equipped).length > 1}
+								<span class="text-accent-cyan">(stacked)</span>
+							{/if}
 						</p>
+						{#if armorEncumbrance < 0}
+							<p class="text-accent-warning text-xs mt-1">
+								Encumbrance: {armorEncumbrance} to AGI/REA tests
+							</p>
+						{/if}
 					</div>
 				{/if}
 			</div>
