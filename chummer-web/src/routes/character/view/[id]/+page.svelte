@@ -3,10 +3,17 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { loadSavedCharacter, character } from '$stores';
+	import { gameData, loadGameData } from '$stores/gamedata';
 	import { CharacterSheet, DiceRoller } from '$lib/components';
 
 	/** Show dice roller panel. */
 	let showDiceRoller = false;
+
+	/** Current dice pool for roller. */
+	let dicePool = 6;
+
+	/** Last rolled test name. */
+	let lastTestName = '';
 
 	/** Loading state. */
 	let loading = true;
@@ -14,6 +21,9 @@
 
 	/** Load character on mount. */
 	onMount(async () => {
+		// Load game data for skill definitions
+		await loadGameData();
+
 		const characterId = $page.params.id;
 
 		if (!characterId) {
@@ -38,6 +48,20 @@
 		if ($character) {
 			goto(`/character/edit/${$character.id}`);
 		}
+	}
+
+	/** Handle skill roll from character sheet. */
+	function handleSkillRoll(event: CustomEvent<{ name: string; pool: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = event.detail.name;
+		showDiceRoller = true;
+	}
+
+	/** Handle attribute roll from character sheet. */
+	function handleAttributeRoll(event: CustomEvent<{ name: string; pool: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = event.detail.name;
+		showDiceRoller = true;
 	}
 </script>
 
@@ -91,12 +115,21 @@
 		<!-- Dice Roller Panel -->
 		{#if showDiceRoller}
 			<div class="mb-6 dice-roller-panel">
-				<DiceRoller />
+				{#if lastTestName}
+					<div class="text-sm text-accent-cyan mb-2">Rolling: {lastTestName}</div>
+				{/if}
+				<DiceRoller bind:dicePool />
 			</div>
 		{/if}
 
 		<!-- Character Sheet -->
-		<CharacterSheet char={$character} />
+		<CharacterSheet
+			char={$character}
+			skillDefs={$gameData.skills}
+			interactive={true}
+			on:rollSkill={handleSkillRoll}
+			on:rollAttribute={handleAttributeRoll}
+		/>
 	{:else}
 		<div class="cw-card text-center py-12">
 			<p class="text-secondary-text">No character data available.</p>

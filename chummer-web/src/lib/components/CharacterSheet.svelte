@@ -1,8 +1,26 @@
 <script lang="ts">
-	import type { Character } from '$types';
+	import { createEventDispatcher } from 'svelte';
+	import type { Character, SkillDefinition, AttributeCode } from '$types';
 
 	/** Character to display. */
 	export let char: Character;
+
+	/** Optional skill definitions for dice pool calculation. */
+	export let skillDefs: SkillDefinition[] = [];
+
+	/** Enable clickable skills for rolling. */
+	export let interactive = false;
+
+	/** Dispatch roll events. */
+	const dispatch = createEventDispatcher<{
+		rollSkill: { name: string; pool: number; attribute: AttributeCode };
+		rollAttribute: { name: string; pool: number };
+	}>();
+
+	/** Get skill definition by name. */
+	function getSkillDef(name: string): SkillDefinition | undefined {
+		return skillDefs.find(s => s.name === name);
+	}
 
 	/** Calculate condition monitor boxes. */
 	function getPhysicalBoxes(bod: number): number {
@@ -22,6 +40,39 @@
 	function getAttrTotal(attr: { base: number; bonus: number } | null): number {
 		if (!attr) return 0;
 		return attr.base + attr.bonus;
+	}
+
+	/** Calculate dice pool for a skill including linked attribute. */
+	function getSkillPool(skillName: string, rating: number, bonus: number): number {
+		const def = getSkillDef(skillName);
+		if (!def) return rating + bonus;
+
+		const attrKey = def.attribute.toLowerCase() as keyof typeof char.attributes;
+		const attr = char.attributes[attrKey];
+		if (!attr || typeof attr === 'number') return rating + bonus;
+
+		return rating + bonus + attr.base + attr.bonus;
+	}
+
+	/** Handle skill click - emit roll event. */
+	function handleSkillClick(skillName: string, rating: number, bonus: number, specialization: string | null): void {
+		if (!interactive) return;
+
+		const def = getSkillDef(skillName);
+		const pool = getSkillPool(skillName, rating, bonus);
+		const specBonus = specialization ? 2 : 0;
+
+		dispatch('rollSkill', {
+			name: specialization ? `${skillName} (${specialization})` : skillName,
+			pool: pool + specBonus,
+			attribute: def?.attribute || 'AGI'
+		});
+	}
+
+	/** Handle derived stat roll. */
+	function handleDerivedRoll(name: string, pool: number): void {
+		if (!interactive) return;
+		dispatch('rollAttribute', { name, pool });
 	}
 
 	/** Get initiative. */
@@ -145,22 +196,42 @@
 					<span class="text-secondary-text">Initiative</span>
 					<span class="font-mono text-primary-text">{initiative} + 1d6</span>
 				</div>
-				<div class="flex justify-between">
+				<button
+					type="button"
+					class="flex justify-between w-full {interactive ? 'hover:bg-surface-light cursor-pointer rounded px-1 -mx-1' : ''}"
+					on:click={() => handleDerivedRoll('Composure', composure)}
+					disabled={!interactive}
+				>
 					<span class="text-secondary-text">Composure</span>
 					<span class="font-mono text-primary-text">{composure}</span>
-				</div>
-				<div class="flex justify-between">
+				</button>
+				<button
+					type="button"
+					class="flex justify-between w-full {interactive ? 'hover:bg-surface-light cursor-pointer rounded px-1 -mx-1' : ''}"
+					on:click={() => handleDerivedRoll('Judge Intentions', judgeIntentions)}
+					disabled={!interactive}
+				>
 					<span class="text-secondary-text">Judge Intentions</span>
 					<span class="font-mono text-primary-text">{judgeIntentions}</span>
-				</div>
-				<div class="flex justify-between">
+				</button>
+				<button
+					type="button"
+					class="flex justify-between w-full {interactive ? 'hover:bg-surface-light cursor-pointer rounded px-1 -mx-1' : ''}"
+					on:click={() => handleDerivedRoll('Lift/Carry', liftCarry)}
+					disabled={!interactive}
+				>
 					<span class="text-secondary-text">Lift/Carry</span>
 					<span class="font-mono text-primary-text">{liftCarry}</span>
-				</div>
-				<div class="flex justify-between">
+				</button>
+				<button
+					type="button"
+					class="flex justify-between w-full {interactive ? 'hover:bg-surface-light cursor-pointer rounded px-1 -mx-1' : ''}"
+					on:click={() => handleDerivedRoll('Memory', memory)}
+					disabled={!interactive}
+				>
 					<span class="text-secondary-text">Memory</span>
 					<span class="font-mono text-primary-text">{memory}</span>
-				</div>
+				</button>
 			</div>
 		</div>
 
@@ -211,12 +282,21 @@
 	<!-- Skills -->
 	<div class="cw-card">
 		<h2 class="cw-card-header">Active Skills</h2>
+		{#if interactive}
+			<p class="text-muted-text text-xs mb-2">Click a skill to roll</p>
+		{/if}
 		{#if char.skills.length === 0}
 			<p class="text-muted-text text-sm">No skills.</p>
 		{:else}
 			<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-sm">
 				{#each char.skills.sort((a, b) => a.name.localeCompare(b.name)) as skill}
-					<div class="flex justify-between py-1 border-b border-border">
+					<button
+						type="button"
+						class="flex justify-between py-1 border-b border-border text-left w-full
+							{interactive ? 'hover:bg-surface-light cursor-pointer rounded px-1 -mx-1' : ''}"
+						on:click={() => handleSkillClick(skill.name, skill.rating, skill.bonus, skill.specialization)}
+						disabled={!interactive}
+					>
 						<span class="text-secondary-text truncate" title={skill.name}>
 							{skill.name}
 							{#if skill.specialization}
@@ -224,12 +304,16 @@
 							{/if}
 						</span>
 						<span class="font-mono text-primary-text ml-2">
-							{skill.rating + skill.bonus}
-							{#if skill.specialization}
-								<span class="text-accent-cyan">(+2)</span>
+							{#if interactive && skillDefs.length > 0}
+								{getSkillPool(skill.name, skill.rating, skill.bonus)}{skill.specialization ? '+2' : ''}
+							{:else}
+								{skill.rating + skill.bonus}
+								{#if skill.specialization}
+									<span class="text-accent-cyan">(+2)</span>
+								{/if}
 							{/if}
 						</span>
-					</div>
+					</button>
 				{/each}
 			</div>
 		{/if}
