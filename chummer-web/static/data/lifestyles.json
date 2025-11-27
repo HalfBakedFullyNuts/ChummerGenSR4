@@ -1,0 +1,68 @@
+{
+  "lifestyles": [
+    {
+      "name": "Street",
+      "cost": 0,
+      "dice": 1,
+      "multiplier": 10,
+      "source": "SR4",
+      "page": 268
+    },
+    {
+      "name": "Squatter",
+      "cost": 500,
+      "dice": 2,
+      "multiplier": 20,
+      "source": "SR4",
+      "page": 268
+    },
+    {
+      "name": "Low",
+      "cost": 2000,
+      "dice": 3,
+      "multiplier": 50,
+      "source": "SR4",
+      "page": 268
+    },
+    {
+      "name": "Middle",
+      "cost": 5000,
+      "dice": 4,
+      "multiplier": 100,
+      "source": "SR4",
+      "page": 268
+    },
+    {
+      "name": "High",
+      "cost": 10000,
+      "dice": 4,
+      "multiplier": 500,
+      "source": "SR4",
+      "page": 268
+    },
+    {
+      "name": "Full Immersion",
+      "cost": 30000,
+      "dice": 4,
+      "multiplier": 100,
+      "source": "UN",
+      "page": 38
+    },
+    {
+      "name": "Luxury",
+      "cost": 100000,
+      "dice": 4,
+      "multiplier": 1000,
+      "source": "SR4",
+      "page": 267
+    },
+    {
+      "name": "Cyberzombie Lifestyle Addition",
+      "cost": 2000,
+      "dice": 0,
+      "multiplier": 0,
+      "source": "AU",
+      "page": 157
+    }
+  ]
+}

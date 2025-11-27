@@ -1,0 +1,441 @@
+{
+  "categories": [
+    "Advanced",
+    "ARE Programs",
+    "Autosoft",
+    "Common Use",
+    "Hacking",
+    "Malware",
+    "Sensor Software",
+    "Skillsofts",
+    "Tactical AR Software"
+  ],
+  "programs": [
+    {
+      "name": "Analyze",
+      "category": "Common Use",
+      "source": "SR4",
+      "page": 232
+    },
+    {
+      "name": "Browse",
+      "category": "Common Use",
+      "source": "SR4",
+      "page": 232
+    },
+    {
+      "name": "Command",
+      "category": "Common Use",
+      "source": "SR4",
+      "page": 232
+    },
+    {
+      "name": "Edit",
+      "category": "Common Use",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Encrypt",
+      "category": "Common Use",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Purge",
+      "category": "Common Use",
+      "source": "UN",
+      "page": 111
+    },
+    {
+      "name": "Reality Filter",
+      "category": "Common Use",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Scan",
+      "category": "Common Use",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "CarnivoreGold",
+      "category": "Common Use",
+      "source": "SG",
+      "page": 149
+    },
+    {
+      "name": "Lip Reader",
+      "category": "Common Use",
+      "source": "SG",
+      "page": 149
+    },
+    {
+      "name": "MonaLisa",
+      "category": "Common Use",
+      "source": "SG",
+      "page": 149
+    },
+    {
+      "name": "Data Translation",
+      "category": "Common Use",
+      "source": "GH",
+      "page": 14
+    },
+    {
+      "name": "Armor",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Attack",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Black Hammer",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Blackout",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Corrupt",
+      "category": "Hacking",
+      "source": "UN",
+      "page": 111
+    },
+    {
+      "name": "Data Bomb",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Decrypt",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Defuse",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Disarm",
+      "category": "Hacking",
+      "source": "UN",
+      "page": 111
+    },
+    {
+      "name": "ECCM",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Exploit",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Medic",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 233
+    },
+    {
+      "name": "Nuke",
+      "category": "Hacking",
+      "source": "UN",
+      "page": 111
+    },
+    {
+      "name": "Sniffer",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 234
+    },
+    {
+      "name": "Spoof",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 234
+    },
+    {
+      "name": "Stealth",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 234
+    },
+    {
+      "name": "Track",
+      "category": "Hacking",
+      "source": "SR4",
+      "page": 234
+    },
+    {
+      "name": "Simrig",
+      "category": "Advanced",
+      "source": "UN",
+      "page": 136
+    },
+    {
+      "name": "Smartlink",
+      "category": "Advanced",
+      "source": "UN",
+      "page": 136
+    },
+    {
+      "name": "Shield",
+      "category": "Advanced",
+      "source": "UN",
+      "page": 136
+    },
+    {
+      "name": "Activesoft",
+      "category": "Skillsofts",
+      "source": "SR4",
+      "page": 330
+    },
+    {
+      "name": "Knowsoft",
+      "category": "Skillsofts",
+      "source": "SR4",
+      "page": 330
+    },
+    {
+      "name": "Linguasoft",
+      "category": "Skillsofts",
+      "source": "SR4",
+      "page": 330
+    },
+    {
+      "name": "Virtual Surround Music",
+      "category": "ARE Programs",
+      "source": "SR4",
+      "page": 331
+    },
+    {
+      "name": "Wall Space",
+      "category": "ARE Programs",
+      "source": "SR4",
+      "page": 331
+    },
+    {
+      "name": "Virtual Pet",
+      "category": "ARE Programs",
+      "source": "SR4",
+      "page": 331
+    },
+    {
+      "name": "Virtual Person",
+      "category": "ARE Programs",
+      "source": "SR4",
+      "page": 331
+    },
+    {
+      "name": "Virtual Weather",
+      "category": "ARE Programs",
+      "source": "SR4",
+      "page": 331
+    },
+    {
+      "name": "Miracle Shooter",
+      "category": "ARE Programs",
+      "source": "SR4",
+      "page": 331
+    },
+    {
+      "name": "Empathy Software",
+      "category": "Sensor Software",
+      "source": "AR",
+      "page": 60
+    },
+    {
+      "name": "Facial Recognition Software",
+      "category": "Sensor Software",
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Gait Analysis Software",
+      "category": "Sensor Software",
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Lie Detection Software",
+      "category": "Sensor Software",
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Noise Analysis Software",
+      "category": "Sensor Software",
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Visual Spotter Software",
+      "category": "Sensor Software",
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Vehicle Identification Software",
+      "category": "Sensor Software",
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Voice Recognition Software",
+      "category": "Sensor Software",
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Weapon Watcher Software",
+      "category": "Sensor Software",
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Wildlife Spotter Software",
+      "category": "Sensor Software",
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Tacsoft",
+      "category": "Tactical AR Software",
+      "source": "UN",
+      "page": 125
+    },
+    {
+      "name": "Body Shop",
+      "category": "ARE Programs",
+      "source": "UN",
+      "page": 108
+    },
+    {
+      "name": "Glyphs",
+      "category": "ARE Programs",
+      "source": "UN",
+      "page": 108
+    },
+    {
+      "name": "Negator",
+      "category": "ARE Programs",
+      "source": "UN",
+      "page": 108
+    },
+    {
+      "name": "Ractives",
+      "category": "ARE Programs",
+      "source": "UN",
+      "page": 108
+    },
+    {
+      "name": "Scentsation",
+      "category": "ARE Programs",
+      "source": "UN",
+      "page": 108
+    },
+    {
+      "name": "Node Mine",
+      "category": "Hacking",
+      "source": "UN",
+      "page": 178
+    },
+    {
+      "name": "Adaptability",
+      "category": "Autosoft",
+      "source": "UN",
+      "page": 112
+    },
+    {
+      "name": "Cascading",
+      "category": "Autosoft",
+      "source": "UN",
+      "page": 113
+    },
+    {
+      "name": "Chaser",
+      "category": "Autosoft",
+      "source": "UN",
+      "page": 114
+    },
+    {
+      "name": "Covert Ops",
+      "category": "Autosoft",
+      "source": "UN",
+      "page": 114
+    },
+    {
+      "name": "Profession",
+      "category": "Autosoft",
+      "source": "UN",
+      "page": 114
+    },
+    {
+      "name": "Trailblazer",
+      "category": "Autosoft",
+      "source": "UN",
+      "page": 114
+    },
+    {
+      "name": "Expert Defense",
+      "category": "Autosoft",
+      "source": "UN",
+      "page": 113
+    },
+    {
+      "name": "Expert Offense",
+      "category": "Autosoft",
+      "source": "UN",
+      "page": 113
+    },
+    {
+      "name": "Homeground",
+      "category": "Autosoft",
+      "source": "UN",
+      "page": 113
+    },
+    {
+      "name": "Replicate",
+      "category": "Autosoft",
+      "source": "UN",
+      "page": 113
+    },
+    {
+      "name": "Trojan",
+      "category": "Malware",
+      "source": "UN",
+      "page": 123
+    },
+    {
+      "name": "Virus",
+      "category": "Malware",
+      "source": "UN",
+      "page": 120
+    },
+    {
+      "name": "Worm",
+      "category": "Malware",
+      "source": "UN",
+      "page": 122
+    }
+  ]
+}
