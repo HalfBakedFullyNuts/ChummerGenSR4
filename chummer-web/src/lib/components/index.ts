@@ -13,3 +13,4 @@
 export { default as CharacterList } from './CharacterList.svelte';
 export { default as CareerPanel } from './CareerPanel.svelte';
 export { default as CharacterSheet } from './CharacterSheet.svelte';
+export { default as DiceRoller } from './DiceRoller.svelte';

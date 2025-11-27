@@ -3,7 +3,10 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { loadSavedCharacter, character } from '$stores';
-	import { CharacterSheet } from '$lib/components';
+	import { CharacterSheet, DiceRoller } from '$lib/components';
+
+	/** Show dice roller panel. */
+	let showDiceRoller = false;
 
 	/** Loading state. */
 	let loading = true;
@@ -63,6 +66,13 @@
 			</a>
 			<div class="flex gap-2">
 				<button
+					class="cw-btn {showDiceRoller ? 'cw-btn-primary' : ''}"
+					on:click={() => showDiceRoller = !showDiceRoller}
+					title="Toggle dice roller"
+				>
+					Dice
+				</button>
+				<button
 					class="cw-btn cw-btn-primary"
 					on:click={handleEdit}
 				>
@@ -78,6 +88,13 @@
 			</div>
 		</header>
 
+		<!-- Dice Roller Panel -->
+		{#if showDiceRoller}
+			<div class="mb-6 dice-roller-panel">
+				<DiceRoller />
+			</div>
+		{/if}
+
 		<!-- Character Sheet -->
 		<CharacterSheet char={$character} />
 	{:else}
@@ -92,7 +109,8 @@
 
 <style>
 	@media print {
-		header {
+		header,
+		.dice-roller-panel {
 			display: none;
 		}
 	}
