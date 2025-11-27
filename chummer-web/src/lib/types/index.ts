@@ -1,14 +1,78 @@
 /**
- * Type definitions index.
- * This module will export all TypeScript interfaces for the application.
- *
- * TODO: Implement type definitions (Issue #3)
- * - character.ts: Main character interface
- * - attributes.ts: Attribute system types
- * - skills.ts: Skills and skill groups
- * - equipment.ts: Gear, weapons, armor
- * - magic.ts: Spells, powers, spirits
- * - improvements.ts: Improvement system (88+ types)
+ * Type definitions module.
+ * Re-exports all TypeScript interfaces for the application.
  */
 
-export {};
+/* Attribute types */
+export type {
+	AttributeCode,
+	PhysicalAttribute,
+	MentalAttribute,
+	SpecialAttribute,
+	AttributeLimits,
+	AttributeValue,
+	Attribute,
+	CharacterAttributes,
+	MetatypeAttributes
+} from './attributes';
+
+export {
+	DEFAULT_ATTRIBUTE_VALUE,
+	ATTRIBUTE_NAMES,
+	calculateAttributeTotal,
+	isAttributeValid
+} from './attributes';
+
+/* Skill types */
+export type {
+	SkillCategoryType,
+	ActiveSkillCategory,
+	KnowledgeSkillCategory,
+	SkillCategory,
+	SkillGroupName,
+	SkillDefinition,
+	CharacterSkill,
+	CharacterSkillGroup,
+	KnowledgeSkill
+} from './skills';
+
+export {
+	MAX_SKILL_RATING_CREATION,
+	MAX_SKILL_RATING_CAREER,
+	MAX_SKILL_GROUP_RATING,
+	calculateSkillPool,
+	calculateDefaultPool,
+	calculateSkillBpCost
+} from './skills';
+
+/* Character types */
+export type {
+	BuildMethod,
+	CharacterStatus,
+	Metatype,
+	Metavariant,
+	CharacterQuality,
+	Contact,
+	ExpenseEntry,
+	BuildPointAllocation,
+	CharacterIdentity,
+	CharacterBackground,
+	CharacterReputation,
+	ConditionMonitor,
+	Character,
+	CharacterMagic,
+	CharacterSpell,
+	CharacterPower,
+	BoundSpirit,
+	Focus,
+	CharacterResonance,
+	ComplexForm,
+	CompiledSprite,
+	CharacterSettings
+} from './character';
+
+export {
+	DEFAULT_CHARACTER_SETTINGS,
+	DEFAULT_BP_ALLOCATION,
+	createEmptyCharacter
+} from './character';
