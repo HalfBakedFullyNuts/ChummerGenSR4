@@ -4,7 +4,16 @@
 	import { goto } from '$app/navigation';
 	import { loadSavedCharacter, character, updateCondition, updateEdge, setAmmo, reloadWeapon, spendAmmo } from '$stores';
 	import { gameData, loadGameData } from '$stores/gamedata';
-	import { CharacterSheet, CombatTracker, DiceRoller } from '$lib/components';
+	import {
+		CharacterSheet,
+		CombatTracker,
+		DiceRoller,
+		CombatModifiersPanel,
+		MatrixPanel,
+		VehiclePanel,
+		MagicPanel,
+		TechnomancerPanel
+	} from '$lib/components';
 	import { rollInitiative } from '$lib/utils/dice';
 
 	/** Roll history entry type. */
@@ -28,6 +37,24 @@
 
 	/** Show combat tracker panel. */
 	let showCombatTracker = false;
+
+	/** Show combat modifiers panel. */
+	let showCombatModifiers = false;
+
+	/** Show matrix panel (for hackers). */
+	let showMatrixPanel = false;
+
+	/** Show vehicle panel (for riggers). */
+	let showVehiclePanel = false;
+
+	/** Show magic panel (for awakened). */
+	let showMagicPanel = false;
+
+	/** Show technomancer panel. */
+	let showTechnomancerPanel = false;
+
+	/** Current combat modifier total. */
+	let combatModifierTotal = 0;
 
 	/** Current dice pool for roller. */
 	let dicePool = 6;
@@ -260,6 +287,133 @@
 		selectedSpell = null;
 		showDiceRoller = true;
 	}
+
+	/** Handle combat modifier changes. */
+	function handleModifierChanged(event: CustomEvent<{ total: number; modifiers: string[]; calledShot: string | null }>): void {
+		combatModifierTotal = event.detail.total;
+	}
+
+	/** Handle Matrix action roll. */
+	function handleMatrixRoll(event: CustomEvent<{ action: { name: string }; pool: number; opposed: boolean; opposedBy?: string }>): void {
+		const { action, pool, opposed, opposedBy } = event.detail;
+		dicePool = pool;
+		lastTestName = `Matrix: ${action.name}${opposed ? ` (vs ${opposedBy})` : ''}`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle Vehicle test roll. */
+	function handleVehicleRoll(event: CustomEvent<{ test: { name: string }; pool: number; opposed: boolean }>): void {
+		const { test, pool } = event.detail;
+		dicePool = pool;
+		lastTestName = `Vehicle: ${test.name}`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle gunnery roll. */
+	function handleGunneryRoll(event: CustomEvent<{ pool: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = 'Gunnery';
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle ram roll. */
+	function handleRamRoll(event: CustomEvent<{ pool: number; damage: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = `Ram (${event.detail.damage}P damage)`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle astral action roll. */
+	function handleAstralRoll(event: CustomEvent<{ action: { name: string }; pool: number; opposed: boolean; opposedBy?: string }>): void {
+		const { action, pool, opposed, opposedBy } = event.detail;
+		dicePool = pool;
+		lastTestName = `${action.name}${opposed ? ` (vs ${opposedBy})` : ''}`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle summoning roll. */
+	function handleSummoningRoll(event: CustomEvent<{ pool: number; spiritType: string; force: number; resistPool: number }>): void {
+		const { pool, spiritType, force, resistPool } = event.detail;
+		dicePool = pool;
+		lastTestName = `Summon ${spiritType} (F${force}, vs ${resistPool}d6)`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle drain roll. */
+	function handleDrainRoll(event: CustomEvent<{ pool: number; drainValue: number; isPhysical: boolean }>): void {
+		const { pool, drainValue, isPhysical } = event.detail;
+		dicePool = pool;
+		lastTestName = `Resist Drain (${drainValue} ${isPhysical ? 'P' : 'S'})`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle technomancer compiling roll. */
+	function handleCompilingRoll(event: CustomEvent<{ pool: number; spriteType: string; rating: number; resistPool: number }>): void {
+		const { pool, spriteType, rating, resistPool } = event.detail;
+		dicePool = pool;
+		lastTestName = `Compile ${spriteType} (R${rating}, vs ${resistPool}d6)`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle technomancer threading roll. */
+	function handleThreadingRoll(event: CustomEvent<{ pool: number; formName: string; rating: number; fadingValue: number }>): void {
+		const { pool, formName, rating, fadingValue } = event.detail;
+		dicePool = pool;
+		lastTestName = `Thread ${formName} (R${rating}, Fading ${fadingValue})`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle fading resistance roll. */
+	function handleFadingRoll(event: CustomEvent<{ pool: number; fadingValue: number; isPhysical: boolean }>): void {
+		const { pool, fadingValue, isPhysical } = event.detail;
+		dicePool = pool;
+		lastTestName = `Resist Fading (${fadingValue} ${isPhysical ? 'P' : 'S'})`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Character attribute helpers. */
+	$: charLogic = $character ? ($character.attributes.log.base + $character.attributes.log.bonus) : 3;
+	$: charIntuition = $character ? ($character.attributes.int.base + $character.attributes.int.bonus) : 3;
+	$: charCharisma = $character ? ($character.attributes.cha.base + $character.attributes.cha.bonus) : 3;
+	$: charWillpower = $character ? ($character.attributes.wil.base + $character.attributes.wil.bonus) : 3;
+	$: charReaction = $character ? ($character.attributes.rea.base + $character.attributes.rea.bonus) : 3;
+	$: charAgility = $character ? ($character.attributes.agi.base + $character.attributes.agi.bonus) : 3;
+	$: charMagic = $character?.attributes.mag ? ($character.attributes.mag.base + $character.attributes.mag.bonus) : null;
+	$: charResonance = $character?.attributes.res ? ($character.attributes.res.base + $character.attributes.res.bonus) : null;
+
+	/** Get character skill ratings as a map. */
+	$: characterSkills = $character ? Object.fromEntries(
+		$character.skills.map(s => [s.name, s.rating + s.bonus])
+	) : {};
+
+	/** Check if character is awakened. */
+	$: isAwakened = $character?.magic !== null;
+
+	/** Check if character is a technomancer. */
+	$: isTechnomancer = $character?.resonance !== null;
+
+	/** Character's tradition. */
+	$: tradition = $character?.magic?.tradition || 'hermetic';
 </script>
 
 <svelte:head>
@@ -281,45 +435,91 @@
 		</div>
 	{:else if $character}
 		<!-- Header with actions -->
-		<header class="flex items-center justify-between mb-6">
-			<a href="/characters" class="cw-btn cw-btn-secondary text-sm">
-				Back to Characters
-			</a>
-			<div class="flex gap-2">
+		<header class="mb-6">
+			<div class="flex items-center justify-between mb-3">
+				<a href="/characters" class="cw-btn cw-btn-secondary text-sm">
+					Back to Characters
+				</a>
+				<div class="flex gap-2">
+					<button
+						class="cw-btn cw-btn-primary"
+						on:click={handleEdit}
+					>
+						Edit Character
+					</button>
+					<button
+						class="cw-btn"
+						on:click={() => window.print()}
+						title="Print character sheet"
+					>
+						Print
+					</button>
+				</div>
+			</div>
+
+			<!-- Panel toggles -->
+			<div class="flex flex-wrap gap-2">
 				<button
-					class="cw-btn {showCombatTracker ? 'cw-btn-primary' : ''}"
+					class="cw-btn text-sm {showCombatTracker ? 'cw-btn-primary' : ''}"
 					on:click={() => showCombatTracker = !showCombatTracker}
 					title="Toggle combat tracker"
 				>
 					Combat
 				</button>
 				<button
-					class="cw-btn {showDiceRoller ? 'cw-btn-primary' : ''}"
+					class="cw-btn text-sm {showCombatModifiers ? 'cw-btn-primary' : ''}"
+					on:click={() => showCombatModifiers = !showCombatModifiers}
+					title="Toggle combat modifiers"
+				>
+					Modifiers {#if combatModifierTotal !== 0}<span class="text-xs">({combatModifierTotal >= 0 ? '+' : ''}{combatModifierTotal})</span>{/if}
+				</button>
+				<button
+					class="cw-btn text-sm {showDiceRoller ? 'cw-btn-primary' : ''}"
 					on:click={() => showDiceRoller = !showDiceRoller}
 					title="Toggle dice roller"
 				>
 					Dice
 				</button>
 				<button
-					class="cw-btn {showRollHistory ? 'cw-btn-primary' : ''}"
+					class="cw-btn text-sm {showRollHistory ? 'cw-btn-primary' : ''}"
 					on:click={() => showRollHistory = !showRollHistory}
 					title="Toggle roll history"
 				>
 					History {#if rollHistory.length > 0}<span class="text-xs">({rollHistory.length})</span>{/if}
 				</button>
+				<span class="w-px h-6 bg-border mx-1 self-center"></span>
 				<button
-					class="cw-btn cw-btn-primary"
-					on:click={handleEdit}
+					class="cw-btn text-sm {showMatrixPanel ? 'cw-btn-primary' : ''}"
+					on:click={() => showMatrixPanel = !showMatrixPanel}
+					title="Toggle Matrix actions"
 				>
-					Edit Character
+					Matrix
 				</button>
 				<button
-					class="cw-btn"
-					on:click={() => window.print()}
-					title="Print character sheet"
+					class="cw-btn text-sm {showVehiclePanel ? 'cw-btn-primary' : ''}"
+					on:click={() => showVehiclePanel = !showVehiclePanel}
+					title="Toggle vehicle combat"
 				>
-					Print
+					Vehicles
 				</button>
+				{#if isAwakened}
+					<button
+						class="cw-btn text-sm {showMagicPanel ? 'cw-btn-primary' : ''}"
+						on:click={() => showMagicPanel = !showMagicPanel}
+						title="Toggle magic & astral"
+					>
+						Magic
+					</button>
+				{/if}
+				{#if isTechnomancer}
+					<button
+						class="cw-btn text-sm {showTechnomancerPanel ? 'cw-btn-primary' : ''}"
+						on:click={() => showTechnomancerPanel = !showTechnomancerPanel}
+						title="Toggle technomancer"
+					>
+						Resonance
+					</button>
+				{/if}
 			</div>
 		</header>
 
@@ -332,6 +532,70 @@
 					playerInitDice={1}
 					on:initiativeRolled={handleCombatInitiative}
 				/>
+			</div>
+		{/if}
+
+		<!-- Combat Modifiers Panel -->
+		{#if showCombatModifiers}
+			<div class="mb-6 combat-modifiers-panel">
+				<CombatModifiersPanel
+					bind:totalModifier={combatModifierTotal}
+					on:modifierChanged={handleModifierChanged}
+				/>
+			</div>
+		{/if}
+
+		<!-- Specialized Role Panels Grid -->
+		{#if showMatrixPanel || showVehiclePanel || showMagicPanel || showTechnomancerPanel}
+			<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6 role-panels">
+				{#if showMatrixPanel}
+					<MatrixPanel
+						logic={charLogic}
+						intuition={charIntuition}
+						charisma={charCharisma}
+						resonance={charResonance}
+						skills={characterSkills}
+						on:rollMatrix={handleMatrixRoll}
+					/>
+				{/if}
+
+				{#if showVehiclePanel}
+					<VehiclePanel
+						pilotSkill={characterSkills['Pilot Ground Craft'] || characterSkills['Pilot Aircraft'] || 0}
+						gunnerySkill={characterSkills['Gunnery'] || 0}
+						reaction={charReaction}
+						agility={charAgility}
+						on:rollVehicle={handleVehicleRoll}
+						on:rollGunnery={handleGunneryRoll}
+						on:rollRam={handleRamRoll}
+					/>
+				{/if}
+
+				{#if showMagicPanel && isAwakened && charMagic}
+					<MagicPanel
+						magic={charMagic}
+						willpower={charWillpower}
+						intuition={charIntuition}
+						charisma={charCharisma}
+						logic={charLogic}
+						tradition={tradition}
+						skills={characterSkills}
+						on:rollAstral={handleAstralRoll}
+						on:rollSummoning={handleSummoningRoll}
+						on:rollDrain={handleDrainRoll}
+					/>
+				{/if}
+
+				{#if showTechnomancerPanel && isTechnomancer && charResonance}
+					<TechnomancerPanel
+						resonance={charResonance}
+						willpower={charWillpower}
+						skills={characterSkills}
+						on:rollCompiling={handleCompilingRoll}
+						on:rollThreading={handleThreadingRoll}
+						on:rollFading={handleFadingRoll}
+					/>
+				{/if}
 			</div>
 		{/if}
 
@@ -456,6 +720,8 @@
 	@media print {
 		header,
 		.combat-tracker-panel,
+		.combat-modifiers-panel,
+		.role-panels,
 		.dice-roller-panel,
 		.roll-history-panel {
 			display: none;
