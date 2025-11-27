@@ -120,6 +120,12 @@ export {
 	getInitiationCost,
 	initiate,
 	getExpenseLog,
+	/* Gameplay tracking */
+	updateCondition,
+	updateEdge,
+	spendAmmo,
+	reloadWeapon,
+	setAmmo,
 	WIZARD_STEPS,
 	type WizardStep,
 	type WizardStepConfig,
