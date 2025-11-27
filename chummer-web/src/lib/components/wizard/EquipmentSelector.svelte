@@ -23,6 +23,17 @@
 	type EquipmentTab = 'resources' | 'weapons' | 'armor' | 'cyberware' | 'gear' | 'lifestyle' | 'owned';
 	let currentTab: EquipmentTab = 'resources';
 
+	/** Tab configuration. */
+	const equipmentTabs: { id: EquipmentTab; label: string }[] = [
+		{ id: 'resources', label: 'Resources' },
+		{ id: 'weapons', label: 'Weapons' },
+		{ id: 'armor', label: 'Armor' },
+		{ id: 'cyberware', label: 'Cyberware' },
+		{ id: 'gear', label: 'Gear' },
+		{ id: 'lifestyle', label: 'Lifestyle' },
+		{ id: 'owned', label: 'Owned' }
+	];
+
 	/** Category filters. */
 	let weaponCategory = '';
 	let armorCategory = '';
@@ -46,6 +57,9 @@
 		'Deltaware': { ess: '0.5x', cost: '10x', label: 'Deltaware' },
 		'Used': { ess: '1.2x', cost: '0.5x', label: 'Used' }
 	};
+
+	/** Available grades as array for iteration. */
+	const gradeOptions: CyberwareGrade[] = ['Standard', 'Alphaware', 'Betaware', 'Deltaware', 'Used'];
 
 	/** Filter weapons by category and search. */
 	$: filteredWeapons = $gameData.weapons
@@ -115,15 +129,7 @@
 
 	<!-- Tab Navigation -->
 	<nav class="flex gap-1 overflow-x-auto pb-2">
-		{#each [
-			{ id: 'resources', label: 'Resources' },
-			{ id: 'weapons', label: 'Weapons' },
-			{ id: 'armor', label: 'Armor' },
-			{ id: 'cyberware', label: 'Cyberware' },
-			{ id: 'gear', label: 'Gear' },
-			{ id: 'lifestyle', label: 'Lifestyle' },
-			{ id: 'owned', label: `Owned (${totalOwned})` }
-		] as tab}
+		{#each equipmentTabs as tab}
 			<button
 				class="px-3 py-2 rounded text-sm whitespace-nowrap transition-colors
 					{currentTab === tab.id
@@ -131,7 +137,7 @@
 						: 'bg-surface text-secondary-text hover:bg-surface-light'}"
 				on:click={() => (currentTab = tab.id)}
 			>
-				{tab.label}
+				{tab.id === 'owned' ? `Owned (${totalOwned})` : tab.label}
 			</button>
 		{/each}
 	</nav>
@@ -281,7 +287,8 @@
 				<div class="cw-panel p-3 mb-4">
 					<span class="text-secondary-text text-sm block mb-2">Select Grade:</span>
 					<div class="flex gap-2 flex-wrap">
-						{#each Object.entries(gradeInfo) as [grade, info]}
+						{#each gradeOptions as grade}
+							{@const info = gradeInfo[grade]}
 							<button
 								class="px-3 py-1 rounded text-xs transition-colors
 									{selectedGrade === grade
