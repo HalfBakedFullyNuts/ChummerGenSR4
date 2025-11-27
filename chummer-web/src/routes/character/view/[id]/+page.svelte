@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { loadSavedCharacter, character, updateCondition, updateEdge, setAmmo, reloadWeapon } from '$stores';
+	import { loadSavedCharacter, character, updateCondition, updateEdge, setAmmo, reloadWeapon, spendAmmo } from '$stores';
 	import { gameData, loadGameData } from '$stores/gamedata';
 	import { CharacterSheet, CombatTracker, DiceRoller } from '$lib/components';
 	import { rollInitiative } from '$lib/utils/dice';
@@ -184,18 +184,42 @@
 		: 10;
 
 	/** Currently selected weapon for attack. */
-	let selectedWeapon: { name: string; damage: string; ap: string } | null = null;
+	let selectedWeapon: { id: string; name: string; damage: string; ap: string; damageMod: number; ammoUsed: number } | null = null;
 
 	/** Currently selected spell for casting. */
 	let selectedSpell: { name: string; drainPool: number; drainValue: string } | null = null;
 
 	/** Handle weapon attack roll. */
-	function handleWeaponRoll(event: CustomEvent<{ weapon: { name: string; damage: string; ap: string }; pool: number; skillName: string }>): void {
-		const { weapon, pool, skillName } = event.detail;
-		selectedWeapon = weapon;
+	function handleWeaponRoll(event: CustomEvent<{
+		weapon: { id: string; name: string; damage: string; ap: string };
+		pool: number;
+		skillName: string;
+		firingMode?: { code: string; name: string; ammoPerShot: number; damageMod: number }
+	}>): void {
+		const { weapon, pool, skillName, firingMode } = event.detail;
+
+		// Calculate damage modifier and ammo consumption from firing mode
+		const damageMod = firingMode?.damageMod ?? 0;
+		const ammoUsed = firingMode?.ammoPerShot ?? 1;
+
+		// Spend ammo for ranged attack
+		if (ammoUsed > 0) {
+			spendAmmo(weapon.id, ammoUsed);
+		}
+
+		selectedWeapon = {
+			id: weapon.id,
+			name: weapon.name,
+			damage: weapon.damage,
+			ap: weapon.ap,
+			damageMod,
+			ammoUsed
+		};
 		selectedSpell = null;
 		dicePool = pool;
-		lastTestName = `${weapon.name} (${skillName})`;
+		lastTestName = firingMode
+			? `${weapon.name} (${firingMode.code})`
+			: `${weapon.name} (${skillName})`;
 		showDiceRoller = true;
 	}
 
@@ -304,10 +328,16 @@
 						<div class="flex flex-wrap gap-4 text-sm">
 							<span class="text-secondary-text">
 								Damage: <span class="text-accent-danger font-bold">{selectedWeapon.damage}</span>
+								{#if selectedWeapon.damageMod > 0}
+									<span class="text-accent-success">+{selectedWeapon.damageMod}</span>
+								{/if}
 							</span>
 							<span class="text-secondary-text">
 								AP: <span class="text-accent-warning font-bold">{selectedWeapon.ap}</span>
 							</span>
+							{#if selectedWeapon.ammoUsed > 0}
+								<span class="text-muted-text text-xs">({selectedWeapon.ammoUsed} ammo)</span>
+							{/if}
 							<span class="text-muted-text text-xs">(Net hits add to damage)</span>
 						</div>
 					</div>

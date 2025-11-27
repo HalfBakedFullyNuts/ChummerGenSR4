@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { Character, SkillDefinition, AttributeCode, CharacterWeapon, CharacterSpell } from '$types';
-	import { getWeaponSkill, parseDamage, parseAP } from '$lib/utils/dice';
+	import { getWeaponSkill, parseDamage, parseAP, parseFireModes, type FiringMode } from '$lib/utils/dice';
 
 	/** Character to display. */
 	export let char: Character;
@@ -17,7 +17,7 @@
 		rollSkill: { name: string; pool: number; attribute: AttributeCode };
 		rollAttribute: { name: string; pool: number };
 		rollInitiative: { base: number; dice: number };
-		rollWeapon: { weapon: CharacterWeapon; pool: number; skillName: string };
+		rollWeapon: { weapon: CharacterWeapon; pool: number; skillName: string; firingMode?: FiringMode };
 		rollSpell: { spell: CharacterSpell; castPool: number; drainPool: number; drainValue: string };
 		damageChanged: { type: 'physical' | 'stun'; value: number };
 		edgeChanged: { value: number };
@@ -131,10 +131,14 @@
 	}
 
 	/** Handle weapon click for attack roll. */
-	function handleWeaponClick(weapon: CharacterWeapon): void {
+	function handleWeaponClick(weapon: CharacterWeapon, firingMode?: FiringMode): void {
 		if (!interactive) return;
 		const { pool, skillName } = getWeaponPool(weapon);
-		dispatch('rollWeapon', { weapon, pool, skillName });
+
+		// Apply firing mode modifier if specified
+		const adjustedPool = firingMode ? Math.max(0, pool + firingMode.poolMod) : pool;
+
+		dispatch('rollWeapon', { weapon, pool: adjustedPool, skillName, firingMode });
 	}
 
 	/** Get spellcasting pool. */
@@ -595,33 +599,54 @@
 					{#each char.equipment.weapons as weapon}
 						{@const weaponPool = getWeaponPool(weapon)}
 						{@const maxAmmo = getMaxAmmo(weapon.ammo)}
+						{@const firingModes = parseFireModes(weapon.mode)}
 						<div class="p-2 bg-surface-light rounded">
-							<button
-								type="button"
-								class="w-full text-left transition-colors
-									{interactive ? 'hover:bg-surface-lighter cursor-pointer' : ''}"
-								on:click={() => handleWeaponClick(weapon)}
-								disabled={!interactive}
-							>
-								<div class="flex justify-between items-start">
-									<div class="font-medium text-primary-text">{weapon.name}</div>
-									{#if interactive}
-										<div class="text-xs text-accent-cyan ml-2">
-											Pool: {weaponPool.pool}
-										</div>
-									{/if}
+							<div class="flex justify-between items-start">
+								<div class="font-medium text-primary-text">{weapon.name}</div>
+								{#if interactive}
+									<div class="text-xs text-accent-cyan ml-2">
+										Pool: {weaponPool.pool}
+									</div>
+								{/if}
+							</div>
+							<div class="flex flex-wrap gap-3 text-xs text-muted-text mt-1">
+								<span>DMG: <span class="text-secondary-text">{weapon.damage}</span></span>
+								<span>AP: <span class="text-secondary-text">{weapon.ap}</span></span>
+								{#if interactive}
+									<span class="text-accent-primary">({weaponPool.skillName})</span>
+								{/if}
+							</div>
+
+							<!-- Firing Mode Buttons (for ranged weapons) -->
+							{#if interactive && weapon.type === 'Ranged' && firingModes.length > 0}
+								<div class="mt-2 pt-2 border-t border-border/50">
+									<div class="flex flex-wrap gap-1">
+										{#each firingModes as mode}
+											<button
+												type="button"
+												class="cw-btn text-xs px-2 py-1 {mode.ammoPerShot > weapon.currentAmmo ? 'opacity-50' : ''}"
+												on:click|stopPropagation={() => handleWeaponClick(weapon, mode)}
+												disabled={mode.ammoPerShot > weapon.currentAmmo}
+												title="{mode.name}: {mode.ammoPerShot} ammo, {mode.poolMod !== 0 ? (mode.poolMod > 0 ? '+' : '') + mode.poolMod + ' pool' : ''}{mode.damageMod !== 0 ? ', +' + mode.damageMod + ' DV' : ''}"
+											>
+												{mode.code}
+												{#if mode.damageMod > 0}
+													<span class="text-accent-success">+{mode.damageMod}</span>
+												{/if}
+											</button>
+										{/each}
+									</div>
 								</div>
-								<div class="flex flex-wrap gap-3 text-xs text-muted-text mt-1">
-									<span>DMG: <span class="text-secondary-text">{weapon.damage}</span></span>
-									<span>AP: <span class="text-secondary-text">{weapon.ap}</span></span>
-									{#if weapon.mode}
-										<span>Mode: <span class="text-secondary-text">{weapon.mode}</span></span>
-									{/if}
-									{#if interactive}
-										<span class="text-accent-primary">({weaponPool.skillName})</span>
-									{/if}
-								</div>
-							</button>
+							{:else if interactive && weapon.type === 'Melee'}
+								<!-- Melee weapon attack button -->
+								<button
+									type="button"
+									class="cw-btn text-xs mt-2"
+									on:click|stopPropagation={() => handleWeaponClick(weapon)}
+								>
+									Attack
+								</button>
+							{/if}
 
 							<!-- Ammo Tracker -->
 							{#if maxAmmo > 0}
