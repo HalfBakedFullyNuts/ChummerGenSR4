@@ -233,3 +233,114 @@ export function getInitiativeForPass(total: number, passNumber: number): number 
 	const reduction = (passNumber - 1) * 10;
 	return Math.max(0, total - reduction);
 }
+
+/** Map weapon categories to their associated combat skills. */
+export const WEAPON_SKILL_MAP: Record<string, string> = {
+	// Melee weapons
+	'Blades': 'Blades',
+	'Clubs': 'Clubs',
+	'Unarmed': 'Unarmed Combat',
+	'Exotic Melee Weapons': 'Exotic Melee Weapon',
+
+	// Ranged - Pistols
+	'Holdouts': 'Pistols',
+	'Light Pistols': 'Pistols',
+	'Heavy Pistols': 'Pistols',
+	'Machine Pistols': 'Pistols',
+	'Tasers': 'Pistols',
+
+	// Ranged - Automatics
+	'Submachine Guns': 'Automatics',
+	'Assault Rifles': 'Automatics',
+	'Battle Rifles': 'Automatics',
+
+	// Ranged - Longarms
+	'Sports Rifles': 'Longarms',
+	'Sniper Rifles': 'Longarms',
+	'Shotguns': 'Longarms',
+
+	// Ranged - Heavy Weapons
+	'Light Machine Guns': 'Heavy Weapons',
+	'Medium Machine Guns': 'Heavy Weapons',
+	'Heavy Machine Guns': 'Heavy Weapons',
+	'Assault Cannons': 'Heavy Weapons',
+	'Grenade Launchers': 'Heavy Weapons',
+	'Mortar Launchers': 'Heavy Weapons',
+	'Missile Launchers': 'Heavy Weapons',
+	'Flamethrowers': 'Heavy Weapons',
+	'Laser Weapons': 'Heavy Weapons',
+
+	// Ranged - Archery
+	'Bows': 'Archery',
+	'Crossbows': 'Archery',
+
+	// Other
+	'Throwing Weapons': 'Throwing Weapons',
+	'Exotic Ranged Weapons': 'Exotic Ranged Weapon',
+	'Special Weapons': 'Automatics', // Default for special cases
+	'Vehicle Weapons': 'Gunnery'
+};
+
+/**
+ * Get the skill name for a weapon category.
+ * @param category - The weapon category.
+ * @returns The skill name, or the category if not mapped.
+ */
+export function getWeaponSkill(category: string): string {
+	return WEAPON_SKILL_MAP[category] ?? category;
+}
+
+/** Result of a damage roll. */
+export interface DamageRollResult {
+	/** Base damage value. */
+	baseDamage: number;
+	/** Damage type (P for Physical, S for Stun). */
+	damageType: 'P' | 'S';
+	/** Net hits from attack roll to add to damage. */
+	netHits: number;
+	/** Total damage value. */
+	totalDamage: number;
+	/** Armor penetration value. */
+	ap: number;
+}
+
+/**
+ * Parse a damage string like "6P" or "5S(e)" into components.
+ * @param damage - The damage string from weapon stats.
+ * @returns Parsed damage value and type.
+ */
+export function parseDamage(damage: string): { value: number; type: 'P' | 'S'; special: string } {
+	// Extract the numeric value
+	const numMatch = damage.match(/(\d+)/);
+	const value = numMatch ? parseInt(numMatch[1], 10) : 0;
+
+	// Determine damage type (P or S) - look for standalone P or S followed by end, space, or (
+	// This avoids matching 'S' in 'STR'
+	const typeMatch = damage.match(/(?<![A-Z])([PS])(?:\(|$)/i);
+	const type = (typeMatch ? typeMatch[1].toUpperCase() : 'P') as 'P' | 'S';
+
+	// Extract special modifiers like (f) for fire, (e) for electric
+	const specialMatch = damage.match(/\([^)]+\)/g);
+	const special = specialMatch ? specialMatch.join('') : '';
+
+	// Also check for strength-based prefixes
+	const strMatch = damage.match(/^\(STR[^)]*\)/i);
+	const strMod = strMatch ? strMatch[0] : '';
+
+	return {
+		value,
+		type,
+		special: strMod + special
+	};
+}
+
+/**
+ * Parse an AP string like "-2" or "-half" into a number.
+ * @param ap - The AP string from weapon stats.
+ * @returns The AP value as a number.
+ */
+export function parseAP(ap: string): number {
+	if (!ap || ap === '-' || ap === '—') return 0;
+	const num = parseInt(ap, 10);
+	return isNaN(num) ? 0 : num;
+}

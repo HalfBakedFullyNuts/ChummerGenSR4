@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { Character, SkillDefinition, AttributeCode } from '$types';
+	import type { Character, SkillDefinition, AttributeCode, CharacterWeapon } from '$types';
+	import { getWeaponSkill, parseDamage, parseAP } from '$lib/utils/dice';
 
 	/** Character to display. */
 	export let char: Character;
@@ -16,6 +17,7 @@
 		rollSkill: { name: string; pool: number; attribute: AttributeCode };
 		rollAttribute: { name: string; pool: number };
 		rollInitiative: { base: number; dice: number };
+		rollWeapon: { weapon: CharacterWeapon; pool: number; skillName: string };
 		damageChanged: { type: 'physical' | 'stun'; value: number };
 		edgeChanged: { value: number };
 	}>();
@@ -86,6 +88,31 @@
 
 	/** Calculate initiative dice based on augmentations/magic. */
 	$: initiativeDice = 1; // TODO: Calculate from cyberware/magic
+
+	/** Get weapon attack pool. */
+	function getWeaponPool(weapon: CharacterWeapon): { pool: number; skillName: string } {
+		const skillName = getWeaponSkill(weapon.category);
+		const skill = char.skills.find(s => s.name === skillName);
+		const skillRating = skill ? skill.rating + skill.bonus : 0;
+
+		// All combat skills use AGI
+		const agi = getAttrTotal(char.attributes.agi);
+
+		// Apply wound modifier
+		const woundMod = totalWoundMod;
+
+		return {
+			pool: Math.max(0, skillRating + agi - woundMod),
+			skillName
+		};
+	}
+
+	/** Handle weapon click for attack roll. */
+	function handleWeaponClick(weapon: CharacterWeapon): void {
+		if (!interactive) return;
+		const { pool, skillName } = getWeaponPool(weapon);
+		dispatch('rollWeapon', { weapon, pool, skillName });
+	}
 
 	/** Handle condition box click. */
 	function handleConditionClick(type: 'physical' | 'stun', boxIndex: number, maxBoxes: number): void {
@@ -502,10 +529,27 @@
 		{#if char.equipment.weapons.length > 0}
 			<div class="cw-card">
 				<h2 class="cw-card-header">Weapons</h2>
+				{#if interactive}
+					<p class="text-muted-text text-xs mb-2">Click a weapon to roll attack</p>
+				{/if}
 				<div class="space-y-2 text-sm">
 					{#each char.equipment.weapons as weapon}
-						<div class="p-2 bg-surface-light rounded">
-							<div class="font-medium text-primary-text">{weapon.name}</div>
+						{@const weaponPool = getWeaponPool(weapon)}
+						<button
+							type="button"
+							class="p-2 bg-surface-light rounded w-full text-left transition-colors
+								{interactive ? 'hover:bg-surface-lighter cursor-pointer' : ''}"
+							on:click={() => handleWeaponClick(weapon)}
+							disabled={!interactive}
+						>
+							<div class="flex justify-between items-start">
+								<div class="font-medium text-primary-text">{weapon.name}</div>
+								{#if interactive}
+									<div class="text-xs text-accent-cyan ml-2">
+										Pool: {weaponPool.pool}
+									</div>
+								{/if}
+							</div>
 							<div class="flex flex-wrap gap-3 text-xs text-muted-text mt-1">
 								<span>DMG: <span class="text-secondary-text">{weapon.damage}</span></span>
 								<span>AP: <span class="text-secondary-text">{weapon.ap}</span></span>
@@ -515,8 +559,11 @@
 								{#if weapon.ammo}
 									<span>Ammo: <span class="text-secondary-text">{weapon.ammo}</span></span>
 								{/if}
+								{#if interactive}
+									<span class="text-accent-primary">({weaponPool.skillName})</span>
+								{/if}
 							</div>
-						</div>
+						</button>
 					{/each}
 				</div>
 			</div>

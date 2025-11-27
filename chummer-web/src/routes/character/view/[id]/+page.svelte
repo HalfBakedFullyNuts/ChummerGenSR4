@@ -78,6 +78,7 @@
 	function handleSkillRoll(event: CustomEvent<{ name: string; pool: number }>): void {
 		dicePool = event.detail.pool;
 		lastTestName = event.detail.name;
+		selectedWeapon = null;
 		showDiceRoller = true;
 	}
 
@@ -85,6 +86,7 @@
 	function handleAttributeRoll(event: CustomEvent<{ name: string; pool: number }>): void {
 		dicePool = event.detail.pool;
 		lastTestName = event.detail.name;
+		selectedWeapon = null;
 		showDiceRoller = true;
 	}
 
@@ -178,6 +180,18 @@
 		? ($character.attributes.rea.base + $character.attributes.rea.bonus) +
 		  ($character.attributes.int.base + $character.attributes.int.bonus)
 		: 10;
+
+	/** Currently selected weapon for attack. */
+	let selectedWeapon: { name: string; damage: string; ap: string } | null = null;
+
+	/** Handle weapon attack roll. */
+	function handleWeaponRoll(event: CustomEvent<{ weapon: { name: string; damage: string; ap: string }; pool: number; skillName: string }>): void {
+		const { weapon, pool, skillName } = event.detail;
+		selectedWeapon = weapon;
+		dicePool = pool;
+		lastTestName = `${weapon.name} (${skillName})`;
+		showDiceRoller = true;
+	}
 </script>
 
 <svelte:head>
@@ -259,6 +273,19 @@
 				{#if lastTestName}
 					<div class="text-sm text-accent-cyan mb-2">Rolling: {lastTestName}</div>
 				{/if}
+				{#if selectedWeapon}
+					<div class="cw-card mb-2 p-3">
+						<div class="flex flex-wrap gap-4 text-sm">
+							<span class="text-secondary-text">
+								Damage: <span class="text-accent-danger font-bold">{selectedWeapon.damage}</span>
+							</span>
+							<span class="text-secondary-text">
+								AP: <span class="text-accent-warning font-bold">{selectedWeapon.ap}</span>
+							</span>
+							<span class="text-muted-text text-xs">(Net hits add to damage)</span>
+						</div>
+					</div>
+				{/if}
 				<DiceRoller bind:dicePool on:roll={handleRollResult} />
 			</div>
 		{/if}
@@ -319,6 +346,7 @@
 			on:rollSkill={handleSkillRoll}
 			on:rollAttribute={handleAttributeRoll}
 			on:rollInitiative={handleInitiativeRoll}
+			on:rollWeapon={handleWeaponRoll}
 			on:damageChanged={handleDamageChanged}
 			on:edgeChanged={handleEdgeChanged}
 		/>

@@ -7,6 +7,10 @@ import {
 	glitchProbability,
 	rollInitiative,
 	getInitiativeForPass,
+	getWeaponSkill,
+	parseDamage,
+	parseAP,
+	WEAPON_SKILL_MAP,
 	type RollResult
 } from '../dice';
 
@@ -396,6 +400,96 @@ describe('Dice Rolling Utilities', () => {
 		it('should never return negative values', () => {
 			expect(getInitiativeForPass(1, 4)).toBe(0);
 			expect(getInitiativeForPass(0, 1)).toBe(0);
+		});
+	});
+
+	describe('getWeaponSkill', () => {
+		it('should map melee weapon categories to correct skills', () => {
+			expect(getWeaponSkill('Blades')).toBe('Blades');
+			expect(getWeaponSkill('Clubs')).toBe('Clubs');
+			expect(getWeaponSkill('Unarmed')).toBe('Unarmed Combat');
+		});
+
+		it('should map pistol categories to Pistols skill', () => {
+			expect(getWeaponSkill('Holdouts')).toBe('Pistols');
+			expect(getWeaponSkill('Light Pistols')).toBe('Pistols');
+			expect(getWeaponSkill('Heavy Pistols')).toBe('Pistols');
+			expect(getWeaponSkill('Machine Pistols')).toBe('Pistols');
+		});
+
+		it('should map automatic weapons to Automatics skill', () => {
+			expect(getWeaponSkill('Submachine Guns')).toBe('Automatics');
+			expect(getWeaponSkill('Assault Rifles')).toBe('Automatics');
+		});
+
+		it('should map longarms to Longarms skill', () => {
+			expect(getWeaponSkill('Shotguns')).toBe('Longarms');
+			expect(getWeaponSkill('Sniper Rifles')).toBe('Longarms');
+			expect(getWeaponSkill('Sports Rifles')).toBe('Longarms');
+		});
+
+		it('should map heavy weapons correctly', () => {
+			expect(getWeaponSkill('Light Machine Guns')).toBe('Heavy Weapons');
+			expect(getWeaponSkill('Assault Cannons')).toBe('Heavy Weapons');
+			expect(getWeaponSkill('Missile Launchers')).toBe('Heavy Weapons');
+		});
+
+		it('should return category as fallback for unknown categories', () => {
+			expect(getWeaponSkill('Unknown Category')).toBe('Unknown Category');
+		});
+	});
+
+	describe('parseDamage', () => {
+		it('should parse simple physical damage', () => {
+			const result = parseDamage('6P');
+			expect(result.value).toBe(6);
+			expect(result.type).toBe('P');
+		});
+
+		it('should parse simple stun damage', () => {
+			const result = parseDamage('5S');
+			expect(result.value).toBe(5);
+			expect(result.type).toBe('S');
+		});
+
+		it('should parse damage with special modifiers', () => {
+			const result = parseDamage('8P(f)');
+			expect(result.value).toBe(8);
+			expect(result.type).toBe('P');
+			expect(result.special).toContain('(f)');
+		});
+
+		it('should handle strength-based damage', () => {
+			// "(STR+2)P" style
+			const result = parseDamage('(STR+2)P');
+			expect(result.type).toBe('P');
+		});
+
+		it('should default to physical for ambiguous strings', () => {
+			const result = parseDamage('10');
+			expect(result.value).toBe(10);
+			expect(result.type).toBe('P');
+		});
+	});
+
+	describe('parseAP', () => {
+		it('should parse negative AP values', () => {
+			expect(parseAP('-2')).toBe(-2);
+			expect(parseAP('-5')).toBe(-5);
+		});
+
+		it('should return 0 for no AP', () => {
+			expect(parseAP('-')).toBe(0);
+			expect(parseAP('—')).toBe(0);
+			expect(parseAP('')).toBe(0);
+		});
+
+		it('should handle positive AP', () => {
+			expect(parseAP('+1')).toBe(1);
+		});
+
+		it('should return 0 for non-numeric AP', () => {
+			expect(parseAP('-half')).toBe(0);
 		});
 	});
 });
