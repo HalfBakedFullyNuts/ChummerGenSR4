@@ -2,17 +2,19 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { initializeFirebase } from '$firebase/config';
+	import { loadGameData } from '$stores/gamedata';
 
 	let initialized = false;
 	let initError: string | null = null;
 
 	/**
-	 * Initialize Firebase on mount.
+	 * Initialize Firebase and load game data on mount.
 	 * Sets initialized flag on success, captures error message on failure.
 	 */
 	onMount(async () => {
 		const result = initializeFirebase();
 		if (result.success) {
+			await loadGameData();
 			initialized = true;
 		} else {
 			initError = result.error ?? 'Unknown initialization error';
