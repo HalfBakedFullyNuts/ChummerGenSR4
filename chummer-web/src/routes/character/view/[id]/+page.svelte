@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { loadSavedCharacter, character, updateCondition } from '$stores';
+	import { loadSavedCharacter, character, updateCondition, updateEdge } from '$stores';
 	import { gameData, loadGameData } from '$stores/gamedata';
 	import { CharacterSheet, DiceRoller } from '$lib/components';
 
@@ -122,6 +122,11 @@
 	/** Handle damage change from condition monitor. */
 	function handleDamageChanged(event: CustomEvent<{ type: 'physical' | 'stun'; value: number }>): void {
 		updateCondition(event.detail.type, event.detail.value);
+	}
+
+	/** Handle Edge change. */
+	function handleEdgeChanged(event: CustomEvent<{ value: number }>): void {
+		updateEdge(event.detail.value);
 	}
 </script>
 
@@ -245,6 +250,7 @@
 			on:rollSkill={handleSkillRoll}
 			on:rollAttribute={handleAttributeRoll}
 			on:damageChanged={handleDamageChanged}
+			on:edgeChanged={handleEdgeChanged}
 		/>
 	{:else}
 		<div class="cw-card text-center py-12">
