@@ -11,6 +11,10 @@ import {
 	type BuildMethod,
 	type CharacterQuality,
 	type CharacterSkill,
+	type CharacterMagic,
+	type CharacterSpell,
+	type CharacterPower,
+	type CharacterResonance,
 	type Contact,
 	type AttributeValue,
 	createEmptyCharacter
@@ -430,3 +434,238 @@ export const hasMetatype: Readable<boolean> = derived(
 	character,
 	($char) => !!$char?.identity.metatype
 );
+
+/** Technomancer quality names. */
+const TECHNOMANCER_QUALITIES = ['Technomancer', 'Latent Technomancer'] as const;
+
+/** Magic type based on qualities. */
+export type MagicType = 'mundane' | 'magician' | 'adept' | 'mystic_adept' | 'aspected' | 'technomancer';
+
+/**
+ * Determine character's magic type from qualities.
+ */
+export function getMagicType(char: Character | null): MagicType {
+	if (!char) return 'mundane';
+
+	const qualityNames = char.qualities.map((q) => q.name);
+
+	if (qualityNames.includes('Magician')) return 'magician';
+	if (qualityNames.includes('Mystic Adept')) return 'mystic_adept';
+	if (qualityNames.includes('Adept')) return 'adept';
+	if (qualityNames.some((n) => n.startsWith('Aspected Magician'))) return 'aspected';
+	if (qualityNames.some((n) => TECHNOMANCER_QUALITIES.includes(n as typeof TECHNOMANCER_QUALITIES[number]))) {
+		return 'technomancer';
+	}
+
+	return 'mundane';
+}
+
+/** Derived store for character's magic type. */
+export const magicType: Readable<MagicType> = derived(
+	character,
+	($char) => getMagicType($char)
+);
+
+/**
+ * Initialize magic for a character.
+ * Sets up magic attribute and tradition.
+ */
+export function initializeMagic(tradition: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const type = getMagicType(char);
+	if (type === 'mundane') return;
+
+	const magicData: CharacterMagic = {
+		tradition,
+		mentor: null,
+		initiateGrade: 0,
+		powerPoints: type === 'adept' || type === 'mystic_adept' ? 6 : 0,
+		powerPointsUsed: 0,
+		spells: [],
+		powers: [],
+		spirits: [],
+		foci: [],
+		metamagics: []
+	};
+
+	/* Set Magic attribute to starting value (typically 1 for awakened) */
+	const updated: Character = {
+		...char,
+		magic: magicData,
+		attributes: {
+			...char.attributes,
+			mag: { base: 1, bonus: 0, karma: 0 }
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Set the magic tradition.
+ */
+export function setTradition(tradition: string): void {
+	const char = get(characterStore);
+	if (!char || !char.magic) return;
+
+	const updated: Character = {
+		...char,
+		magic: {
+			...char.magic,
+			tradition
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Add a spell to the character.
+ * Costs 5 BP per spell during creation.
+ */
+export function addSpell(spell: {
+	name: string;
+	category: string;
+	type: string;
+	range: string;
+	damage: string;
+	duration: string;
+	dv: string;
+}): void {
+	const char = get(characterStore);
+	if (!char || !char.magic) return;
+
+	/* Check if spell already exists */
+	if (char.magic.spells.some((s) => s.name === spell.name)) return;
+
+	const newSpell: CharacterSpell = {
+		id: generateId(),
+		...spell,
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		magic: {
+			...char.magic,
+			spells: [...char.magic.spells, newSpell]
+		},
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			spells: char.buildPointsSpent.spells + 5
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove a spell from the character.
+ */
+export function removeSpell(spellId: string): void {
+	const char = get(characterStore);
+	if (!char || !char.magic) return;
+
+	const updated: Character = {
+		...char,
+		magic: {
+			...char.magic,
+			spells: char.magic.spells.filter((s) => s.id !== spellId)
+		},
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			spells: char.buildPointsSpent.spells - 5
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Add an adept power to the character.
+ */
+export function addPower(power: { name: string; points: number; level: number }): void {
+	const char = get(characterStore);
+	if (!char || !char.magic) return;
+
+	/* Check power point availability */
+	const newUsed = char.magic.powerPointsUsed + power.points;
+	if (newUsed > char.magic.powerPoints) return;
+
+	const newPower: CharacterPower = {
+		id: generateId(),
+		name: power.name,
+		points: power.points,
+		level: power.level,
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		magic: {
+			...char.magic,
+			powers: [...char.magic.powers, newPower],
+			powerPointsUsed: newUsed
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove an adept power from the character.
+ */
+export function removePower(powerId: string): void {
+	const char = get(characterStore);
+	if (!char || !char.magic) return;
+
+	const power = char.magic.powers.find((p) => p.id === powerId);
+	if (!power) return;
+
+	const updated: Character = {
+		...char,
+		magic: {
+			...char.magic,
+			powers: char.magic.powers.filter((p) => p.id !== powerId),
+			powerPointsUsed: char.magic.powerPointsUsed - power.points
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Initialize technomancer resonance.
+ */
+export function initializeResonance(stream: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const resonanceData: CharacterResonance = {
+		stream,
+		submersionGrade: 0,
+		complexForms: [],
+		sprites: [],
+		echoes: []
+	};
+
+	const updated: Character = {
+		...char,
+		resonance: resonanceData,
+		attributes: {
+			...char.attributes,
+			res: { base: 1, bonus: 0, karma: 0 }
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
