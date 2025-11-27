@@ -580,6 +580,253 @@ function convertPrograms(): ConversionResult {
 }
 
 /**
+ * Convert weapons.xml to JSON.
+ * Extracts weapons with damage, AP, and availability.
+ */
+function convertWeapons(): ConversionResult {
+	const xml = readXmlFile('weapons.xml');
+	if (!xml) {
+		return { success: false, itemCount: 0, error: 'Failed to read file' };
+	}
+
+	const chummer = xml['chummer'] as Record<string, unknown>;
+	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as string[]);
+	const weaponsRaw = toArray((chummer['weapons'] as Record<string, unknown>)?.['weapon'] as Record<string, unknown>[]);
+
+	interface Weapon {
+		name: string;
+		category: string;
+		type: string;
+		reach: number;
+		damage: string;
+		ap: string;
+		mode: string;
+		rc: string;
+		ammo: string;
+		conceal: number;
+		avail: string;
+		cost: number;
+		source: string;
+		page: number;
+	}
+
+	const weapons: Weapon[] = [];
+	const limit = Math.min(weaponsRaw.length, MAX_ITEMS);
+
+	for (let i = 0; i < limit; i++) {
+		const w = weaponsRaw[i];
+		if (!w || typeof w !== 'object') continue;
+
+		weapons.push({
+			name: String(w['name'] ?? ''),
+			category: String(w['category'] ?? ''),
+			type: String(w['type'] ?? ''),
+			reach: Number(w['reach'] ?? 0),
+			damage: String(w['damage'] ?? ''),
+			ap: String(w['ap'] ?? '-'),
+			mode: String(w['mode'] ?? ''),
+			rc: String(w['rc'] ?? ''),
+			ammo: String(w['ammo'] ?? ''),
+			conceal: Number(w['conceal'] ?? 0),
+			avail: String(w['avail'] ?? '0'),
+			cost: Number(w['cost'] ?? 0),
+			source: String(w['source'] ?? ''),
+			page: Number(w['page'] ?? 0)
+		});
+	}
+
+	writeJsonFile('weapons.json', { categories: categoriesRaw, weapons });
+	return { success: true, itemCount: weapons.length };
+}
+
+/**
+ * Convert armor.xml to JSON.
+ * Extracts armor with ballistic and impact ratings.
+ */
+function convertArmor(): ConversionResult {
+	const xml = readXmlFile('armor.xml');
+	if (!xml) {
+		return { success: false, itemCount: 0, error: 'Failed to read file' };
+	}
+
+	const chummer = xml['chummer'] as Record<string, unknown>;
+	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as string[]);
+	const armorRaw = toArray((chummer['armors'] as Record<string, unknown>)?.['armor'] as Record<string, unknown>[]);
+
+	interface Armor {
+		name: string;
+		category: string;
+		ballistic: number;
+		impact: number;
+		capacity: number;
+		avail: string;
+		cost: number;
+		source: string;
+		page: number;
+	}
+
+	const armor: Armor[] = [];
+	const limit = Math.min(armorRaw.length, MAX_ITEMS);
+
+	for (let i = 0; i < limit; i++) {
+		const a = armorRaw[i];
+		if (!a || typeof a !== 'object') continue;
+
+		/* Parse ballistic/impact - can be number or "+X" */
+		const bVal = String(a['b'] ?? '0');
+		const iVal = String(a['i'] ?? '0');
+
+		armor.push({
+			name: String(a['name'] ?? ''),
+			category: String(a['category'] ?? ''),
+			ballistic: bVal.startsWith('+') ? parseInt(bVal) : Number(bVal),
+			impact: iVal.startsWith('+') ? parseInt(iVal) : Number(iVal),
+			capacity: Number(a['armorcapacity'] ?? 0),
+			avail: String(a['avail'] ?? '0'),
+			cost: Number(String(a['cost'] ?? '0').replace(/Variable\([^)]+\)/g, '0')),
+			source: String(a['source'] ?? ''),
+			page: Number(a['page'] ?? 0)
+		});
+	}
+
+	writeJsonFile('armor.json', { categories: categoriesRaw, armor });
+	return { success: true, itemCount: armor.length };
+}
+
+/**
+ * Convert cyberware.xml to JSON.
+ * Extracts cyberware with essence costs and grades.
+ */
+function convertCyberware(): ConversionResult {
+	const xml = readXmlFile('cyberware.xml');
+	if (!xml) {
+		return { success: false, itemCount: 0, error: 'Failed to read file' };
+	}
+
+	const chummer = xml['chummer'] as Record<string, unknown>;
+	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as string[]);
+	const gradesRaw = toArray((chummer['grades'] as Record<string, unknown>)?.['grade'] as Record<string, unknown>[]);
+	const cyberwareRaw = toArray((chummer['cyberwares'] as Record<string, unknown>)?.['cyberware'] as Record<string, unknown>[]);
+
+	interface CyberwareGrade {
+		name: string;
+		essMultiplier: number;
+		costMultiplier: number;
+		availModifier: number;
+	}
+
+	const grades: CyberwareGrade[] = [];
+	for (const g of gradesRaw) {
+		if (!g || typeof g !== 'object') continue;
+		grades.push({
+			name: String(g['name'] ?? ''),
+			essMultiplier: Number(g['ess'] ?? 1),
+			costMultiplier: Number(g['cost'] ?? 1),
+			availModifier: Number(g['avail'] ?? 0)
+		});
+	}
+
+	interface Cyberware {
+		name: string;
+		category: string;
+		ess: number;
+		capacity: string;
+		avail: string;
+		cost: number;
+		rating: number;
+		source: string;
+		page: number;
+	}
+
+	const cyberware: Cyberware[] = [];
+	const limit = Math.min(cyberwareRaw.length, MAX_ITEMS);
+
+	for (let i = 0; i < limit; i++) {
+		const c = cyberwareRaw[i];
+		if (!c || typeof c !== 'object') continue;
+
+		cyberware.push({
+			name: String(c['name'] ?? ''),
+			category: String(c['category'] ?? ''),
+			ess: Number(c['ess'] ?? 0),
+			capacity: String(c['capacity'] ?? '0'),
+			avail: String(c['avail'] ?? '0'),
+			cost: Number(c['cost'] ?? 0),
+			rating: Number(c['rating'] ?? 0),
+			source: String(c['source'] ?? ''),
+			page: Number(c['page'] ?? 0)
+		});
+	}
+
+	writeJsonFile('cyberware.json', { categories: categoriesRaw, grades, cyberware });
+	return { success: true, itemCount: cyberware.length };
+}
+
+/**
+ * Convert gear.xml to JSON (essential items only).
+ * Extracts commlinks, fake IDs, tools, and common gear.
+ */
+function convertGear(): ConversionResult {
+	const xml = readXmlFile('gear.xml');
+	if (!xml) {
+		return { success: false, itemCount: 0, error: 'Failed to read file' };
+	}
+
+	const chummer = xml['chummer'] as Record<string, unknown>;
+	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as Array<string | Record<string, unknown>>);
+	const gearRaw = toArray((chummer['gears'] as Record<string, unknown>)?.['gear'] as Record<string, unknown>[]);
+
+	/* Filter categories to show only essential ones */
+	const essentialCategories = [
+		'Commlink', 'Commlink Accessories', 'Commlink Operating System',
+		'ID/Credsticks', 'Communications', 'Sensors', 'Security Devices',
+		'B&E Gear', 'Biotech', 'Disguise', 'Survival Gear', 'Foci',
+		'Magical Supplies', 'DocWagon Contract', 'Drugs', 'Slap Patches'
+	];
+
+	const categories = categoriesRaw
+		.map(c => typeof c === 'string' ? c : String(c['#text'] ?? ''))
+		.filter(c => essentialCategories.some(e => c.includes(e) || e.includes(c)));
+
+	interface GearItem {
+		name: string;
+		category: string;
+		rating: number;
+		avail: string;
+		cost: number;
+		source: string;
+		page: number;
+	}
+
+	const gear: GearItem[] = [];
+	const limit = Math.min(gearRaw.length, MAX_ITEMS);
+
+	for (let i = 0; i < limit; i++) {
+		const g = gearRaw[i];
+		if (!g || typeof g !== 'object') continue;
+
+		const category = String(g['category'] ?? '');
+		/* Only include essential categories */
+		if (!essentialCategories.some(e => category.includes(e) || e.includes(category))) {
+			continue;
+		}
+
+		gear.push({
+			name: String(g['name'] ?? ''),
+			category,
+			rating: Number(g['rating'] ?? 0),
+			avail: String(g['avail'] ?? '0'),
+			cost: Number(g['cost'] ?? 0),
+			source: String(g['source'] ?? ''),
+			page: Number(g['page'] ?? 0)
+		});
+	}
+
+	writeJsonFile('gear.json', { categories, gear });
+	return { success: true, itemCount: gear.length };
+}
+
+/**
  * Main entry point.
  * Runs all converters and reports results.
  */
@@ -598,7 +845,11 @@ function main(): void {
 		{ name: 'Traditions', fn: convertTraditions },
 		{ name: 'Mentors', fn: convertMentors },
 		{ name: 'Lifestyles', fn: convertLifestyles },
-		{ name: 'Programs', fn: convertPrograms }
+		{ name: 'Programs', fn: convertPrograms },
+		{ name: 'Weapons', fn: convertWeapons },
+		{ name: 'Armor', fn: convertArmor },
+		{ name: 'Cyberware', fn: convertCyberware },
+		{ name: 'Gear', fn: convertGear }
 	];
 
 	let totalItems = 0;

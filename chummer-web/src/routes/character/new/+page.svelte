@@ -20,6 +20,7 @@
 	import QualitySelector from '$lib/components/wizard/QualitySelector.svelte';
 	import SkillAllocator from '$lib/components/wizard/SkillAllocator.svelte';
 	import MagicSelector from '$lib/components/wizard/MagicSelector.svelte';
+	import EquipmentSelector from '$lib/components/wizard/EquipmentSelector.svelte';
 	import ContactsEditor from '$lib/components/wizard/ContactsEditor.svelte';
 
 	/** Initialize new character on mount. */
@@ -65,6 +66,8 @@
 				return char.skills.length > 0;
 			case 'magic':
 				return true; // Optional step
+			case 'equipment':
+				return true; // Equipment is optional but BP must be allocated
 			case 'contacts':
 				return true; // Contacts are optional
 			case 'finalize':
@@ -142,6 +145,8 @@
 			<SkillAllocator />
 		{:else if $currentStep === 'magic'}
 			<MagicSelector />
+		{:else if $currentStep === 'equipment'}
+			<EquipmentSelector />
 		{:else if $currentStep === 'contacts'}
 			<ContactsEditor />
 		{:else if $currentStep === 'finalize'}

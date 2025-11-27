@@ -17,6 +17,17 @@ import {
 	type CharacterResonance,
 	type Contact,
 	type AttributeValue,
+	type CharacterWeapon,
+	type CharacterArmor,
+	type CharacterCyberware,
+	type CharacterGear,
+	type CharacterLifestyle,
+	type GameWeapon,
+	type GameArmor,
+	type GameCyberware,
+	type GameGear,
+	type CyberwareGrade,
+	bpToNuyen,
 	createEmptyCharacter
 } from '$types';
 import { findMetatype, type GameData } from './gamedata';
@@ -52,6 +63,7 @@ export const WIZARD_STEPS: readonly WizardStepConfig[] = [
 	{ id: 'qualities', label: 'Qualities', description: 'Select positive and negative qualities', required: true },
 	{ id: 'skills', label: 'Skills', description: 'Choose and rate your skills', required: true },
 	{ id: 'magic', label: 'Magic/Resonance', description: 'Configure magical abilities', required: false },
+	{ id: 'equipment', label: 'Equipment', description: 'Purchase gear and cyberware', required: true },
 	{ id: 'contacts', label: 'Contacts', description: 'Define your network', required: true },
 	{ id: 'finalize', label: 'Finalize', description: 'Review and complete', required: true }
 ] as const;
@@ -669,3 +681,424 @@ export function initializeResonance(stream: string): void {
 
 	characterStore.set(updated);
 }
+
+/* ============================================
+ * Equipment Functions
+ * ============================================ */
+
+/**
+ * Set BP spent on resources (nuyen).
+ * Updates starting nuyen based on BP-to-nuyen conversion.
+ */
+export function setResourcesBP(bp: number): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	/* Clamp to valid range (0-50 BP) */
+	const clampedBP = Math.max(0, Math.min(50, bp));
+	const nuyen = bpToNuyen(clampedBP);
+
+	const updated: Character = {
+		...char,
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			resources: clampedBP
+		},
+		startingNuyen: nuyen,
+		nuyen: nuyen - calculateEquipmentSpent(char),
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Calculate total nuyen spent on equipment.
+ */
+function calculateEquipmentSpent(char: Character): number {
+	let total = 0;
+
+	for (const weapon of char.equipment.weapons) {
+		total += weapon.cost;
+	}
+	for (const armor of char.equipment.armor) {
+		total += armor.cost;
+	}
+	for (const cyber of char.equipment.cyberware) {
+		total += cyber.cost;
+	}
+	for (const gear of char.equipment.gear) {
+		total += gear.cost * gear.quantity;
+	}
+	if (char.equipment.lifestyle) {
+		total += char.equipment.lifestyle.monthlyCost * char.equipment.lifestyle.monthsPrepaid;
+	}
+
+	return total;
+}
+
+/**
+ * Add a weapon to the character's equipment.
+ */
+export function addWeapon(weapon: GameWeapon): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	/* Check if we have enough nuyen */
+	if (char.nuyen < weapon.cost) return;
+
+	const newWeapon: CharacterWeapon = {
+		id: generateId(),
+		name: weapon.name,
+		category: weapon.category,
+		type: weapon.type,
+		reach: weapon.reach,
+		damage: weapon.damage,
+		ap: weapon.ap,
+		mode: weapon.mode,
+		rc: weapon.rc,
+		ammo: weapon.ammo,
+		currentAmmo: 0,
+		conceal: weapon.conceal,
+		cost: weapon.cost,
+		accessories: [],
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			weapons: [...char.equipment.weapons, newWeapon]
+		},
+		nuyen: char.nuyen - weapon.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove a weapon from the character's equipment.
+ */
+export function removeWeapon(weaponId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const weapon = char.equipment.weapons.find((w) => w.id === weaponId);
+	if (!weapon) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			weapons: char.equipment.weapons.filter((w) => w.id !== weaponId)
+		},
+		nuyen: char.nuyen + weapon.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Add armor to the character's equipment.
+ */
+export function addArmor(armor: GameArmor): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	if (char.nuyen < armor.cost) return;
+
+	const newArmor: CharacterArmor = {
+		id: generateId(),
+		name: armor.name,
+		category: armor.category,
+		ballistic: armor.ballistic,
+		impact: armor.impact,
+		capacity: armor.capacity,
+		capacityUsed: 0,
+		equipped: false,
+		cost: armor.cost,
+		modifications: [],
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			armor: [...char.equipment.armor, newArmor]
+		},
+		nuyen: char.nuyen - armor.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove armor from the character's equipment.
+ */
+export function removeArmor(armorId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const armor = char.equipment.armor.find((a) => a.id === armorId);
+	if (!armor) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			armor: char.equipment.armor.filter((a) => a.id !== armorId)
+		},
+		nuyen: char.nuyen + armor.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Add cyberware to the character.
+ * Reduces essence based on grade.
+ */
+export function addCyberware(
+	cyber: GameCyberware,
+	grade: CyberwareGrade = 'Standard'
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	/* Get grade multipliers */
+	const gradeMultipliers: Record<CyberwareGrade, { ess: number; cost: number }> = {
+		'Standard': { ess: 1.0, cost: 1 },
+		'Alphaware': { ess: 0.8, cost: 2 },
+		'Betaware': { ess: 0.7, cost: 4 },
+		'Deltaware': { ess: 0.5, cost: 10 },
+		'Used': { ess: 1.2, cost: 0.5 }
+	};
+
+	const multiplier = gradeMultipliers[grade];
+	const essenceCost = cyber.ess * multiplier.ess;
+	const nuyenCost = Math.floor(cyber.cost * multiplier.cost);
+
+	/* Check if we have enough nuyen and essence */
+	if (char.nuyen < nuyenCost) return;
+	if (char.attributes.ess - essenceCost < 0) return;
+
+	const newCyber: CharacterCyberware = {
+		id: generateId(),
+		name: cyber.name,
+		category: cyber.category,
+		grade,
+		rating: cyber.rating || 1,
+		essence: essenceCost,
+		cost: nuyenCost,
+		capacity: 0,
+		capacityUsed: 0,
+		location: '',
+		subsystems: [],
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			cyberware: [...char.equipment.cyberware, newCyber]
+		},
+		attributes: {
+			...char.attributes,
+			ess: char.attributes.ess - essenceCost
+		},
+		nuyen: char.nuyen - nuyenCost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove cyberware from the character.
+ * Restores essence.
+ */
+export function removeCyberware(cyberId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const cyber = char.equipment.cyberware.find((c) => c.id === cyberId);
+	if (!cyber) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			cyberware: char.equipment.cyberware.filter((c) => c.id !== cyberId)
+		},
+		attributes: {
+			...char.attributes,
+			ess: char.attributes.ess + cyber.essence
+		},
+		nuyen: char.nuyen + cyber.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Add gear to the character's equipment.
+ */
+export function addGear(gear: GameGear, quantity: number = 1): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const totalCost = gear.cost * quantity;
+	if (char.nuyen < totalCost) return;
+
+	/* Check if gear already exists and stack */
+	const existingIndex = char.equipment.gear.findIndex((g) => g.name === gear.name);
+
+	let newGear: readonly CharacterGear[];
+	if (existingIndex >= 0) {
+		newGear = char.equipment.gear.map((g, i) =>
+			i === existingIndex ? { ...g, quantity: g.quantity + quantity } : g
+		);
+	} else {
+		const newItem: CharacterGear = {
+			id: generateId(),
+			name: gear.name,
+			category: gear.category,
+			rating: gear.rating,
+			quantity,
+			cost: gear.cost,
+			location: '',
+			notes: ''
+		};
+		newGear = [...char.equipment.gear, newItem];
+	}
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			gear: newGear
+		},
+		nuyen: char.nuyen - totalCost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove gear from the character's equipment.
+ */
+export function removeGear(gearId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const gear = char.equipment.gear.find((g) => g.id === gearId);
+	if (!gear) return;
+
+	const refund = gear.cost * gear.quantity;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			gear: char.equipment.gear.filter((g) => g.id !== gearId)
+		},
+		nuyen: char.nuyen + refund,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Set the character's lifestyle.
+ */
+export function setLifestyle(
+	name: string,
+	level: string,
+	monthlyCost: number,
+	monthsPrepaid: number = 1
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const totalCost = monthlyCost * monthsPrepaid;
+
+	/* Refund old lifestyle if exists */
+	let currentNuyen = char.nuyen;
+	if (char.equipment.lifestyle) {
+		currentNuyen += char.equipment.lifestyle.monthlyCost * char.equipment.lifestyle.monthsPrepaid;
+	}
+
+	if (currentNuyen < totalCost) return;
+
+	const newLifestyle: CharacterLifestyle = {
+		id: generateId(),
+		name,
+		level,
+		monthlyCost,
+		monthsPrepaid,
+		location: '',
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			lifestyle: newLifestyle
+		},
+		nuyen: currentNuyen - totalCost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove the character's lifestyle.
+ */
+export function removeLifestyle(): void {
+	const char = get(characterStore);
+	if (!char || !char.equipment.lifestyle) return;
+
+	const refund = char.equipment.lifestyle.monthlyCost * char.equipment.lifestyle.monthsPrepaid;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			lifestyle: null
+		},
+		nuyen: char.nuyen + refund,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/** Derived store for remaining nuyen. */
+export const remainingNuyen: Readable<number> = derived(
+	character,
+	($char) => $char?.nuyen ?? 0
+);
+
+/** Derived store for starting nuyen. */
+export const startingNuyen: Readable<number> = derived(
+	character,
+	($char) => $char?.startingNuyen ?? 0
+);
+
+/** Derived store for current essence. */
+export const currentEssence: Readable<number> = derived(
+	character,
+	($char) => $char?.attributes.ess ?? 6.0
+);
