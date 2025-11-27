@@ -21,7 +21,6 @@ import {
 	remainingNuyen,
 	startingNuyen
 } from '../character';
-import { bpToNuyen } from '$types';
 
 describe('Character Store - BP Management', () => {
 	beforeEach(() => {

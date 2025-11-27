@@ -16,3 +16,13 @@ export {
 	subscribeToAuthState,
 	getCurrentUser
 } from './auth';
+
+export {
+	saveCharacter,
+	loadCharacter,
+	deleteCharacter,
+	listUserCharacters,
+	verifyCharacterOwnership,
+	duplicateCharacter,
+	type CharacterSummary
+} from './characters';
