@@ -1,11 +1,7 @@
 /**
  * XML compatibility module index.
- * This module will handle Chummer XML import/export.
- *
- * TODO: Implement XML handling (Issues #45-47)
- * - importer.ts: Parse Chummer XML files
- * - exporter.ts: Generate Chummer XML format
- * - schemas.ts: XML schema definitions
+ * Handles Chummer XML import/export.
  */
 
-export {};
+export { exportToChummer, downloadAsChum } from './exporter';
+export { importFromChummer, importFromFile, type ImportResult } from './importer';

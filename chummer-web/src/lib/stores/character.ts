@@ -1156,6 +1156,18 @@ export async function loadSavedCharacter(characterId: string): Promise<AsyncResu
 }
 
 /**
+ * Load an imported character into the store.
+ * Used when importing from Chummer XML files.
+ */
+export function loadImportedCharacter(importedChar: Character): void {
+	characterStore.set(importedChar);
+	/* Set step based on character status */
+	if (importedChar.status === 'creation') {
+		currentStepStore.set('finalize');
+	}
+}
+
+/**
  * Delete a character from Firebase.
  * If it's the current character, clears the store.
  */

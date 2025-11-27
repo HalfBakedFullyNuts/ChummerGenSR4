@@ -3,8 +3,10 @@
 	import {
 		listCharacters,
 		loadSavedCharacter,
+		loadImportedCharacter,
 		deleteSavedCharacter,
 		startNewCharacter,
+		saveCurrentCharacter,
 		type CharacterSummary
 	} from '$stores/character';
 	import {
@@ -13,6 +15,8 @@
 		signOutUser,
 		subscribeToAuthState
 	} from '$lib/firebase';
+	import { loadCharacter } from '$lib/firebase/characters';
+	import { downloadAsChum, importFromFile } from '$lib/xml';
 	import type { User } from 'firebase/auth';
 
 	/** Current authenticated user. */
@@ -32,6 +36,15 @@
 
 	/** Auth state unsubscribe function. */
 	let unsubscribeAuth: (() => void) | null = null;
+
+	/** File input reference for import. */
+	let fileInput: HTMLInputElement;
+
+	/** Import in progress. */
+	let importing = false;
+
+	/** Export in progress. */
+	let exporting: string | null = null;
 
 	/** Dispatches events to parent. */
 	import { createEventDispatcher } from 'svelte';
@@ -162,9 +175,67 @@
 			day: 'numeric'
 		});
 	}
+
+	/** Export character as .chum file. */
+	async function handleExport(characterId: string) {
+		if (!user) return;
+		exporting = characterId;
+		error = null;
+
+		const result = await loadCharacter(characterId);
+		if (result.success && result.data) {
+			downloadAsChum(result.data);
+		} else {
+			error = result.error || 'Failed to export character';
+		}
+
+		exporting = null;
+	}
+
+	/** Handle file selection for import. */
+	async function handleImportFile(event: Event) {
+		const target = event.target as HTMLInputElement;
+		const file = target.files?.[0];
+		if (!file || !user) return;
+
+		importing = true;
+		error = null;
+
+		const result = await importFromFile(file, user.uid);
+		if (result.success && result.character) {
+			/* Store imported character and save */
+			loadImportedCharacter(result.character);
+			const saveResult = await saveCurrentCharacter();
+			if (saveResult.success) {
+				await refreshCharacters();
+			} else {
+				error = saveResult.error || 'Failed to save imported character';
+			}
+		} else {
+			error = result.error || 'Failed to import character';
+		}
+
+		importing = false;
+		/* Reset file input */
+		target.value = '';
+	}
+
+	/** Trigger file input click. */
+	function triggerImport() {
+		fileInput?.click();
+	}
 </script>
 
 <div class="space-y-6">
+	<!-- Hidden file input for import -->
+	<input
+		type="file"
+		accept=".chum,.xml"
+		class="hidden"
+		bind:this={fileInput}
+		on:change={handleImportFile}
+	/>
+
 	<!-- Header -->
 	<div class="flex items-center justify-between">
 		<h2 class="text-2xl font-bold text-primary-text">Characters</h2>
@@ -210,21 +281,47 @@
 
 	<!-- Character List -->
 	{#if !loading && user}
-		<!-- New Character Button -->
-		<button
-			class="cw-card w-full p-6 text-left hover:border-accent-primary transition-colors group"
-			on:click={handleNewCharacter}
-		>
-			<div class="flex items-center gap-4">
-				<div class="w-12 h-12 rounded-full bg-accent-primary/20 flex items-center justify-center text-accent-primary text-2xl group-hover:bg-accent-primary group-hover:text-surface transition-colors">
-					+
+		<!-- Action Buttons -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<!-- New Character Button -->
+			<button
+				class="cw-card p-6 text-left hover:border-accent-primary transition-colors group"
+				on:click={handleNewCharacter}
+			>
+				<div class="flex items-center gap-4">
+					<div class="w-12 h-12 rounded-full bg-accent-primary/20 flex items-center justify-center text-accent-primary text-2xl group-hover:bg-accent-primary group-hover:text-surface transition-colors">
+						+
+					</div>
+					<div>
+						<h3 class="text-primary-text font-medium">Create New Character</h3>
+						<p class="text-secondary-text text-sm">Start the character creation wizard</p>
+					</div>
 				</div>
-				<div>
-					<h3 class="text-primary-text font-medium">Create New Character</h3>
-					<p class="text-secondary-text text-sm">Start the character creation wizard</p>
+			</button>
+
+			<!-- Import Button -->
+			<button
+				class="cw-card p-6 text-left hover:border-accent-cyan transition-colors group"
+				on:click={triggerImport}
+				disabled={importing}
+			>
+				<div class="flex items-center gap-4">
+					<div class="w-12 h-12 rounded-full bg-accent-cyan/20 flex items-center justify-center text-accent-cyan text-xl group-hover:bg-accent-cyan group-hover:text-surface transition-colors">
+						{#if importing}
+							<span class="animate-spin">↻</span>
+						{:else}
+							↑
+						{/if}
+					</div>
+					<div>
+						<h3 class="text-primary-text font-medium">
+							{importing ? 'Importing...' : 'Import Character'}
+						</h3>
+						<p class="text-secondary-text text-sm">Load .chum file from desktop Chummer</p>
+					</div>
 				</div>
-			</div>
-		</button>
+			</button>
+		</div>
 
 		<!-- Character Cards -->
 		{#if characters.length === 0}
@@ -282,6 +379,13 @@
 										Load
 									</button>
 									<button
+										class="cw-btn text-sm text-accent-cyan hover:bg-accent-cyan/20"
+										on:click={() => handleExport(char.id)}
+										disabled={exporting === char.id}
+									>
+										{exporting === char.id ? '...' : 'Export'}
+									</button>
+									<button
 										class="cw-btn text-sm text-accent-danger hover:bg-accent-danger/20"
 										on:click={() => handleDelete(char.id)}
 									>
@@ -298,11 +402,12 @@
 
 	<!-- Help Text -->
 	<div class="cw-panel p-4 text-sm">
-		<h4 class="text-accent-primary mb-2">Cloud Save</h4>
+		<h4 class="text-accent-primary mb-2">Cloud Save & Desktop Compatibility</h4>
 		<ul class="text-secondary-text space-y-1 list-disc list-inside">
 			<li>Characters are automatically saved to the cloud</li>
 			<li>Access your characters from any device</li>
-			<li>Characters in creation can be resumed later</li>
+			<li>Import .chum files from desktop Chummer</li>
+			<li>Export characters as .chum for desktop use</li>
 			<li>Career mode characters track karma and advancement</li>
 		</ul>
 	</div>
