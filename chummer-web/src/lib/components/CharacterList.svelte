@@ -372,11 +372,17 @@
 										Cancel
 									</button>
 								{:else}
+									<a
+										href="/character/view/{char.id}"
+										class="cw-btn text-sm"
+									>
+										View
+									</a>
 									<button
 										class="cw-btn cw-btn-primary text-sm"
 										on:click={() => handleLoad(char.id)}
 									>
-										Load
+										Edit
 									</button>
 									<button
 										class="cw-btn text-sm text-accent-cyan hover:bg-accent-cyan/20"
