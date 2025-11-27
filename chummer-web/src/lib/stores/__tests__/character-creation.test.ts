@@ -13,7 +13,6 @@ import {
 	bpBreakdown,
 	startNewCharacter,
 	setMetatype,
-	setAttribute,
 	addQuality,
 	setSkill,
 	addContact,
@@ -22,7 +21,6 @@ import {
 	initializeMagic,
 	addSpell,
 	magicType,
-	remainingNuyen,
 	currentEssence
 } from '../character';
 import type { GameData } from '../gamedata';

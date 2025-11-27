@@ -1102,3 +1102,167 @@ export const currentEssence: Readable<number> = derived(
 	character,
 	($char) => $char?.attributes.ess ?? 6.0
 );
+
+/* ============================================
+ * Save/Load Functions (Firebase Integration)
+ * ============================================ */
+
+import {
+	saveCharacter as firebaseSave,
+	loadCharacter as firebaseLoad,
+	deleteCharacter as firebaseDelete,
+	listUserCharacters as firebaseList,
+	duplicateCharacter as firebaseDuplicate,
+	type CharacterSummary
+} from '$lib/firebase';
+
+/** Result type for async operations. */
+interface AsyncResult<T = void> {
+	success: boolean;
+	error?: string;
+	data?: T;
+}
+
+/**
+ * Save current character to Firebase.
+ * Returns success status.
+ */
+export async function saveCurrentCharacter(): Promise<AsyncResult> {
+	const char = get(characterStore);
+	if (!char) {
+		return { success: false, error: 'No character to save' };
+	}
+
+	const result = await firebaseSave(char);
+	return result;
+}
+
+/**
+ * Load a character from Firebase by ID.
+ * Sets the loaded character as current.
+ */
+export async function loadSavedCharacter(characterId: string): Promise<AsyncResult<Character | null>> {
+	const result = await firebaseLoad(characterId);
+
+	if (result.success && result.data) {
+		characterStore.set(result.data);
+		/* Set step based on character status */
+		if (result.data.status === 'creation') {
+			currentStepStore.set('finalize');
+		}
+	}
+
+	return result;
+}
+
+/**
+ * Delete a character from Firebase.
+ * If it's the current character, clears the store.
+ */
+export async function deleteSavedCharacter(characterId: string): Promise<AsyncResult> {
+	const char = get(characterStore);
+
+	const result = await firebaseDelete(characterId);
+
+	if (result.success && char?.id === characterId) {
+		characterStore.set(null);
+		currentStepStore.set('method');
+	}
+
+	return result;
+}
+
+/**
+ * List all characters for a user.
+ */
+export async function listCharacters(userId: string): Promise<AsyncResult<CharacterSummary[]>> {
+	return firebaseList(userId);
+}
+
+/**
+ * Duplicate a character.
+ * Creates a copy with a new ID.
+ */
+export async function duplicateCurrentCharacter(): Promise<AsyncResult<Character | null>> {
+	const char = get(characterStore);
+	if (!char) {
+		return { success: false, error: 'No character to duplicate' };
+	}
+
+	const newId = generateId();
+	return firebaseDuplicate(char.id, newId, char.userId);
+}
+
+/**
+ * Clear the current character from store.
+ * Does not delete from Firebase.
+ */
+export function clearCurrentCharacter(): void {
+	characterStore.set(null);
+	currentStepStore.set('method');
+}
+
+/**
+ * Check if there are unsaved changes.
+ * Compares current character to last saved version.
+ */
+let lastSavedVersion: string | null = null;
+
+export function markAsSaved(): void {
+	const char = get(characterStore);
+	lastSavedVersion = char ? JSON.stringify(char) : null;
+}
+
+export function hasUnsavedChanges(): boolean {
+	const char = get(characterStore);
+	if (!char) return false;
+
+	const currentVersion = JSON.stringify(char);
+	return currentVersion !== lastSavedVersion;
+}
+
+/** Derived store for unsaved changes indicator. */
+export const isDirty: Readable<boolean> = derived(
+	character,
+	($char) => {
+		if (!$char) return false;
+		const currentVersion = JSON.stringify($char);
+		return currentVersion !== lastSavedVersion;
+	}
+);
+
+/**
+ * Auto-save interval (in milliseconds).
+ * Set to null to disable auto-save.
+ */
+let autoSaveInterval: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Enable auto-save with given interval.
+ * Saves every interval ms if there are unsaved changes.
+ */
+export function enableAutoSave(intervalMs: number = 30000): void {
+	disableAutoSave();
+
+	autoSaveInterval = setInterval(async () => {
+		if (hasUnsavedChanges()) {
+			const result = await saveCurrentCharacter();
+			if (result.success) {
+				markAsSaved();
+			}
+		}
+	}, intervalMs);
+}
+
+/**
+ * Disable auto-save.
+ */
+export function disableAutoSave(): void {
+	if (autoSaveInterval) {
+		clearInterval(autoSaveInterval);
+		autoSaveInterval = null;
+	}
+}
+
+/** Re-export CharacterSummary type for convenience. */
+export type { CharacterSummary };

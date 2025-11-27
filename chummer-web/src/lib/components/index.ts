@@ -10,4 +10,4 @@
  * - layout/: Navigation, sidebars
  */
 
-export {};
+export { default as CharacterList } from './CharacterList.svelte';
