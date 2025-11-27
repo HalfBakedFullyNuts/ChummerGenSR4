@@ -5,6 +5,8 @@ import {
 	calculateHitProbability,
 	expectedHits,
 	glitchProbability,
+	rollInitiative,
+	getInitiativeForPass,
 	type RollResult
 } from '../dice';
 
@@ -301,6 +303,99 @@ describe('Dice Rolling Utilities', () => {
 			});
 
 			expect(result.hits).toBe(4); // Everything is a hit
+		});
+	});
+
+	describe('rollInitiative', () => {
+		it('should roll initiative with base value', () => {
+			const result = rollInitiative({
+				base: 10,
+				rng: () => 0.5 // Roll a 4
+			});
+
+			expect(result.base).toBe(10);
+			expect(result.dice).toEqual([4]);
+			expect(result.total).toBe(14);
+		});
+
+		it('should roll multiple initiative dice', () => {
+			const values = [0.5, 0.7]; // 4, 5
+			let index = 0;
+
+			const result = rollInitiative({
+				base: 8,
+				dice: 2,
+				rng: () => values[index++]
+			});
+
+			expect(result.dice).toHaveLength(2);
+			expect(result.dice).toEqual([4, 5]);
+			expect(result.total).toBe(17); // 8 + 4 + 5
+		});
+
+		it('should calculate initiative passes correctly', () => {
+			// 1-10 = 1 pass
+			expect(rollInitiative({ base: 5, rng: () => 0.1 }).passes).toBe(1); // 5 + 1 = 6
+
+			// 11-20 = 2 passes
+			expect(rollInitiative({ base: 8, rng: () => 0.5 }).passes).toBe(2); // 8 + 4 = 12
+
+			// 21-30 = 3 passes
+			expect(rollInitiative({ base: 15, rng: () => 0.99 }).passes).toBe(3); // 15 + 6 = 21
+
+			// 31+ = 4 passes (maximum)
+			const values = [0.99, 0.99, 0.99]; // All 6s
+			let index = 0;
+			const result = rollInitiative({
+				base: 20,
+				dice: 3,
+				rng: () => values[index++]
+			});
+			expect(result.total).toBe(38); // 20 + 18
+			expect(result.passes).toBe(4); // Max 4 passes
+		});
+
+		it('should default to 1 initiative die', () => {
+			const result = rollInitiative({
+				base: 10,
+				rng: () => 0.5
+			});
+
+			expect(result.dice).toHaveLength(1);
+		});
+
+		it('should handle minimum initiative', () => {
+			const result = rollInitiative({
+				base: 1,
+				rng: () => 0 // Roll a 1
+			});
+
+			expect(result.total).toBe(2);
+			expect(result.passes).toBe(1);
+		});
+	});
+
+	describe('getInitiativeForPass', () => {
+		it('should return full initiative for pass 1', () => {
+			expect(getInitiativeForPass(15, 1)).toBe(15);
+			expect(getInitiativeForPass(25, 1)).toBe(25);
+		});
+
+		it('should reduce initiative by 10 for each subsequent pass', () => {
+			expect(getInitiativeForPass(25, 2)).toBe(15); // 25 - 10
+			expect(getInitiativeForPass(25, 3)).toBe(5);  // 25 - 20
+			expect(getInitiativeForPass(35, 4)).toBe(5);  // 35 - 30
+		});
+
+		it('should return 0 when initiative is too low for pass', () => {
+			expect(getInitiativeForPass(10, 2)).toBe(0); // 10 - 10 = 0
+			expect(getInitiativeForPass(15, 3)).toBe(0); // 15 - 20 = -5, clamped to 0
+			expect(getInitiativeForPass(5, 2)).toBe(0);
+		});
+
+		it('should never return negative values', () => {
+			expect(getInitiativeForPass(1, 4)).toBe(0);
+			expect(getInitiativeForPass(0, 1)).toBe(0);
 		});
 	});
 });

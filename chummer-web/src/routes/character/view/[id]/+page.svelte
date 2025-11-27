@@ -4,7 +4,8 @@
 	import { goto } from '$app/navigation';
 	import { loadSavedCharacter, character, updateCondition, updateEdge } from '$stores';
 	import { gameData, loadGameData } from '$stores/gamedata';
-	import { CharacterSheet, DiceRoller } from '$lib/components';
+	import { CharacterSheet, CombatTracker, DiceRoller } from '$lib/components';
+	import { rollInitiative } from '$lib/utils/dice';
 
 	/** Roll history entry type. */
 	interface RollHistoryEntry {
@@ -24,6 +25,9 @@
 
 	/** Show roll history panel. */
 	let showRollHistory = false;
+
+	/** Show combat tracker panel. */
+	let showCombatTracker = false;
 
 	/** Current dice pool for roller. */
 	let dicePool = 6;
@@ -128,6 +132,52 @@
 	function handleEdgeChanged(event: CustomEvent<{ value: number }>): void {
 		updateEdge(event.detail.value);
 	}
+
+	/** Handle initiative roll from character sheet. */
+	function handleInitiativeRoll(event: CustomEvent<{ base: number; dice: number }>): void {
+		const result = rollInitiative({ base: event.detail.base, dice: event.detail.dice });
+
+		// Add to roll history
+		const entry: RollHistoryEntry = {
+			id: rollIdCounter++,
+			timestamp: new Date(),
+			testName: 'Initiative',
+			pool: result.dice.length,
+			hits: result.total,  // Using hits field for total
+			isGlitch: false,
+			isCriticalGlitch: false,
+			edgeUsed: false,
+			dice: result.dice
+		};
+		rollHistory = [entry, ...rollHistory].slice(0, 50);
+
+		// Show combat tracker if not already visible
+		if (!showCombatTracker) {
+			showCombatTracker = true;
+		}
+	}
+
+	/** Handle initiative rolled from combat tracker. */
+	function handleCombatInitiative(event: CustomEvent<{ total: number; passes: number; dice: number[] }>): void {
+		const entry: RollHistoryEntry = {
+			id: rollIdCounter++,
+			timestamp: new Date(),
+			testName: `Initiative (${event.detail.passes} pass${event.detail.passes !== 1 ? 'es' : ''})`,
+			pool: event.detail.dice.length,
+			hits: event.detail.total,
+			isGlitch: false,
+			isCriticalGlitch: false,
+			edgeUsed: false,
+			dice: event.detail.dice
+		};
+		rollHistory = [entry, ...rollHistory].slice(0, 50);
+	}
+
+	/** Get player base initiative. */
+	$: playerBaseInit = $character
+		? ($character.attributes.rea.base + $character.attributes.rea.bonus) +
+		  ($character.attributes.int.base + $character.attributes.int.bonus)
+		: 10;
 </script>
 
 <svelte:head>
@@ -154,6 +204,13 @@
 				Back to Characters
 			</a>
 			<div class="flex gap-2">
+				<button
+					class="cw-btn {showCombatTracker ? 'cw-btn-primary' : ''}"
+					on:click={() => showCombatTracker = !showCombatTracker}
+					title="Toggle combat tracker"
+				>
+					Combat
+				</button>
 				<button
 					class="cw-btn {showDiceRoller ? 'cw-btn-primary' : ''}"
 					on:click={() => showDiceRoller = !showDiceRoller}
@@ -183,6 +240,18 @@
 				</button>
 			</div>
 		</header>
+
+		<!-- Combat Tracker Panel -->
+		{#if showCombatTracker}
+			<div class="mb-6 combat-tracker-panel">
+				<CombatTracker
+					playerName={$character.identity.name || 'Player'}
+					playerBaseInit={playerBaseInit}
+					playerInitDice={1}
+					on:initiativeRolled={handleCombatInitiative}
+				/>
+			</div>
+		{/if}
 
 		<!-- Dice Roller Panel -->
 		{#if showDiceRoller}
@@ -249,6 +318,7 @@
 			interactive={true}
 			on:rollSkill={handleSkillRoll}
 			on:rollAttribute={handleAttributeRoll}
+			on:rollInitiative={handleInitiativeRoll}
 			on:damageChanged={handleDamageChanged}
 			on:edgeChanged={handleEdgeChanged}
 		/>
@@ -265,6 +335,7 @@
 <style>
 	@media print {
 		header,
+		.combat-tracker-panel,
 		.dice-roller-panel,
 		.roll-history-panel {
 			display: none;
