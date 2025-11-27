@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { loadSavedCharacter, character, updateCondition, updateEdge } from '$stores';
+	import { loadSavedCharacter, character, updateCondition, updateEdge, setAmmo, reloadWeapon } from '$stores';
 	import { gameData, loadGameData } from '$stores/gamedata';
 	import { CharacterSheet, CombatTracker, DiceRoller } from '$lib/components';
 	import { rollInitiative } from '$lib/utils/dice';
@@ -208,6 +208,16 @@
 		lastTestName = `Cast ${spell.name}`;
 		showDiceRoller = true;
 	}
+
+	/** Handle ammo change. */
+	function handleAmmoChanged(event: CustomEvent<{ weaponId: string; value: number }>): void {
+		setAmmo(event.detail.weaponId, event.detail.value);
+	}
+
+	/** Handle weapon reload. */
+	function handleReloadWeapon(event: CustomEvent<{ weaponId: string }>): void {
+		reloadWeapon(event.detail.weaponId);
+	}
 </script>
 
 <svelte:head>
@@ -379,6 +389,8 @@
 			on:rollSpell={handleSpellRoll}
 			on:damageChanged={handleDamageChanged}
 			on:edgeChanged={handleEdgeChanged}
+			on:ammoChanged={handleAmmoChanged}
+			on:reloadWeapon={handleReloadWeapon}
 		/>
 	{:else}
 		<div class="cw-card text-center py-12">

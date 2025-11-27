@@ -19,7 +19,12 @@ import {
 	removeContact,
 	setResourcesBP,
 	remainingNuyen,
-	startingNuyen
+	startingNuyen,
+	getMaxAmmo,
+	spendAmmo,
+	reloadWeapon,
+	setAmmo,
+	addWeapon
 } from '../character';
 
 describe('Character Store - BP Management', () => {
@@ -406,6 +411,128 @@ describe('Character Store - Resources/Nuyen', () => {
 			setResourcesBP(30);
 
 			expect(get(remainingBP)).toBe(initialBP - 30);
+		});
+	});
+});
+
+describe('Character Store - Ammo Tracking', () => {
+	beforeEach(() => {
+		startNewCharacter('test-user', 'bp');
+	});
+
+	describe('getMaxAmmo', () => {
+		it('should parse simple ammo strings', () => {
+			expect(getMaxAmmo('15(c)')).toBe(15);
+			expect(getMaxAmmo('30(c)')).toBe(30);
+			expect(getMaxAmmo('100(belt)')).toBe(100);
+		});
+
+		it('should return 0 for invalid strings', () => {
+			expect(getMaxAmmo('')).toBe(0);
+			expect(getMaxAmmo('NA')).toBe(0);
+		});
+	});
+
+	describe('ammo management', () => {
+		const testWeapon = {
+			name: 'Ares Predator IV',
+			category: 'Heavy Pistols',
+			type: 'Ranged' as const,
+			reach: 0,
+			damage: '5P',
+			ap: '-1',
+			mode: 'SA',
+			rc: '-',
+			ammo: '15(c)',
+			conceal: 0,
+			avail: '4R',
+			cost: 350,
+			source: 'SR4',
+			page: 312
+		};
+
+		beforeEach(() => {
+			// Set resources so we have nuyen to buy weapons
+			setResourcesBP(20); // 90,000 nuyen
+		});
+
+		it('should spend ammo correctly', () => {
+			addWeapon(testWeapon);
+			const char = get(character);
+			const weaponId = char?.equipment.weapons[0]?.id;
+			expect(weaponId).toBeDefined();
+
+			// Should start with max ammo
+			expect(char?.equipment.weapons[0]?.currentAmmo).toBe(15);
+
+			// Spend 1 ammo
+			const result = spendAmmo(weaponId!, 1);
+			expect(result).toBe(true);
+
+			const updated = get(character);
+			expect(updated?.equipment.weapons[0]?.currentAmmo).toBe(14);
+		});
+
+		it('should not spend more ammo than available', () => {
+			addWeapon(testWeapon);
+			const char = get(character);
+			const weaponId = char?.equipment.weapons[0]?.id;
+
+			// Try to spend more than available
+			const result = spendAmmo(weaponId!, 100);
+			expect(result).toBe(false);
+
+			// Ammo should be unchanged
+			const updated = get(character);
+			expect(updated?.equipment.weapons[0]?.currentAmmo).toBe(15);
+		});
+
+		it('should reload weapon to max', () => {
+			addWeapon(testWeapon);
+			const char = get(character);
+			const weaponId = char?.equipment.weapons[0]?.id;
+
+			// Spend some ammo first
+			spendAmmo(weaponId!, 10);
+
+			// Reload
+			reloadWeapon(weaponId!);
+
+			const updated = get(character);
+			expect(updated?.equipment.weapons[0]?.currentAmmo).toBe(15);
+		});
+
+		it('should set ammo to specific value', () => {
+			addWeapon(testWeapon);
+			const char = get(character);
+			const weaponId = char?.equipment.weapons[0]?.id;
+
+			setAmmo(weaponId!, 5);
+
+			const updated = get(character);
+			expect(updated?.equipment.weapons[0]?.currentAmmo).toBe(5);
+		});
+
+		it('should clamp ammo to max', () => {
+			addWeapon(testWeapon);
+			const char = get(character);
+			const weaponId = char?.equipment.weapons[0]?.id;
+
+			setAmmo(weaponId!, 100);
+
+			const updated = get(character);
+			expect(updated?.equipment.weapons[0]?.currentAmmo).toBe(15);
+		});
+
+		it('should clamp ammo to 0', () => {
+			addWeapon(testWeapon);
+			const char = get(character);
+			const weaponId = char?.equipment.weapons[0]?.id;
+
+			setAmmo(weaponId!, -5);
+
+			const updated = get(character);
+			expect(updated?.equipment.weapons[0]?.currentAmmo).toBe(0);
 		});
 	});
 });

@@ -748,6 +748,10 @@ export function addWeapon(weapon: GameWeapon): void {
 	/* Check if we have enough nuyen */
 	if (char.nuyen < weapon.cost) return;
 
+	// Parse max ammo from ammo string
+	const ammoMatch = weapon.ammo.match(/^(\d+)/);
+	const maxAmmo = ammoMatch ? parseInt(ammoMatch[1], 10) : 0;
+
 	const newWeapon: CharacterWeapon = {
 		id: generateId(),
 		name: weapon.name,
@@ -759,7 +763,7 @@ export function addWeapon(weapon: GameWeapon): void {
 		mode: weapon.mode,
 		rc: weapon.rc,
 		ammo: weapon.ammo,
-		currentAmmo: 0,
+		currentAmmo: maxAmmo, // Initialize with full ammo
 		conceal: weapon.conceal,
 		cost: weapon.cost,
 		accessories: [],
@@ -2013,6 +2017,106 @@ export function refreshEdge(): void {
 
 	const maxEdge = char.attributes.edg.base + char.attributes.edg.bonus;
 	updateEdge(maxEdge);
+}
+
+/* ============================================
+ * Ammo Tracking Functions
+ * ============================================ */
+
+/**
+ * Get the maximum ammo capacity for a weapon.
+ * Parses ammo strings like "15(c)" or "30(c)".
+ */
+export function getMaxAmmo(ammoString: string): number {
+	const match = ammoString.match(/^(\d+)/);
+	return match ? parseInt(match[1], 10) : 0;
+}
+
+/**
+ * Spend ammo for a weapon.
+ * @param weaponId - The weapon ID.
+ * @param amount - Amount of ammo to spend (default 1).
+ * @returns True if successful, false if not enough ammo.
+ */
+export function spendAmmo(weaponId: string, amount: number = 1): boolean {
+	const char = get(characterStore);
+	if (!char) return false;
+
+	const weapon = char.equipment.weapons.find((w) => w.id === weaponId);
+	if (!weapon) return false;
+
+	if (weapon.currentAmmo < amount) return false;
+
+	characterStore.update((c) => {
+		if (!c) return c;
+		return {
+			...c,
+			equipment: {
+				...c.equipment,
+				weapons: c.equipment.weapons.map((w) =>
+					w.id === weaponId ? { ...w, currentAmmo: w.currentAmmo - amount } : w
+				)
+			}
+		};
+	});
+
+	return true;
+}
+
+/**
+ * Reload a weapon to its maximum capacity.
+ * @param weaponId - The weapon ID.
+ */
+export function reloadWeapon(weaponId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const weapon = char.equipment.weapons.find((w) => w.id === weaponId);
+	if (!weapon) return;
+
+	const maxAmmo = getMaxAmmo(weapon.ammo);
+
+	characterStore.update((c) => {
+		if (!c) return c;
+		return {
+			...c,
+			equipment: {
+				...c.equipment,
+				weapons: c.equipment.weapons.map((w) =>
+					w.id === weaponId ? { ...w, currentAmmo: maxAmmo } : w
+				)
+			}
+		};
+	});
+}
+
+/**
+ * Set ammo for a weapon to a specific value.
+ * @param weaponId - The weapon ID.
+ * @param value - The ammo value to set.
+ */
+export function setAmmo(weaponId: string, value: number): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const weapon = char.equipment.weapons.find((w) => w.id === weaponId);
+	if (!weapon) return;
+
+	const maxAmmo = getMaxAmmo(weapon.ammo);
+	const clampedValue = Math.max(0, Math.min(value, maxAmmo));
+
+	characterStore.update((c) => {
+		if (!c) return c;
+		return {
+			...c,
+			equipment: {
+				...c.equipment,
+				weapons: c.equipment.weapons.map((w) =>
+					w.id === weaponId ? { ...w, currentAmmo: clampedValue } : w
+				)
+			}
+		};
+	});
 }
 
 /** Re-export CharacterSummary type for convenience. */

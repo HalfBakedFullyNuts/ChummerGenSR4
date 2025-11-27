@@ -21,7 +21,29 @@
 		rollSpell: { spell: CharacterSpell; castPool: number; drainPool: number; drainValue: string };
 		damageChanged: { type: 'physical' | 'stun'; value: number };
 		edgeChanged: { value: number };
+		ammoChanged: { weaponId: string; value: number };
+		reloadWeapon: { weaponId: string };
 	}>();
+
+	/** Get max ammo from ammo string. */
+	function getMaxAmmo(ammoString: string): number {
+		const match = ammoString.match(/^(\d+)/);
+		return match ? parseInt(match[1], 10) : 0;
+	}
+
+	/** Handle ammo spend. */
+	function handleSpendAmmo(weaponId: string, currentAmmo: number): void {
+		if (!interactive) return;
+		if (currentAmmo > 0) {
+			dispatch('ammoChanged', { weaponId, value: currentAmmo - 1 });
+		}
+	}
+
+	/** Handle weapon reload. */
+	function handleReload(weaponId: string): void {
+		if (!interactive) return;
+		dispatch('reloadWeapon', { weaponId });
+	}
 
 	/** Get skill definition by name. */
 	function getSkillDef(name: string): SkillDefinition | undefined {
@@ -572,35 +594,74 @@
 				<div class="space-y-2 text-sm">
 					{#each char.equipment.weapons as weapon}
 						{@const weaponPool = getWeaponPool(weapon)}
-						<button
-							type="button"
-							class="p-2 bg-surface-light rounded w-full text-left transition-colors
-								{interactive ? 'hover:bg-surface-lighter cursor-pointer' : ''}"
-							on:click={() => handleWeaponClick(weapon)}
-							disabled={!interactive}
-						>
-							<div class="flex justify-between items-start">
-								<div class="font-medium text-primary-text">{weapon.name}</div>
-								{#if interactive}
-									<div class="text-xs text-accent-cyan ml-2">
-										Pool: {weaponPool.pool}
+						{@const maxAmmo = getMaxAmmo(weapon.ammo)}
+						<div class="p-2 bg-surface-light rounded">
+							<button
+								type="button"
+								class="w-full text-left transition-colors
+									{interactive ? 'hover:bg-surface-lighter cursor-pointer' : ''}"
+								on:click={() => handleWeaponClick(weapon)}
+								disabled={!interactive}
+							>
+								<div class="flex justify-between items-start">
+									<div class="font-medium text-primary-text">{weapon.name}</div>
+									{#if interactive}
+										<div class="text-xs text-accent-cyan ml-2">
+											Pool: {weaponPool.pool}
+										</div>
+									{/if}
+								</div>
+								<div class="flex flex-wrap gap-3 text-xs text-muted-text mt-1">
+									<span>DMG: <span class="text-secondary-text">{weapon.damage}</span></span>
+									<span>AP: <span class="text-secondary-text">{weapon.ap}</span></span>
+									{#if weapon.mode}
+										<span>Mode: <span class="text-secondary-text">{weapon.mode}</span></span>
+									{/if}
+									{#if interactive}
+										<span class="text-accent-primary">({weaponPool.skillName})</span>
+									{/if}
+								</div>
+							</button>
+
+							<!-- Ammo Tracker -->
+							{#if maxAmmo > 0}
+								<div class="mt-2 pt-2 border-t border-border/50">
+									<div class="flex items-center justify-between">
+										<div class="flex items-center gap-2">
+											<span class="text-muted-text text-xs">Ammo:</span>
+											<span class="font-mono text-sm {weapon.currentAmmo === 0 ? 'text-accent-danger' : 'text-secondary-text'}">
+												{weapon.currentAmmo} / {maxAmmo}
+											</span>
+										</div>
+										{#if interactive}
+											<div class="flex gap-1">
+												<button
+													type="button"
+													class="cw-btn text-xs px-2 py-0.5"
+													on:click|stopPropagation={() => handleSpendAmmo(weapon.id, weapon.currentAmmo)}
+													disabled={weapon.currentAmmo === 0}
+													title="Spend 1 ammo"
+												>
+													-1
+												</button>
+												<button
+													type="button"
+													class="cw-btn text-xs px-2 py-0.5"
+													on:click|stopPropagation={() => handleReload(weapon.id)}
+													disabled={weapon.currentAmmo >= maxAmmo}
+													title="Reload weapon"
+												>
+													Reload
+												</button>
+											</div>
+										{/if}
 									</div>
-								{/if}
-							</div>
-							<div class="flex flex-wrap gap-3 text-xs text-muted-text mt-1">
-								<span>DMG: <span class="text-secondary-text">{weapon.damage}</span></span>
-								<span>AP: <span class="text-secondary-text">{weapon.ap}</span></span>
-								{#if weapon.mode}
-									<span>Mode: <span class="text-secondary-text">{weapon.mode}</span></span>
-								{/if}
-								{#if weapon.ammo}
-									<span>Ammo: <span class="text-secondary-text">{weapon.ammo}</span></span>
-								{/if}
-								{#if interactive}
-									<span class="text-accent-primary">({weaponPool.skillName})</span>
-								{/if}
-							</div>
-						</button>
+									{#if weapon.currentAmmo === 0}
+										<p class="text-accent-danger text-xs mt-1">Weapon empty!</p>
+									{/if}
+								</div>
+							{/if}
+						</div>
 					{/each}
 				</div>
 			</div>
