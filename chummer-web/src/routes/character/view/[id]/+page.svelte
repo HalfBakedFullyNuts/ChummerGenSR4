@@ -79,6 +79,7 @@
 		dicePool = event.detail.pool;
 		lastTestName = event.detail.name;
 		selectedWeapon = null;
+		selectedSpell = null;
 		showDiceRoller = true;
 	}
 
@@ -87,6 +88,7 @@
 		dicePool = event.detail.pool;
 		lastTestName = event.detail.name;
 		selectedWeapon = null;
+		selectedSpell = null;
 		showDiceRoller = true;
 	}
 
@@ -184,12 +186,26 @@
 	/** Currently selected weapon for attack. */
 	let selectedWeapon: { name: string; damage: string; ap: string } | null = null;
 
+	/** Currently selected spell for casting. */
+	let selectedSpell: { name: string; drainPool: number; drainValue: string } | null = null;
+
 	/** Handle weapon attack roll. */
 	function handleWeaponRoll(event: CustomEvent<{ weapon: { name: string; damage: string; ap: string }; pool: number; skillName: string }>): void {
 		const { weapon, pool, skillName } = event.detail;
 		selectedWeapon = weapon;
+		selectedSpell = null;
 		dicePool = pool;
 		lastTestName = `${weapon.name} (${skillName})`;
+		showDiceRoller = true;
+	}
+
+	/** Handle spell cast roll. */
+	function handleSpellRoll(event: CustomEvent<{ spell: { name: string }; castPool: number; drainPool: number; drainValue: string }>): void {
+		const { spell, castPool, drainPool, drainValue } = event.detail;
+		selectedSpell = { name: spell.name, drainPool, drainValue };
+		selectedWeapon = null;
+		dicePool = castPool;
+		lastTestName = `Cast ${spell.name}`;
 		showDiceRoller = true;
 	}
 </script>
@@ -286,6 +302,19 @@
 						</div>
 					</div>
 				{/if}
+				{#if selectedSpell}
+					<div class="cw-card mb-2 p-3">
+						<div class="flex flex-wrap gap-4 text-sm">
+							<span class="text-secondary-text">
+								Drain: <span class="text-accent-magenta font-bold">{selectedSpell.drainValue}</span>
+							</span>
+							<span class="text-secondary-text">
+								Resist: <span class="text-accent-cyan font-bold">{selectedSpell.drainPool}d6</span>
+							</span>
+							<span class="text-muted-text text-xs">(Hits on spellcasting determine Force)</span>
+						</div>
+					</div>
+				{/if}
 				<DiceRoller bind:dicePool on:roll={handleRollResult} />
 			</div>
 		{/if}
@@ -347,6 +376,7 @@
 			on:rollAttribute={handleAttributeRoll}
 			on:rollInitiative={handleInitiativeRoll}
 			on:rollWeapon={handleWeaponRoll}
+			on:rollSpell={handleSpellRoll}
 			on:damageChanged={handleDamageChanged}
 			on:edgeChanged={handleEdgeChanged}
 		/>
