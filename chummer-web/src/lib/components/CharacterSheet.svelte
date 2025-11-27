@@ -19,6 +19,8 @@
 		rollInitiative: { base: number; dice: number };
 		rollWeapon: { weapon: CharacterWeapon; pool: number; skillName: string; firingMode?: FiringMode };
 		rollSpell: { spell: CharacterSpell; castPool: number; drainPool: number; drainValue: string };
+		rollDefense: { name: string; pool: number };
+		rollSoak: { name: string; pool: number; armor: number; ap?: number };
 		damageChanged: { type: 'physical' | 'stun'; value: number };
 		edgeChanged: { value: number };
 		ammoChanged: { weaponId: string; value: number };
@@ -249,6 +251,48 @@
 
 	/** Stun boxes. */
 	$: stunBoxes = getStunBoxes(getAttrTotal(char.attributes.wil));
+
+	/** Get Dodge skill rating if character has it. */
+	$: dodgeSkill = char.skills.find(s => s.name === 'Dodge');
+	$: dodgeRating = dodgeSkill ? dodgeSkill.rating + (dodgeSkill.bonus || 0) : 0;
+
+	/** Defense pool (REA + Dodge) - apply wound modifier. */
+	$: defensePool = Math.max(0, getAttrTotal(char.attributes.rea) + dodgeRating - totalWoundMod);
+
+	/** Get total equipped armor (ballistic + impact / 2 for simplicity, or just ballistic). */
+	$: equippedArmor = char.equipment.armor.filter(a => a.equipped);
+	$: totalBallistic = equippedArmor.reduce((sum, a) => sum + a.ballistic, 0);
+	$: totalImpact = equippedArmor.reduce((sum, a) => sum + a.impact, 0);
+
+	/** Body for soak. */
+	$: bodyTotal = getAttrTotal(char.attributes.bod);
+
+	/** Soak pool for ballistic (Body + Ballistic armor). */
+	$: soakPoolBallistic = bodyTotal + totalBallistic;
+
+	/** Soak pool for impact (Body + Impact armor). */
+	$: soakPoolImpact = bodyTotal + totalImpact;
+
+	/** Handle defense roll. */
+	function handleDefenseRoll(): void {
+		if (!interactive) return;
+		dispatch('rollDefense', {
+			name: dodgeSkill ? 'Dodge Defense' : 'Reaction Defense',
+			pool: defensePool
+		});
+	}
+
+	/** Handle soak roll for physical damage. */
+	function handleSoakRoll(type: 'ballistic' | 'impact'): void {
+		if (!interactive) return;
+		const pool = type === 'ballistic' ? soakPoolBallistic : soakPoolImpact;
+		const armor = type === 'ballistic' ? totalBallistic : totalImpact;
+		dispatch('rollSoak', {
+			name: `Soak (${type === 'ballistic' ? 'B' : 'I'})`,
+			pool,
+			armor
+		});
+	}
 </script>
 
 <div class="space-y-6">
@@ -503,6 +547,42 @@
 							Applied to all tests ({physicalWoundMod > 0 ? `Physical: -${physicalWoundMod}` : ''}
 							{physicalWoundMod > 0 && stunWoundMod > 0 ? ', ' : ''}
 							{stunWoundMod > 0 ? `Stun: -${stunWoundMod}` : ''})
+						</p>
+					</div>
+				{/if}
+
+				<!-- Defense & Soak Actions -->
+				{#if interactive}
+					<div class="mt-3 pt-3 border-t border-border">
+						<h3 class="text-sm text-secondary-text mb-2">Combat Defense</h3>
+						<div class="flex flex-wrap gap-2">
+							<button
+								type="button"
+								class="cw-btn cw-btn-secondary text-xs"
+								on:click={handleDefenseRoll}
+								title="Roll defense (REA + Dodge{totalWoundMod > 0 ? ` - ${totalWoundMod} wounds` : ''})"
+							>
+								Defense ({defensePool}d6)
+							</button>
+							<button
+								type="button"
+								class="cw-btn cw-btn-secondary text-xs"
+								on:click={() => handleSoakRoll('ballistic')}
+								title="Soak ballistic damage (Body + Ballistic Armor)"
+							>
+								Soak B ({soakPoolBallistic}d6)
+							</button>
+							<button
+								type="button"
+								class="cw-btn cw-btn-secondary text-xs"
+								on:click={() => handleSoakRoll('impact')}
+								title="Soak impact damage (Body + Impact Armor)"
+							>
+								Soak I ({soakPoolImpact}d6)
+							</button>
+						</div>
+						<p class="text-muted-text text-xs mt-1">
+							Armor: B{totalBallistic}/I{totalImpact} | Body: {bodyTotal}
 						</p>
 					</div>
 				{/if}
