@@ -22,6 +22,7 @@
 	import MagicSelector from '$lib/components/wizard/MagicSelector.svelte';
 	import EquipmentSelector from '$lib/components/wizard/EquipmentSelector.svelte';
 	import ContactsEditor from '$lib/components/wizard/ContactsEditor.svelte';
+	import FinalizeCharacter from '$lib/components/wizard/FinalizeCharacter.svelte';
 
 	/** Initialize new character on mount. */
 	onMount(() => {
@@ -150,36 +151,7 @@
 		{:else if $currentStep === 'contacts'}
 			<ContactsEditor />
 		{:else if $currentStep === 'finalize'}
-			<div class="cw-card">
-				<h2 class="cw-card-header">Finalize Character</h2>
-				<p class="text-secondary-text mb-4">
-					Review your character and save when ready.
-				</p>
-				{#if $character}
-					<div class="grid grid-cols-2 gap-4 text-sm">
-						<div>
-							<span class="text-muted-text">Name:</span>
-							<span class="text-primary-text ml-2">
-								{$character.identity.name || 'Unnamed'}
-							</span>
-						</div>
-						<div>
-							<span class="text-muted-text">Metatype:</span>
-							<span class="text-primary-text ml-2">
-								{$character.identity.metatype || 'None'}
-							</span>
-						</div>
-						<div>
-							<span class="text-muted-text">Skills:</span>
-							<span class="text-primary-text ml-2">{$character.skills.length}</span>
-						</div>
-						<div>
-							<span class="text-muted-text">Qualities:</span>
-							<span class="text-primary-text ml-2">{$character.qualities.length}</span>
-						</div>
-					</div>
-				{/if}
-			</div>
+			<FinalizeCharacter />
 		{/if}
 	</section>
 
