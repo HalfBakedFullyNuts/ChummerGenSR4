@@ -7,6 +7,8 @@
 
 import type { CharacterAttributes, MetatypeAttributes } from './attributes';
 import type { CharacterSkill, CharacterSkillGroup, KnowledgeSkill } from './skills';
+import type { CharacterEquipment } from './equipment';
+import { EMPTY_EQUIPMENT } from './equipment';
 
 /** Character build methods. */
 export type BuildMethod = 'bp' | 'karma';
@@ -193,8 +195,12 @@ export interface Character {
 	/* Social */
 	readonly contacts: readonly Contact[];
 
+	/* Equipment */
+	readonly equipment: CharacterEquipment;
+
 	/* Resources */
 	readonly nuyen: number;
+	readonly startingNuyen: number;
 	readonly karma: number;
 	readonly totalKarma: number;
 
@@ -420,7 +426,9 @@ export function createEmptyCharacter(
 		magic: null,
 		resonance: null,
 		contacts: [],
+		equipment: EMPTY_EQUIPMENT,
 		nuyen: 0,
+		startingNuyen: 0,
 		karma: 0,
 		totalKarma: 0,
 		reputation: {

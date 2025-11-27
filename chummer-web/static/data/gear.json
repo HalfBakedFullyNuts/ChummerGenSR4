@@ -1,0 +1,3262 @@
+{
+  "categories": [
+    "Awakened Drugs",
+    "B&E Gear",
+    "Biotech",
+    "Camping and Survival Gear",
+    "Commlink",
+    "Commlink Accessories",
+    "Commlink Modules",
+    "Commlink Operating System",
+    "Commlink Operating System Upgrade",
+    "Commlink Option",
+    "Commlink Upgrade",
+    "Communications",
+    "Disguise",
+    "Disguised Equipment",
+    "DocWagon Contract",
+    "Drugs",
+    "Foci",
+    "ID/Credsticks",
+    "Magical Supplies",
+    "Metamagic Foci",
+    "Security Devices",
+    "Sensors",
+    "Simsense Drugs",
+    "Slap Patches",
+    "Surveillance and Security Devices"
+  ],
+  "gear": [
+    {
+      "name": "Response 1",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "4",
+      "cost": 250,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Response 2",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "4",
+      "cost": 750,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Response 3",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "8",
+      "cost": 1250,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Response 4",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "8",
+      "cost": 2000,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Response 5",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "12",
+      "cost": 4000,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Response 6",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "16",
+      "cost": 8000,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Response 7",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "20F",
+      "cost": 24000,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Response 8",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "26F",
+      "cost": 48000,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Response 9",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "32F",
+      "cost": 96000,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Response 10",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "40F",
+      "cost": 192000,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Signal 1",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "4",
+      "cost": 10,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Signal 2",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "4",
+      "cost": 50,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Signal 3",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "8",
+      "cost": 150,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Signal 4",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "8",
+      "cost": 500,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Signal 5",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "12",
+      "cost": 1000,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Signal 6",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "16",
+      "cost": 3000,
+      "source": "SR4",
+      "page": 222
+    },
+    {
+      "name": "Signal 7",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "20F",
+      "cost": 6500,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Signal 8",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "26F",
+      "cost": 8750,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Signal 9",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "32F",
+      "cost": 12250,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Signal 10",
+      "category": "Commlink Upgrade",
+      "rating": 0,
+      "avail": "40F",
+      "cost": 17250,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Firewall 1",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 200,
+      "source": "SR4",
+      "page": 221
+    },
+    {
+      "name": "Firewall 2",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 400,
+      "source": "SR4",
+      "page": 221
+    },
+    {
+      "name": "Firewall 3",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 600,
+      "source": "SR4",
+      "page": 221
+    },
+    {
+      "name": "Firewall 4",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 2000,
+      "source": "SR4",
+      "page": 221
+    },
+    {
+      "name": "Firewall 5",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 2500,
+      "source": "SR4",
+      "page": 221
+    },
+    {
+      "name": "Firewall 6",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 3000,
+      "source": "SR4",
+      "page": 221
+    },
+    {
+      "name": "Firewall 7",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "28F",
+      "cost": 24500,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Firewall 8",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "32F",
+      "cost": 32000,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Firewall 9",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "36F",
+      "cost": 40500,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Firewall 10",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "40F",
+      "cost": 50000,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "System 1",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 200,
+      "source": "SR4",
+      "page": 232
+    },
+    {
+      "name": "System 2",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 400,
+      "source": "SR4",
+      "page": 232
+    },
+    {
+      "name": "System 3",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 600,
+      "source": "SR4",
+      "page": 232
+    },
+    {
+      "name": "System 4",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 2000,
+      "source": "SR4",
+      "page": 232
+    },
+    {
+      "name": "System 5",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 2500,
+      "source": "SR4",
+      "page": 232
+    },
+    {
+      "name": "System 6",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "0",
+      "cost": 3000,
+      "source": "SR4",
+      "page": 232
+    },
+    {
+      "name": "System 7",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "28F",
+      "cost": 24500,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "System 8",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "32F",
+      "cost": 32000,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "System 9",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "36F",
+      "cost": 40500,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "System 10",
+      "category": "Commlink Operating System Upgrade",
+      "rating": 0,
+      "avail": "40F",
+      "cost": 50000,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Custom Commlink",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Meta Link",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "0",
+      "cost": 100,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "CMT Clip",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "0",
+      "cost": 300,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Sony Emperor",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "0",
+      "cost": 700,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Renraku Sensei",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "0",
+      "cost": 1000,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Novatech Airware",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "0",
+      "cost": 1250,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Erika Elite",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "0",
+      "cost": 2500,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Hermes Ikon",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "0",
+      "cost": 3000,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Transys Avalon",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "0",
+      "cost": 5000,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Fairlight Caliban",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "0",
+      "cost": 8000,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Singularity Battle Buddy Basic",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "8R",
+      "cost": 10000,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Singularity Battle Buddy",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "24F",
+      "cost": 17000,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "MCT Tactical",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "32F",
+      "cost": 18500,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Renraku Suterusu",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "40F",
+      "cost": 32750,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Transys Cybernaut",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "48F",
+      "cost": 65000,
+      "source": "WAR",
+      "page": 162
+    },
+    {
+      "name": "Disposable Commlink",
+      "category": "Commlink",
+      "rating": 0,
+      "avail": "0",
+      "cost": 300,
+      "source": "UN",
+      "page": 196
+    },
+    {
+      "name": "Custom Commlink OS",
+      "category": "Commlink Operating System",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Vector Xim",
+      "category": "Commlink Operating System",
+      "rating": 0,
+      "avail": "0",
+      "cost": 200,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Redcap Nix",
+      "category": "Commlink Operating System",
+      "rating": 0,
+      "avail": "0",
+      "cost": 400,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Renraku Ichi",
+      "category": "Commlink Operating System",
+      "rating": 0,
+      "avail": "0",
+      "cost": 600,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Mangadyne Deva",
+      "category": "Commlink Operating System",
+      "rating": 0,
+      "avail": "0",
+      "cost": 800,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Iris Orb",
+      "category": "Commlink Operating System",
+      "rating": 0,
+      "avail": "0",
+      "cost": 1000,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Novatech Navi",
+      "category": "Commlink Operating System",
+      "rating": 0,
+      "avail": "0",
+      "cost": 1500,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Disposable Commlink OS",
+      "category": "Commlink Operating System",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "UN",
+      "page": 196
+    },
+    {
+      "name": "AR Gloves",
+      "category": "Commlink Accessories",
+      "rating": 0,
+      "avail": "0",
+      "cost": 250,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Biometric Reader",
+      "category": "Commlink Accessories",
+      "rating": 0,
+      "avail": "4",
+      "cost": 200,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Nanopaste Trodes",
+      "category": "Commlink Accessories",
+      "rating": 0,
+      "avail": "2",
+      "cost": 100,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Printer",
+      "category": "Commlink Accessories",
+      "rating": 0,
+      "avail": "0",
+      "cost": 5,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Satellite Link",
+      "category": "Commlink Accessories",
+      "rating": 0,
+      "avail": "4",
+      "cost": 500,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Sim Module (Cold)",
+      "category": "Commlink Accessories",
+      "rating": 0,
+      "avail": "0",
+      "cost": null,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Sim Module (Hot)",
+      "category": "Commlink Accessories",
+      "rating": 0,
+      "avail": "4F",
+      "cost": null,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Simrig",
+      "category": "Commlink Accessories",
+      "rating": 0,
+      "avail": "12",
+      "cost": 1000,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Subvocal Microphone",
+      "category": "Commlink Accessories",
+      "rating": 0,
+      "avail": "6",
+      "cost": 50,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Trodes",
+      "category": "Commlink Accessories",
+      "rating": 0,
+      "avail": "0",
+      "cost": 50,
+      "source": "SR4",
+      "page": 328
+    },
+    {
+      "name": "Headjammer",
+      "category": "Communications",
+      "rating": 6,
+      "avail": "6R",
+      "cost": null,
+      "source": "SR4",
+      "page": 329
+    },
+    {
+      "name": "Jammer, Area",
+      "category": "Communications",
+      "rating": 10,
+      "avail": "(Rating * 3)F",
+      "cost": null,
+      "source": "SR4",
+      "page": 329
+    },
+    {
+      "name": "Jammer, Directional",
+      "category": "Communications",
+      "rating": 10,
+      "avail": "(Rating * 2)F",
+      "cost": null,
+      "source": "SR4",
+      "page": 329
+    },
+    {
+      "name": "Micro-Transceiver",
+      "category": "Communications",
+      "rating": 6,
+      "avail": "Rating * 2",
+      "cost": null,
+      "source": "SR4",
+      "page": 329
+    },
+    {
+      "name": "Tag Eraser",
+      "category": "Communications",
+      "rating": 0,
+      "avail": "6F",
+      "cost": 150,
+      "source": "SR4",
+      "page": 330
+    },
+    {
+      "name": "White Noise Generator",
+      "category": "Communications",
+      "rating": 6,
+      "avail": "Rating + 1",
+      "cost": null,
+      "source": "SR4",
+      "page": 330
+    },
+    {
+      "name": "Certified Credstick, Standard",
+      "category": "ID/Credsticks",
+      "rating": 5000,
+      "avail": "0",
+      "cost": null,
+      "source": "SR4",
+      "page": 331
+    },
+    {
+      "name": "Certified Credstick, Silver",
+      "category": "ID/Credsticks",
+      "rating": 20000,
+      "avail": "0",
+      "cost": null,
+      "source": "SR4",
+      "page": 331
+    },
+    {
+      "name": "Certified Credstick, Gold",
+      "category": "ID/Credsticks",
+      "rating": 100000,
+      "avail": "0",
+      "cost": null,
+      "source": "SR4",
+      "page": 331
+    },
+    {
+      "name": "Certified Credstick, Platinum",
+      "category": "ID/Credsticks",
+      "rating": 500000,
+      "avail": "0",
+      "cost": null,
+      "source": "SR4",
+      "page": 331
+    },
+    {
+      "name": "Certified Credstick, Ebony",
+      "category": "ID/Credsticks",
+      "rating": 1000000,
+      "avail": "0",
+      "cost": null,
+      "source": "SR4",
+      "page": 331
+    },
+    {
+      "name": "Fake License",
+      "category": "ID/Credsticks",
+      "rating": 6,
+      "avail": "(Rating * 3)F",
+      "cost": null,
+      "source": "SR4",
+      "page": 332
+    },
+    {
+      "name": "Fake SIN",
+      "category": "ID/Credsticks",
+      "rating": 6,
+      "avail": "(Rating * 3)F",
+      "cost": null,
+      "source": "SR4",
+      "page": 332
+    },
+    {
+      "name": "RFID Sensor",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 333
+    },
+    {
+      "name": "Micro Sensor",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 333
+    },
+    {
+      "name": "Handheld Sensor",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 333
+    },
+    {
+      "name": "Microdrone Sensor",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 333
+    },
+    {
+      "name": "Minidrone Sensor",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 333
+    },
+    {
+      "name": "Mounted Sensor",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 333
+    },
+    {
+      "name": "Small Drone Sensor",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 333
+    },
+    {
+      "name": "Medium Drone Sensor",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 333
+    },
+    {
+      "name": "Large Drone Sensor",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 333
+    },
+    {
+      "name": "Vehicle Sensor",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "SR4",
+      "page": 333
+    },
+    {
+      "name": "Extra-Large Vehicle Sensor",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "0",
+      "cost": 0,
+      "source": "AR",
+      "page": 138
+    },
+    {
+      "name": "Spyball",
+      "category": "Sensors",
+      "rating": 0,
+      "avail": "12",
+      "cost": 5000,
+      "source": "AR",
+      "page": 63
+    },
+    {
+      "name": "Barbed Wire (10m)",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "4",
+      "cost": 15,
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Concertina Wire (10m)",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "6",
+      "cost": 20,
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Electric Wire (10m)",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "6",
+      "cost": 10,
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Key Lock",
+      "category": "Security Devices",
+      "rating": 6,
+      "avail": "0",
+      "cost": null,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Laser Trip Beam, Infrared",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "6",
+      "cost": 50,
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Laser Trip Beam, Visible",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "4",
+      "cost": 25,
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Maglock",
+      "category": "Security Devices",
+      "rating": 6,
+      "avail": "0",
+      "cost": null,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Maglock Keypad",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "0",
+      "cost": 50,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Maglock Card-Reader",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "0",
+      "cost": 50,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Maglock Anti-Tamper Circuits",
+      "category": "Security Devices",
+      "rating": 4,
+      "avail": "0",
+      "cost": null,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Maglock Biometric Reader",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "4",
+      "cost": 200,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Magnetic Scrambler",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "6R",
+      "cost": 1000,
+      "source": "SG",
+      "page": 160
+    },
+    {
+      "name": "Monowire (1m)",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "10F",
+      "cost": 1000,
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Pressure Mesh/Pads (10m)",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "8",
+      "cost": 200,
+      "source": "AR",
+      "page": 61
+    },
+    {
+      "name": "Proximity Wire",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "10",
+      "cost": 500,
+      "source": "AR",
+      "page": 62
+    },
+    {
+      "name": "Security Lighting, Active Infrared",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "8",
+      "cost": 50,
+      "source": "AR",
+      "page": 62
+    },
+    {
+      "name": "Security Lighting, Regular Lamps",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "0",
+      "cost": 25,
+      "source": "AR",
+      "page": 62
+    },
+    {
+      "name": "Security Lighting, Ultraviolet",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "4",
+      "cost": 30,
+      "source": "AR",
+      "page": 62
+    },
+    {
+      "name": "Metal Restraints",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "0",
+      "cost": 20,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Plasteel Restraints",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "6R",
+      "cost": 50,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Plastic Restraints",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "0",
+      "cost": 1,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Containment Manacles",
+      "category": "Security Devices",
+      "rating": 0,
+      "avail": "6R",
+      "cost": 200,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Autopicker",
+      "category": "B&E Gear",
+      "rating": 6,
+      "avail": "8R",
+      "cost": null,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Cellular Glove Molder",
+      "category": "B&E Gear",
+      "rating": 3,
+      "avail": "12F",
+      "cost": null,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Chisel",
+      "category": "B&E Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 20,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Keycard Copier",
+      "category": "B&E Gear",
+      "rating": 6,
+      "avail": "8F",
+      "cost": null,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Lockpick Set",
+      "category": "B&E Gear",
+      "rating": 0,
+      "avail": "6R",
+      "cost": 300,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Maglock Passkey",
+      "category": "B&E Gear",
+      "rating": 6,
+      "avail": "(Rating * 3)F",
+      "cost": null,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Miniwelder",
+      "category": "B&E Gear",
+      "rating": 0,
+      "avail": "2",
+      "cost": 250,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Monofilament Chainsaw",
+      "category": "B&E Gear",
+      "rating": 0,
+      "avail": "4",
+      "cost": 300,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Maglock Sequencer",
+      "category": "B&E Gear",
+      "rating": 6,
+      "avail": "(Rating * 3)F",
+      "cost": null,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Wire Clippers",
+      "category": "B&E Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 25,
+      "source": "SR4",
+      "page": 335
+    },
+    {
+      "name": "Aisa",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 15,
+      "source": "AR",
+      "page": 73
+    },
+    {
+      "name": "Betameth",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "3R",
+      "cost": 20,
+      "source": "AR",
+      "page": 74
+    },
+    {
+      "name": "Betel",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 1,
+      "source": "AR",
+      "page": 74
+    },
+    {
+      "name": "Bliss",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "3R",
+      "cost": 15,
+      "source": "SR4",
+      "page": 257
+    },
+    {
+      "name": "Cram",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "2R",
+      "cost": 10,
+      "source": "SR4",
+      "page": 257
+    },
+    {
+      "name": "Crimson Orchid",
+      "category": "Awakened Drugs",
+      "rating": 0,
+      "avail": "4R",
+      "cost": 30,
+      "source": "AR",
+      "page": 76
+    },
+    {
+      "name": "Deepweed",
+      "category": "Awakened Drugs",
+      "rating": 0,
+      "avail": "8F",
+      "cost": 400,
+      "source": "SR4",
+      "page": 257
+    },
+    {
+      "name": "Dopadrine",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "2",
+      "cost": 15,
+      "source": "AR",
+      "page": 74
+    },
+    {
+      "name": "eX",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "3R",
+      "cost": 10,
+      "source": "AR",
+      "page": 74
+    },
+    {
+      "name": "G3",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 5,
+      "source": "AR",
+      "page": 74
+    },
+    {
+      "name": "Galak",
+      "category": "Awakened Drugs",
+      "rating": 0,
+      "avail": "3R",
+      "cost": 25,
+      "source": "AR",
+      "page": 74
+    },
+    {
+      "name": "Guts",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 100,
+      "source": "AR",
+      "page": 74
+    },
+    {
+      "name": "Hurlg",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 5,
+      "source": "AR",
+      "page": 75
+    },
+    {
+      "name": "Jazz",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "2R",
+      "cost": 75,
+      "source": "SR4",
+      "page": 257
+    },
+    {
+      "name": "K-10",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "16F",
+      "cost": 900,
+      "source": "AR",
+      "page": 75
+    },
+    {
+      "name": "Kamikaze",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "4R",
+      "cost": 100,
+      "source": "SR4",
+      "page": 258
+    },
+    {
+      "name": "Laés",
+      "category": "Awakened Drugs",
+      "rating": 0,
+      "avail": "10F",
+      "cost": 500,
+      "source": "AR",
+      "page": 76
+    },
+    {
+      "name": "Leäl",
+      "category": "Awakened Drugs",
+      "rating": 0,
+      "avail": "8R",
+      "cost": 180,
+      "source": "AR",
+      "page": 76
+    },
+    {
+      "name": "Loco",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "4R",
+      "cost": 350,
+      "source": "AR",
+      "page": 76
+    },
+    {
+      "name": "Long Haul",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 50,
+      "source": "SR4",
+      "page": 258
+    },
+    {
+      "name": "Nitro",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "2R",
+      "cost": 50,
+      "source": "SR4",
+      "page": 258
+    },
+    {
+      "name": "NoPaint",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "3",
+      "cost": 15,
+      "source": "AR",
+      "page": 75
+    },
+    {
+      "name": "Novacoke",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "2R",
+      "cost": 10,
+      "source": "SR4",
+      "page": 258
+    },
+    {
+      "name": "Tempo",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 50,
+      "source": "GC",
+      "page": 58
+    },
+    {
+      "name": "Overdrive",
+      "category": "Awakened Drugs",
+      "rating": 0,
+      "avail": "5R",
+      "cost": 150,
+      "source": "AR",
+      "page": 77
+    },
+    {
+      "name": "Oxygenated Fluorocarbons",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 2000,
+      "source": "AR",
+      "page": 75
+    },
+    {
+      "name": "Pixie Dust",
+      "category": "Awakened Drugs",
+      "rating": 0,
+      "avail": "6R",
+      "cost": 40,
+      "source": "AR",
+      "page": 77
+    },
+    {
+      "name": "Psyche",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 200,
+      "source": "SR4",
+      "page": 258
+    },
+    {
+      "name": "Push",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 15,
+      "source": "AR",
+      "page": 75
+    },
+    {
+      "name": "Red Mescaline",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "4R",
+      "cost": 50,
+      "source": "AR",
+      "page": 75
+    },
+    {
+      "name": "Ripper",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 25,
+      "source": "AR",
+      "page": 75
+    },
+    {
+      "name": "Slab",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "5R",
+      "cost": 150,
+      "source": "AR",
+      "page": 76
+    },
+    {
+      "name": "Snuff",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 5,
+      "source": "AR",
+      "page": 76
+    },
+    {
+      "name": "Trance",
+      "category": "Awakened Drugs",
+      "rating": 0,
+      "avail": "5R",
+      "cost": 120,
+      "source": "AR",
+      "page": 77
+    },
+    {
+      "name": "Woad",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "3R",
+      "cost": 15,
+      "source": "AR",
+      "page": 76
+    },
+    {
+      "name": "Zen",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "4R",
+      "cost": 5,
+      "source": "SR4",
+      "page": 258
+    },
+    {
+      "name": "Zero",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "2R",
+      "cost": 100,
+      "source": "AR",
+      "page": 76
+    },
+    {
+      "name": "Short Circuit",
+      "category": "Drugs",
+      "rating": 0,
+      "avail": "8F",
+      "cost": 750,
+      "source": "SG",
+      "page": 151
+    },
+    {
+      "name": "Proteus Monosled",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "8",
+      "cost": 2500,
+      "source": "ARG",
+      "page": 0
+    },
+    {
+      "name": "Proteus Monosled Battery",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "8",
+      "cost": 150,
+      "source": "ARG",
+      "page": 0
+    },
+    {
+      "name": "Climbing Gear",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 200,
+      "source": "SR4",
+      "page": 336
+    },
+    {
+      "name": "Gecko Tape Gloves",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "12",
+      "cost": 250,
+      "source": "SR4",
+      "page": 336
+    },
+    {
+      "name": "GPS",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "3",
+      "cost": 200,
+      "source": "SR4",
+      "page": 336
+    },
+    {
+      "name": "Flashlight",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 25,
+      "source": "SR4",
+      "page": 336
+    },
+    {
+      "name": "Light Stick",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 5,
+      "source": "SR4",
+      "page": 336
+    },
+    {
+      "name": "Magnesium Torch",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 20,
+      "source": "SR4",
+      "page": 336
+    },
+    {
+      "name": "Micro Flare Launcher",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 50,
+      "source": "SR4",
+      "page": 336
+    },
+    {
+      "name": "Micro Flares",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 25,
+      "source": "SR4",
+      "page": 336
+    },
+    {
+      "name": "Rappelling Gloves",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 70,
+      "source": "SR4",
+      "page": 336
+    },
+    {
+      "name": "Survival Kit",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "4",
+      "cost": 100,
+      "source": "SR4",
+      "page": 337
+    },
+    {
+      "name": "Auto-Rappel",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "6",
+      "cost": 1000,
+      "source": "WAR",
+      "page": 163
+    },
+    {
+      "name": "Camouflage Netting (m²)",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "4",
+      "cost": 5,
+      "source": "WAR",
+      "page": 163
+    },
+    {
+      "name": "Chameleon Netting",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "10R",
+      "cost": 35,
+      "source": "WAR",
+      "page": 163
+    },
+    {
+      "name": "Emergency Field Dressing",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "6",
+      "cost": 10,
+      "source": "WAR",
+      "page": 164
+    },
+    {
+      "name": "Insulated Netting",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "6",
+      "cost": 10,
+      "source": "WAR",
+      "page": 164
+    },
+    {
+      "name": "MOSLTOV",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "8",
+      "cost": 750,
+      "source": "WAR",
+      "page": 164
+    },
+    {
+      "name": "Wingsuit",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "7",
+      "cost": 600,
+      "source": "WAR",
+      "page": 164
+    },
+    {
+      "name": "Wingsuit Jetpack",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "10R",
+      "cost": 1200,
+      "source": "WAR",
+      "page": 164
+    },
+    {
+      "name": "Biomonitor",
+      "category": "Biotech",
+      "rating": 0,
+      "avail": "0",
+      "cost": 300,
+      "source": "SR4",
+      "page": 337
+    },
+    {
+      "name": "Disposable Syringe",
+      "category": "Biotech",
+      "rating": 0,
+      "avail": "4",
+      "cost": 10,
+      "source": "SR4",
+      "page": 337
+    },
+    {
+      "name": "False Front Signal Drug",
+      "category": "Biotech",
+      "rating": 0,
+      "avail": "8",
+      "cost": 50,
+      "source": "AU",
+      "page": 68
+    },
+    {
+      "name": "Medkit",
+      "category": "Biotech",
+      "rating": 6,
+      "avail": "0",
+      "cost": null,
+      "source": "SR4",
+      "page": 337
+    },
+    {
+      "name": "Medkit Supplies",
+      "category": "Biotech",
+      "rating": 0,
+      "avail": "0",
+      "cost": 50,
+      "source": "SR4",
+      "page": 337
+    },
+    {
+      "name": "False Front Mimic Signal Drug",
+      "category": "Biotech",
+      "rating": 0,
+      "avail": "12",
+      "cost": 500,
+      "source": "AU",
+      "page": 68
+    },
+    {
+      "name": "DocWagon Contract: Basic",
+      "category": "DocWagon Contract",
+      "rating": 0,
+      "avail": "0",
+      "cost": 5000,
+      "source": "SR4",
+      "page": 337
+    },
+    {
+      "name": "DocWagon Contract: Gold",
+      "category": "DocWagon Contract",
+      "rating": 0,
+      "avail": "0",
+      "cost": 25000,
+      "source": "SR4",
+      "page": 337
+    },
+    {
+      "name": "DocWagon Contract: Platinum",
+      "category": "DocWagon Contract",
+      "rating": 0,
+      "avail": "0",
+      "cost": 50000,
+      "source": "SR4",
+      "page": 337
+    },
+    {
+      "name": "DocWagon Contract: Super-Platinum",
+      "category": "DocWagon Contract",
+      "rating": 0,
+      "avail": "0",
+      "cost": 100000,
+      "source": "SR4",
+      "page": 337
+    },
+    {
+      "name": "Antidote Patch",
+      "category": "Slap Patches",
+      "rating": 6,
+      "avail": "Rating",
+      "cost": null,
+      "source": "SR4",
+      "page": 338
+    },
+    {
+      "name": "Stimulant Patch",
+      "category": "Slap Patches",
+      "rating": 6,
+      "avail": "Rating * 2",
+      "cost": null,
+      "source": "SR4",
+      "page": 338
+    },
+    {
+      "name": "Tranq Patch",
+      "category": "Slap Patches",
+      "rating": 10,
+      "avail": "Rating * 2",
+      "cost": null,
+      "source": "SR4",
+      "page": 338
+    },
+    {
+      "name": "Trauma Patch",
+      "category": "Slap Patches",
+      "rating": 0,
+      "avail": "2",
+      "cost": 500,
+      "source": "SR4",
+      "page": 338
+    },
+    {
+      "name": "Ballpoint Micro-transceiver",
+      "category": "Disguised Equipment",
+      "rating": 6,
+      "avail": "Rating * 3",
+      "cost": null,
+      "source": "AR",
+      "page": 63
+    },
+    {
+      "name": "Briefcase Rocket",
+      "category": "Disguised Equipment",
+      "rating": 0,
+      "avail": "12",
+      "cost": 1400,
+      "source": "AR",
+      "page": 63
+    },
+    {
+      "name": "Chemical Cosmetics, Aerosol (1 chem, 200 doses)",
+      "category": "Disguised Equipment",
+      "rating": 0,
+      "avail": "12",
+      "cost": 2000,
+      "source": "AR",
+      "page": 64
+    },
+    {
+      "name": "Chemical Cosmetics, Cologne (1 chem, 100 doses)",
+      "category": "Disguised Equipment",
+      "rating": 0,
+      "avail": "12",
+      "cost": 1000,
+      "source": "AR",
+      "page": 64
+    },
+    {
+      "name": "Chemical Cosmetics, Deodorant, roll-on (1 chem, 100 doses)",
+      "category": "Disguised Equipment",
+      "rating": 0,
+      "avail": "12",
+      "cost": 1000,
+      "source": "AR",
+      "page": 64
+    },
+    {
+      "name": "Chemical Cosmetics, Lipstick (1 chem, 100 doses)",
+      "category": "Disguised Equipment",
+      "rating": 0,
+      "avail": "12",
+      "cost": 1500,
+      "source": "AR",
+      "page": 64
+    },
+    {
+      "name": "Chemical Cosmetics, Makeup Compact (3 chems, 10 doses each)",
+      "category": "Disguised Equipment",
+      "rating": 0,
+      "avail": "12",
+      "cost": 300,
+      "source": "AR",
+      "page": 64
+    },
+    {
+      "name": "False-bottomed Attaché Case",
+      "category": "Disguised Equipment",
+      "rating": 0,
+      "avail": "12",
+      "cost": 300,
+      "source": "AR",
+      "page": 64
+    },
+    {
+      "name": "Hollowed Book",
+      "category": "Disguised Equipment",
+      "rating": 0,
+      "avail": "12",
+      "cost": 50,
+      "source": "AR",
+      "page": 64
+    },
+    {
+      "name": "Laés Cigarette",
+      "category": "Disguised Equipment",
+      "rating": 0,
+      "avail": "12",
+      "cost": 25,
+      "source": "AR",
+      "page": 64
+    },
+    {
+      "name": "Latex Face Mask",
+      "category": "Disguise",
+      "rating": 0,
+      "avail": "8",
+      "cost": 500,
+      "source": "SR4",
+      "page": 338
+    },
+    {
+      "name": "Nanopaste Disguise (Small Container)",
+      "category": "Disguise",
+      "rating": 0,
+      "avail": "12",
+      "cost": 500,
+      "source": "SR4",
+      "page": 338
+    },
+    {
+      "name": "Nanopaste Disguise (Large Container)",
+      "category": "Disguise",
+      "rating": 0,
+      "avail": "16",
+      "cost": 1000,
+      "source": "SR4",
+      "page": 338
+    },
+    {
+      "name": "Scent-masking Cigarette",
+      "category": "Disguise",
+      "rating": 0,
+      "avail": "12",
+      "cost": 10,
+      "source": "AR",
+      "page": 64
+    },
+    {
+      "name": "MCT Gun Pit",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "9R",
+      "cost": 100,
+      "source": "WAR",
+      "page": 163
+    },
+    {
+      "name": "Backpack",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 250,
+      "source": "AR",
+      "page": 53
+    },
+    {
+      "name": "Camouflage Net (10m²)",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "4",
+      "cost": 100,
+      "source": "AR",
+      "page": 53
+    },
+    {
+      "name": "Ghillie Suit",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "6",
+      "cost": 500,
+      "source": "AR",
+      "page": 53
+    },
+    {
+      "name": "Rations",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 5,
+      "source": "AR",
+      "page": 53
+    },
+    {
+      "name": "Sleeping Bag",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 75,
+      "source": "AR",
+      "page": 53
+    },
+    {
+      "name": "Tent",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "0",
+      "cost": 75,
+      "source": "AR",
+      "page": 53
+    },
+    {
+      "name": "Banishing Focus",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Binding Focus",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Counterspelling Focus (Combat)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Counterspelling Focus (Detection)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Counterspelling Focus (Health)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Counterspelling Focus (Illusion)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Counterspelling Focus (Manipulation)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Power Focus",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 5)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Spellcasting Focus (Combat)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Spellcasting Focus (Detection)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Spellcasting Focus (Health)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Spellcasting Focus (Illusion)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Spellcasting Focus (Manipulation)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Summoning Focus",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Sustaining Focus (Combat)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Sustaining Focus (Detection)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Sustaining Focus (Health)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Sustaining Focus (Illusion)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Sustaining Focus (Manipulation)",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 4)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Weapon Focus",
+      "category": "Foci",
+      "rating": 18,
+      "avail": "(Rating * 5)R",
+      "cost": null,
+      "source": "SR4",
+      "page": 199
+    },
+    {
+      "name": "Anchoring Focus (Combat)",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 6)R",
+      "cost": null,
+      "source": "SM",
+      "page": 84
+    },
+    {
+      "name": "Anchoring Focus (Detection)",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 6)R",
+      "cost": null,
+      "source": "SM",
+      "page": 84
+    },
+    {
+      "name": "Anchoring Focus (Health)",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 6)R",
+      "cost": null,
+      "source": "SM",
+      "page": 84
+    },
+    {
+      "name": "Anchoring Focus (Illusion)",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 6)R",
+      "cost": null,
+      "source": "SM",
+      "page": 84
+    },
+    {
+      "name": "Anchoring Focus (Manipulation)",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 6)R",
+      "cost": null,
+      "source": "SM",
+      "page": 84
+    },
+    {
+      "name": "Centering Focus",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 6)R",
+      "cost": null,
+      "source": "SM",
+      "page": 84
+    },
+    {
+      "name": "Divining Focus",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 6)R",
+      "cost": null,
+      "source": "DG",
+      "page": 7
+    },
+    {
+      "name": "Dowsing Focus",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 8)R",
+      "cost": null,
+      "source": "DG",
+      "page": 7
+    },
+    {
+      "name": "Infusion Focus",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 10)R",
+      "cost": null,
+      "source": "DG",
+      "page": 7
+    },
+    {
+      "name": "Masking Focus",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 6)R",
+      "cost": null,
+      "source": "SM",
+      "page": 84
+    },
+    {
+      "name": "Shielding Focus",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 6)R",
+      "cost": null,
+      "source": "SM",
+      "page": 84
+    },
+    {
+      "name": "Symbolic Link Focus",
+      "category": "Metamagic Foci",
+      "rating": 18,
+      "avail": "(Rating * 6)F",
+      "cost": null,
+      "source": "SM",
+      "page": 84
+    },
+    {
+      "name": "Magical Lodge Materials",
+      "category": "Magical Supplies",
+      "rating": 18,
+      "avail": "Rating * 2",
+      "cost": null,
+      "source": "SR4",
+      "page": 178
+    },
+    {
+      "name": "Orichalcum",
+      "category": "Magical Supplies",
+      "rating": 0,
+      "avail": "12",
+      "cost": 50000,
+      "source": "SM",
+      "page": 81
+    },
+    {
+      "name": "Quickening Materials",
+      "category": "Magical Supplies",
+      "rating": 18,
+      "avail": "Rating * 4",
+      "cost": null,
+      "source": "SM",
+      "page": 85
+    },
+    {
+      "name": "Ritual Sorcery Materials",
+      "category": "Magical Supplies",
+      "rating": 18,
+      "avail": "Rating * 2",
+      "cost": null,
+      "source": "SM",
+      "page": 81
+    },
+    {
+      "name": "Spirit Binding Materials",
+      "category": "Magical Supplies",
+      "rating": 18,
+      "avail": "Rating * 2",
+      "cost": null,
+      "source": "SR4",
+      "page": 348
+    },
+    {
+      "name": "Talisman",
+      "category": "Magical Supplies",
+      "rating": 0,
+      "avail": "0",
+      "cost": 100,
+      "source": "SM",
+      "page": 81
+    },
+    {
+      "name": "Simsense Accelerator",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "14",
+      "cost": 15000,
+      "source": "UN",
+      "page": 198
+    },
+    {
+      "name": "Optimization",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "6",
+      "cost": 500,
+      "source": "UN",
+      "page": 198
+    },
+    {
+      "name": "Customized Interface",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "6",
+      "cost": 250,
+      "source": "UN",
+      "page": 198
+    },
+    {
+      "name": "Armor Case",
+      "category": "Commlink Option",
+      "rating": 10,
+      "avail": "8",
+      "cost": null,
+      "source": "UN",
+      "page": 196
+    },
+    {
+      "name": "Biometric Lock",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "4",
+      "cost": 150,
+      "source": "UN",
+      "page": 196
+    },
+    {
+      "name": "Hardening",
+      "category": "Commlink Option",
+      "rating": 6,
+      "avail": "4",
+      "cost": null,
+      "source": "UN",
+      "page": 196
+    },
+    {
+      "name": "Advanced Materials",
+      "category": "Disguised Equipment",
+      "rating": 20,
+      "avail": "0",
+      "cost": null,
+      "source": "SG",
+      "page": 141
+    },
+    {
+      "name": "Alternate Material",
+      "category": "Disguised Equipment",
+      "rating": 20,
+      "avail": "0",
+      "cost": null,
+      "source": "SG",
+      "page": 141
+    },
+    {
+      "name": "Camouflage",
+      "category": "Disguised Equipment",
+      "rating": 6,
+      "avail": "0",
+      "cost": 0,
+      "source": "SG",
+      "page": 141
+    },
+    {
+      "name": "Disassembled",
+      "category": "Disguised Equipment",
+      "rating": 0,
+      "avail": "0",
+      "cost": 2000,
+      "source": "SG",
+      "page": 141
+    },
+    {
+      "name": "Micro/Nanoization",
+      "category": "Disguised Equipment",
+      "rating": 20,
+      "avail": "0",
+      "cost": null,
+      "source": "SG",
+      "page": 141
+    },
+    {
+      "name": "Secondary Functionality",
+      "category": "Disguised Equipment",
+      "rating": 20,
+      "avail": "0",
+      "cost": null,
+      "source": "SG",
+      "page": 141
+    },
+    {
+      "name": "Stun Gas Deployment",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "12F",
+      "cost": 50,
+      "source": "SG",
+      "page": 146
+    },
+    {
+      "name": "Fingerprint Scanner",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "12F",
+      "cost": 2000,
+      "source": "SG",
+      "page": 146
+    },
+    {
+      "name": "Cell Collector",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "12F",
+      "cost": 2500,
+      "source": "SG",
+      "page": 146
+    },
+    {
+      "name": "Small Explosive Device",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "12F",
+      "cost": 100,
+      "source": "SG",
+      "page": 146
+    },
+    {
+      "name": "Flash-Pak",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "6",
+      "cost": 200,
+      "source": "SG",
+      "page": 146
+    },
+    {
+      "name": "Mini Flamethrower",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "18F",
+      "cost": 600,
+      "source": "SG",
+      "page": 146
+    },
+    {
+      "name": "Monofilament Garrote",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "18F",
+      "cost": 2200,
+      "source": "SG",
+      "page": 146
+    },
+    {
+      "name": "Nanite Slicers",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "2",
+      "cost": 200,
+      "source": "SG",
+      "page": 146
+    },
+    {
+      "name": "Gyroscopic Winch",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "6",
+      "cost": 600,
+      "source": "SG",
+      "page": 146
+    },
+    {
+      "name": "Harmonic Resonator",
+      "category": "Commlink Option",
+      "rating": 0,
+      "avail": "6R",
+      "cost": 700,
+      "source": "SG",
+      "page": 146
+    },
+    {
+      "name": "Standard Passkey",
+      "category": "B&E Gear",
+      "rating": 0,
+      "avail": "4",
+      "cost": 100,
+      "source": "UN",
+      "page": 64
+    },
+    {
+      "name": "Nanotech Passkey",
+      "category": "B&E Gear",
+      "rating": 0,
+      "avail": "12",
+      "cost": 1200,
+      "source": "UN",
+      "page": 64
+    },
+    {
+      "name": "Alchemical Passkey",
+      "category": "B&E Gear",
+      "rating": 0,
+      "avail": "16",
+      "cost": 2100,
+      "source": "UN",
+      "page": 64
+    },
+    {
+      "name": "Standard Passkey System",
+      "category": "B&E Gear",
+      "rating": 0,
+      "avail": "4",
+      "cost": 15000,
+      "source": "UN",
+      "page": 64
+    },
+    {
+      "name": "Nanotech Passkey System",
+      "category": "B&E Gear",
+      "rating": 0,
+      "avail": "12",
+      "cost": 32000,
+      "source": "UN",
+      "page": 64
+    },
+    {
+      "name": "Alchemical Passkey System",
+      "category": "B&E Gear",
+      "rating": 0,
+      "avail": "16",
+      "cost": 110000,
+      "source": "UN",
+      "page": 64
+    },
+    {
+      "name": "Cryptosense Module",
+      "category": "Commlink Modules",
+      "rating": 0,
+      "avail": "8",
+      "cost": 1000,
+      "source": "UN",
+      "page": 196
+    },
+    {
+      "name": "Fetch Module",
+      "category": "Commlink Modules",
+      "rating": 6,
+      "avail": "0",
+      "cost": 0,
+      "source": "UN",
+      "page": 196
+    },
+    {
+      "name": "Nonstandard Wireless Link",
+      "category": "Commlink Modules",
+      "rating": 6,
+      "avail": "6R",
+      "cost": null,
+      "source": "UN",
+      "page": 196
+    },
+    {
+      "name": "Response Enhancer",
+      "category": "Commlink Modules",
+      "rating": 6,
+      "avail": "Rating * 4",
+      "cost": null,
+      "source": "UN",
+      "page": 196
+    },
+    {
+      "name": "Ghoul Caps",
+      "category": "Awakened Drugs",
+      "rating": 0,
+      "avail": "2",
+      "cost": 0,
+      "source": "SA",
+      "page": 39
+    },
+    {
+      "name": "Vessel Materials",
+      "category": "Magical Supplies",
+      "rating": 0,
+      "avail": "0",
+      "cost": null,
+      "source": "SM",
+      "page": 86
+    },
+    {
+      "name": "Cooling Blanket",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "6",
+      "cost": 800,
+      "source": "HP",
+      "page": 164
+    },
+    {
+      "name": "Certified Credstick, Fake (2050)",
+      "category": "ID/Credsticks",
+      "rating": 6,
+      "avail": "(Rating * 2)F",
+      "cost": null,
+      "source": "2050",
+      "page": 178
+    },
+    {
+      "name": "Telcom (2050)",
+      "category": "Communications",
+      "rating": 0,
+      "avail": "0",
+      "cost": 1000,
+      "source": "2050",
+      "page": 178
+    },
+    {
+      "name": "Portable Phone (2050)",
+      "category": "Communications",
+      "rating": 0,
+      "avail": "0",
+      "cost": 500,
+      "source": "2050",
+      "page": 178
+    },
+    {
+      "name": "Pocket Secretary (2050)",
+      "category": "Communications",
+      "rating": 0,
+      "avail": "0",
+      "cost": 3000,
+      "source": "2050",
+      "page": 178
+    },
+    {
+      "name": "Personal Computer (2050)",
+      "category": "Communications",
+      "rating": 0,
+      "avail": "0",
+      "cost": 5000,
+      "source": "2050",
+      "page": 178
+    },
+    {
+      "name": "Data Display (2050)",
+      "category": "Communications",
+      "rating": 0,
+      "avail": "0",
+      "cost": 500,
+      "source": "2050",
+      "page": 178
+    },
+    {
+      "name": "Bug Scanner (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "Rating",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Data Codebreaker (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "(Rating)R",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Data Encryption System (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "(Rating)R",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Dataline Scanner (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "Rating",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Identification Scanner, Palm Print (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "Rating + 1",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Identification Scanner, Retinal (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "Rating + 2",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Identification Scanner, Thumbprint (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "Rating",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Jammer (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "(Rating)R",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Laser Microphone (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "Rating",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Maglock Passkey (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "(Rating)F",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Maglock (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "Rating",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Micro-Camcorder (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 0,
+      "avail": "6",
+      "cost": 2500,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Micro-Recorder (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 0,
+      "avail": "6",
+      "cost": 1000,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Micro-Transceiver (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 0,
+      "avail": "6",
+      "cost": 2500,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Restraints, Metal (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 0,
+      "avail": "4",
+      "cost": 50,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Restraints, Plastic (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 0,
+      "avail": "4",
+      "cost": 20,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Shotgun Microphone (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "Rating",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Signal Locator (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "Rating",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Squealer (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 0,
+      "avail": "6",
+      "cost": 100,
+      "source": "2050",
+      "page": 178
+    },
+    {
+      "name": "Tracking Signal (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "Rating",
+      "cost": null,
+      "source": "2050",
+      "page": 179
+    },
+    {
+      "name": "Voice Identifier (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "Rating",
+      "cost": null,
+      "source": "2050",
+      "page": 180
+    },
+    {
+      "name": "Voice Mask (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "(Rating)R",
+      "cost": null,
+      "source": "2050",
+      "page": 180
+    },
+    {
+      "name": "White Noise Generator (2050)",
+      "category": "Surveillance and Security Devices",
+      "rating": 6,
+      "avail": "(Rating)R",
+      "cost": null,
+      "source": "2050",
+      "page": 180
+    },
+    {
+      "name": "Survival Kit (2050)",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "2",
+      "cost": 100,
+      "source": "2050",
+      "page": 182
+    },
+    {
+      "name": "Extra Compressed Soy Bars (10 Days) (2050)",
+      "category": "Camping and Survival Gear",
+      "rating": 0,
+      "avail": "2",
+      "cost": 30,
+      "source": "2050",
+      "page": 182
+    },
+    {
+      "name": "DocWagon Contract: HTR Service (2050)",
+      "category": "DocWagon Contract",
+      "rating": 0,
+      "avail": "0",
+      "cost": 5000,
+      "source": "2050",
+      "page": 182
+    },
+    {
+      "name": "DocWagon Contract: Employee Death Compensation (2050)",
+      "category": "DocWagon Contract",
+      "rating": 0,
+      "avail": "0",
+      "cost": 20000,
+      "source": "2050",
+      "page": 182
+    },
+    {
+      "name": "DocWagon Contract: Resuscication Service (2050)",
+      "category": "DocWagon Contract",
+      "rating": 0,
+      "avail": "0",
+      "cost": 8000,
+      "source": "2050",
+      "page": 182
+    },
+    {
+      "name": "Medkit (2050)",
+      "category": "Biotech",
+      "rating": 0,
+      "avail": "2",
+      "cost": 200,
+      "source": "2050",
+      "page": 183
+    },
+    {
+      "name": "Medkit Supplies (2050)",
+      "category": "Biotech",
+      "rating": 0,
+      "avail": "2",
+      "cost": 50,
+      "source": "2050",
+      "page": 183
+    },
+    {
+      "name": "Stabilization Unit, Standard (2050)",
+      "category": "Biotech",
+      "rating": 0,
+      "avail": "12",
+      "cost": 10000,
+      "source": "2050",
+      "page": 183
+    },
+    {
+      "name": "Stabilization Unit, Deluxe (2050)",
+      "category": "Biotech",
+      "rating": 0,
+      "avail": "16",
+      "cost": 20000,
+      "source": "2050",
+      "page": 183
+    },
+    {
+      "name": "Stabilization Unit Supplies (2050)",
+      "category": "Biotech",
+      "rating": 0,
+      "avail": "6",
+      "cost": 100,
+      "source": "2050",
+      "page": 183
+    },
+    {
+      "name": "Antidote Patch (2050)",
+      "category": "Slap Patches",
+      "rating": 6,
+      "avail": "6",
+      "cost": null,
+      "source": "2050",
+      "page": 183
+    },
+    {
+      "name": "Stimulant Patch (2050)",
+      "category": "Slap Patches",
+      "rating": 6,
+      "avail": "2",
+      "cost": null,
+      "source": "2050",
+      "page": 183
+    },
+    {
+      "name": "Tranq Patch (2050)",
+      "category": "Slap Patches",
+      "rating": 10,
+      "avail": "4",
+      "cost": null,
+      "source": "2050",
+      "page": 183
+    },
+    {
+      "name": "Trauma Patch (2050)",
+      "category": "Slap Patches",
+      "rating": 0,
+      "avail": "4",
+      "cost": 400,
+      "source": "2050",
+      "page": 183
+    },
+    {
+      "name": "Simsense Movie",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Simsense PPoV Movie",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Simsense Series",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Simsense Pay-Per-Experience Broadcast",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Simsense Sports Rebroadcast",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Simsense Arcade Machine",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": 1,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Simsense Video Game (Commlink)",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "0",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Hot Simsense Movie",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "3F",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Hottest Simsense Movie",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "4F",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Cold Sim-Level Moodchip",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "1R",
+      "cost": 50,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "BTL-Level Moodchip",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "2F",
+      "cost": 75,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Dreamchip",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "4F",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Dreamchip with PPoV",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "4F",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Tripchip",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "6F",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Personasoft",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "8F",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Unlimited-Duration Personasoft",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "14F",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "DRM-Stripped Personafixes",
+      "category": "Simsense Drugs",
+      "rating": 0,
+      "avail": "20F",
+      "cost": null,
+      "source": "SDN",
+      "page": 17
+    },
+    {
+      "name": "Molu Root",
+      "category": "Awakened Drugs",
+      "rating": 0,
+      "avail": "12R",
+      "cost": 22000,
+      "source": "PB",
+      "page": 50
+    },
+    {
+      "name": "Mana Inhibiting Oil",
+      "category": "Awakened Drugs",
+      "rating": 0,
+      "avail": "16F",
+      "cost": 50000,
+      "source": "PB",
+      "page": 50
+    }
+  ]
+}

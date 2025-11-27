@@ -7,7 +7,15 @@
 
 import { writable, derived, type Readable } from 'svelte/store';
 import { browser } from '$app/environment';
-import type { Metatype, SkillDefinition } from '$types';
+import type {
+	Metatype,
+	SkillDefinition,
+	GameWeapon,
+	GameArmor,
+	GameCyberware,
+	GameGear,
+	CyberwareGradeMultiplier
+} from '$types';
 
 /* Maximum items to load per category (safety bound) */
 const MAX_ITEMS = 10000;
@@ -113,6 +121,16 @@ export interface GameData {
 	lifestyles: GameLifestyle[];
 	programs: GameProgram[];
 	programCategories: string[];
+	/* Equipment */
+	weapons: GameWeapon[];
+	weaponCategories: string[];
+	armor: GameArmor[];
+	armorCategories: string[];
+	cyberware: GameCyberware[];
+	cyberwareCategories: string[];
+	cyberwareGrades: CyberwareGradeMultiplier[];
+	gear: GameGear[];
+	gearCategories: string[];
 }
 
 /** Empty game data for initial state. */
@@ -131,7 +149,17 @@ const EMPTY_GAME_DATA: GameData = {
 	mentors: [],
 	lifestyles: [],
 	programs: [],
-	programCategories: []
+	programCategories: [],
+	/* Equipment */
+	weapons: [],
+	weaponCategories: [],
+	armor: [],
+	armorCategories: [],
+	cyberware: [],
+	cyberwareCategories: [],
+	cyberwareGrades: [],
+	gear: [],
+	gearCategories: []
 };
 
 /* Internal stores */
@@ -168,6 +196,17 @@ function limitArray<T>(arr: T[] | undefined): T[] {
 }
 
 /**
+ * Filter cyberware categories, removing hidden ones.
+ * Some categories in XML have object format with show=false.
+ */
+function filterCyberwareCategories(categories: unknown[] | undefined): string[] {
+	if (!categories) return [];
+	return categories
+		.filter((cat): cat is string => typeof cat === 'string')
+		.slice(0, MAX_ITEMS);
+}
+
+/**
  * Load all game data files.
  * Fetches all JSON files in parallel and combines them.
  */
@@ -189,7 +228,11 @@ export async function loadGameData(): Promise<void> {
 			traditionsData,
 			mentorsData,
 			lifestylesData,
-			programsData
+			programsData,
+			weaponsData,
+			armorData,
+			cyberwareData,
+			gearData
 		] = await Promise.all([
 			fetchDataFile<{ categories: string[]; metatypes: Metatype[] }>('metatypes.json'),
 			fetchDataFile<{ skillGroups: string[]; categories: SkillCategoryDef[]; skills: SkillDefinition[] }>('skills.json'),
@@ -199,7 +242,11 @@ export async function loadGameData(): Promise<void> {
 			fetchDataFile<{ traditions: GameTradition[] }>('traditions.json'),
 			fetchDataFile<{ mentors: GameMentor[] }>('mentors.json'),
 			fetchDataFile<{ lifestyles: GameLifestyle[] }>('lifestyles.json'),
-			fetchDataFile<{ categories: string[]; programs: GameProgram[] }>('programs.json')
+			fetchDataFile<{ categories: string[]; programs: GameProgram[] }>('programs.json'),
+			fetchDataFile<{ categories: string[]; weapons: GameWeapon[] }>('weapons.json'),
+			fetchDataFile<{ categories: string[]; armor: GameArmor[] }>('armor.json'),
+			fetchDataFile<{ categories: string[]; grades: CyberwareGradeMultiplier[]; cyberware: GameCyberware[] }>('cyberware.json'),
+			fetchDataFile<{ categories: string[]; gear: GameGear[] }>('gear.json')
 		]);
 
 		/* Combine into single game data object */
@@ -218,7 +265,17 @@ export async function loadGameData(): Promise<void> {
 			mentors: limitArray(mentorsData?.mentors),
 			lifestyles: limitArray(lifestylesData?.lifestyles),
 			programs: limitArray(programsData?.programs),
-			programCategories: limitArray(programsData?.categories)
+			programCategories: limitArray(programsData?.categories),
+			/* Equipment */
+			weapons: limitArray(weaponsData?.weapons),
+			weaponCategories: limitArray(weaponsData?.categories),
+			armor: limitArray(armorData?.armor),
+			armorCategories: limitArray(armorData?.categories),
+			cyberware: limitArray(cyberwareData?.cyberware),
+			cyberwareCategories: filterCyberwareCategories(cyberwareData?.categories),
+			cyberwareGrades: limitArray(cyberwareData?.grades),
+			gear: limitArray(gearData?.gear),
+			gearCategories: limitArray(gearData?.categories)
 		};
 
 		gameDataStore.set(data);
@@ -349,4 +406,126 @@ export function filterSkillsByGroup(
 	group: string
 ): SkillDefinition[] {
 	return data.skills.filter((s) => s.skillgroup === group);
+}
+
+/* ============================================
+ * Equipment Derived Stores
+ * ============================================ */
+
+/** Derived store for weapons. */
+export const weapons: Readable<GameWeapon[]> = derived(
+	gameData,
+	($data) => $data.weapons
+);
+
+/** Derived store for armor. */
+export const armor: Readable<GameArmor[]> = derived(
+	gameData,
+	($data) => $data.armor
+);
+
+/** Derived store for cyberware. */
+export const cyberware: Readable<GameCyberware[]> = derived(
+	gameData,
+	($data) => $data.cyberware
+);
+
+/** Derived store for gear. */
+export const gear: Readable<GameGear[]> = derived(
+	gameData,
+	($data) => $data.gear
+);
+
+/** Derived store for lifestyles. */
+export const lifestyles: Readable<GameLifestyle[]> = derived(
+	gameData,
+	($data) => $data.lifestyles
+);
+
+/* ============================================
+ * Equipment Lookup Functions
+ * ============================================ */
+
+/**
+ * Find weapon by name.
+ */
+export function findWeapon(
+	data: GameData,
+	name: string
+): GameWeapon | undefined {
+	if (!name) return undefined;
+	return data.weapons.find((w) => w.name === name);
+}
+
+/**
+ * Find armor by name.
+ */
+export function findArmor(
+	data: GameData,
+	name: string
+): GameArmor | undefined {
+	if (!name) return undefined;
+	return data.armor.find((a) => a.name === name);
+}
+
+/**
+ * Find cyberware by name.
+ */
+export function findCyberware(
+	data: GameData,
+	name: string
+): GameCyberware | undefined {
+	if (!name) return undefined;
+	return data.cyberware.find((c) => c.name === name);
+}
+
+/**
+ * Find gear by name.
+ */
+export function findGear(
+	data: GameData,
+	name: string
+): GameGear | undefined {
+	if (!name) return undefined;
+	return data.gear.find((g) => g.name === name);
+}
+
+/**
+ * Filter weapons by category.
+ */
+export function filterWeaponsByCategory(
+	data: GameData,
+	category: string
+): GameWeapon[] {
+	return data.weapons.filter((w) => w.category === category);
+}
+
+/**
+ * Filter armor by category.
+ */
+export function filterArmorByCategory(
+	data: GameData,
+	category: string
+): GameArmor[] {
+	return data.armor.filter((a) => a.category === category);
+}
+
+/**
+ * Filter cyberware by category.
+ */
+export function filterCyberwareByCategory(
+	data: GameData,
+	category: string
+): GameCyberware[] {
+	return data.cyberware.filter((c) => c.category === category);
+}
+
+/**
+ * Filter gear by category.
+ */
+export function filterGearByCategory(
+	data: GameData,
+	category: string
+): GameGear[] {
+	return data.gear.filter((g) => g.category === category);
 }

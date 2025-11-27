@@ -77,3 +77,38 @@ export {
 	DEFAULT_BP_ALLOCATION,
 	createEmptyCharacter
 } from './character';
+
+/* Equipment types */
+export type {
+	WeaponType,
+	WeaponCategory,
+	GameWeapon,
+	CharacterWeapon,
+	WeaponAccessory,
+	ArmorCategory,
+	GameArmor,
+	CharacterArmor,
+	ArmorModification,
+	CyberwareCategory,
+	CyberwareGrade,
+	CyberwareGradeMultiplier,
+	GameCyberware,
+	CharacterCyberware,
+	GearCategory,
+	GameGear,
+	CharacterGear,
+	LifestyleLevel,
+	GameLifestyle,
+	CharacterLifestyle,
+	CharacterEquipment
+} from './equipment';
+
+export {
+	CYBERWARE_GRADES,
+	BP_TO_NUYEN_RATES,
+	EMPTY_EQUIPMENT,
+	calculateEquipmentCost,
+	calculateEssenceCost,
+	bpToNuyen,
+	nuyenToBp
+} from './equipment';
