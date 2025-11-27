@@ -34,6 +34,10 @@
 			</p>
 		</div>
 	</div>
+{:else if !initialized}
+	<div class="min-h-screen bg-background flex items-center justify-center">
+		<div class="text-accent-primary animate-pulse">Loading...</div>
+	</div>
 {:else}
 	<div class="min-h-screen bg-background">
 		<slot />
