@@ -10,7 +10,10 @@ import {
 	getWeaponSkill,
 	parseDamage,
 	parseAP,
+	parseFireModes,
+	calculateRecoilPenalty,
 	WEAPON_SKILL_MAP,
+	FIRING_MODES,
 	type RollResult
 } from '../dice';
 
@@ -490,6 +493,70 @@ describe('Dice Rolling Utilities', () => {
 
 		it('should return 0 for non-numeric AP', () => {
 			expect(parseAP('-half')).toBe(0);
+		});
+	});
+
+	describe('parseFireModes', () => {
+		it('should parse single mode', () => {
+			const modes = parseFireModes('SA');
+			expect(modes).toHaveLength(1);
+			expect(modes[0].code).toBe('SA');
+		});
+
+		it('should parse multiple modes', () => {
+			const modes = parseFireModes('SA/BF/FA');
+			expect(modes).toHaveLength(3);
+			expect(modes.map(m => m.code)).toEqual(['SA', 'BF', 'FA']);
+		});
+
+		it('should return empty for invalid modes', () => {
+			expect(parseFireModes('')).toHaveLength(0);
+			expect(parseFireModes('-')).toHaveLength(0);
+		});
+
+		it('should have correct ammo consumption', () => {
+			expect(FIRING_MODES.SA.ammoPerShot).toBe(1);
+			expect(FIRING_MODES.BF.ammoPerShot).toBe(3);
+			expect(FIRING_MODES.FA.ammoPerShot).toBe(6);
+		});
+
+		it('should have correct damage modifiers', () => {
+			expect(FIRING_MODES.SA.damageMod).toBe(0);
+			expect(FIRING_MODES.BF.damageMod).toBe(2);
+			expect(FIRING_MODES.FA.damageMod).toBe(5);
+		});
+	});
+
+	describe('calculateRecoilPenalty', () => {
+		it('should return 0 for single shot with any RC', () => {
+			// SS has 0 recoil, so no penalty
+			expect(calculateRecoilPenalty(0, 0, FIRING_MODES.SS)).toBe(0);
+		});
+
+		it('should return 0 when recoil is compensated', () => {
+			// SA has 1 recoil, RC 2 covers it (2 + 1 = 3 free shots)
+			// Cumulative = 0 + 1 = 1, RC + 1 = 3, uncompensated = max(0, 1-3) = 0
+			expect(calculateRecoilPenalty(2, 0, FIRING_MODES.SA)).toBe(0);
+		});
+
+		it('should return penalty when recoil exceeds compensation', () => {
+			// RC 0, no previous shots, firing SA (1 recoil)
+			// Cumulative = 0 + 1 = 1, RC + 1 = 1, uncompensated = max(0, 1-1) = 0
+			expect(calculateRecoilPenalty(0, 0, FIRING_MODES.SA)).toBe(0);
+
+			// RC 0, 1 previous shot, firing SA (1 more recoil)
+			// Cumulative = 1 + 1 = 2, RC + 1 = 1, uncompensated = max(0, 2-1) = 1
+			expect(calculateRecoilPenalty(0, 1, FIRING_MODES.SA)).toBe(-1);
+		});
+
+		it('should handle burst fire recoil', () => {
+			// RC 2, no previous shots, firing BF (3 recoil)
+			// Cumulative = 0 + 3 = 3, RC + 1 = 3, uncompensated = max(0, 3-3) = 0
+			expect(calculateRecoilPenalty(2, 0, FIRING_MODES.BF)).toBe(0);
+
+			// RC 0, no previous shots, firing BF (3 recoil)
+			// Cumulative = 0 + 3 = 3, RC + 1 = 1, uncompensated = max(0, 3-1) = 2
+			expect(calculateRecoilPenalty(0, 0, FIRING_MODES.BF)).toBe(-2);
 		});
 	});
 });

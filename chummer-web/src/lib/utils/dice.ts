@@ -344,3 +344,65 @@ export function parseAP(ap: string): number {
 	const num = parseInt(ap, 10);
 	return isNaN(num) ? 0 : num;
 }
+
+/** Firing mode definition. */
+export interface FiringMode {
+	/** Mode abbreviation (SS, SA, BF, FA). */
+	code: string;
+	/** Full name of the mode. */
+	name: string;
+	/** Ammo consumed per attack. */
+	ammoPerShot: number;
+	/** Dice pool modifier. */
+	poolMod: number;
+	/** Damage modifier (0 for SS/SA, +2 for BF, +5 for FA narrow, +9 for FA wide). */
+	damageMod: number;
+	/** Recoil penalty per shot. */
+	recoil: number;
+}
+
+/** Standard SR4 firing modes. */
+export const FIRING_MODES: Record<string, FiringMode> = {
+	SS: { code: 'SS', name: 'Single Shot', ammoPerShot: 1, poolMod: 0, damageMod: 0, recoil: 0 },
+	SA: { code: 'SA', name: 'Semi-Automatic', ammoPerShot: 1, poolMod: 0, damageMod: 0, recoil: 1 },
+	BF: { code: 'BF', name: 'Burst Fire', ammoPerShot: 3, poolMod: -2, damageMod: 2, recoil: 3 },
+	LB: { code: 'LB', name: 'Long Burst', ammoPerShot: 6, poolMod: -5, damageMod: 5, recoil: 6 },
+	FA: { code: 'FA', name: 'Full Auto (Narrow)', ammoPerShot: 6, poolMod: -5, damageMod: 5, recoil: 6 },
+	FAW: { code: 'FAW', name: 'Full Auto (Wide)', ammoPerShot: 10, poolMod: -9, damageMod: 9, recoil: 10 },
+	SF: { code: 'SF', name: 'Suppressive Fire', ammoPerShot: 20, poolMod: 0, damageMod: 0, recoil: 0 }
+};
+
+/**
+ * Parse available firing modes from a weapon's mode string.
+ * @param modeString - The mode string like "SA/BF/FA" or "SA".
+ * @returns Array of available firing modes.
+ */
+export function parseFireModes(modeString: string): FiringMode[] {
+	if (!modeString || modeString === '-') return [];
+
+	const modes: FiringMode[] = [];
+	const modeCodes = modeString.toUpperCase().split('/');
+
+	for (const code of modeCodes) {
+		const mode = FIRING_MODES[code.trim()];
+		if (mode) {
+			modes.push(mode);
+		}
+	}
+
+	return modes;
+}
+
+/**
+ * Calculate recoil compensation needed.
+ * @param totalRC - Total recoil compensation (from weapon + accessories + STR/2).
+ * @param shotsThisTurn - Number of shots fired this combat turn.
+ * @param mode - The firing mode being used.
+ * @returns Recoil penalty (negative modifier).
+ */
+export function calculateRecoilPenalty(totalRC: number, shotsThisTurn: number, mode: FiringMode): number {
+	const cumulativeRecoil = shotsThisTurn + mode.recoil;
+	const uncompensated = Math.max(0, cumulativeRecoil - totalRC - 1);
+	// Avoid returning -0 (use || 0 to convert -0 to 0)
+	return -uncompensated || 0;
+}
