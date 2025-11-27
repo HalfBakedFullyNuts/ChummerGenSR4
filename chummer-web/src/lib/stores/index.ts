@@ -92,6 +92,7 @@ export {
 	removeLifestyle,
 	saveCurrentCharacter,
 	loadSavedCharacter,
+	loadImportedCharacter,
 	deleteSavedCharacter,
 	listCharacters,
 	duplicateCurrentCharacter,
