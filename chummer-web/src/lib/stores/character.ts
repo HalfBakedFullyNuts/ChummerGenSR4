@@ -1932,5 +1932,29 @@ export const isCareerMode: Readable<boolean> = derived(
 	($char) => $char?.status === 'career'
 );
 
+/**
+ * Update condition monitor value.
+ * Used for tracking damage during gameplay.
+ */
+export function updateCondition(type: 'physical' | 'stun', value: number): void {
+	characterStore.update((c) => {
+		if (!c) return c;
+
+		const maxValue = type === 'physical'
+			? Math.ceil((c.attributes.bod.base + c.attributes.bod.bonus) / 2) + 8
+			: Math.ceil((c.attributes.wil.base + c.attributes.wil.bonus) / 2) + 8;
+
+		const clampedValue = Math.max(0, Math.min(value, maxValue));
+
+		return {
+			...c,
+			condition: {
+				...c.condition,
+				[type === 'physical' ? 'physicalCurrent' : 'stunCurrent']: clampedValue
+			}
+		};
+	});
+}
+
 /** Re-export CharacterSummary type for convenience. */
 export type { CharacterSummary };

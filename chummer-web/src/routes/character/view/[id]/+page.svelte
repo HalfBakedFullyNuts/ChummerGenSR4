@@ -2,18 +2,38 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { loadSavedCharacter, character } from '$stores';
+	import { loadSavedCharacter, character, updateCondition } from '$stores';
 	import { gameData, loadGameData } from '$stores/gamedata';
 	import { CharacterSheet, DiceRoller } from '$lib/components';
 
+	/** Roll history entry type. */
+	interface RollHistoryEntry {
+		id: number;
+		timestamp: Date;
+		testName: string;
+		pool: number;
+		hits: number;
+		isGlitch: boolean;
+		isCriticalGlitch: boolean;
+		edgeUsed: boolean;
+		dice: number[];
+	}
+
 	/** Show dice roller panel. */
 	let showDiceRoller = false;
+
+	/** Show roll history panel. */
+	let showRollHistory = false;
 
 	/** Current dice pool for roller. */
 	let dicePool = 6;
 
 	/** Last rolled test name. */
 	let lastTestName = '';
+
+	/** Roll history (most recent first). */
+	let rollHistory: RollHistoryEntry[] = [];
+	let rollIdCounter = 0;
 
 	/** Loading state. */
 	let loading = true;
@@ -63,6 +83,46 @@
 		lastTestName = event.detail.name;
 		showDiceRoller = true;
 	}
+
+	/** Handle roll result from dice roller. */
+	function handleRollResult(event: CustomEvent<{ results: {
+		dice: number[];
+		hits: number;
+		ones: number;
+		isGlitch: boolean;
+		isCriticalGlitch: boolean;
+		edgeUsed: boolean;
+		pool: number;
+	} }>): void {
+		const r = event.detail.results;
+		const entry: RollHistoryEntry = {
+			id: rollIdCounter++,
+			timestamp: new Date(),
+			testName: lastTestName || 'Manual Roll',
+			pool: r.pool,
+			hits: r.hits,
+			isGlitch: r.isGlitch,
+			isCriticalGlitch: r.isCriticalGlitch,
+			edgeUsed: r.edgeUsed,
+			dice: r.dice
+		};
+		rollHistory = [entry, ...rollHistory].slice(0, 50); // Keep last 50
+	}
+
+	/** Clear roll history. */
+	function clearHistory(): void {
+		rollHistory = [];
+	}
+
+	/** Format time for display. */
+	function formatTime(date: Date): string {
+		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+	}
+
+	/** Handle damage change from condition monitor. */
+	function handleDamageChanged(event: CustomEvent<{ type: 'physical' | 'stun'; value: number }>): void {
+		updateCondition(event.detail.type, event.detail.value);
+	}
 </script>
 
 <svelte:head>
@@ -97,6 +157,13 @@
 					Dice
 				</button>
 				<button
+					class="cw-btn {showRollHistory ? 'cw-btn-primary' : ''}"
+					on:click={() => showRollHistory = !showRollHistory}
+					title="Toggle roll history"
+				>
+					History {#if rollHistory.length > 0}<span class="text-xs">({rollHistory.length})</span>{/if}
+				</button>
+				<button
 					class="cw-btn cw-btn-primary"
 					on:click={handleEdit}
 				>
@@ -118,7 +185,55 @@
 				{#if lastTestName}
 					<div class="text-sm text-accent-cyan mb-2">Rolling: {lastTestName}</div>
 				{/if}
-				<DiceRoller bind:dicePool />
+				<DiceRoller bind:dicePool on:roll={handleRollResult} />
+			</div>
+		{/if}
+
+		<!-- Roll History Panel -->
+		{#if showRollHistory}
+			<div class="mb-6 cw-card roll-history-panel">
+				<div class="flex items-center justify-between mb-3">
+					<h3 class="text-primary-text font-medium">Roll History</h3>
+					{#if rollHistory.length > 0}
+						<button
+							class="cw-btn text-xs text-accent-danger"
+							on:click={clearHistory}
+						>
+							Clear
+						</button>
+					{/if}
+				</div>
+				{#if rollHistory.length === 0}
+					<p class="text-muted-text text-sm">No rolls yet this session.</p>
+				{:else}
+					<div class="space-y-2 max-h-64 overflow-y-auto">
+						{#each rollHistory as entry (entry.id)}
+							<div class="flex items-center justify-between py-2 border-b border-border text-sm">
+								<div class="flex-1">
+									<span class="text-secondary-text">{entry.testName}</span>
+									<span class="text-muted-text text-xs ml-2">({entry.pool}d6)</span>
+									{#if entry.edgeUsed}
+										<span class="text-accent-primary text-xs ml-1">Edge</span>
+									{/if}
+								</div>
+								<div class="flex items-center gap-3">
+									<span class="font-mono font-bold
+										{entry.isCriticalGlitch ? 'text-accent-danger' : ''}
+										{entry.isGlitch && !entry.isCriticalGlitch ? 'text-accent-warning' : ''}
+										{!entry.isGlitch ? 'text-accent-success' : ''}">
+										{entry.hits} hit{entry.hits !== 1 ? 's' : ''}
+										{#if entry.isCriticalGlitch}
+											<span class="text-xs">(CG!)</span>
+										{:else if entry.isGlitch}
+											<span class="text-xs">(G)</span>
+										{/if}
+									</span>
+									<span class="text-muted-text text-xs">{formatTime(entry.timestamp)}</span>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
 			</div>
 		{/if}
 
@@ -129,6 +244,7 @@
 			interactive={true}
 			on:rollSkill={handleSkillRoll}
 			on:rollAttribute={handleAttributeRoll}
+			on:damageChanged={handleDamageChanged}
 		/>
 	{:else}
 		<div class="cw-card text-center py-12">
@@ -143,7 +259,8 @@
 <style>
 	@media print {
 		header,
-		.dice-roller-panel {
+		.dice-roller-panel,
+		.roll-history-panel {
 			display: none;
 		}
 	}
