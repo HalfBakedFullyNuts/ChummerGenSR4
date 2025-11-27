@@ -19,6 +19,8 @@
 	import AttributeAllocator from '$lib/components/wizard/AttributeAllocator.svelte';
 	import QualitySelector from '$lib/components/wizard/QualitySelector.svelte';
 	import SkillAllocator from '$lib/components/wizard/SkillAllocator.svelte';
+	import MagicSelector from '$lib/components/wizard/MagicSelector.svelte';
+	import ContactsEditor from '$lib/components/wizard/ContactsEditor.svelte';
 
 	/** Initialize new character on mount. */
 	onMount(() => {
@@ -139,19 +141,9 @@
 		{:else if $currentStep === 'skills'}
 			<SkillAllocator />
 		{:else if $currentStep === 'magic'}
-			<div class="cw-card">
-				<h2 class="cw-card-header">Magic / Resonance</h2>
-				<p class="text-secondary-text">
-					Magic and Technomancer options coming soon.
-				</p>
-			</div>
+			<MagicSelector />
 		{:else if $currentStep === 'contacts'}
-			<div class="cw-card">
-				<h2 class="cw-card-header">Contacts</h2>
-				<p class="text-secondary-text">
-					Contact management coming soon.
-				</p>
-			</div>
+			<ContactsEditor />
 		{:else if $currentStep === 'finalize'}
 			<div class="cw-card">
 				<h2 class="cw-card-header">Finalize Character</h2>

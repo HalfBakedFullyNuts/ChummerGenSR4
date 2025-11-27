@@ -40,6 +40,7 @@ export {
 	remainingBP,
 	bpBreakdown,
 	hasMetatype,
+	magicType,
 	startNewCharacter,
 	setWizardStep,
 	nextWizardStep,
@@ -53,8 +54,17 @@ export {
 	addContact,
 	removeContact,
 	updateIdentity,
+	initializeMagic,
+	setTradition,
+	addSpell,
+	removeSpell,
+	addPower,
+	removePower,
+	initializeResonance,
+	getMagicType,
 	WIZARD_STEPS,
 	type WizardStep,
 	type WizardStepConfig,
-	type AttributeValueKey
+	type AttributeValueKey,
+	type MagicType
 } from './character';
