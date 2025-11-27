@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { Character, SkillDefinition, AttributeCode, CharacterWeapon } from '$types';
+	import type { Character, SkillDefinition, AttributeCode, CharacterWeapon, CharacterSpell } from '$types';
 	import { getWeaponSkill, parseDamage, parseAP } from '$lib/utils/dice';
 
 	/** Character to display. */
@@ -18,6 +18,7 @@
 		rollAttribute: { name: string; pool: number };
 		rollInitiative: { base: number; dice: number };
 		rollWeapon: { weapon: CharacterWeapon; pool: number; skillName: string };
+		rollSpell: { spell: CharacterSpell; castPool: number; drainPool: number; drainValue: string };
 		damageChanged: { type: 'physical' | 'stun'; value: number };
 		edgeChanged: { value: number };
 	}>();
@@ -112,6 +113,42 @@
 		if (!interactive) return;
 		const { pool, skillName } = getWeaponPool(weapon);
 		dispatch('rollWeapon', { weapon, pool, skillName });
+	}
+
+	/** Get spellcasting pool. */
+	function getSpellcastingPool(): number {
+		const mag = getAttrTotal(char.attributes.mag);
+		const spellcasting = char.skills.find(s => s.name === 'Spellcasting');
+		const skillRating = spellcasting ? spellcasting.rating + spellcasting.bonus : 0;
+		return Math.max(0, mag + skillRating - totalWoundMod);
+	}
+
+	/** Get drain resistance pool based on tradition. */
+	function getDrainResistPool(): number {
+		const wil = getAttrTotal(char.attributes.wil);
+		const tradition = char.magic?.tradition.toLowerCase() || '';
+
+		// Hermetic uses Logic, Shamanic uses Charisma
+		// Default to Charisma for other traditions
+		let drainAttr: number;
+		if (tradition.includes('hermetic') || tradition.includes('mage')) {
+			drainAttr = getAttrTotal(char.attributes.log);
+		} else {
+			drainAttr = getAttrTotal(char.attributes.cha);
+		}
+
+		return Math.max(0, wil + drainAttr - totalWoundMod);
+	}
+
+	/** Handle spell click for casting. */
+	function handleSpellClick(spell: CharacterSpell): void {
+		if (!interactive) return;
+		dispatch('rollSpell', {
+			spell,
+			castPool: getSpellcastingPool(),
+			drainPool: getDrainResistPool(),
+			drainValue: spell.dv
+		});
 	}
 
 	/** Handle condition box click. */
@@ -631,14 +668,23 @@
 				{#if char.magic.spells.length > 0}
 					<div>
 						<h3 class="text-sm font-medium text-secondary-text mb-2">Spells</h3>
+						{#if interactive}
+							<p class="text-muted-text text-xs mb-2">Click a spell to cast (Pool: {getSpellcastingPool()})</p>
+						{/if}
 						<div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
 							{#each char.magic.spells as spell}
-								<div class="p-2 bg-surface-light rounded">
+								<button
+									type="button"
+									class="p-2 bg-surface-light rounded text-left w-full transition-colors
+										{interactive ? 'hover:bg-surface-lighter cursor-pointer' : ''}"
+									on:click={() => handleSpellClick(spell)}
+									disabled={!interactive}
+								>
 									<div class="font-medium text-primary-text">{spell.name}</div>
 									<div class="text-xs text-muted-text">
 										{spell.category} • {spell.type} • DV {spell.dv}
 									</div>
-								</div>
+								</button>
 							{/each}
 						</div>
 					</div>
