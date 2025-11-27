@@ -242,6 +242,24 @@
 	function handleReloadWeapon(event: CustomEvent<{ weaponId: string }>): void {
 		reloadWeapon(event.detail.weaponId);
 	}
+
+	/** Handle defense roll. */
+	function handleDefenseRoll(event: CustomEvent<{ name: string; pool: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = event.detail.name;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle soak roll. */
+	function handleSoakRoll(event: CustomEvent<{ name: string; pool: number; armor: number; ap?: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = event.detail.name;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
 </script>
 
 <svelte:head>
@@ -417,6 +435,8 @@
 			on:rollInitiative={handleInitiativeRoll}
 			on:rollWeapon={handleWeaponRoll}
 			on:rollSpell={handleSpellRoll}
+			on:rollDefense={handleDefenseRoll}
+			on:rollSoak={handleSoakRoll}
 			on:damageChanged={handleDamageChanged}
 			on:edgeChanged={handleEdgeChanged}
 			on:ammoChanged={handleAmmoChanged}
