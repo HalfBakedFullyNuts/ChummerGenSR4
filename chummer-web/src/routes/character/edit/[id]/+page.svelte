@@ -7,6 +7,7 @@
 		currentStep,
 		currentStepIndex,
 		remainingBP,
+		isCareerMode,
 		loadSavedCharacter,
 		nextWizardStep,
 		prevWizardStep,
@@ -19,6 +20,7 @@
 	} from '$stores';
 	import { user } from '$stores/user';
 	import { gameData } from '$stores/gamedata';
+	import { CareerPanel } from '$lib/components';
 	import MetatypeSelector from '$lib/components/wizard/MetatypeSelector.svelte';
 	import AttributeAllocator from '$lib/components/wizard/AttributeAllocator.svelte';
 	import QualitySelector from '$lib/components/wizard/QualitySelector.svelte';
@@ -186,6 +188,13 @@
 		{#if saveError}
 			<div class="cw-panel p-3 mb-4 border-l-4 border-accent-danger">
 				<p class="text-accent-danger text-sm">{saveError}</p>
+			</div>
+		{/if}
+
+		<!-- Career Mode Panel -->
+		{#if $isCareerMode}
+			<div class="mb-6">
+				<CareerPanel />
 			</div>
 		{/if}
 

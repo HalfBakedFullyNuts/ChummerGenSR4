@@ -27,7 +27,6 @@ import {
 	setSkill,
 	addQuality,
 	initializeMagic,
-	setTradition,
 	setAttribute
 } from '../character';
 
