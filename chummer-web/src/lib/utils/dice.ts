@@ -164,3 +164,72 @@ export function glitchProbability(pool: number): number {
 
 	return probability;
 }
+
+/** Result of an initiative roll. */
+export interface InitiativeResult {
+	/** Base initiative (REA + INT). */
+	base: number;
+	/** Dice rolled for initiative. */
+	dice: number[];
+	/** Total initiative score. */
+	total: number;
+	/** Number of initiative passes this combat turn. */
+	passes: number;
+}
+
+/** Options for rolling initiative. */
+export interface InitiativeOptions {
+	/** Base initiative (REA + INT). */
+	base: number;
+	/** Number of initiative dice (default 1, increased by certain abilities). */
+	dice?: number;
+	/** Custom RNG function for testing. */
+	rng?: () => number;
+}
+
+/**
+ * Roll initiative for SR4.
+ * Initiative = REA + INT + Xd6 (typically 1d6 for mundanes).
+ * @param options - Initiative roll options.
+ * @returns The initiative result.
+ */
+export function rollInitiative(options: InitiativeOptions): InitiativeResult {
+	const { base, dice = 1, rng } = options;
+
+	const diceResults: number[] = [];
+	let diceTotal = 0;
+
+	for (let i = 0; i < dice; i++) {
+		const result = rollD6(rng);
+		diceResults.push(result);
+		diceTotal += result;
+	}
+
+	const total = base + diceTotal;
+
+	// Calculate initiative passes
+	// Pass 1: everyone with Init >= 1
+	// Pass 2: everyone with Init >= 11
+	// Pass 3: everyone with Init >= 21
+	// Pass 4: everyone with Init >= 31
+	const passes = Math.min(4, Math.max(1, Math.ceil(total / 10)));
+
+	return {
+		base,
+		dice: diceResults,
+		total,
+		passes
+	};
+}
+
+/**
+ * Calculate remaining initiative for subsequent passes.
+ * Each pass reduces initiative by 10.
+ * @param total - Current initiative total.
+ * @param passNumber - Which pass (1-4).
+ * @returns Initiative score for this pass, or 0 if no action.
+ */
+export function getInitiativeForPass(total: number, passNumber: number): number {
+	const reduction = (passNumber - 1) * 10;
+	return Math.max(0, total - reduction);
+}

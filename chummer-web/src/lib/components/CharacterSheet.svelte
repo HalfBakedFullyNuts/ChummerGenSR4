@@ -15,6 +15,7 @@
 	const dispatch = createEventDispatcher<{
 		rollSkill: { name: string; pool: number; attribute: AttributeCode };
 		rollAttribute: { name: string; pool: number };
+		rollInitiative: { base: number; dice: number };
 		damageChanged: { type: 'physical' | 'stun'; value: number };
 		edgeChanged: { value: number };
 	}>();
@@ -76,6 +77,15 @@
 		if (!interactive) return;
 		dispatch('rollAttribute', { name, pool });
 	}
+
+	/** Handle initiative roll. */
+	function handleInitiativeRoll(): void {
+		if (!interactive) return;
+		dispatch('rollInitiative', { base: initiative, dice: initiativeDice });
+	}
+
+	/** Calculate initiative dice based on augmentations/magic. */
+	$: initiativeDice = 1; // TODO: Calculate from cyberware/magic
 
 	/** Handle condition box click. */
 	function handleConditionClick(type: 'physical' | 'stun', boxIndex: number, maxBoxes: number): void {
@@ -290,10 +300,15 @@
 		<div class="cw-card">
 			<h2 class="cw-card-header">Derived Stats</h2>
 			<div class="space-y-2 text-sm">
-				<div class="flex justify-between">
+				<button
+					type="button"
+					class="flex justify-between w-full {interactive ? 'hover:bg-surface-light cursor-pointer rounded px-1 -mx-1' : ''}"
+					on:click={handleInitiativeRoll}
+					disabled={!interactive}
+				>
 					<span class="text-secondary-text">Initiative</span>
-					<span class="font-mono text-primary-text">{initiative} + 1d6</span>
-				</div>
+					<span class="font-mono text-primary-text">{initiative} + {initiativeDice}d6</span>
+				</button>
 				<button
 					type="button"
 					class="flex justify-between w-full {interactive ? 'hover:bg-surface-light cursor-pointer rounded px-1 -mx-1' : ''}"
