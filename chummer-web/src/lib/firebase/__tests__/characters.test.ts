@@ -34,7 +34,7 @@ import {
 	duplicateCharacter
 } from '../characters';
 import { createEmptyCharacter } from '$types';
-import { doc, getDoc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
+import { getDoc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
 
 describe('Firebase Characters Service', () => {
 	beforeEach(() => {
@@ -164,8 +164,9 @@ describe('Firebase Characters Service', () => {
 
 			expect(result.success).toBe(true);
 			expect(result.data).toHaveLength(2);
-			expect(result.data?.[0].name).toBe('Test Char 1');
-			expect(result.data?.[1].metatype).toBe('Elf');
+			expect(result.data).toBeDefined();
+			expect(result.data![0]!.name).toBe('Test Char 1');
+			expect(result.data![1]!.metatype).toBe('Elf');
 		});
 
 		it('should return empty array for user with no characters', async () => {
@@ -197,8 +198,9 @@ describe('Firebase Characters Service', () => {
 			const result = await listUserCharacters('user-123');
 
 			expect(result.success).toBe(true);
-			expect(result.data?.[0].name).toBe('Unnamed');
-			expect(result.data?.[0].metatype).toBe('Unknown');
+			expect(result.data).toBeDefined();
+			expect(result.data![0]!.name).toBe('Unnamed');
+			expect(result.data![0]!.metatype).toBe('Unknown');
 		});
 	});
 
@@ -241,8 +243,11 @@ describe('Firebase Characters Service', () => {
 
 	describe('duplicateCharacter', () => {
 		it('should duplicate a character with new ID', async () => {
-			const originalChar = createEmptyCharacter('original-id', 'user-123', 'bp');
-			originalChar.identity.name = 'Original Character';
+			const baseChar = createEmptyCharacter('original-id', 'user-123', 'bp');
+			const originalChar = {
+				...baseChar,
+				identity: { ...baseChar.identity, name: 'Original Character' }
+			};
 
 			(getDoc as ReturnType<typeof vi.fn>).mockResolvedValue({
 				exists: () => true,

@@ -10,6 +10,9 @@
 		nextWizardStep,
 		prevWizardStep,
 		setWizardStep,
+		saveCurrentCharacter,
+		markAsSaved,
+		isDirty,
 		WIZARD_STEPS,
 		type WizardStep
 	} from '$stores';
@@ -23,6 +26,10 @@
 	import EquipmentSelector from '$lib/components/wizard/EquipmentSelector.svelte';
 	import ContactsEditor from '$lib/components/wizard/ContactsEditor.svelte';
 	import FinalizeCharacter from '$lib/components/wizard/FinalizeCharacter.svelte';
+
+	/** Saving state. */
+	let saving = false;
+	let saveError: string | null = null;
 
 	/** Initialize new character on mount. */
 	onMount(() => {
@@ -44,10 +51,37 @@
 		nextWizardStep();
 	}
 
-	/** Save character and redirect to sheet. */
-	function handleFinalize(): void {
-		// TODO: Save to Firestore
-		goto('/characters');
+	/** Save character and redirect to character list. */
+	async function handleFinalize(): Promise<void> {
+		saving = true;
+		saveError = null;
+
+		const result = await saveCurrentCharacter();
+
+		if (result.success) {
+			markAsSaved();
+			goto('/characters');
+		} else {
+			saveError = result.error || 'Failed to save character';
+		}
+
+		saving = false;
+	}
+
+	/** Quick save without navigating away. */
+	async function handleQuickSave(): Promise<void> {
+		saving = true;
+		saveError = null;
+
+		const result = await saveCurrentCharacter();
+
+		if (result.success) {
+			markAsSaved();
+		} else {
+			saveError = result.error || 'Failed to save character';
+		}
+
+		saving = false;
 	}
 
 	/** Check if current step allows proceeding. */
@@ -94,11 +128,30 @@
 				{WIZARD_STEPS[$currentStepIndex]?.description ?? ''}
 			</p>
 		</div>
-		<div class="cw-panel px-4 py-2">
-			<span class="text-muted-text text-sm">Build Points</span>
-			<span class="text-accent-primary font-mono text-xl ml-2">{$remainingBP}</span>
+		<div class="flex items-center gap-4">
+			{#if $user}
+				<button
+					class="cw-btn text-sm"
+					on:click={handleQuickSave}
+					disabled={saving || !$isDirty}
+					title={$isDirty ? 'Save progress' : 'No changes to save'}
+				>
+					{saving ? 'Saving...' : $isDirty ? 'Save' : 'Saved'}
+				</button>
+			{/if}
+			<div class="cw-panel px-4 py-2">
+				<span class="text-muted-text text-sm">Build Points</span>
+				<span class="text-accent-primary font-mono text-xl ml-2">{$remainingBP}</span>
+			</div>
 		</div>
 	</header>
+
+	<!-- Save Error -->
+	{#if saveError}
+		<div class="cw-panel p-3 mb-4 border-l-4 border-accent-danger">
+			<p class="text-accent-danger text-sm">{saveError}</p>
+		</div>
+	{/if}
 
 	<!-- Step Progress -->
 	<nav class="mb-8">
@@ -172,9 +225,15 @@
 		<button
 			class="cw-btn cw-btn-primary"
 			on:click={handleNext}
-			disabled={!canGoNext}
+			disabled={!canGoNext || saving}
 		>
-			{isLastStep ? 'Save Character' : 'Next'}
+			{#if saving}
+				Saving...
+			{:else if isLastStep}
+				Save Character
+			{:else}
+				Next
+			{/if}
 		</button>
 	</footer>
 </main>
