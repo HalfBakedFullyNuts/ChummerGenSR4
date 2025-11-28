@@ -102,6 +102,8 @@ export interface BuildPointAllocation {
 	readonly complexForms: number;
 	readonly contacts: number;
 	readonly resources: number;
+	readonly mentor: number;
+	readonly martialArts: number;
 }
 
 /**
@@ -349,7 +351,9 @@ export const DEFAULT_BP_ALLOCATION: BuildPointAllocation = {
 	spells: 0,
 	complexForms: 0,
 	contacts: 0,
-	resources: 0
+	resources: 0,
+	mentor: 0,
+	martialArts: 0
 } as const;
 
 /**

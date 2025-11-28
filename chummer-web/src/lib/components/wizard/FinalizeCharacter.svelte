@@ -201,9 +201,21 @@
 					<span class="text-secondary-text">Resources</span>
 					<span class="text-primary-text font-mono">{$bpBreakdown.resources} BP</span>
 				</div>
+				{#if $bpBreakdown.mentor > 0}
+					<div class="flex justify-between py-1 border-b border-border/30">
+						<span class="text-secondary-text">Mentor Spirit</span>
+						<span class="text-primary-text font-mono">{$bpBreakdown.mentor} BP</span>
+					</div>
+				{/if}
+				{#if $bpBreakdown.martialArts > 0}
+					<div class="flex justify-between py-1 border-b border-border/30">
+						<span class="text-secondary-text">Martial Arts</span>
+						<span class="text-primary-text font-mono">{$bpBreakdown.martialArts} BP</span>
+					</div>
+				{/if}
 				<div class="flex justify-between py-2 font-medium border-t border-border">
 					<span class="text-secondary-text">Total Spent</span>
-					<span class="text-primary-text font-mono">{totalSpent} / 400 BP</span>
+					<span class="text-primary-text font-mono">{totalSpent} / {$character?.buildPoints ?? 400} {$character?.buildMethod === 'karma' ? 'Karma' : 'BP'}</span>
 				</div>
 				<div class="flex justify-between py-2">
 					<span class="text-secondary-text">Remaining</span>
@@ -211,7 +223,7 @@
 						class="font-mono font-bold
 							{$remainingBP < 0 ? 'text-accent-danger' : $remainingBP === 0 ? 'text-accent-cyan' : 'text-accent-primary'}"
 					>
-						{$remainingBP} BP
+						{$remainingBP} {$character?.buildMethod === 'karma' ? 'Karma' : 'BP'}
 					</span>
 				</div>
 			{/if}
@@ -264,6 +276,18 @@
 					<span class="text-muted-text block">Cyberware</span>
 					<span class="text-primary-text">{$character.equipment.cyberware.length}</span>
 				</div>
+				<div>
+					<span class="text-muted-text block">Bioware</span>
+					<span class="text-primary-text">{$character.equipment.bioware?.length ?? 0}</span>
+				</div>
+				<div>
+					<span class="text-muted-text block">Vehicles</span>
+					<span class="text-primary-text">{$character.equipment.vehicles?.length ?? 0}</span>
+				</div>
+				<div>
+					<span class="text-muted-text block">Martial Arts</span>
+					<span class="text-primary-text">{$character.equipment.martialArts?.length ?? 0}</span>
+				</div>
 			</div>
 
 			<!-- Qualities List -->
@@ -295,6 +319,11 @@
 					<div class="text-sm">
 						<span class="text-secondary-text">Tradition:</span>
 						<span class="text-primary-text ml-2">{$character.magic.tradition || 'None'}</span>
+						{#if $character.magic.mentor}
+							<span class="text-muted-text ml-4">|</span>
+							<span class="text-secondary-text ml-4">Mentor:</span>
+							<span class="text-accent-purple ml-2">{$character.magic.mentor}</span>
+						{/if}
 						{#if $character.magic.spells.length > 0}
 							<span class="text-muted-text ml-4">|</span>
 							<span class="text-secondary-text ml-4">Spells:</span>
@@ -304,6 +333,27 @@
 							<span class="text-muted-text ml-4">|</span>
 							<span class="text-secondary-text ml-4">Powers:</span>
 							<span class="text-primary-text ml-2">{$character.magic.powers.length}</span>
+						{/if}
+					</div>
+				</div>
+			{/if}
+
+			<!-- Resonance Info -->
+			{#if $character.resonance}
+				<div class="mt-4 pt-4 border-t border-border/30">
+					<span class="text-muted-text text-sm block mb-2">Resonance:</span>
+					<div class="text-sm">
+						<span class="text-secondary-text">Stream:</span>
+						<span class="text-accent-cyan ml-2">{$character.resonance.stream || 'None'}</span>
+						{#if $character.resonance.complexForms.length > 0}
+							<span class="text-muted-text ml-4">|</span>
+							<span class="text-secondary-text ml-4">Complex Forms:</span>
+							<span class="text-primary-text ml-2">{$character.resonance.complexForms.length}</span>
+						{/if}
+						{#if $character.resonance.echoes && $character.resonance.echoes.length > 0}
+							<span class="text-muted-text ml-4">|</span>
+							<span class="text-secondary-text ml-4">Echoes:</span>
+							<span class="text-primary-text ml-2">{$character.resonance.echoes.length}</span>
 						{/if}
 					</div>
 				</div>

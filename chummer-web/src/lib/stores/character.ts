@@ -606,14 +606,13 @@ export function setMentor(mentorName: string | null): void {
 	const char = get(characterStore);
 	if (!char || !char.magic) return;
 
-	/* Calculate BP difference */
-	const hadMentor = char.magic.mentor !== null;
-	const willHaveMentor = mentorName !== null;
-	const bpChange = willHaveMentor && !hadMentor ? 5 : (!willHaveMentor && hadMentor ? -5 : 0);
+	/* Calculate BP cost: 5 BP for mentor spirit */
+	const newMentorBP = mentorName !== null ? 5 : 0;
 
 	/* Check BP availability */
 	const totalSpent = Object.values(char.buildPointsSpent).reduce((a, b) => a + b, 0);
-	if (totalSpent + bpChange > char.buildPoints) return;
+	const bpDiff = newMentorBP - char.buildPointsSpent.mentor;
+	if (totalSpent + bpDiff > char.buildPoints) return;
 
 	const updated: Character = {
 		...char,
@@ -623,7 +622,7 @@ export function setMentor(mentorName: string | null): void {
 		},
 		buildPointsSpent: {
 			...char.buildPointsSpent,
-			other: (char.buildPointsSpent.other || 0) + bpChange
+			mentor: newMentorBP
 		},
 		updatedAt: new Date().toISOString()
 	};
@@ -1362,7 +1361,7 @@ export function addMartialArt(style: GameMartialArt): void {
 		},
 		buildPointsSpent: {
 			...char.buildPointsSpent,
-			other: (char.buildPointsSpent.other || 0) + bpCost
+			martialArts: char.buildPointsSpent.martialArts + bpCost
 		},
 		updatedAt: new Date().toISOString()
 	};
@@ -1391,7 +1390,7 @@ export function removeMartialArt(artId: string): void {
 		},
 		buildPointsSpent: {
 			...char.buildPointsSpent,
-			other: Math.max(0, (char.buildPointsSpent.other || 0) - bpRefund)
+			martialArts: Math.max(0, char.buildPointsSpent.martialArts - bpRefund)
 		},
 		updatedAt: new Date().toISOString()
 	};
@@ -1427,7 +1426,7 @@ export function addMartialArtTechnique(artId: string, technique: string): void {
 		},
 		buildPointsSpent: {
 			...char.buildPointsSpent,
-			other: (char.buildPointsSpent.other || 0) + bpCost
+			martialArts: char.buildPointsSpent.martialArts + bpCost
 		},
 		updatedAt: new Date().toISOString()
 	};
@@ -1459,7 +1458,7 @@ export function removeMartialArtTechnique(artId: string, technique: string): voi
 		},
 		buildPointsSpent: {
 			...char.buildPointsSpent,
-			other: Math.max(0, (char.buildPointsSpent.other || 0) - bpRefund)
+			martialArts: Math.max(0, char.buildPointsSpent.martialArts - bpRefund)
 		},
 		updatedAt: new Date().toISOString()
 	};
