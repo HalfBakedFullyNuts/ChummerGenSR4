@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { character, setAttribute, type AttributeValueKey } from '$stores/character';
+	import { character, setAttribute, KARMA_BUILD_COSTS, type AttributeValueKey } from '$stores/character';
 	import type { AttributeValue } from '$types';
 	import { ATTRIBUTE_NAMES } from '$types';
 
@@ -69,18 +69,42 @@
 		return total;
 	}
 
-	$: attrBP = calculateAttrBP($character);
+	/** Calculate total Karma spent on attributes (Karma Build method). */
+	function calculateAttrKarma(char: typeof $character): number {
+		if (!char) return 0;
+
+		let total = 0;
+		for (const code of [...STANDARD_ATTRS, ...SPECIAL_ATTRS]) {
+			const attr = getAttrValue(char, code);
+			const limits = getAttrLimits(char, code);
+			if (!attr || !limits) continue;
+
+			/* Karma cost is sum of (rating × 5) for each point from min to current */
+			for (let r = limits.min + 1; r <= attr.base; r++) {
+				total += r * KARMA_BUILD_COSTS.ATTRIBUTE_MULTIPLIER;
+			}
+		}
+		return total;
+	}
+
+	$: isKarmaBuild = $character?.buildMethod === 'karma';
+	$: attrCost = isKarmaBuild ? calculateAttrKarma($character) : calculateAttrBP($character);
+	$: costLabel = isKarmaBuild ? 'Karma' : 'BP';
 </script>
 
 <div class="space-y-6">
-	<!-- BP Summary -->
+	<!-- Cost Summary -->
 	<div class="cw-panel p-4">
 		<div class="flex items-center justify-between">
-			<span class="text-secondary-text">Attribute BP Spent:</span>
-			<span class="font-mono text-accent-primary text-xl">{attrBP}</span>
+			<span class="text-secondary-text">Attribute {costLabel} Spent:</span>
+			<span class="font-mono text-xl {isKarmaBuild ? 'text-accent-cyan' : 'text-accent-primary'}">{attrCost}</span>
 		</div>
 		<p class="text-muted-text text-xs mt-2">
-			Each point above minimum costs 10 BP. Metatype sets min/max limits.
+			{#if isKarmaBuild}
+				Each point costs (new rating × 5) karma. Example: min 1 → 4 costs 10+15+20 = 45 karma.
+			{:else}
+				Each point above minimum costs 10 BP. Metatype sets min/max limits.
+			{/if}
 		</p>
 	</div>
 

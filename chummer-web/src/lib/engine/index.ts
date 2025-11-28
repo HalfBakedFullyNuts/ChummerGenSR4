@@ -1,11 +1,72 @@
 /**
- * Rules engine index.
- * This module will export character calculation and validation logic.
- *
- * TODO: Implement rules engine (Issues #40-44)
- * - improvements.ts: Improvement manager
- * - calculations.ts: Attribute/skill calculators
- * - validation.ts: Build validation engine
+ * Rules Engine
+ * ============
+ * Core game logic for Shadowrun 4th Edition.
+ * Handles calculations, validation, and improvements.
  */
 
-export {};
+// Calculations - derived values (initiative, condition monitors, limits, etc.)
+export {
+	getAttributeTotal,
+	getMagicTotal,
+	getResonanceTotal,
+	getEssence,
+	calculatePhysicalCM,
+	calculateStunCM,
+	calculateOverflow,
+	getWoundModifier,
+	calculateInitiative,
+	calculateInitiativeDice,
+	calculateInitiativeBonus,
+	calculateWalkSpeed,
+	calculateRunSpeed,
+	calculateSprintBonus,
+	calculatePhysicalLimit,
+	calculateMentalLimit,
+	calculateSocialLimit,
+	calculateDicePool,
+	calculateComposure,
+	calculateJudgeIntentions,
+	calculateMemory,
+	calculateLiftCarry,
+	calculateDefense,
+	calculateDodge,
+	calculateArmorBallistic,
+	calculateArmorImpact,
+	calculateDrainResist,
+	calculateAstralInitiative,
+	calculateAstralInitiativeDice,
+	calculateFadingResist,
+	calculateMatrixInitiative,
+	calculateMatrixInitiativeDice,
+	calculateAll,
+	type CharacterCalculations
+} from './calculations';
+
+// Validation - character build validation
+export {
+	validateCharacter,
+	getValidationErrors,
+	getValidationWarnings,
+	isCharacterComplete,
+	type ValidationSeverity,
+	type ValidationIssue,
+	type ValidationResult
+} from './validation';
+
+// Improvements - bonuses from cyberware, qualities, powers, etc.
+export {
+	getCyberwareImprovements,
+	getQualityImprovements,
+	getAdeptPowerImprovements,
+	getAllImprovements,
+	getTotalImprovement,
+	getImprovementsForTarget,
+	getImprovementsBySource,
+	getStackedValue,
+	getImprovementSummary,
+	type ImprovementTarget,
+	type ImprovementSource,
+	type Improvement,
+	type ImprovementSummary
+} from './improvements';

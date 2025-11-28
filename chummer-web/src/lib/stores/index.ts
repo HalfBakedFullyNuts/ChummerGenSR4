@@ -61,6 +61,8 @@ export {
 	currentEssence,
 	isDirty,
 	startNewCharacter,
+	setBuildMethod,
+	KARMA_BUILD_COSTS,
 	setWizardStep,
 	nextWizardStep,
 	prevWizardStep,

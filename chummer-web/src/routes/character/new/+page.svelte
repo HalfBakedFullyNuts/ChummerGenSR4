@@ -7,6 +7,7 @@
 		currentStepIndex,
 		remainingBP,
 		startNewCharacter,
+		setBuildMethod,
 		nextWizardStep,
 		prevWizardStep,
 		setWizardStep,
@@ -182,12 +183,85 @@
 		{:else if $currentStep === 'method'}
 			<div class="cw-card">
 				<h2 class="cw-card-header">Build Method</h2>
-				<p class="text-secondary-text mb-4">
-					Using Build Point (BP) system with 400 starting points.
+				<p class="text-secondary-text mb-6">
+					Choose how you want to create your character.
 				</p>
-				<p class="text-muted-text text-sm">
-					Karma build method coming soon.
-				</p>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<!-- BP Method -->
+					<button
+						class="p-6 rounded-lg text-left transition-all
+							{$character?.buildMethod === 'bp'
+								? 'bg-accent-primary/20 border-2 border-accent-primary'
+								: 'bg-surface hover:bg-surface-light border-2 border-transparent'}"
+						on:click={() => setBuildMethod('bp')}
+					>
+						<div class="flex items-center gap-3 mb-3">
+							<div class="w-12 h-12 rounded-full bg-accent-primary/30 flex items-center justify-center">
+								<span class="text-accent-primary text-xl font-bold">BP</span>
+							</div>
+							<div>
+								<h3 class="text-lg font-medium text-primary-text">Build Points</h3>
+								<span class="text-accent-primary font-mono">400 BP</span>
+							</div>
+						</div>
+						<p class="text-secondary-text text-sm">
+							The standard SR4 creation method. Allocate Build Points across all aspects
+							of your character with straightforward costs.
+						</p>
+						<ul class="text-muted-text text-xs mt-3 space-y-1">
+							<li>• Attributes: 10 BP per point above minimum</li>
+							<li>• Skills: 4 BP per rating point</li>
+							<li>• Spells/Forms: 5 BP each</li>
+							<li>• Resources: Up to 50 BP for nuyen</li>
+						</ul>
+					</button>
+
+					<!-- Karma Method -->
+					<button
+						class="p-6 rounded-lg text-left transition-all
+							{$character?.buildMethod === 'karma'
+								? 'bg-accent-cyan/20 border-2 border-accent-cyan'
+								: 'bg-surface hover:bg-surface-light border-2 border-transparent'}"
+						on:click={() => setBuildMethod('karma')}
+					>
+						<div class="flex items-center gap-3 mb-3">
+							<div class="w-12 h-12 rounded-full bg-accent-cyan/30 flex items-center justify-center">
+								<span class="text-accent-cyan text-xl font-bold">K</span>
+							</div>
+							<div>
+								<h3 class="text-lg font-medium text-primary-text">Karma Build</h3>
+								<span class="text-accent-cyan font-mono">750 Karma</span>
+							</div>
+						</div>
+						<p class="text-secondary-text text-sm">
+							Runner's Companion alternate method. Uses karma for everything,
+							matching career advancement costs for easier tracking.
+						</p>
+						<ul class="text-muted-text text-xs mt-3 space-y-1">
+							<li>• Attributes: (new rating) × 5 karma</li>
+							<li>• Skills: (new rating) × 2 karma</li>
+							<li>• Qualities: BP cost × 2 karma</li>
+							<li>• Resources: 1 karma = 2,500¥</li>
+						</ul>
+					</button>
+				</div>
+
+				<div class="mt-6 p-4 bg-surface rounded-lg">
+					<div class="flex items-center justify-between">
+						<span class="text-secondary-text">Selected Method:</span>
+						<span class="font-medium {$character?.buildMethod === 'karma' ? 'text-accent-cyan' : 'text-accent-primary'}">
+							{$character?.buildMethod === 'karma' ? 'Karma Build' : 'Build Points'}
+						</span>
+					</div>
+					<div class="flex items-center justify-between mt-2">
+						<span class="text-secondary-text">Starting Points:</span>
+						<span class="font-mono text-lg {$character?.buildMethod === 'karma' ? 'text-accent-cyan' : 'text-accent-primary'}">
+							{$character?.buildPoints ?? 400}
+							{$character?.buildMethod === 'karma' ? ' Karma' : ' BP'}
+						</span>
+					</div>
+				</div>
 			</div>
 		{:else if $currentStep === 'metatype'}
 			<MetatypeSelector />
