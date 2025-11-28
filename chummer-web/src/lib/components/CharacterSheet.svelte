@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { Character, SkillDefinition, AttributeCode, CharacterWeapon, CharacterSpell } from '$types';
-	import { getWeaponSkill, parseDamage, parseAP, parseFireModes, calculateArmorStacking, type FiringMode } from '$lib/utils/dice';
+	import { getWeaponSkill, parseDamage, parseAP, parseFireModes, calculateArmorStacking, calculateInitiativeModifiers, type FiringMode } from '$lib/utils/dice';
 
 	/** Character to display. */
 	export let char: Character;
@@ -111,8 +111,17 @@
 		dispatch('rollInitiative', { base: initiative, dice: initiativeDice });
 	}
 
-	/** Calculate initiative dice based on augmentations/magic. */
-	$: initiativeDice = 1; // TODO: Calculate from cyberware/magic
+	/** Calculate initiative modifiers from cyberware and adept powers. */
+	$: initMods = calculateInitiativeModifiers(
+		char.equipment.cyberware.map(c => ({ name: c.name, rating: c.rating })),
+		char.magic?.powers?.map(p => ({ name: p.name, rating: p.level })) ?? []
+	);
+
+	/** Bonus to initiative score from augmentations. */
+	$: initiativeBonus = initMods.initiativeBonus;
+
+	/** Initiative dice (base 1 + augmentation bonuses). */
+	$: initiativeDice = 1 + initMods.initiativeDice;
 
 	/** Get weapon attack pool. */
 	function getWeaponPool(weapon: CharacterWeapon): { pool: number; skillName: string } {
@@ -226,8 +235,8 @@
 	/** Max Edge points. */
 	$: maxEdge = getAttrTotal(char.attributes.edg);
 
-	/** Get initiative. */
-	$: initiative = getAttrTotal(char.attributes.rea) + getAttrTotal(char.attributes.int);
+	/** Get initiative (REA + INT + augmentation bonuses). */
+	$: initiative = getAttrTotal(char.attributes.rea) + getAttrTotal(char.attributes.int) + initiativeBonus;
 
 	/** Calculate wound modifier (every 3 boxes filled = -1). */
 	$: physicalWoundMod = Math.floor(char.condition.physicalCurrent / 3);
