@@ -98,6 +98,63 @@ export interface GameProgram {
 	page: number;
 }
 
+/** Bioware from game data. */
+export interface GameBioware {
+	name: string;
+	category: string;
+	rating: number;
+	ess: number;
+	cost: number;
+	capacity: number;
+	avail: string;
+	source: string;
+	page: number;
+}
+
+/** Vehicle from game data. */
+export interface GameVehicle {
+	name: string;
+	category: string;
+	handling: string;
+	accel: string;
+	speed: string;
+	pilot: number;
+	body: number;
+	armor: number;
+	sensor: number;
+	seats: string;
+	avail: string;
+	cost: number;
+	source: string;
+	page: number;
+}
+
+/** Martial art style from game data. */
+export interface GameMartialArt {
+	name: string;
+	source: string;
+	page: number;
+	techniques: string[];
+}
+
+/** Technomancer echo from game data. */
+export interface GameEcho {
+	name: string;
+	source: string;
+	page: number;
+	limit: number;
+	bonus: string;
+}
+
+/** Technomancer stream from game data. */
+export interface GameStream {
+	name: string;
+	drain: string;
+	sprites: string[];
+	source: string;
+	page: number;
+}
+
 /** Skill category with type. */
 export interface SkillCategoryDef {
 	name: string;
@@ -131,6 +188,17 @@ export interface GameData {
 	cyberwareGrades: CyberwareGradeMultiplier[];
 	gear: GameGear[];
 	gearCategories: string[];
+	/* Bioware (separate from cyberware) */
+	bioware: GameBioware[];
+	biowareCategories: string[];
+	/* Vehicles & Drones */
+	vehicles: GameVehicle[];
+	vehicleCategories: string[];
+	/* Martial Arts */
+	martialArts: GameMartialArt[];
+	/* Technomancer */
+	echoes: GameEcho[];
+	streams: GameStream[];
 }
 
 /** Empty game data for initial state. */
@@ -159,7 +227,18 @@ const EMPTY_GAME_DATA: GameData = {
 	cyberwareCategories: [],
 	cyberwareGrades: [],
 	gear: [],
-	gearCategories: []
+	gearCategories: [],
+	/* Bioware (separate from cyberware) */
+	bioware: [],
+	biowareCategories: [],
+	/* Vehicles & Drones */
+	vehicles: [],
+	vehicleCategories: [],
+	/* Martial Arts */
+	martialArts: [],
+	/* Technomancer */
+	echoes: [],
+	streams: []
 };
 
 /* Internal stores */
@@ -232,7 +311,12 @@ export async function loadGameData(): Promise<void> {
 			weaponsData,
 			armorData,
 			cyberwareData,
-			gearData
+			gearData,
+			biowareData,
+			vehiclesData,
+			martialArtsData,
+			echoesData,
+			streamsData
 		] = await Promise.all([
 			fetchDataFile<{ categories: string[]; metatypes: Metatype[] }>('metatypes.json'),
 			fetchDataFile<{ skillGroups: string[]; categories: SkillCategoryDef[]; skills: SkillDefinition[] }>('skills.json'),
@@ -246,7 +330,12 @@ export async function loadGameData(): Promise<void> {
 			fetchDataFile<{ categories: string[]; weapons: GameWeapon[] }>('weapons.json'),
 			fetchDataFile<{ categories: string[]; armor: GameArmor[] }>('armor.json'),
 			fetchDataFile<{ categories: string[]; grades: CyberwareGradeMultiplier[]; cyberware: GameCyberware[] }>('cyberware.json'),
-			fetchDataFile<{ categories: string[]; gear: GameGear[] }>('gear.json')
+			fetchDataFile<{ categories: string[]; gear: GameGear[] }>('gear.json'),
+			fetchDataFile<{ categories: string[]; biowares: GameBioware[] }>('bioware.json'),
+			fetchDataFile<{ categories: string[]; vehicles: GameVehicle[] }>('vehicles.json'),
+			fetchDataFile<{ styles: GameMartialArt[] }>('martialarts.json'),
+			fetchDataFile<{ echoes: GameEcho[] }>('echoes.json'),
+			fetchDataFile<{ streams: GameStream[] }>('streams.json')
 		]);
 
 		/* Combine into single game data object */
@@ -275,7 +364,18 @@ export async function loadGameData(): Promise<void> {
 			cyberwareCategories: filterCyberwareCategories(cyberwareData?.categories),
 			cyberwareGrades: limitArray(cyberwareData?.grades),
 			gear: limitArray(gearData?.gear),
-			gearCategories: limitArray(gearData?.categories)
+			gearCategories: limitArray(gearData?.categories),
+			/* Bioware (separate from cyberware) */
+			bioware: limitArray(biowareData?.biowares),
+			biowareCategories: limitArray(biowareData?.categories),
+			/* Vehicles & Drones */
+			vehicles: limitArray(vehiclesData?.vehicles),
+			vehicleCategories: limitArray(vehiclesData?.categories),
+			/* Martial Arts */
+			martialArts: limitArray(martialArtsData?.styles),
+			/* Technomancer */
+			echoes: limitArray(echoesData?.echoes),
+			streams: limitArray(streamsData?.streams)
 		};
 
 		gameDataStore.set(data);
@@ -339,6 +439,12 @@ export const powers: Readable<GamePower[]> = derived(
 export const traditions: Readable<GameTradition[]> = derived(
 	gameData,
 	($data) => $data.traditions
+);
+
+/** Derived store for mentor spirits. */
+export const mentors: Readable<GameMentor[]> = derived(
+	gameData,
+	($data) => $data.mentors
 );
 
 /** Derived store for programs (complex forms for technomancers). */
@@ -540,4 +646,143 @@ export function filterGearByCategory(
 	category: string
 ): GameGear[] {
 	return data.gear.filter((g) => g.category === category);
+}
+
+/* ============================================
+ * Bioware Derived Stores & Functions
+ * ============================================ */
+
+/** Derived store for bioware. */
+export const bioware: Readable<GameBioware[]> = derived(
+	gameData,
+	($data) => $data.bioware
+);
+
+/** Derived store for bioware categories. */
+export const biowareCategories: Readable<string[]> = derived(
+	gameData,
+	($data) => $data.biowareCategories
+);
+
+/**
+ * Find bioware by name.
+ */
+export function findBioware(
+	data: GameData,
+	name: string
+): GameBioware | undefined {
+	if (!name) return undefined;
+	return data.bioware.find((b) => b.name === name);
+}
+
+/**
+ * Filter bioware by category.
+ */
+export function filterBiowareByCategory(
+	data: GameData,
+	category: string
+): GameBioware[] {
+	return data.bioware.filter((b) => b.category === category);
+}
+
+/* ============================================
+ * Vehicles & Drones Derived Stores & Functions
+ * ============================================ */
+
+/** Derived store for vehicles. */
+export const vehicles: Readable<GameVehicle[]> = derived(
+	gameData,
+	($data) => $data.vehicles
+);
+
+/** Derived store for vehicle categories. */
+export const vehicleCategories: Readable<string[]> = derived(
+	gameData,
+	($data) => $data.vehicleCategories
+);
+
+/** Derived store for drones only (categories that start with "Drones:"). */
+export const drones: Readable<GameVehicle[]> = derived(
+	gameData,
+	($data) => $data.vehicles.filter((v) => v.category.startsWith('Drones:'))
+);
+
+/**
+ * Find vehicle by name.
+ */
+export function findVehicle(
+	data: GameData,
+	name: string
+): GameVehicle | undefined {
+	if (!name) return undefined;
+	return data.vehicles.find((v) => v.name === name);
+}
+
+/**
+ * Filter vehicles by category.
+ */
+export function filterVehiclesByCategory(
+	data: GameData,
+	category: string
+): GameVehicle[] {
+	return data.vehicles.filter((v) => v.category === category);
+}
+
+/* ============================================
+ * Martial Arts Derived Stores & Functions
+ * ============================================ */
+
+/** Derived store for martial arts. */
+export const martialArts: Readable<GameMartialArt[]> = derived(
+	gameData,
+	($data) => $data.martialArts
+);
+
+/**
+ * Find martial art by name.
+ */
+export function findMartialArt(
+	data: GameData,
+	name: string
+): GameMartialArt | undefined {
+	if (!name) return undefined;
+	return data.martialArts.find((m) => m.name === name);
+}
+
+/* ============================================
+ * Technomancer Echoes & Streams
+ * ============================================ */
+
+/** Derived store for technomancer echoes. */
+export const echoes: Readable<GameEcho[]> = derived(
+	gameData,
+	($data) => $data.echoes
+);
+
+/** Derived store for technomancer streams. */
+export const streams: Readable<GameStream[]> = derived(
+	gameData,
+	($data) => $data.streams
+);
+
+/**
+ * Find echo by name.
+ */
+export function findEcho(
+	data: GameData,
+	name: string
+): GameEcho | undefined {
+	if (!name) return undefined;
+	return data.echoes.find((e) => e.name === name);
+}
+
+/**
+ * Find stream by name.
+ */
+export function findStream(
+	data: GameData,
+	name: string
+): GameStream | undefined {
+	if (!name) return undefined;
+	return data.streams.find((s) => s.name === name);
 }

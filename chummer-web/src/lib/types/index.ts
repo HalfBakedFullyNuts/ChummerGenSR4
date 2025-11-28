@@ -94,6 +94,13 @@ export type {
 	CyberwareGradeMultiplier,
 	GameCyberware,
 	CharacterCyberware,
+	BiowareCategory,
+	BiowareGrade,
+	CharacterBioware,
+	VehicleCategory,
+	CharacterVehicle,
+	VehicleMod,
+	CharacterMartialArt,
 	GearCategory,
 	GameGear,
 	CharacterGear,
@@ -105,10 +112,13 @@ export type {
 
 export {
 	CYBERWARE_GRADES,
+	BIOWARE_GRADES,
 	BP_TO_NUYEN_RATES,
 	EMPTY_EQUIPMENT,
 	calculateEquipmentCost,
 	calculateEssenceCost,
+	calculateBiowareEssenceCost,
+	calculateTotalEssenceCost,
 	bpToNuyen,
 	nuyenToBp
 } from './equipment';
