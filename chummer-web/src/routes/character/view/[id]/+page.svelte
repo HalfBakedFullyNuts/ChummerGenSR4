@@ -243,10 +243,18 @@
 			ammoUsed
 		};
 		selectedSpell = null;
-		dicePool = pool;
+
+		// Apply combat modifiers to attack pool (minimum 1 die)
+		const modifiedPool = Math.max(1, pool + combatModifierTotal);
+		dicePool = modifiedPool;
+
+		// Include modifier info in test name if non-zero
+		const modStr = combatModifierTotal !== 0
+			? ` [${combatModifierTotal >= 0 ? '+' : ''}${combatModifierTotal}]`
+			: '';
 		lastTestName = firingMode
-			? `${weapon.name} (${firingMode.code})`
-			: `${weapon.name} (${skillName})`;
+			? `${weapon.name} (${firingMode.code})${modStr}`
+			: `${weapon.name} (${skillName})${modStr}`;
 		showDiceRoller = true;
 	}
 
@@ -604,6 +612,14 @@
 			<div class="mb-6 dice-roller-panel">
 				{#if lastTestName}
 					<div class="text-sm text-accent-cyan mb-2">Rolling: {lastTestName}</div>
+				{/if}
+				{#if combatModifierTotal !== 0 && selectedWeapon}
+					<div class="cw-panel mb-2 p-2 border-l-4 {combatModifierTotal < 0 ? 'border-accent-danger bg-accent-danger/10' : 'border-accent-success bg-accent-success/10'}">
+						<span class="text-sm text-secondary-text">Combat Modifiers Applied: </span>
+						<span class="font-mono font-bold {combatModifierTotal < 0 ? 'text-accent-danger' : 'text-accent-success'}">
+							{combatModifierTotal >= 0 ? '+' : ''}{combatModifierTotal}
+						</span>
+					</div>
 				{/if}
 				{#if selectedWeapon}
 					<div class="cw-card mb-2 p-3">
