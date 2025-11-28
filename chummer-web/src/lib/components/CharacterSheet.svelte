@@ -1049,6 +1049,54 @@
 		</div>
 	{/if}
 
+	<!-- Gear -->
+	{#if char.equipment.gear && char.equipment.gear.length > 0}
+		<div class="cw-card">
+			<h2 class="cw-card-header">Gear</h2>
+			<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-sm">
+				{#each char.equipment.gear as item}
+					<div class="flex justify-between py-1 border-b border-border">
+						<span class="text-secondary-text">
+							{item.name}
+							{#if item.quantity > 1}
+								<span class="text-muted-text">×{item.quantity}</span>
+							{/if}
+							{#if item.rating > 0}
+								<span class="text-muted-text">(R{item.rating})</span>
+							{/if}
+						</span>
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
+	<!-- Lifestyle -->
+	{#if char.equipment.lifestyle}
+		<div class="cw-card">
+			<h2 class="cw-card-header">Lifestyle</h2>
+			<div class="p-3 bg-surface-light rounded">
+				<div class="flex justify-between items-center">
+					<div>
+						<span class="font-medium text-primary-text">{char.equipment.lifestyle.name}</span>
+						{#if char.equipment.lifestyle.location}
+							<span class="text-muted-text text-sm ml-2">({char.equipment.lifestyle.location})</span>
+						{/if}
+					</div>
+					<div class="text-right">
+						<span class="text-accent-cyan font-mono">{formatNuyen(char.equipment.lifestyle.monthlyCost)}</span>
+						<span class="text-muted-text text-xs">/month</span>
+					</div>
+				</div>
+				{#if char.equipment.lifestyle.monthsPrepaid > 0}
+					<div class="text-xs text-secondary-text mt-1">
+						{char.equipment.lifestyle.monthsPrepaid} month{char.equipment.lifestyle.monthsPrepaid !== 1 ? 's' : ''} prepaid
+					</div>
+				{/if}
+			</div>
+		</div>
+	{/if}
+
 	<!-- Identity Details -->
 	<div class="cw-card">
 		<h2 class="cw-card-header">Identity</h2>
