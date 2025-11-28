@@ -11,16 +11,25 @@
 		removeArmor,
 		addCyberware,
 		removeCyberware,
+		addBioware,
+		removeBioware,
+		addVehicle,
+		removeVehicle,
+		addMartialArt,
+		removeMartialArt,
+		addMartialArtTechnique,
+		removeMartialArtTechnique,
+		MARTIAL_ARTS_COSTS,
 		addGear,
 		removeGear,
 		setLifestyle,
 		removeLifestyle
 	} from '$stores/character';
 	import { gameData } from '$stores/gamedata';
-	import { BP_TO_NUYEN_RATES, type CyberwareGrade } from '$types';
+	import { BP_TO_NUYEN_RATES, type CyberwareGrade, type BiowareGrade } from '$types';
 
 	/** Current equipment tab. */
-	type EquipmentTab = 'resources' | 'weapons' | 'armor' | 'cyberware' | 'gear' | 'lifestyle' | 'owned';
+	type EquipmentTab = 'resources' | 'weapons' | 'armor' | 'cyberware' | 'bioware' | 'vehicles' | 'martialarts' | 'gear' | 'lifestyle' | 'owned';
 	let currentTab: EquipmentTab = 'resources';
 
 	/** Tab configuration. */
@@ -29,6 +38,9 @@
 		{ id: 'weapons', label: 'Weapons' },
 		{ id: 'armor', label: 'Armor' },
 		{ id: 'cyberware', label: 'Cyberware' },
+		{ id: 'bioware', label: 'Bioware' },
+		{ id: 'vehicles', label: 'Vehicles' },
+		{ id: 'martialarts', label: 'Martial Arts' },
 		{ id: 'gear', label: 'Gear' },
 		{ id: 'lifestyle', label: 'Lifestyle' },
 		{ id: 'owned', label: 'Owned' }
@@ -38,15 +50,21 @@
 	let weaponCategory = '';
 	let armorCategory = '';
 	let cyberCategory = '';
+	let bioCategory = '';
+	let vehicleCategory = '';
 	let gearCategory = '';
 
 	/** Cyberware grade selection. */
 	let selectedGrade: CyberwareGrade = 'Standard';
+	let selectedBioGrade: BiowareGrade = 'Standard';
 
 	/** Search filters. */
 	let weaponSearch = '';
 	let armorSearch = '';
 	let cyberSearch = '';
+	let bioSearch = '';
+	let vehicleSearch = '';
+	let martialSearch = '';
 	let gearSearch = '';
 
 	/** Grade multipliers for display. */
@@ -60,6 +78,13 @@
 
 	/** Available grades as array for iteration. */
 	const gradeOptions: CyberwareGrade[] = ['Standard', 'Alphaware', 'Betaware', 'Deltaware', 'Used'];
+	const bioGradeOptions: BiowareGrade[] = ['Standard', 'Cultured'];
+
+	/** Bioware grade info. */
+	const bioGradeInfo: Record<BiowareGrade, { ess: string; cost: string; label: string }> = {
+		'Standard': { ess: '1.0x', cost: '1x', label: 'Standard' },
+		'Cultured': { ess: '0.75x', cost: '4x', label: 'Cultured' }
+	};
 
 	/** Filter weapons by category and search. */
 	$: filteredWeapons = $gameData.weapons
@@ -89,6 +114,24 @@
 		.filter((g) => g.cost > 0)
 		.slice(0, 50);
 
+	/** Filter bioware by category and search. */
+	$: filteredBioware = $gameData.bioware
+		.filter((b) => !bioCategory || b.category === bioCategory)
+		.filter((b) => !bioSearch || b.name.toLowerCase().includes(bioSearch.toLowerCase()))
+		.filter((b) => b.cost > 0)
+		.slice(0, 50);
+
+	/** Filter vehicles by category and search. */
+	$: filteredVehicles = $gameData.vehicles
+		.filter((v) => !vehicleCategory || v.category === vehicleCategory)
+		.filter((v) => !vehicleSearch || v.name.toLowerCase().includes(vehicleSearch.toLowerCase()))
+		.filter((v) => v.cost > 0)
+		.slice(0, 50);
+
+	/** Filter martial arts by search. */
+	$: filteredMartialArts = $gameData.martialArts
+		.filter((m) => !martialSearch || m.name.toLowerCase().includes(martialSearch.toLowerCase()));
+
 	/** Format nuyen amount. */
 	function formatNuyen(amount: number): string {
 		return amount.toLocaleString() + ' ¥';
@@ -101,11 +144,14 @@
 	$: ownedWeapons = $character?.equipment.weapons ?? [];
 	$: ownedArmor = $character?.equipment.armor ?? [];
 	$: ownedCyberware = $character?.equipment.cyberware ?? [];
+	$: ownedBioware = $character?.equipment.bioware ?? [];
+	$: ownedVehicles = $character?.equipment.vehicles ?? [];
+	$: ownedMartialArts = $character?.equipment.martialArts ?? [];
 	$: ownedGear = $character?.equipment.gear ?? [];
 	$: ownedLifestyle = $character?.equipment.lifestyle;
 
 	/** Total owned items. */
-	$: totalOwned = ownedWeapons.length + ownedArmor.length + ownedCyberware.length + ownedGear.length + (ownedLifestyle ? 1 : 0);
+	$: totalOwned = ownedWeapons.length + ownedArmor.length + ownedCyberware.length + ownedBioware.length + ownedVehicles.length + ownedMartialArts.length + ownedGear.length + (ownedLifestyle ? 1 : 0);
 </script>
 
 <div class="space-y-6">
@@ -354,6 +400,181 @@
 				</div>
 			</div>
 
+		{:else if currentTab === 'bioware'}
+			<!-- Bioware Browser -->
+			<div class="cw-card">
+				<h3 class="cw-card-header mb-4">Bioware</h3>
+
+				<!-- Grade Selection -->
+				<div class="cw-panel p-3 mb-4">
+					<span class="text-secondary-text text-sm block mb-2">Select Grade:</span>
+					<div class="flex gap-2 flex-wrap">
+						{#each bioGradeOptions as grade}
+							{@const info = bioGradeInfo[grade]}
+							<button
+								class="px-3 py-1 rounded text-xs transition-colors
+									{selectedBioGrade === grade
+										? 'bg-accent-primary text-background'
+										: 'bg-surface text-secondary-text hover:bg-surface-light'}"
+								on:click={() => (selectedBioGrade = grade)}
+							>
+								{info.label}
+								<span class="text-muted-text ml-1">({info.ess} ESS, {info.cost})</span>
+							</button>
+						{/each}
+					</div>
+				</div>
+
+				<div class="flex gap-2 mb-4">
+					<select
+						class="cw-input flex-1"
+						bind:value={bioCategory}
+					>
+						<option value="">All Categories</option>
+						{#each $gameData.biowareCategories as cat}
+							<option value={cat}>{cat}</option>
+						{/each}
+					</select>
+					<input
+						type="text"
+						class="cw-input flex-1"
+						placeholder="Search..."
+						bind:value={bioSearch}
+					/>
+				</div>
+
+				<div class="space-y-2 max-h-[350px] overflow-y-auto">
+					{#each filteredBioware as bio}
+						{@const gradeMultiplier = selectedBioGrade === 'Standard' ? 1 : 4}
+						{@const essMultiplier = selectedBioGrade === 'Standard' ? 1 : 0.75}
+						{@const adjustedCost = Math.floor(bio.cost * gradeMultiplier)}
+						{@const adjustedEss = bio.ess * essMultiplier}
+						<div class="flex items-center justify-between p-2 bg-surface rounded text-sm">
+							<div class="flex-1 min-w-0">
+								<span class="text-primary-text block truncate">{bio.name}</span>
+								<span class="text-muted-text text-xs">
+									{bio.category} | ESS: {adjustedEss.toFixed(2)}
+								</span>
+							</div>
+							<div class="flex items-center gap-2 ml-2">
+								<span class="font-mono text-accent-cyan text-xs whitespace-nowrap">
+									{formatNuyen(adjustedCost)}
+								</span>
+								<button
+									class="cw-btn cw-btn-primary text-xs py-1 px-2"
+									disabled={$remainingNuyen < adjustedCost || $currentEssence < adjustedEss}
+									on:click={() => addBioware(bio, selectedBioGrade)}
+								>
+									Install
+								</button>
+							</div>
+						</div>
+					{/each}
+					{#if filteredBioware.length === 0}
+						<p class="text-muted-text text-center py-4">No bioware found</p>
+					{/if}
+				</div>
+			</div>
+
+		{:else if currentTab === 'vehicles'}
+			<!-- Vehicles Browser -->
+			<div class="cw-card">
+				<h3 class="cw-card-header mb-4">Vehicles & Drones</h3>
+
+				<div class="flex gap-2 mb-4">
+					<select
+						class="cw-input flex-1"
+						bind:value={vehicleCategory}
+					>
+						<option value="">All Categories</option>
+						{#each $gameData.vehicleCategories as cat}
+							<option value={cat}>{cat}</option>
+						{/each}
+					</select>
+					<input
+						type="text"
+						class="cw-input flex-1"
+						placeholder="Search..."
+						bind:value={vehicleSearch}
+					/>
+				</div>
+
+				<div class="space-y-2 max-h-[400px] overflow-y-auto">
+					{#each filteredVehicles as vehicle}
+						<div class="flex items-center justify-between p-2 bg-surface rounded text-sm">
+							<div class="flex-1 min-w-0">
+								<span class="text-primary-text block truncate">{vehicle.name}</span>
+								<span class="text-muted-text text-xs">
+									{vehicle.category} | Handling: {vehicle.handling} | Speed: {vehicle.speed}
+								</span>
+							</div>
+							<div class="flex items-center gap-2 ml-2">
+								<span class="font-mono text-accent-cyan text-xs whitespace-nowrap">
+									{formatNuyen(vehicle.cost)}
+								</span>
+								<button
+									class="cw-btn cw-btn-primary text-xs py-1 px-2"
+									disabled={$remainingNuyen < vehicle.cost}
+									on:click={() => addVehicle(vehicle)}
+								>
+									Buy
+								</button>
+							</div>
+						</div>
+					{/each}
+					{#if filteredVehicles.length === 0}
+						<p class="text-muted-text text-center py-4">No vehicles found</p>
+					{/if}
+				</div>
+			</div>
+
+		{:else if currentTab === 'martialarts'}
+			<!-- Martial Arts Browser -->
+			<div class="cw-card">
+				<h3 class="cw-card-header mb-4">Martial Arts</h3>
+				<p class="text-secondary-text text-sm mb-4">
+					Martial Arts cost BP, not nuyen. Each style costs {MARTIAL_ARTS_COSTS.STYLE} BP.
+				</p>
+
+				<div class="flex gap-2 mb-4">
+					<input
+						type="text"
+						class="cw-input flex-1"
+						placeholder="Search styles..."
+						bind:value={martialSearch}
+					/>
+				</div>
+
+				<div class="space-y-2 max-h-[400px] overflow-y-auto">
+					{#each filteredMartialArts as style}
+						{@const alreadyKnown = ownedMartialArts.some((m) => m.name === style.name)}
+						<div class="flex items-center justify-between p-2 bg-surface rounded text-sm">
+							<div class="flex-1 min-w-0">
+								<span class="text-primary-text block truncate">{style.name}</span>
+								<span class="text-muted-text text-xs">
+									Source: {style.source} p.{style.page}
+								</span>
+							</div>
+							<div class="flex items-center gap-2 ml-2">
+								<span class="font-mono text-accent-purple text-xs whitespace-nowrap">
+									{MARTIAL_ARTS_COSTS.STYLE} BP
+								</span>
+								<button
+									class="cw-btn cw-btn-primary text-xs py-1 px-2"
+									disabled={alreadyKnown}
+									on:click={() => addMartialArt(style)}
+								>
+									{alreadyKnown ? 'Known' : 'Learn'}
+								</button>
+							</div>
+						</div>
+					{/each}
+					{#if filteredMartialArts.length === 0}
+						<p class="text-muted-text text-center py-4">No martial arts found</p>
+					{/if}
+				</div>
+			</div>
+
 		{:else if currentTab === 'gear'}
 			<!-- Gear Browser -->
 			<div class="cw-card">
@@ -535,6 +756,90 @@
 										<button
 											class="text-accent-danger hover:text-red-400 text-xs"
 											on:click={() => removeCyberware(cyber.id)}
+										>
+											Remove
+										</button>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				<!-- Bioware -->
+				{#if ownedBioware.length > 0}
+					<div class="cw-card">
+						<h3 class="cw-card-header mb-3">Bioware ({ownedBioware.length})</h3>
+						<div class="space-y-2">
+							{#each ownedBioware as bio}
+								<div class="flex items-center justify-between p-2 bg-surface rounded text-sm">
+									<div class="flex-1 min-w-0">
+										<span class="text-primary-text block truncate">{bio.name}</span>
+										<span class="text-muted-text text-xs">
+											{bio.grade} | ESS: {bio.essence.toFixed(2)}
+										</span>
+									</div>
+									<div class="flex items-center gap-2">
+										<span class="text-muted-text text-xs">{formatNuyen(bio.cost)}</span>
+										<button
+											class="text-accent-danger hover:text-red-400 text-xs"
+											on:click={() => removeBioware(bio.id)}
+										>
+											Remove
+										</button>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				<!-- Vehicles -->
+				{#if ownedVehicles.length > 0}
+					<div class="cw-card">
+						<h3 class="cw-card-header mb-3">Vehicles ({ownedVehicles.length})</h3>
+						<div class="space-y-2">
+							{#each ownedVehicles as vehicle}
+								<div class="flex items-center justify-between p-2 bg-surface rounded text-sm">
+									<div class="flex-1 min-w-0">
+										<span class="text-primary-text block truncate">{vehicle.name}</span>
+										<span class="text-muted-text text-xs">
+											{vehicle.category} | Handling: {vehicle.handling}
+										</span>
+									</div>
+									<div class="flex items-center gap-2">
+										<span class="text-muted-text text-xs">{formatNuyen(vehicle.cost)}</span>
+										<button
+											class="text-accent-danger hover:text-red-400 text-xs"
+											on:click={() => removeVehicle(vehicle.id)}
+										>
+											Sell
+										</button>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				<!-- Martial Arts -->
+				{#if ownedMartialArts.length > 0}
+					<div class="cw-card">
+						<h3 class="cw-card-header mb-3">Martial Arts ({ownedMartialArts.length})</h3>
+						<div class="space-y-2">
+							{#each ownedMartialArts as art}
+								<div class="flex items-center justify-between p-2 bg-surface rounded text-sm">
+									<div class="flex-1 min-w-0">
+										<span class="text-primary-text block truncate">{art.name}</span>
+										<span class="text-muted-text text-xs">
+											{art.techniques.length} technique{art.techniques.length !== 1 ? 's' : ''}
+										</span>
+									</div>
+									<div class="flex items-center gap-2">
+										<span class="text-muted-text text-xs">{MARTIAL_ARTS_COSTS.STYLE} BP</span>
+										<button
+											class="text-accent-danger hover:text-red-400 text-xs"
+											on:click={() => removeMartialArt(art.id)}
 										>
 											Remove
 										</button>
