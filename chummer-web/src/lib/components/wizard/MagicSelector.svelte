@@ -6,9 +6,11 @@
 		powers,
 		programs,
 		programCategories,
+		streams,
 		type GameSpell,
 		type GamePower,
-		type GameProgram
+		type GameProgram,
+		type GameStream
 	} from '$stores/gamedata';
 	import {
 		character,
@@ -30,18 +32,6 @@
 
 	/** Currently active tab for technomancers. */
 	let techTab: 'stream' | 'forms' = 'stream';
-
-	/** Technomancer stream selection. */
-	const TECH_STREAMS = [
-		{ name: 'Cyberadept', desc: 'Focuses on enhancing cyberware and bioware integration' },
-		{ name: 'Dronomancer', desc: 'Specializes in controlling and enhancing drones' },
-		{ name: 'E-Ghost', desc: 'Masters the art of Matrix stealth and infiltration' },
-		{ name: 'Info Savant', desc: 'Expert at data processing and information gathering' },
-		{ name: 'Machinist', desc: 'Excels at controlling and manipulating devices' },
-		{ name: 'Prodigy', desc: 'Balanced approach to all technomancer abilities' },
-		{ name: 'Sourcerer', desc: 'Specializes in sprites and sprite compilation' },
-		{ name: 'Technoshaman', desc: 'Follows a spiritual approach to the Resonance' }
-	] as const;
 
 	/** Complex form category filter. */
 	let formCategory = 'Common Use';
@@ -273,7 +263,7 @@
 					Your stream defines your approach to the Resonance and influences your abilities.
 				</p>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-					{#each TECH_STREAMS as stream}
+					{#each $streams ?? [] as stream}
 						{@const isSelected = selectedStream === stream.name}
 						<button
 							class="p-3 rounded text-left transition-all
@@ -285,12 +275,23 @@
 							<div class="font-medium text-primary-text">
 								{stream.name}
 							</div>
-							<div class="text-secondary-text text-xs mt-1">
-								{stream.desc}
+							<div class="text-muted-text text-xs mt-1">
+								Drain: {stream.drain}
+							</div>
+							<div class="text-secondary-text text-xs mt-1 line-clamp-1">
+								Sprites: {stream.sprites.slice(0, 3).join(', ')}{stream.sprites.length > 3 ? '...' : ''}
+							</div>
+							<div class="text-muted-text text-xs mt-1">
+								{stream.source} p.{stream.page}
 							</div>
 						</button>
 					{/each}
 				</div>
+				{#if !$streams?.length}
+					<div class="text-center text-muted-text py-4">
+						Loading streams data...
+					</div>
+				{/if}
 			</div>
 		{/if}
 
