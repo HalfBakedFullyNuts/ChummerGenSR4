@@ -837,13 +837,91 @@
 		</div>
 	{/if}
 
+	<!-- Bioware -->
+	{#if char.equipment.bioware && char.equipment.bioware.length > 0}
+		<div class="cw-card">
+			<h2 class="cw-card-header">Bioware</h2>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+				{#each char.equipment.bioware as bio}
+					<div class="flex justify-between py-1 border-b border-border">
+						<span class="text-secondary-text">
+							{bio.name}
+							{#if bio.rating > 0}
+								<span class="text-muted-text">(R{bio.rating})</span>
+							{/if}
+							{#if bio.grade !== 'Standard'}
+								<span class="text-accent-success text-xs ml-1">[{bio.grade}]</span>
+							{/if}
+						</span>
+						<span class="text-accent-purple text-xs">{bio.essence.toFixed(2)} ESS</span>
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
+	<!-- Vehicles -->
+	{#if char.equipment.vehicles && char.equipment.vehicles.length > 0}
+		<div class="cw-card">
+			<h2 class="cw-card-header">Vehicles</h2>
+			<div class="space-y-2 text-sm">
+				{#each char.equipment.vehicles as vehicle}
+					<div class="p-2 bg-surface-light rounded">
+						<div class="font-medium text-primary-text">{vehicle.name}</div>
+						<div class="grid grid-cols-4 gap-2 text-xs text-muted-text mt-1">
+							<span>Hand: <span class="text-secondary-text">{vehicle.handling}</span></span>
+							<span>Speed: <span class="text-secondary-text">{vehicle.speed}</span></span>
+							<span>Pilot: <span class="text-secondary-text">{vehicle.pilot}</span></span>
+							<span>Body: <span class="text-secondary-text">{vehicle.body}</span></span>
+							<span>Armor: <span class="text-secondary-text">{vehicle.armor}</span></span>
+							<span>Sensor: <span class="text-secondary-text">{vehicle.sensor}</span></span>
+						</div>
+						{#if vehicle.mods && vehicle.mods.length > 0}
+							<div class="text-xs text-muted-text mt-1">
+								Mods: {vehicle.mods.map(m => m.name).join(', ')}
+							</div>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
+	<!-- Martial Arts -->
+	{#if char.equipment.martialArts && char.equipment.martialArts.length > 0}
+		<div class="cw-card">
+			<h2 class="cw-card-header">Martial Arts</h2>
+			<div class="space-y-3 text-sm">
+				{#each char.equipment.martialArts as art}
+					<div class="p-2 bg-surface-light rounded">
+						<div class="font-medium text-primary-text">{art.name}</div>
+						{#if art.techniques.length > 0}
+							<div class="flex flex-wrap gap-1 mt-2">
+								{#each art.techniques as technique}
+									<span class="px-2 py-0.5 bg-accent-primary/20 text-accent-primary text-xs rounded">
+										{technique}
+									</span>
+								{/each}
+							</div>
+						{:else}
+							<p class="text-muted-text text-xs mt-1">No techniques learned yet</p>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
 	<!-- Magic -->
 	{#if char.magic}
 		<div class="cw-card">
 			<h2 class="cw-card-header">Magic</h2>
 			<div class="space-y-4">
-				<div class="flex gap-4 text-sm">
+				<div class="flex flex-wrap gap-4 text-sm">
 					<span class="text-secondary-text">Tradition: <span class="text-primary-text">{char.magic.tradition}</span></span>
+					{#if char.magic.mentor}
+						<span class="text-secondary-text">Mentor: <span class="text-accent-purple">{char.magic.mentor}</span></span>
+					{/if}
 					{#if char.magic.initiateGrade > 0}
 						<span class="text-secondary-text">Initiate Grade: <span class="text-accent-magenta">{char.magic.initiateGrade}</span></span>
 					{/if}
@@ -882,6 +960,66 @@
 								<div class="flex justify-between py-1 border-b border-border">
 									<span class="text-secondary-text">{power.name}</span>
 									<span class="text-accent-magenta">{power.points * power.level} PP</span>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+			</div>
+		</div>
+	{/if}
+
+	<!-- Resonance (Technomancer) -->
+	{#if char.resonance}
+		<div class="cw-card">
+			<h2 class="cw-card-header">Resonance</h2>
+			<div class="space-y-4">
+				<div class="flex flex-wrap gap-4 text-sm">
+					<span class="text-secondary-text">Stream: <span class="text-accent-cyan">{char.resonance.stream}</span></span>
+					{#if char.resonance.submersionGrade > 0}
+						<span class="text-secondary-text">Submersion Grade: <span class="text-accent-cyan">{char.resonance.submersionGrade}</span></span>
+					{/if}
+				</div>
+
+				{#if char.resonance.complexForms.length > 0}
+					<div>
+						<h3 class="text-sm font-medium text-secondary-text mb-2">Complex Forms</h3>
+						<div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+							{#each char.resonance.complexForms as form}
+								<div class="p-2 bg-surface-light rounded">
+									<div class="font-medium text-primary-text">{form.name}</div>
+									<div class="text-xs text-muted-text">
+										{form.target} • {form.duration}
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				{#if char.resonance.echoes && char.resonance.echoes.length > 0}
+					<div>
+						<h3 class="text-sm font-medium text-secondary-text mb-2">Echoes</h3>
+						<div class="flex flex-wrap gap-2">
+							{#each char.resonance.echoes as echo}
+								<span class="px-2 py-1 bg-accent-cyan/20 text-accent-cyan text-sm rounded">
+									{echo.name}
+								</span>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				{#if char.resonance.sprites && char.resonance.sprites.length > 0}
+					<div>
+						<h3 class="text-sm font-medium text-secondary-text mb-2">Registered Sprites</h3>
+						<div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+							{#each char.resonance.sprites as sprite}
+								<div class="p-2 bg-surface-light rounded">
+									<div class="font-medium text-primary-text">{sprite.type}</div>
+									<div class="text-xs text-muted-text">
+										Rating {sprite.rating} • {sprite.tasks} task{sprite.tasks !== 1 ? 's' : ''} remaining
+									</div>
 								</div>
 							{/each}
 						</div>
