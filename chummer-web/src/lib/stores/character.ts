@@ -20,6 +20,9 @@ import {
 	type CharacterWeapon,
 	type CharacterArmor,
 	type CharacterCyberware,
+	type CharacterBioware,
+	type CharacterVehicle,
+	type CharacterMartialArt,
 	type CharacterGear,
 	type CharacterLifestyle,
 	type GameWeapon,
@@ -27,11 +30,18 @@ import {
 	type GameCyberware,
 	type GameGear,
 	type CyberwareGrade,
+	type BiowareGrade,
 	type ExpenseEntry,
 	bpToNuyen,
 	createEmptyCharacter
 } from '$types';
-import { findMetatype, type GameData } from './gamedata';
+import {
+	findMetatype,
+	type GameData,
+	type GameBioware,
+	type GameVehicle,
+	type GameMartialArt
+} from './gamedata';
 
 /** Maximum BP for standard character creation. */
 const MAX_BP = 400;
@@ -588,6 +598,40 @@ export function setTradition(tradition: string): void {
 }
 
 /**
+ * Set the character's mentor spirit.
+ * Mentor spirits provide bonuses and disadvantages.
+ * Costs 5 BP during character creation.
+ */
+export function setMentor(mentorName: string | null): void {
+	const char = get(characterStore);
+	if (!char || !char.magic) return;
+
+	/* Calculate BP difference */
+	const hadMentor = char.magic.mentor !== null;
+	const willHaveMentor = mentorName !== null;
+	const bpChange = willHaveMentor && !hadMentor ? 5 : (!willHaveMentor && hadMentor ? -5 : 0);
+
+	/* Check BP availability */
+	const totalSpent = Object.values(char.buildPointsSpent).reduce((a, b) => a + b, 0);
+	if (totalSpent + bpChange > char.buildPoints) return;
+
+	const updated: Character = {
+		...char,
+		magic: {
+			...char.magic,
+			mentor: mentorName
+		},
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			other: (char.buildPointsSpent.other || 0) + bpChange
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
  * Add a spell to the character.
  * Costs 5 BP per spell during creation.
  */
@@ -1118,6 +1162,305 @@ export function removeCyberware(cyberId: string): void {
 			ess: char.attributes.ess + cyber.essence
 		},
 		nuyen: char.nuyen + cyber.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/* ============================================
+ * Bioware Functions
+ * ============================================ */
+
+/**
+ * Add bioware to the character.
+ */
+export function addBioware(
+	bio: GameBioware,
+	grade: BiowareGrade = 'Standard',
+	rating: number = 1
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	/* Get grade multipliers */
+	const gradeMultipliers: Record<BiowareGrade, { ess: number; cost: number }> = {
+		'Standard': { ess: 1.0, cost: 1 },
+		'Cultured': { ess: 0.75, cost: 4 }
+	};
+
+	const multiplier = gradeMultipliers[grade];
+	const essenceCost = bio.ess * multiplier.ess * rating;
+	const nuyenCost = Math.floor(bio.cost * multiplier.cost * rating);
+
+	/* Check if we have enough nuyen and essence */
+	if (char.nuyen < nuyenCost) return;
+	if (char.attributes.ess - essenceCost < 0) return;
+
+	const newBio: CharacterBioware = {
+		id: generateId(),
+		name: bio.name,
+		category: bio.category,
+		grade,
+		rating,
+		essence: essenceCost,
+		cost: nuyenCost,
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			bioware: [...char.equipment.bioware, newBio]
+		},
+		attributes: {
+			...char.attributes,
+			ess: char.attributes.ess - essenceCost
+		},
+		nuyen: char.nuyen - nuyenCost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove bioware from the character.
+ */
+export function removeBioware(bioId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const bio = char.equipment.bioware.find((b) => b.id === bioId);
+	if (!bio) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			bioware: char.equipment.bioware.filter((b) => b.id !== bioId)
+		},
+		attributes: {
+			...char.attributes,
+			ess: char.attributes.ess + bio.essence
+		},
+		nuyen: char.nuyen + bio.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/* ============================================
+ * Vehicle Functions
+ * ============================================ */
+
+/**
+ * Add a vehicle to the character.
+ */
+export function addVehicle(vehicle: GameVehicle): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	if (char.nuyen < vehicle.cost) return;
+
+	const newVehicle: CharacterVehicle = {
+		id: generateId(),
+		name: vehicle.name,
+		category: vehicle.category,
+		handling: vehicle.handling,
+		accel: vehicle.accel,
+		speed: vehicle.speed,
+		pilot: vehicle.pilot,
+		body: vehicle.body,
+		armor: vehicle.armor,
+		sensor: vehicle.sensor,
+		cost: vehicle.cost,
+		mods: [],
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			vehicles: [...char.equipment.vehicles, newVehicle]
+		},
+		nuyen: char.nuyen - vehicle.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove a vehicle from the character.
+ */
+export function removeVehicle(vehicleId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const vehicle = char.equipment.vehicles.find((v) => v.id === vehicleId);
+	if (!vehicle) return;
+
+	/* Calculate total refund including mods */
+	let refund = vehicle.cost;
+	for (const mod of vehicle.mods) {
+		refund += mod.cost;
+	}
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			vehicles: char.equipment.vehicles.filter((v) => v.id !== vehicleId)
+		},
+		nuyen: char.nuyen + refund,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/* ============================================
+ * Martial Arts Functions
+ * ============================================ */
+
+/** BP cost for martial arts. */
+export const MARTIAL_ARTS_COSTS = {
+	STYLE: 5,
+	TECHNIQUE: 2
+} as const;
+
+/**
+ * Add a martial art style to the character.
+ */
+export function addMartialArt(style: GameMartialArt): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	/* Check if already known */
+	if (char.equipment.martialArts.some((m) => m.name === style.name)) return;
+
+	/* Check BP cost (5 BP per style) */
+	const bpCost = MARTIAL_ARTS_COSTS.STYLE;
+	const currentSpent = Object.values(char.buildPointsSpent).reduce((a, b) => a + b, 0);
+	if (currentSpent + bpCost > char.buildPoints) return;
+
+	const newArt: CharacterMartialArt = {
+		id: generateId(),
+		name: style.name,
+		techniques: []
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			martialArts: [...char.equipment.martialArts, newArt]
+		},
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			other: (char.buildPointsSpent.other || 0) + bpCost
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove a martial art style from the character.
+ */
+export function removeMartialArt(artId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const art = char.equipment.martialArts.find((m) => m.id === artId);
+	if (!art) return;
+
+	/* Refund BP for style + techniques */
+	const bpRefund = MARTIAL_ARTS_COSTS.STYLE + (art.techniques.length * MARTIAL_ARTS_COSTS.TECHNIQUE);
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			martialArts: char.equipment.martialArts.filter((m) => m.id !== artId)
+		},
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			other: Math.max(0, (char.buildPointsSpent.other || 0) - bpRefund)
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Add a technique to a martial art style.
+ */
+export function addMartialArtTechnique(artId: string, technique: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const art = char.equipment.martialArts.find((m) => m.id === artId);
+	if (!art) return;
+
+	/* Check if already known */
+	if (art.techniques.includes(technique)) return;
+
+	/* Check BP cost (2 BP per technique) */
+	const bpCost = MARTIAL_ARTS_COSTS.TECHNIQUE;
+	const currentSpent = Object.values(char.buildPointsSpent).reduce((a, b) => a + b, 0);
+	if (currentSpent + bpCost > char.buildPoints) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			martialArts: char.equipment.martialArts.map((m) =>
+				m.id === artId ? { ...m, techniques: [...m.techniques, technique] } : m
+			)
+		},
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			other: (char.buildPointsSpent.other || 0) + bpCost
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove a technique from a martial art style.
+ */
+export function removeMartialArtTechnique(artId: string, technique: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const art = char.equipment.martialArts.find((m) => m.id === artId);
+	if (!art) return;
+
+	if (!art.techniques.includes(technique)) return;
+
+	const bpRefund = MARTIAL_ARTS_COSTS.TECHNIQUE;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			martialArts: char.equipment.martialArts.map((m) =>
+				m.id === artId ? { ...m, techniques: m.techniques.filter((t) => t !== technique) } : m
+			)
+		},
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			other: Math.max(0, (char.buildPointsSpent.other || 0) - bpRefund)
+		},
 		updatedAt: new Date().toISOString()
 	};
 
@@ -2089,6 +2432,125 @@ export function initiate(): { success: boolean; error?: string } {
 	});
 
 	return { success: true };
+}
+
+/* ============================================
+ * Technomancer Submersion (Career Mode)
+ * ============================================ */
+
+/**
+ * Calculate the karma cost for the next submersion grade.
+ */
+export function getSubmersionCost(currentGrade: number): number {
+	const newGrade = currentGrade + 1;
+	return KARMA_COSTS.SUBMERSION_BASE + (newGrade * KARMA_COSTS.SUBMERSION_MULTIPLIER);
+}
+
+/**
+ * Submerge to increase submersion grade.
+ * Requires career mode and resonance.
+ */
+export function submerge(): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) {
+		return { success: false, error: 'No character loaded' };
+	}
+	if (char.status !== 'career') {
+		return { success: false, error: 'Character must be in career mode' };
+	}
+	if (!char.resonance) {
+		return { success: false, error: 'Character is not a technomancer' };
+	}
+
+	const newGrade = char.resonance.submersionGrade + 1;
+	const cost = KARMA_COSTS.SUBMERSION_BASE + (newGrade * KARMA_COSTS.SUBMERSION_MULTIPLIER);
+
+	if (char.karma < cost) {
+		return { success: false, error: `Not enough karma (need ${cost}, have ${char.karma})` };
+	}
+
+	/* Spend karma */
+	const spendResult = spendKarmaInternal(cost, `Submerged to grade ${newGrade}`);
+	if (!spendResult.success) return spendResult;
+
+	/* Update resonance */
+	characterStore.update((c) => {
+		if (!c || !c.resonance) return c;
+		return {
+			...c,
+			resonance: {
+				...c.resonance,
+				submersionGrade: newGrade
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+
+	return { success: true };
+}
+
+/**
+ * Learn an echo (requires submersion).
+ * Each submersion grade grants one echo.
+ */
+export function learnEcho(echoName: string): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) {
+		return { success: false, error: 'No character loaded' };
+	}
+	if (!char.resonance) {
+		return { success: false, error: 'Character is not a technomancer' };
+	}
+
+	/* Check if already known */
+	if (char.resonance.echoes.includes(echoName)) {
+		return { success: false, error: 'Echo already known' };
+	}
+
+	/* Check if they have available echo slots (one per submersion grade) */
+	const availableSlots = char.resonance.submersionGrade;
+	const usedSlots = char.resonance.echoes.length;
+
+	if (usedSlots >= availableSlots) {
+		return { success: false, error: 'No echo slots available (need to submerge)' };
+	}
+
+	/* Add the echo */
+	characterStore.update((c) => {
+		if (!c || !c.resonance) return c;
+		return {
+			...c,
+			resonance: {
+				...c.resonance,
+				echoes: [...c.resonance.echoes, echoName]
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+
+	return { success: true };
+}
+
+/**
+ * Remove an echo.
+ */
+export function removeEcho(echoName: string): void {
+	const char = get(characterStore);
+	if (!char || !char.resonance) return;
+
+	if (!char.resonance.echoes.includes(echoName)) return;
+
+	characterStore.update((c) => {
+		if (!c || !c.resonance) return c;
+		return {
+			...c,
+			resonance: {
+				...c.resonance,
+				echoes: c.resonance.echoes.filter((e) => e !== echoName)
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
 }
 
 /**

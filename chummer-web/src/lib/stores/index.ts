@@ -16,6 +16,7 @@ export {
 	spells,
 	powers,
 	traditions,
+	mentors,
 	programs,
 	programCategories,
 	weapons,
@@ -23,6 +24,18 @@ export {
 	cyberware,
 	gear,
 	lifestyles,
+	/* Bioware */
+	bioware,
+	biowareCategories,
+	/* Vehicles & Drones */
+	vehicles,
+	vehicleCategories,
+	drones,
+	/* Martial Arts */
+	martialArts,
+	/* Technomancer */
+	echoes,
+	streams,
 	loadGameData,
 	findMetatype,
 	findSkill,
@@ -31,12 +44,19 @@ export {
 	findArmor,
 	findCyberware,
 	findGear,
+	findBioware,
+	findVehicle,
+	findMartialArt,
+	findEcho,
+	findStream,
 	filterSkillsByCategory,
 	filterSkillsByGroup,
 	filterWeaponsByCategory,
 	filterArmorByCategory,
 	filterCyberwareByCategory,
 	filterGearByCategory,
+	filterBiowareByCategory,
+	filterVehiclesByCategory,
 	type GameData,
 	type GameQuality,
 	type GameSpell,
@@ -45,6 +65,11 @@ export {
 	type GameMentor,
 	type GameLifestyle,
 	type GameProgram,
+	type GameBioware,
+	type GameVehicle,
+	type GameMartialArt,
+	type GameEcho,
+	type GameStream,
 	type SkillCategoryDef
 } from './gamedata';
 
@@ -77,6 +102,7 @@ export {
 	updateIdentity,
 	initializeMagic,
 	setTradition,
+	setMentor,
 	addSpell,
 	removeSpell,
 	addPower,
@@ -93,6 +119,18 @@ export {
 	removeArmor,
 	addCyberware,
 	removeCyberware,
+	/* Bioware */
+	addBioware,
+	removeBioware,
+	/* Vehicles */
+	addVehicle,
+	removeVehicle,
+	/* Martial Arts */
+	addMartialArt,
+	removeMartialArt,
+	addMartialArtTechnique,
+	removeMartialArtTechnique,
+	MARTIAL_ARTS_COSTS,
 	addGear,
 	removeGear,
 	setLifestyle,
@@ -126,6 +164,11 @@ export {
 	learnSpell,
 	getInitiationCost,
 	initiate,
+	/* Technomancer submersion */
+	getSubmersionCost,
+	submerge,
+	learnEcho,
+	removeEcho,
 	getExpenseLog,
 	/* Gameplay tracking */
 	updateCondition,

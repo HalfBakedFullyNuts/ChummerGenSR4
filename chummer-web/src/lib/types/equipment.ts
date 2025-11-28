@@ -216,6 +216,108 @@ export interface CharacterCyberware {
 }
 
 /* ============================================
+ * Bioware Types
+ * ============================================ */
+
+/** Bioware category from game data. */
+export type BiowareCategory =
+	| 'Basic'
+	| 'Biosculpting'
+	| 'Cosmetic'
+	| 'Cultured'
+	| 'Endosymbiont'
+	| 'Genetech: Genetic Restoration'
+	| 'Genetech: Phenotype Adjustments'
+	| 'Genetech: Transgenics'
+	| 'Genetic Infusions'
+	| 'Organs and Limbs'
+	| 'Symbiont';
+
+/** Bioware grade affecting essence and cost. */
+export type BiowareGrade = 'Standard' | 'Cultured';
+
+/** Grade multiplier for bioware. */
+export const BIOWARE_GRADES = [
+	{ name: 'Standard', essMultiplier: 1.0, costMultiplier: 1 },
+	{ name: 'Cultured', essMultiplier: 0.75, costMultiplier: 4 }
+] as const;
+
+/** Bioware installed on a character. */
+export interface CharacterBioware {
+	readonly id: string;
+	readonly name: string;
+	readonly category: string;
+	readonly grade: BiowareGrade;
+	readonly rating: number;
+	readonly essence: number;
+	readonly cost: number;
+	readonly notes: string;
+}
+
+/* ============================================
+ * Vehicle Types
+ * ============================================ */
+
+/** Vehicle category from game data. */
+export type VehicleCategory =
+	| 'Personal Mobility Vehicles'
+	| 'Bikes'
+	| 'Cars'
+	| 'Trucks'
+	| 'Hovercraft'
+	| 'Watercraft'
+	| 'Gliders and FPMV'
+	| 'LAVs'
+	| 'Military, Security and Medical Craft'
+	| 'Boats & Subs'
+	| 'Winged Planes'
+	| 'Rotorcraft'
+	| 'Zeppelin'
+	| 'VTOL/VSTOL'
+	| 'Drones: Micro'
+	| 'Drones: Mini'
+	| 'Drones: Small'
+	| 'Drones: Medium'
+	| 'Drones: Large';
+
+/** Vehicle owned by a character. */
+export interface CharacterVehicle {
+	readonly id: string;
+	readonly name: string;
+	readonly category: string;
+	readonly handling: string;
+	readonly accel: string;
+	readonly speed: string;
+	readonly pilot: number;
+	readonly body: number;
+	readonly armor: number;
+	readonly sensor: number;
+	readonly cost: number;
+	readonly mods: readonly VehicleMod[];
+	readonly notes: string;
+}
+
+/** Vehicle modification. */
+export interface VehicleMod {
+	readonly id: string;
+	readonly name: string;
+	readonly rating: number;
+	readonly slots: number;
+	readonly cost: number;
+}
+
+/* ============================================
+ * Martial Arts Types
+ * ============================================ */
+
+/** Martial art style owned by a character. */
+export interface CharacterMartialArt {
+	readonly id: string;
+	readonly name: string;
+	readonly techniques: readonly string[];
+}
+
+/* ============================================
  * General Gear Types
  * ============================================ */
 
@@ -308,8 +410,11 @@ export interface CharacterEquipment {
 	readonly weapons: readonly CharacterWeapon[];
 	readonly armor: readonly CharacterArmor[];
 	readonly cyberware: readonly CharacterCyberware[];
+	readonly bioware: readonly CharacterBioware[];
+	readonly vehicles: readonly CharacterVehicle[];
 	readonly gear: readonly CharacterGear[];
 	readonly lifestyle: CharacterLifestyle | null;
+	readonly martialArts: readonly CharacterMartialArt[];
 }
 
 /** Calculate total equipment cost. */
@@ -334,6 +439,17 @@ export function calculateEquipmentCost(equipment: CharacterEquipment): number {
 		total += cyber.cost;
 	}
 
+	for (const bio of equipment.bioware) {
+		total += bio.cost;
+	}
+
+	for (const vehicle of equipment.vehicles) {
+		total += vehicle.cost;
+		for (const mod of vehicle.mods) {
+			total += mod.cost;
+		}
+	}
+
 	for (const item of equipment.gear) {
 		total += item.cost * item.quantity;
 	}
@@ -341,6 +457,9 @@ export function calculateEquipmentCost(equipment: CharacterEquipment): number {
 	if (equipment.lifestyle) {
 		total += equipment.lifestyle.monthlyCost * equipment.lifestyle.monthsPrepaid;
 	}
+
+	// Martial arts have BP cost, not nuyen cost (5 BP per style, 2 BP per technique)
+	// So they don't add to equipment cost
 
 	return total;
 }
@@ -357,13 +476,30 @@ export function calculateEssenceCost(cyberware: readonly CharacterCyberware[]): 
 	return total;
 }
 
+/** Calculate total essence cost of bioware. */
+export function calculateBiowareEssenceCost(bioware: readonly CharacterBioware[]): number {
+	let total = 0;
+	for (const bio of bioware) {
+		total += bio.essence;
+	}
+	return total;
+}
+
+/** Calculate combined essence cost of cyberware and bioware. */
+export function calculateTotalEssenceCost(equipment: CharacterEquipment): number {
+	return calculateEssenceCost(equipment.cyberware) + calculateBiowareEssenceCost(equipment.bioware);
+}
+
 /** Empty equipment template. */
 export const EMPTY_EQUIPMENT: CharacterEquipment = {
 	weapons: [],
 	armor: [],
 	cyberware: [],
+	bioware: [],
+	vehicles: [],
 	gear: [],
-	lifestyle: null
+	lifestyle: null,
+	martialArts: []
 } as const;
 
 /* ============================================
