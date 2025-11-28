@@ -1197,7 +1197,7 @@ namespace Chummer
 			UpdateWindowTitle(false);
 			RefreshPasteStatus();
 
-			// Stupid hack to get the MDI icon to show up properly.
+			// Workaround: Clone the icon to ensure MDI child window icon displays correctly.
 			this.Icon = this.Icon.Clone() as System.Drawing.Icon;
 		}
 

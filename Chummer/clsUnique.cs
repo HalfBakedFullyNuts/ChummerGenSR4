@@ -3611,11 +3611,8 @@ namespace Chummer
 				}
 			}
 
-			//TreeNode objNode = new TreeNode();
 			objNode.Text = DisplayName;
 			objNode.Tag = _guiID.ToString();
-
-			//return objNode;
 		}
 
 		/// <summary>

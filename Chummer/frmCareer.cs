@@ -1296,7 +1296,7 @@ namespace Chummer
 			UpdateWindowTitle(false);
 			RefreshPasteStatus();
 
-			// Stupid hack to get the MDI icon to show up properly.
+			// Workaround: Clone the icon to ensure MDI child window icon displays correctly.
 			this.Icon = this.Icon.Clone() as System.Drawing.Icon;
 		}
 
@@ -13934,16 +13934,16 @@ namespace Chummer
 							intNewPenalty = _objCharacter.EssencePenalty;
 
 							// Restore the character's MAG/RES if they have it.
-							//if (!_objCharacter.OverrideSpecialAttributeEssenceLoss && !_objCharacter.OverrideSpecialAttributeEssenceLoss)
-							//{
-							//    if (intOldPenalty != intNewPenalty)
-							//    {
-							//        if (_objCharacter.MAGEnabled)
-							//            _objCharacter.MAG.Value += (intOldPenalty - intNewPenalty);
-							//        if (_objCharacter.RESEnabled)
-							//            _objCharacter.RES.Value += (intOldPenalty - intNewPenalty);
-							//    }
-							//}
+							if (!_objOptions.ESSLossReducesMaximumOnly && !_objCharacter.OverrideSpecialAttributeEssenceLoss)
+							{
+								if (intOldPenalty != intNewPenalty)
+								{
+									if (_objCharacter.MAGEnabled)
+										_objCharacter.MAG.Value += (intOldPenalty - intNewPenalty);
+									if (_objCharacter.RESEnabled)
+										_objCharacter.RES.Value += (intOldPenalty - intNewPenalty);
+								}
+							}
 
 							// Remove the item from the Tree.
 							foreach (TreeNode objNode in treCyberware.Nodes[0].Nodes)

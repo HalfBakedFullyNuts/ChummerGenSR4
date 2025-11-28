@@ -2822,7 +2822,7 @@
 			this.chkAllowObsolescentUpgrade.Size = new System.Drawing.Size(372, 17);
 			this.chkAllowObsolescentUpgrade.TabIndex = 23;
 			this.chkAllowObsolescentUpgrade.Tag = "Checkbox_Option_AllowObsolescentUpgrade";
-			this.chkAllowObsolescentUpgrade.Text = "Allow Obsolescent to be removed/upgraded in the same was as Obsolete";
+			this.chkAllowObsolescentUpgrade.Text = "Allow Obsolescent to be removed/upgraded in the same way as Obsolete";
 			this.chkAllowObsolescentUpgrade.UseVisualStyleBackColor = true;
 			// 
 			// chkAlternateMetatypeAttributeKarma

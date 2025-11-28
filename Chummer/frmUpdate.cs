@@ -52,12 +52,6 @@ namespace Chummer
 				this.Close();
 			}
 
-			//if (Application.StartupPath.Contains("\\Debug"))
-			//{
-			//    MessageBox.Show("Cannot run Update from a debug path.");
-			//    this.Close();
-			//}
-
 			FetchXML();
 		}
 

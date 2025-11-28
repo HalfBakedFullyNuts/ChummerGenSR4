@@ -678,8 +678,6 @@ namespace Chummer
 						strTooltip += " + " + LanguageManager.Instance.GetString("Tip_Skill_RatingModifiers") + " (" + _objSkill.RatingModifiers.ToString() + ")";
 				}
 				// Dice Pool Modifiers.
-				//if (_objSkill.DicePoolModifiers != 0)
-				//	strTooltip += " + " + LanguageManager.Instance.GetString("Tip_Skill_DicePoolModifiers") + " (" + _objSkill.DicePoolModifiers.ToString() + ")";
 				strTooltip += _objSkill.DicePoolModifiersTooltip;
 			}
 

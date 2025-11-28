@@ -6484,10 +6484,6 @@ namespace Chummer
 					}
 				}
 
-				// If the full RC is not higher than the base, only the base value is shown.
-				//if (intRCFull + intRCModifier <= intRCBase)
-				//	strRC = intRCBase.ToString();
-				//else
 				strRC = intRCFull.ToString();
 
 				return strRC;
