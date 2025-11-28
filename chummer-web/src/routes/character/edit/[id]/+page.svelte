@@ -226,11 +226,26 @@
 			{:else if $currentStep === 'method'}
 				<div class="cw-card">
 					<h2 class="cw-card-header">Build Method</h2>
-					<p class="text-secondary-text mb-4">
-						Using Build Point (BP) system with 400 starting points.
-					</p>
-					<p class="text-muted-text text-sm">
-						Karma build method coming soon.
+					<div class="p-4 bg-surface rounded-lg">
+						<div class="flex items-center gap-4">
+							<div class="w-16 h-16 rounded-full flex items-center justify-center
+								{$character.buildMethod === 'karma' ? 'bg-accent-cyan/30' : 'bg-accent-primary/30'}">
+								<span class="text-2xl font-bold {$character.buildMethod === 'karma' ? 'text-accent-cyan' : 'text-accent-primary'}">
+									{$character.buildMethod === 'karma' ? 'K' : 'BP'}
+								</span>
+							</div>
+							<div>
+								<h3 class="text-lg font-medium text-primary-text">
+									{$character.buildMethod === 'karma' ? 'Karma Build' : 'Build Points'}
+								</h3>
+								<p class="text-secondary-text">
+									Started with {$character.buildPoints} {$character.buildMethod === 'karma' ? 'Karma' : 'BP'}
+								</p>
+							</div>
+						</div>
+					</div>
+					<p class="text-muted-text text-sm mt-4">
+						Build method cannot be changed after character creation.
 					</p>
 				</div>
 			{:else if $currentStep === 'metatype'}

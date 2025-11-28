@@ -36,6 +36,37 @@ import { findMetatype, type GameData } from './gamedata';
 /** Maximum BP for standard character creation. */
 const MAX_BP = 400;
 
+/** Starting Karma for Karma build method (Runner's Companion). */
+const KARMA_BUILD_STARTING = 750;
+
+/**
+ * Karma Build costs per Runner's Companion.
+ * Different from career mode advancement costs.
+ */
+export const KARMA_BUILD_COSTS = {
+	/** Attribute: new rating × 5 */
+	ATTRIBUTE_MULTIPLIER: 5,
+	/** Active Skill (new): 4 karma */
+	NEW_SKILL: 4,
+	/** Active Skill (improve): new rating × 2 */
+	SKILL_MULTIPLIER: 2,
+	/** Skill Group (new): 10 karma */
+	NEW_SKILL_GROUP: 10,
+	/** Skill Group (improve): new rating × 5 */
+	SKILL_GROUP_MULTIPLIER: 5,
+	/** Quality: BP cost × 2 */
+	QUALITY_MULTIPLIER: 2,
+	/** Spell/Complex Form: 5 karma */
+	SPELL: 5,
+	COMPLEX_FORM: 5,
+	/** Contact: (Loyalty + Connection) karma */
+	CONTACT_MULTIPLIER: 1,
+	/** Resources: 1 karma = 2,500¥ (lower rate than BP) */
+	NUYEN_PER_KARMA: 2500,
+	/** Metatype costs in karma (BP × 2) */
+	METATYPE_MULTIPLIER: 2
+} as const;
+
 /** Wizard step identifiers. */
 export type WizardStep =
 	| 'method'
@@ -95,6 +126,26 @@ export function startNewCharacter(
 	const char = createEmptyCharacter(id, userId, buildMethod);
 	characterStore.set(char);
 	currentStepStore.set('metatype');
+}
+
+/**
+ * Set the build method for the current character.
+ * Updates starting points based on method.
+ */
+export function setBuildMethod(method: BuildMethod): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const startingPoints = method === 'karma' ? KARMA_BUILD_STARTING : MAX_BP;
+
+	const updated: Character = {
+		...char,
+		buildMethod: method,
+		buildPoints: startingPoints,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
 }
 
 /**
