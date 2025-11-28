@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { traditions, spells, powers, type GameSpell, type GamePower } from '$stores/gamedata';
+	import {
+		traditions,
+		spells,
+		powers,
+		programs,
+		programCategories,
+		type GameSpell,
+		type GamePower,
+		type GameProgram
+	} from '$stores/gamedata';
 	import {
 		character,
 		magicType,
@@ -8,11 +17,35 @@
 		addSpell,
 		removeSpell,
 		addPower,
-		removePower
+		removePower,
+		initializeResonance,
+		addComplexForm,
+		removeComplexForm
 	} from '$stores/character';
 
 	/** Currently active tab for magicians. */
 	let activeTab: 'tradition' | 'spells' | 'powers' = 'tradition';
+
+	/** Currently active tab for technomancers. */
+	let techTab: 'stream' | 'forms' = 'stream';
+
+	/** Technomancer stream selection. */
+	const TECH_STREAMS = [
+		{ name: 'Cyberadept', desc: 'Focuses on enhancing cyberware and bioware integration' },
+		{ name: 'Dronomancer', desc: 'Specializes in controlling and enhancing drones' },
+		{ name: 'E-Ghost', desc: 'Masters the art of Matrix stealth and infiltration' },
+		{ name: 'Info Savant', desc: 'Expert at data processing and information gathering' },
+		{ name: 'Machinist', desc: 'Excels at controlling and manipulating devices' },
+		{ name: 'Prodigy', desc: 'Balanced approach to all technomancer abilities' },
+		{ name: 'Sourcerer', desc: 'Specializes in sprites and sprite compilation' },
+		{ name: 'Technoshaman', desc: 'Follows a spiritual approach to the Resonance' }
+	] as const;
+
+	/** Complex form category filter. */
+	let formCategory = 'Common Use';
+
+	/** Complex form search query. */
+	let formSearch = '';
 
 	/** Spell category filter. */
 	let spellCategory = 'Combat';
@@ -101,6 +134,49 @@
 		}
 	}
 
+	/** Handle stream selection for technomancer. */
+	function selectStream(name: string): void {
+		if (!$character?.resonance) {
+			initializeResonance(name);
+		}
+		/* Stream is set during initialization */
+	}
+
+	/** Filter complex forms by category and search. */
+	function filterForms(
+		allPrograms: readonly GameProgram[],
+		category: string,
+		search: string
+	): GameProgram[] {
+		return allPrograms.filter((p) => {
+			const matchesCat = category === 'All' || p.category === category;
+			const matchesSearch =
+				search === '' || p.name.toLowerCase().includes(search.toLowerCase());
+			return matchesCat && matchesSearch;
+		});
+	}
+
+	/** Check if complex form is already learned. */
+	function hasComplexForm(name: string): boolean {
+		return $character?.resonance?.complexForms.some((f) => f.name === name) ?? false;
+	}
+
+	/** Handle complex form toggle. */
+	function toggleComplexForm(program: GameProgram): void {
+		if (hasComplexForm(program.name)) {
+			const form = $character?.resonance?.complexForms.find((f) => f.name === program.name);
+			if (form) removeComplexForm(form.id);
+		} else {
+			/* Convert program to complex form with default values */
+			addComplexForm({
+				name: program.name,
+				target: 'Self', /* Default - most forms target self or device */
+				duration: 'Sustained', /* Default for most complex forms */
+				fv: 'Rating' /* Default fading value */
+			});
+		}
+	}
+
 	$: spellCategories = $spells ? getSpellCategories($spells) : [];
 	$: filteredSpells = $spells ? filterSpells($spells, spellCategory, spellSearch) : [];
 	$: filteredPowers = $powers ? filterPowers($powers, powerSearch) : [];
@@ -111,6 +187,13 @@
 	$: powerPointsTotal = $character?.magic?.powerPoints ?? 0;
 	$: canHaveSpells = $magicType === 'magician' || $magicType === 'mystic_adept' || $magicType === 'aspected';
 	$: canHavePowers = $magicType === 'adept' || $magicType === 'mystic_adept';
+
+	/* Technomancer reactive statements */
+	$: filteredForms = $programs ? filterForms($programs, formCategory, formSearch) : [];
+	$: selectedStream = $character?.resonance?.stream ?? null;
+	$: formCount = $character?.resonance?.complexForms.length ?? 0;
+	$: formBP = formCount * 5;
+	$: resonanceAttr = $character?.attributes.res?.base ?? 0;
 </script>
 
 <div class="space-y-6">
@@ -131,12 +214,159 @@
 		</div>
 	{:else if $magicType === 'technomancer'}
 		<!-- Technomancer -->
-		<div class="cw-card">
-			<h2 class="cw-card-header">Technomancer</h2>
-			<p class="text-secondary-text mb-4">
-				Technomancer configuration coming soon. You can proceed for now.
-			</p>
+		<div class="cw-panel p-4">
+			<div class="flex items-center justify-between">
+				<div>
+					<span class="text-accent-cyan font-medium">Technomancer</span>
+					<span class="text-muted-text text-sm ml-2">
+						Resonance: {resonanceAttr}
+					</span>
+				</div>
+				<div class="flex gap-4">
+					<span class="text-secondary-text">
+						Complex Forms: <span class="text-accent-cyan">{formCount}</span>
+						<span class="text-muted-text">({formBP} BP)</span>
+					</span>
+				</div>
+			</div>
 		</div>
+
+		<!-- Tab Navigation -->
+		<div class="flex gap-1">
+			<button
+				class="px-4 py-2 rounded transition-colors
+					{techTab === 'stream'
+						? 'bg-accent-cyan text-background'
+						: 'bg-surface text-secondary-text hover:bg-surface-light'}"
+				on:click={() => (techTab = 'stream')}
+			>
+				Stream
+			</button>
+			<button
+				class="px-4 py-2 rounded transition-colors
+					{techTab === 'forms'
+						? 'bg-accent-cyan text-background'
+						: 'bg-surface text-secondary-text hover:bg-surface-light'}"
+				on:click={() => (techTab = 'forms')}
+			>
+				Complex Forms ({formCount})
+			</button>
+		</div>
+
+		<!-- Stream Tab -->
+		{#if techTab === 'stream'}
+			<div class="cw-card">
+				<h3 class="cw-card-header mb-4">Select Stream</h3>
+				<p class="text-muted-text text-sm mb-4">
+					Your stream defines your approach to the Resonance and influences your abilities.
+				</p>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+					{#each TECH_STREAMS as stream}
+						{@const isSelected = selectedStream === stream.name}
+						<button
+							class="p-3 rounded text-left transition-all
+								{isSelected
+									? 'bg-accent-cyan/20 border border-accent-cyan'
+									: 'bg-surface hover:bg-surface-light border border-transparent'}"
+							on:click={() => selectStream(stream.name)}
+						>
+							<div class="font-medium text-primary-text">
+								{stream.name}
+							</div>
+							<div class="text-secondary-text text-xs mt-1">
+								{stream.desc}
+							</div>
+						</button>
+					{/each}
+				</div>
+			</div>
+		{/if}
+
+		<!-- Complex Forms Tab -->
+		{#if techTab === 'forms'}
+			<div class="space-y-4">
+				<!-- Selected Complex Forms -->
+				{#if $character?.resonance?.complexForms.length}
+					<div class="cw-card">
+						<h3 class="cw-card-header mb-3">Compiled Forms</h3>
+						<div class="flex flex-wrap gap-2">
+							{#each $character.resonance.complexForms as form}
+								<button
+									class="px-3 py-1 rounded bg-accent-cyan/20 text-accent-cyan
+										border border-accent-cyan/30 text-sm flex items-center gap-2"
+									on:click={() => removeComplexForm(form.id)}
+								>
+									{form.name}
+									<span class="text-xs opacity-50">×</span>
+								</button>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				<!-- Category Filters -->
+				<div class="flex flex-wrap gap-4">
+					<div class="flex gap-1 overflow-x-auto">
+						<button
+							class="px-3 py-1 rounded text-sm whitespace-nowrap transition-colors
+								{formCategory === 'All'
+									? 'bg-accent-cyan text-background'
+									: 'bg-surface text-secondary-text hover:bg-surface-light'}"
+							on:click={() => (formCategory = 'All')}
+						>
+							All
+						</button>
+						{#each $programCategories ?? [] as cat}
+							<button
+								class="px-3 py-1 rounded text-sm whitespace-nowrap transition-colors
+									{formCategory === cat
+										? 'bg-accent-cyan text-background'
+										: 'bg-surface text-secondary-text hover:bg-surface-light'}"
+								on:click={() => (formCategory = cat)}
+							>
+								{cat}
+							</button>
+						{/each}
+					</div>
+					<input
+						type="text"
+						placeholder="Search forms..."
+						class="cw-input flex-1 min-w-[200px]"
+						bind:value={formSearch}
+					/>
+				</div>
+
+				<!-- Complex Form List -->
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+					{#each filteredForms as program}
+						{@const selected = hasComplexForm(program.name)}
+						<button
+							class="p-3 rounded text-left transition-all
+								{selected
+									? 'bg-accent-cyan/20 border border-accent-cyan'
+									: 'bg-surface hover:bg-surface-light border border-transparent'}"
+							on:click={() => toggleComplexForm(program)}
+						>
+							<div class="flex items-center justify-between">
+								<span class="font-medium {selected ? 'text-accent-cyan' : 'text-primary-text'}">
+									{program.name}
+								</span>
+								<span class="cw-badge cw-badge-ghost text-xs">{program.category}</span>
+							</div>
+							<div class="text-muted-text text-xs mt-1">
+								{program.source} p.{program.page}
+							</div>
+						</button>
+					{/each}
+				</div>
+
+				{#if filteredForms.length === 0}
+					<div class="text-center text-muted-text py-8">
+						No complex forms match your filter.
+					</div>
+				{/if}
+			</div>
+		{/if}
 	{:else}
 		<!-- Awakened Character (Magician, Adept, Mystic Adept, Aspected) -->
 		<div class="cw-panel p-4">
