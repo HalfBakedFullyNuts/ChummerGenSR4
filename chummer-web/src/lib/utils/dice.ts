@@ -1682,3 +1682,97 @@ export function calculateArmorStacking(armorPieces: ArmorPiece[], body: number):
 		hasArmor: true
 	};
 }
+
+/* ============================================
+ * Initiative Modifiers
+ * ============================================ */
+
+/** Cyberware that modifies initiative. */
+export interface InitiativeModifier {
+	/** Name of the cyberware/power. */
+	name: string;
+	/** Rating of the cyberware (if applicable). */
+	rating: number;
+}
+
+/** Result of initiative modifier calculation. */
+export interface InitiativeModResult {
+	/** Bonus to initiative score (REA + INT). */
+	initiativeBonus: number;
+	/** Bonus initiative dice. */
+	initiativeDice: number;
+	/** Sources of the bonuses. */
+	sources: string[];
+}
+
+/**
+ * Cyberware and bioware that provide initiative bonuses.
+ * Maps name pattern to function that returns bonuses based on rating.
+ */
+const INITIATIVE_AUGMENTATIONS: Record<string, (rating: number) => { initBonus: number; diceBonus: number }> = {
+	'wired reflexes': (rating) => ({ initBonus: rating, diceBonus: rating }),
+	'synaptic booster': (rating) => ({ initBonus: rating, diceBonus: rating }),
+	'move-by-wire': (rating) => ({ initBonus: rating * 2, diceBonus: rating }),
+	'boosted reflexes': () => ({ initBonus: 0, diceBonus: 1 }),
+	'reaction enhancers': (rating) => ({ initBonus: rating, diceBonus: 0 }),
+};
+
+/**
+ * Adept powers that provide initiative bonuses.
+ */
+const INITIATIVE_POWERS: Record<string, (level: number) => { initBonus: number; diceBonus: number }> = {
+	'improved reflexes': (level) => ({ initBonus: level, diceBonus: level }),
+};
+
+/**
+ * Calculate initiative modifiers from cyberware and adept powers.
+ * @param cyberware - Array of installed cyberware with names and ratings.
+ * @param powers - Array of adept powers with names and levels.
+ * @returns Initiative bonuses and sources.
+ */
+export function calculateInitiativeModifiers(
+	cyberware: InitiativeModifier[],
+	powers: InitiativeModifier[] = []
+): InitiativeModResult {
+	let initiativeBonus = 0;
+	let initiativeDice = 0;
+	const sources: string[] = [];
+
+	// Check cyberware
+	for (const cyber of cyberware) {
+		const lowerName = cyber.name.toLowerCase();
+		for (const [pattern, calcFn] of Object.entries(INITIATIVE_AUGMENTATIONS)) {
+			if (lowerName.includes(pattern)) {
+				const bonuses = calcFn(cyber.rating || 1);
+				if (bonuses.initBonus > 0 || bonuses.diceBonus > 0) {
+					initiativeBonus += bonuses.initBonus;
+					initiativeDice += bonuses.diceBonus;
+					sources.push(`${cyber.name}${bonuses.initBonus > 0 ? ` (+${bonuses.initBonus} Init)` : ''}${bonuses.diceBonus > 0 ? ` (+${bonuses.diceBonus}d6)` : ''}`);
+				}
+				break;
+			}
+		}
+	}
+
+	// Check adept powers
+	for (const power of powers) {
+		const lowerName = power.name.toLowerCase();
+		for (const [pattern, calcFn] of Object.entries(INITIATIVE_POWERS)) {
+			if (lowerName.includes(pattern)) {
+				const bonuses = calcFn(power.rating || 1);
+				if (bonuses.initBonus > 0 || bonuses.diceBonus > 0) {
+					initiativeBonus += bonuses.initBonus;
+					initiativeDice += bonuses.diceBonus;
+					sources.push(`${power.name}${bonuses.initBonus > 0 ? ` (+${bonuses.initBonus} Init)` : ''}${bonuses.diceBonus > 0 ? ` (+${bonuses.diceBonus}d6)` : ''}`);
+				}
+				break;
+			}
+		}
+	}
+
+	return {
+		initiativeBonus,
+		initiativeDice,
+		sources
+	};
+}
