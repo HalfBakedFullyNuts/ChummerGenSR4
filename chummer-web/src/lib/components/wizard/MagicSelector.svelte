@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		traditions,
+		mentors,
 		spells,
 		powers,
 		programs,
@@ -14,6 +15,7 @@
 		magicType,
 		initializeMagic,
 		setTradition,
+		setMentor,
 		addSpell,
 		removeSpell,
 		addPower,
@@ -181,12 +183,22 @@
 	$: filteredSpells = $spells ? filterSpells($spells, spellCategory, spellSearch) : [];
 	$: filteredPowers = $powers ? filterPowers($powers, powerSearch) : [];
 	$: selectedTradition = $character?.magic?.tradition ?? null;
+	$: selectedMentor = $character?.magic?.mentor ?? null;
+	$: selectedMentorData = selectedMentor ? $mentors?.find((m) => m.name === selectedMentor) ?? null : null;
 	$: spellCount = $character?.magic?.spells.length ?? 0;
 	$: spellBP = spellCount * 5;
 	$: powerPointsUsed = $character?.magic?.powerPointsUsed ?? 0;
 	$: powerPointsTotal = $character?.magic?.powerPoints ?? 0;
 	$: canHaveSpells = $magicType === 'magician' || $magicType === 'mystic_adept' || $magicType === 'aspected';
 	$: canHavePowers = $magicType === 'adept' || $magicType === 'mystic_adept';
+
+	/** Mentor spirit search. */
+	let mentorSearch = '';
+
+	/** Filter mentors by search. */
+	$: filteredMentors = ($mentors ?? []).filter(
+		(m) => !mentorSearch || m.name.toLowerCase().includes(mentorSearch.toLowerCase())
+	);
 
 	/* Technomancer reactive statements */
 	$: filteredForms = $programs ? filterForms($programs, formCategory, formSearch) : [];
@@ -457,6 +469,79 @@
 						</button>
 					{/each}
 				</div>
+			</div>
+
+			<!-- Mentor Spirit Section -->
+			<div class="cw-card mt-4">
+				<h3 class="cw-card-header mb-4">
+					Mentor Spirit
+					<span class="text-muted-text font-normal text-sm ml-2">(Optional, 5 BP)</span>
+				</h3>
+				<p class="text-secondary-text text-sm mb-4">
+					A mentor spirit provides bonuses and disadvantages based on your relationship with a spiritual guide.
+				</p>
+
+				{#if selectedMentor}
+					<div class="cw-panel p-3 mb-4 border-accent-purple/50">
+						<div class="flex items-center justify-between">
+							<div>
+								<span class="text-accent-purple font-medium">{selectedMentor}</span>
+								{#if selectedMentorData}
+									<div class="text-secondary-text text-xs mt-1">
+										<span class="text-accent-primary">Advantage:</span> {selectedMentorData.advantage}
+									</div>
+									<div class="text-secondary-text text-xs mt-1">
+										<span class="text-accent-danger">Disadvantage:</span> {selectedMentorData.disadvantage}
+									</div>
+								{/if}
+							</div>
+							<button
+								class="cw-btn cw-btn-danger text-xs"
+								on:click={() => setMentor(null)}
+							>
+								Remove
+							</button>
+						</div>
+					</div>
+				{/if}
+
+				<div class="flex gap-2 mb-4">
+					<input
+						type="text"
+						placeholder="Search mentor spirits..."
+						class="cw-input flex-1"
+						bind:value={mentorSearch}
+					/>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
+					{#each filteredMentors as mentor}
+						{@const isSelected = selectedMentor === mentor.name}
+						<button
+							class="p-3 rounded text-left transition-all
+								{isSelected
+									? 'bg-accent-purple/20 border border-accent-purple'
+									: 'bg-surface hover:bg-surface-light border border-transparent'}"
+							on:click={() => setMentor(isSelected ? null : mentor.name)}
+						>
+							<div class="font-medium {isSelected ? 'text-accent-purple' : 'text-primary-text'}">
+								{mentor.name}
+							</div>
+							<div class="text-secondary-text text-xs mt-1 line-clamp-2">
+								{mentor.advantage}
+							</div>
+							<div class="text-muted-text text-xs mt-1">
+								{mentor.source} p.{mentor.page}
+							</div>
+						</button>
+					{/each}
+				</div>
+
+				{#if filteredMentors.length === 0}
+					<div class="text-center text-muted-text py-4">
+						No mentor spirits match your search.
+					</div>
+				{/if}
 			</div>
 		{/if}
 
