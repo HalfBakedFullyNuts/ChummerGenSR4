@@ -6,6 +6,7 @@
 // Character components
 export { default as CharacterList } from './CharacterList.svelte';
 export { default as CareerPanel } from './CareerPanel.svelte';
+export { default as CareerAdvancement } from './CareerAdvancement.svelte';
 export { default as CharacterSheet } from './CharacterSheet.svelte';
 
 // Combat & gameplay components
@@ -18,3 +19,4 @@ export { default as MatrixPanel } from './MatrixPanel.svelte';
 export { default as VehiclePanel } from './VehiclePanel.svelte';
 export { default as MagicPanel } from './MagicPanel.svelte';
 export { default as TechnomancerPanel } from './TechnomancerPanel.svelte';
+export { default as CustomContentManager } from './CustomContentManager.svelte';

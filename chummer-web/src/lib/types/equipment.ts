@@ -353,6 +353,9 @@ export interface GameGear {
 	readonly cost: number;
 	readonly source: string;
 	readonly page: number;
+	readonly capacity?: number;
+	readonly capacityCost?: number;
+	readonly isContainer?: boolean;
 }
 
 /** Gear owned by a character. */
@@ -365,6 +368,33 @@ export interface CharacterGear {
 	readonly cost: number;
 	readonly location: string;
 	readonly notes: string;
+	/** Container capacity (if this gear can hold other gear). */
+	readonly capacity: number;
+	/** Capacity used by contained items. */
+	readonly capacityUsed: number;
+	/** Capacity this item consumes when placed in a container. */
+	readonly capacityCost: number;
+	/** ID of the container this item is in (null if not in a container). */
+	readonly containerId: string | null;
+	/** Items contained within this gear (if it's a container). */
+	readonly containedItems: readonly string[];
+}
+
+/** Check if gear has capacity to hold items. */
+export function isGearContainer(gear: CharacterGear): boolean {
+	return gear.capacity > 0;
+}
+
+/** Calculate remaining capacity of a container gear. */
+export function getRemainingCapacity(gear: CharacterGear): number {
+	return gear.capacity - gear.capacityUsed;
+}
+
+/** Check if gear can fit in a container. */
+export function canFitInContainer(container: CharacterGear, item: CharacterGear): boolean {
+	if (!isGearContainer(container)) return false;
+	if (item.capacityCost <= 0) return true; // Items with no capacity cost always fit
+	return getRemainingCapacity(container) >= item.capacityCost;
 }
 
 /* ============================================

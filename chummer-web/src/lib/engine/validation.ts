@@ -511,6 +511,176 @@ function validateIdentity(char: Character): ValidationIssue[] {
 	return issues;
 }
 
+/** Validate initiation and metamagics. */
+function validateInitiation(char: Character): ValidationIssue[] {
+	const issues: ValidationIssue[] = [];
+
+	if (!char.magic) return issues;
+
+	/* Check metamagic slots match initiation grade */
+	const metamagicCount = char.magic.metamagics.length;
+	const availableSlots = char.magic.initiateGrade;
+
+	if (metamagicCount > availableSlots) {
+		issues.push({
+			code: 'TOO_MANY_METAMAGICS',
+			severity: 'error',
+			category: 'Magic',
+			message: 'More metamagics than initiation grades',
+			details: `Have ${metamagicCount} metamagics but only ${availableSlots} initiation grade(s)`
+		});
+	}
+
+	if (availableSlots > 0 && metamagicCount < availableSlots) {
+		issues.push({
+			code: 'UNUSED_METAMAGIC_SLOTS',
+			severity: 'info',
+			category: 'Magic',
+			message: 'Unused metamagic slots',
+			details: `${availableSlots - metamagicCount} metamagic slot(s) available`
+		});
+	}
+
+	return issues;
+}
+
+/** Validate submersion and echoes. */
+function validateSubmersion(char: Character): ValidationIssue[] {
+	const issues: ValidationIssue[] = [];
+
+	if (!char.resonance) return issues;
+
+	/* Check echo slots match submersion grade */
+	const echoCount = char.resonance.echoes.length;
+	const availableSlots = char.resonance.submersionGrade;
+
+	if (echoCount > availableSlots) {
+		issues.push({
+			code: 'TOO_MANY_ECHOES',
+			severity: 'error',
+			category: 'Resonance',
+			message: 'More echoes than submersion grades',
+			details: `Have ${echoCount} echoes but only ${availableSlots} submersion grade(s)`
+		});
+	}
+
+	if (availableSlots > 0 && echoCount < availableSlots) {
+		issues.push({
+			code: 'UNUSED_ECHO_SLOTS',
+			severity: 'info',
+			category: 'Resonance',
+			message: 'Unused echo slots',
+			details: `${availableSlots - echoCount} echo slot(s) available`
+		});
+	}
+
+	return issues;
+}
+
+/** Validate gear capacity (containers). */
+function validateGearCapacity(char: Character): ValidationIssue[] {
+	const issues: ValidationIssue[] = [];
+
+	for (const gear of char.equipment.gear) {
+		/* Check container capacity */
+		if (gear.capacity > 0 && gear.capacityUsed > gear.capacity) {
+			issues.push({
+				code: 'GEAR_OVER_CAPACITY',
+				severity: 'error',
+				category: 'Equipment',
+				message: `${gear.name} exceeds capacity`,
+				details: `Used: ${gear.capacityUsed}, Capacity: ${gear.capacity}`
+			});
+		}
+
+		/* Check for orphaned items (containerId points to non-existent container) */
+		if (gear.containerId) {
+			const container = char.equipment.gear.find(g => g.id === gear.containerId);
+			if (!container) {
+				issues.push({
+					code: 'ORPHANED_GEAR',
+					severity: 'warning',
+					category: 'Equipment',
+					message: `${gear.name} references missing container`,
+					details: 'Item may have been orphaned during data migration'
+				});
+			}
+		}
+	}
+
+	return issues;
+}
+
+/** Validate spirit roster. */
+function validateSpirits(char: Character): ValidationIssue[] {
+	const issues: ValidationIssue[] = [];
+
+	if (!char.magic) return issues;
+
+	/* Max spirits bound based on Charisma */
+	const charisma = getAttributeTotal(char, 'cha');
+	const boundSpirits = char.magic.spirits.filter(s => s.bound).length;
+
+	if (boundSpirits > charisma) {
+		issues.push({
+			code: 'TOO_MANY_BOUND_SPIRITS',
+			severity: 'error',
+			category: 'Magic',
+			message: 'Too many bound spirits',
+			details: `Have ${boundSpirits} bound spirits but CHA is only ${charisma}`
+		});
+	}
+
+	/* Check for spirits with no services */
+	const noServiceSpirits = char.magic.spirits.filter(s => s.services <= 0);
+	if (noServiceSpirits.length > 0) {
+		issues.push({
+			code: 'SPIRITS_NO_SERVICES',
+			severity: 'warning',
+			category: 'Magic',
+			message: `${noServiceSpirits.length} spirit(s) with no services remaining`,
+			details: 'These spirits should be released'
+		});
+	}
+
+	return issues;
+}
+
+/** Validate sprite roster. */
+function validateSprites(char: Character): ValidationIssue[] {
+	const issues: ValidationIssue[] = [];
+
+	if (!char.resonance) return issues;
+
+	/* Max registered sprites based on Charisma (same as spirits) */
+	const charisma = getAttributeTotal(char, 'cha');
+	const registeredSprites = char.resonance.sprites.filter(s => s.registered).length;
+
+	if (registeredSprites > charisma) {
+		issues.push({
+			code: 'TOO_MANY_REGISTERED_SPRITES',
+			severity: 'error',
+			category: 'Resonance',
+			message: 'Too many registered sprites',
+			details: `Have ${registeredSprites} registered sprites but CHA is only ${charisma}`
+		});
+	}
+
+	/* Check for sprites with no tasks */
+	const noTaskSprites = char.resonance.sprites.filter(s => s.tasks <= 0);
+	if (noTaskSprites.length > 0) {
+		issues.push({
+			code: 'SPRITES_NO_TASKS',
+			severity: 'warning',
+			category: 'Resonance',
+			message: `${noTaskSprites.length} sprite(s) with no tasks remaining`,
+			details: 'These sprites should be decompiled'
+		});
+	}
+
+	return issues;
+}
+
 /* ============================================
  * Main Validation Function
  * ============================================ */
@@ -527,7 +697,12 @@ export function validateCharacter(char: Character): ValidationResult {
 	allIssues.push(...validateQualities(char));
 	allIssues.push(...validateMagic(char));
 	allIssues.push(...validateResonance(char));
+	allIssues.push(...validateInitiation(char));
+	allIssues.push(...validateSubmersion(char));
+	allIssues.push(...validateSpirits(char));
+	allIssues.push(...validateSprites(char));
 	allIssues.push(...validateEquipment(char));
+	allIssues.push(...validateGearCapacity(char));
 	allIssues.push(...validateContacts(char));
 
 	// Count by severity
