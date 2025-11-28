@@ -341,6 +341,18 @@ export const traditions: Readable<GameTradition[]> = derived(
 	($data) => $data.traditions
 );
 
+/** Derived store for programs (complex forms for technomancers). */
+export const programs: Readable<GameProgram[]> = derived(
+	gameData,
+	($data) => $data.programs
+);
+
+/** Derived store for program categories. */
+export const programCategories: Readable<string[]> = derived(
+	gameData,
+	($data) => $data.programCategories
+);
+
 /**
  * Find metatype by name.
  * Returns undefined if not found.

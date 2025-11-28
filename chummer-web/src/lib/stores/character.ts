@@ -683,6 +683,126 @@ export function initializeResonance(stream: string): void {
 	characterStore.set(updated);
 }
 
+/**
+ * Add a complex form to the character (technomancer).
+ * Costs 5 BP per complex form during creation.
+ */
+export function addComplexForm(form: {
+	name: string;
+	target: string;
+	duration: string;
+	fv: string;
+}): void {
+	const char = get(characterStore);
+	if (!char || !char.resonance) return;
+
+	/* Check if form already exists */
+	if (char.resonance.complexForms.some((f) => f.name === form.name)) return;
+
+	const newForm = {
+		id: generateId(),
+		...form,
+		rating: 1,
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		resonance: {
+			...char.resonance,
+			complexForms: [...char.resonance.complexForms, newForm]
+		},
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			complexForms: char.buildPointsSpent.complexForms + 5
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Remove a complex form from the character.
+ */
+export function removeComplexForm(formId: string): void {
+	const char = get(characterStore);
+	if (!char || !char.resonance) return;
+
+	const updated: Character = {
+		...char,
+		resonance: {
+			...char.resonance,
+			complexForms: char.resonance.complexForms.filter((f) => f.id !== formId)
+		},
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			complexForms: char.buildPointsSpent.complexForms - 5
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Learn a new complex form with karma (career mode).
+ */
+export function learnComplexForm(form: {
+	name: string;
+	target: string;
+	duration: string;
+	fv: string;
+}): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) {
+		return { success: false, error: 'No character loaded' };
+	}
+	if (char.status !== 'career') {
+		return { success: false, error: 'Character must be in career mode' };
+	}
+	if (!char.resonance) {
+		return { success: false, error: 'Character is not a technomancer' };
+	}
+
+	/* Check if already has form */
+	if (char.resonance.complexForms.some((f) => f.name === form.name)) {
+		return { success: false, error: 'Already knows this complex form' };
+	}
+
+	const cost = KARMA_COSTS.NEW_COMPLEX_FORM;
+	if (char.karma < cost) {
+		return { success: false, error: `Not enough karma (need ${cost}, have ${char.karma})` };
+	}
+
+	/* Spend karma */
+	const spendResult = spendKarmaInternal(cost, `Learned complex form: ${form.name}`);
+	if (!spendResult.success) return spendResult;
+
+	/* Add form */
+	characterStore.update((c) => {
+		if (!c || !c.resonance) return c;
+		return {
+			...c,
+			resonance: {
+				...c.resonance,
+				complexForms: [
+					...c.resonance.complexForms,
+					{
+						id: generateId(),
+						...form,
+						rating: 1,
+						notes: ''
+					}
+				]
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+
+	return { success: true };
+}
+
 /* ============================================
  * Equipment Functions
  * ============================================ */
