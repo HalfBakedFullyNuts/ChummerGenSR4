@@ -133,6 +133,7 @@ export {
 	MARTIAL_ARTS_COSTS,
 	addGear,
 	removeGear,
+	moveGearToContainer,
 	setLifestyle,
 	removeLifestyle,
 	saveCurrentCharacter,
@@ -169,6 +170,20 @@ export {
 	submerge,
 	learnEcho,
 	removeEcho,
+	/* Spirit management */
+	addSpirit,
+	removeSpirit,
+	useSpiritService,
+	updateSpiritServices,
+	/* Metamagic management */
+	learnMetamagic,
+	removeMetamagic,
+	/* Sprite management */
+	addSprite,
+	removeSprite,
+	useSpriteTask,
+	registerSprite,
+	updateSpriteTasks,
 	getExpenseLog,
 	/* Gameplay tracking */
 	updateCondition,

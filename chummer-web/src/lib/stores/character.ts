@@ -1469,15 +1469,25 @@ export function removeMartialArtTechnique(artId: string, technique: string): voi
 /**
  * Add gear to the character's equipment.
  */
-export function addGear(gear: GameGear, quantity: number = 1): void {
+export function addGear(gear: GameGear, quantity: number = 1, containerId: string | null = null): void {
 	const char = get(characterStore);
 	if (!char) return;
 
 	const totalCost = gear.cost * quantity;
 	if (char.nuyen < totalCost) return;
 
-	/* Check if gear already exists and stack */
-	const existingIndex = char.equipment.gear.findIndex((g) => g.name === gear.name);
+	/* If adding to a container, check capacity */
+	if (containerId) {
+		const container = char.equipment.gear.find((g) => g.id === containerId);
+		if (!container || container.capacity <= 0) return;
+		const capacityCost = gear.capacityCost ?? 1;
+		if (container.capacityUsed + capacityCost > container.capacity) return;
+	}
+
+	/* Check if gear already exists and stack (only if not in a container) */
+	const existingIndex = containerId === null
+		? char.equipment.gear.findIndex((g) => g.name === gear.name && g.containerId === null)
+		: -1;
 
 	let newGear: readonly CharacterGear[];
 	if (existingIndex >= 0) {
@@ -1493,9 +1503,31 @@ export function addGear(gear: GameGear, quantity: number = 1): void {
 			quantity,
 			cost: gear.cost,
 			location: '',
-			notes: ''
+			notes: '',
+			capacity: gear.capacity ?? 0,
+			capacityUsed: 0,
+			capacityCost: gear.capacityCost ?? 1,
+			containerId,
+			containedItems: []
 		};
 		newGear = [...char.equipment.gear, newItem];
+
+		/* Update container's capacity used and contained items list */
+		if (containerId) {
+			const containerIndex = newGear.findIndex((g) => g.id === containerId);
+			if (containerIndex >= 0) {
+				const container = newGear[containerIndex]!;
+				newGear = newGear.map((g, i) =>
+					i === containerIndex
+						? {
+							...g,
+							capacityUsed: container.capacityUsed + (gear.capacityCost ?? 1),
+							containedItems: [...container.containedItems, newItem.id]
+						}
+						: g
+				);
+			}
+		}
 	}
 
 	const updated: Character = {
@@ -1513,6 +1545,7 @@ export function addGear(gear: GameGear, quantity: number = 1): void {
 
 /**
  * Remove gear from the character's equipment.
+ * Also removes any contained items.
  */
 export function removeGear(gearId: string): void {
 	const char = get(characterStore);
@@ -1521,19 +1554,135 @@ export function removeGear(gearId: string): void {
 	const gear = char.equipment.gear.find((g) => g.id === gearId);
 	if (!gear) return;
 
-	const refund = gear.cost * gear.quantity;
+	/* Calculate refund including contained items */
+	let refund = gear.cost * gear.quantity;
+
+	/* Get IDs of all items to remove (this item + all contained items recursively) */
+	const idsToRemove = new Set<string>([gearId]);
+
+	function addContainedItems(containerId: string): void {
+		for (const item of char.equipment.gear) {
+			if (item.containerId === containerId) {
+				idsToRemove.add(item.id);
+				refund += item.cost * item.quantity;
+				addContainedItems(item.id); // Recursively add nested items
+			}
+		}
+	}
+	addContainedItems(gearId);
+
+	/* If this item was in a container, update the container's capacity */
+	let newGear = char.equipment.gear.filter((g) => !idsToRemove.has(g.id));
+	if (gear.containerId) {
+		const containerIndex = newGear.findIndex((g) => g.id === gear.containerId);
+		if (containerIndex >= 0) {
+			const container = newGear[containerIndex]!;
+			newGear = newGear.map((g, i) =>
+				i === containerIndex
+					? {
+						...g,
+						capacityUsed: Math.max(0, container.capacityUsed - gear.capacityCost),
+						containedItems: container.containedItems.filter((id) => id !== gearId)
+					}
+					: g
+			);
+		}
+	}
 
 	const updated: Character = {
 		...char,
 		equipment: {
 			...char.equipment,
-			gear: char.equipment.gear.filter((g) => g.id !== gearId)
+			gear: newGear
 		},
 		nuyen: char.nuyen + refund,
 		updatedAt: new Date().toISOString()
 	};
 
 	characterStore.set(updated);
+}
+
+/**
+ * Move gear to a different container (or out of a container).
+ */
+export function moveGearToContainer(gearId: string, newContainerId: string | null): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) {
+		return { success: false, error: 'No character loaded' };
+	}
+
+	const gear = char.equipment.gear.find((g) => g.id === gearId);
+	if (!gear) {
+		return { success: false, error: 'Gear not found' };
+	}
+
+	/* Can't move a container into itself */
+	if (newContainerId === gearId) {
+		return { success: false, error: 'Cannot move container into itself' };
+	}
+
+	/* Check if new container has capacity */
+	if (newContainerId) {
+		const newContainer = char.equipment.gear.find((g) => g.id === newContainerId);
+		if (!newContainer) {
+			return { success: false, error: 'Target container not found' };
+		}
+		if (newContainer.capacity <= 0) {
+			return { success: false, error: 'Target is not a container' };
+		}
+		if (newContainer.capacityUsed + gear.capacityCost > newContainer.capacity) {
+			return { success: false, error: 'Not enough capacity in target container' };
+		}
+	}
+
+	let newGear = [...char.equipment.gear];
+
+	/* Remove from old container */
+	if (gear.containerId) {
+		const oldContainerIndex = newGear.findIndex((g) => g.id === gear.containerId);
+		if (oldContainerIndex >= 0) {
+			const oldContainer = newGear[oldContainerIndex]!;
+			newGear[oldContainerIndex] = {
+				...oldContainer,
+				capacityUsed: Math.max(0, oldContainer.capacityUsed - gear.capacityCost),
+				containedItems: oldContainer.containedItems.filter((id) => id !== gearId)
+			};
+		}
+	}
+
+	/* Add to new container */
+	if (newContainerId) {
+		const newContainerIndex = newGear.findIndex((g) => g.id === newContainerId);
+		if (newContainerIndex >= 0) {
+			const newContainer = newGear[newContainerIndex]!;
+			newGear[newContainerIndex] = {
+				...newContainer,
+				capacityUsed: newContainer.capacityUsed + gear.capacityCost,
+				containedItems: [...newContainer.containedItems, gearId]
+			};
+		}
+	}
+
+	/* Update gear's container reference */
+	const gearIndex = newGear.findIndex((g) => g.id === gearId);
+	if (gearIndex >= 0) {
+		newGear[gearIndex] = {
+			...gear,
+			containerId: newContainerId
+		};
+	}
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			gear: newGear
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+	return { success: true };
 }
 
 /**
@@ -2546,6 +2695,356 @@ export function removeEcho(echoName: string): void {
 			resonance: {
 				...c.resonance,
 				echoes: c.resonance.echoes.filter((e) => e !== echoName)
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+}
+
+/* ============================================
+ * Spirit Management Functions
+ * ============================================ */
+
+import type { BoundSpirit, CompiledSprite } from '$types';
+
+/**
+ * Add a bound spirit to the character.
+ * @param spiritType - Type of spirit (e.g., "Fire", "Air", "Beast")
+ * @param force - Force of the spirit
+ * @param services - Number of services owed
+ * @param bound - Whether the spirit is bound (true) or just summoned (false)
+ */
+export function addSpirit(
+	spiritType: string,
+	force: number,
+	services: number,
+	bound: boolean = false
+): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) {
+		return { success: false, error: 'No character loaded' };
+	}
+	if (!char.magic) {
+		return { success: false, error: 'Character is not awakened' };
+	}
+
+	const newSpirit: BoundSpirit = {
+		id: generateId(),
+		type: spiritType,
+		force: Math.max(1, Math.min(12, force)),
+		services: Math.max(0, services),
+		bound
+	};
+
+	characterStore.update((c) => {
+		if (!c || !c.magic) return c;
+		return {
+			...c,
+			magic: {
+				...c.magic,
+				spirits: [...c.magic.spirits, newSpirit]
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+
+	return { success: true };
+}
+
+/**
+ * Remove a spirit from the character.
+ */
+export function removeSpirit(spiritId: string): void {
+	const char = get(characterStore);
+	if (!char || !char.magic) return;
+
+	characterStore.update((c) => {
+		if (!c || !c.magic) return c;
+		return {
+			...c,
+			magic: {
+				...c.magic,
+				spirits: c.magic.spirits.filter((s) => s.id !== spiritId)
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+}
+
+/**
+ * Use a service from a spirit.
+ */
+export function useSpiritService(spiritId: string): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char || !char.magic) {
+		return { success: false, error: 'No character or magic' };
+	}
+
+	const spirit = char.magic.spirits.find((s) => s.id === spiritId);
+	if (!spirit) {
+		return { success: false, error: 'Spirit not found' };
+	}
+	if (spirit.services <= 0) {
+		return { success: false, error: 'No services remaining' };
+	}
+
+	characterStore.update((c) => {
+		if (!c || !c.magic) return c;
+		return {
+			...c,
+			magic: {
+				...c.magic,
+				spirits: c.magic.spirits.map((s) =>
+					s.id === spiritId ? { ...s, services: s.services - 1 } : s
+				)
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+
+	return { success: true };
+}
+
+/**
+ * Update spirit services (for adding more via binding).
+ */
+export function updateSpiritServices(spiritId: string, services: number): void {
+	const char = get(characterStore);
+	if (!char || !char.magic) return;
+
+	characterStore.update((c) => {
+		if (!c || !c.magic) return c;
+		return {
+			...c,
+			magic: {
+				...c.magic,
+				spirits: c.magic.spirits.map((s) =>
+					s.id === spiritId ? { ...s, services: Math.max(0, services) } : s
+				)
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+}
+
+/* ============================================
+ * Metamagic Functions
+ * ============================================ */
+
+/**
+ * Learn a metamagic ability (requires initiation).
+ * Each initiation grade grants one metamagic.
+ */
+export function learnMetamagic(metamagicName: string): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) {
+		return { success: false, error: 'No character loaded' };
+	}
+	if (!char.magic) {
+		return { success: false, error: 'Character is not awakened' };
+	}
+
+	/* Check if already known */
+	if (char.magic.metamagics.includes(metamagicName)) {
+		return { success: false, error: 'Metamagic already known' };
+	}
+
+	/* Check if they have available metamagic slots (one per initiation grade) */
+	const availableSlots = char.magic.initiateGrade;
+	const usedSlots = char.magic.metamagics.length;
+
+	if (usedSlots >= availableSlots) {
+		return { success: false, error: 'No metamagic slots available (need to initiate)' };
+	}
+
+	/* Add the metamagic */
+	characterStore.update((c) => {
+		if (!c || !c.magic) return c;
+		return {
+			...c,
+			magic: {
+				...c.magic,
+				metamagics: [...c.magic.metamagics, metamagicName]
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+
+	return { success: true };
+}
+
+/**
+ * Remove a metamagic ability.
+ */
+export function removeMetamagic(metamagicName: string): void {
+	const char = get(characterStore);
+	if (!char || !char.magic) return;
+
+	characterStore.update((c) => {
+		if (!c || !c.magic) return c;
+		return {
+			...c,
+			magic: {
+				...c.magic,
+				metamagics: c.magic.metamagics.filter((m) => m !== metamagicName)
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+}
+
+/* ============================================
+ * Sprite Management Functions
+ * ============================================ */
+
+/**
+ * Add a compiled sprite to the character.
+ * @param spriteType - Type of sprite (e.g., "Crack", "Data", "Machine")
+ * @param rating - Rating of the sprite
+ * @param tasks - Number of tasks owed
+ * @param registered - Whether the sprite is registered
+ */
+export function addSprite(
+	spriteType: string,
+	rating: number,
+	tasks: number,
+	registered: boolean = false
+): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) {
+		return { success: false, error: 'No character loaded' };
+	}
+	if (!char.resonance) {
+		return { success: false, error: 'Character is not a technomancer' };
+	}
+
+	const newSprite: CompiledSprite = {
+		id: generateId(),
+		type: spriteType,
+		rating: Math.max(1, Math.min(12, rating)),
+		tasks: Math.max(0, tasks),
+		registered
+	};
+
+	characterStore.update((c) => {
+		if (!c || !c.resonance) return c;
+		return {
+			...c,
+			resonance: {
+				...c.resonance,
+				sprites: [...c.resonance.sprites, newSprite]
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+
+	return { success: true };
+}
+
+/**
+ * Remove a sprite from the character.
+ */
+export function removeSprite(spriteId: string): void {
+	const char = get(characterStore);
+	if (!char || !char.resonance) return;
+
+	characterStore.update((c) => {
+		if (!c || !c.resonance) return c;
+		return {
+			...c,
+			resonance: {
+				...c.resonance,
+				sprites: c.resonance.sprites.filter((s) => s.id !== spriteId)
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+}
+
+/**
+ * Use a task from a sprite.
+ */
+export function useSpriteTask(spriteId: string): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char || !char.resonance) {
+		return { success: false, error: 'No character or resonance' };
+	}
+
+	const sprite = char.resonance.sprites.find((s) => s.id === spriteId);
+	if (!sprite) {
+		return { success: false, error: 'Sprite not found' };
+	}
+	if (sprite.tasks <= 0) {
+		return { success: false, error: 'No tasks remaining' };
+	}
+
+	characterStore.update((c) => {
+		if (!c || !c.resonance) return c;
+		return {
+			...c,
+			resonance: {
+				...c.resonance,
+				sprites: c.resonance.sprites.map((s) =>
+					s.id === spriteId ? { ...s, tasks: s.tasks - 1 } : s
+				)
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+
+	return { success: true };
+}
+
+/**
+ * Register a sprite (makes it permanent until decompiled).
+ */
+export function registerSprite(spriteId: string): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char || !char.resonance) {
+		return { success: false, error: 'No character or resonance' };
+	}
+
+	const sprite = char.resonance.sprites.find((s) => s.id === spriteId);
+	if (!sprite) {
+		return { success: false, error: 'Sprite not found' };
+	}
+	if (sprite.registered) {
+		return { success: false, error: 'Sprite already registered' };
+	}
+
+	characterStore.update((c) => {
+		if (!c || !c.resonance) return c;
+		return {
+			...c,
+			resonance: {
+				...c.resonance,
+				sprites: c.resonance.sprites.map((s) =>
+					s.id === spriteId ? { ...s, registered: true } : s
+				)
+			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+
+	return { success: true };
+}
+
+/**
+ * Update sprite tasks (for adding more via sustaining).
+ */
+export function updateSpriteTasks(spriteId: string, tasks: number): void {
+	const char = get(characterStore);
+	if (!char || !char.resonance) return;
+
+	characterStore.update((c) => {
+		if (!c || !c.resonance) return c;
+		return {
+			...c,
+			resonance: {
+				...c.resonance,
+				sprites: c.resonance.sprites.map((s) =>
+					s.id === spriteId ? { ...s, tasks: Math.max(0, tasks) } : s
+				)
 			},
 			updatedAt: new Date().toISOString()
 		};

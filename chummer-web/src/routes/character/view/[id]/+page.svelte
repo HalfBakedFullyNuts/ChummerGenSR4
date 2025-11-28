@@ -12,7 +12,8 @@
 		MatrixPanel,
 		VehiclePanel,
 		MagicPanel,
-		TechnomancerPanel
+		TechnomancerPanel,
+		CareerAdvancement
 	} from '$lib/components';
 	import { rollInitiative } from '$lib/utils/dice';
 
@@ -52,6 +53,9 @@
 
 	/** Show technomancer panel. */
 	let showTechnomancerPanel = false;
+
+	/** Show career advancement panel. */
+	let showCareerAdvancement = false;
 
 	/** Current combat modifier total. */
 	let combatModifierTotal = 0;
@@ -528,6 +532,16 @@
 						Resonance
 					</button>
 				{/if}
+				{#if $character.status === 'career'}
+					<span class="w-px h-6 bg-border mx-1 self-center"></span>
+					<button
+						class="cw-btn text-sm {showCareerAdvancement ? 'cw-btn-primary' : ''}"
+						on:click={() => showCareerAdvancement = !showCareerAdvancement}
+						title="Toggle career advancement"
+					>
+						Advancement
+					</button>
+				{/if}
 			</div>
 		</header>
 
@@ -705,6 +719,13 @@
 			</div>
 		{/if}
 
+		<!-- Career Advancement Panel -->
+		{#if showCareerAdvancement && $character.status === 'career'}
+			<div class="mb-6 career-advancement-panel">
+				<CareerAdvancement />
+			</div>
+		{/if}
+
 		<!-- Character Sheet -->
 		<CharacterSheet
 			char={$character}
@@ -739,7 +760,8 @@
 		.combat-modifiers-panel,
 		.role-panels,
 		.dice-roller-panel,
-		.roll-history-panel {
+		.roll-history-panel,
+		.career-advancement-panel {
 			display: none;
 		}
 	}
