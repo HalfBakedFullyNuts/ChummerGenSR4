@@ -15,8 +15,8 @@
 	} from '$stores/gamedata';
 
 	/** Current category tab. */
-	type Category = 'qualities' | 'spells' | 'powers' | 'programs' | 'martial' | 'echoes' | 'mentors' | 'traditions' | 'streams' | 'cyberware' | 'bioware' | 'gear';
-	let currentCategory: Category = 'qualities';
+	type Category = 'metatypes' | 'skills' | 'qualities' | 'spells' | 'powers' | 'programs' | 'martial' | 'echoes' | 'mentors' | 'traditions' | 'streams' | 'weapons' | 'armor' | 'cyberware' | 'bioware' | 'vehicles' | 'gear';
+	let currentCategory: Category = 'metatypes';
 
 	/** Search query. */
 	let search = '';
@@ -26,6 +26,9 @@
 
 	/** Spell category filter. */
 	let spellCategory = '';
+
+	/** Weapon category filter. */
+	let weaponCategory = '';
 
 	/** Loading state. */
 	let loading = true;
@@ -42,6 +45,21 @@
 
 	/** Get unique gear categories. */
 	$: gearCategories = $gameData.gearCategories ?? [];
+
+	/** Get unique weapon categories. */
+	$: weaponCategories = $gameData.weapons
+		? [...new Set($gameData.weapons.map((w) => w.category))].sort()
+		: [];
+
+	/** Filter metatypes by search. */
+	$: filteredMetatypes = ($gameData.metatypes ?? []).filter((m) =>
+		!search || m.name.toLowerCase().includes(search.toLowerCase())
+	);
+
+	/** Filter skills by search. */
+	$: filteredSkills = ($gameData.skills ?? []).filter((s) =>
+		!search || s.name.toLowerCase().includes(search.toLowerCase())
+	);
 
 	/** Filter qualities by search and type. */
 	$: filteredQualities = ($qualities ?? []).filter((q) => {
@@ -82,6 +100,18 @@
 		!search || m.name.toLowerCase().includes(search.toLowerCase())
 	);
 
+	/** Filter weapons by search and category. */
+	$: filteredWeapons = ($gameData.weapons ?? []).filter((w) => {
+		const matchesSearch = !search || w.name.toLowerCase().includes(search.toLowerCase());
+		const matchesCategory = !weaponCategory || w.category === weaponCategory;
+		return matchesSearch && matchesCategory;
+	});
+
+	/** Filter armor by search. */
+	$: filteredArmor = ($gameData.armor ?? []).filter((a) =>
+		!search || a.name.toLowerCase().includes(search.toLowerCase())
+	);
+
 	/** Filter cyberware by search. */
 	$: filteredCyberware = ($gameData.cyberware ?? []).filter((c) =>
 		!search || c.name.toLowerCase().includes(search.toLowerCase())
@@ -92,6 +122,11 @@
 		!search || b.name.toLowerCase().includes(search.toLowerCase())
 	);
 
+	/** Filter vehicles by search. */
+	$: filteredVehicles = ($gameData.vehicles ?? []).filter((v) =>
+		!search || v.name.toLowerCase().includes(search.toLowerCase())
+	);
+
 	/** Filter gear by search. */
 	$: filteredGear = ($gameData.gear ?? []).filter((g) =>
 		!search || g.name.toLowerCase().includes(search.toLowerCase())
@@ -99,6 +134,8 @@
 
 	/** Category tabs. */
 	const categories: { id: Category; label: string }[] = [
+		{ id: 'metatypes', label: 'Metatypes' },
+		{ id: 'skills', label: 'Skills' },
 		{ id: 'qualities', label: 'Qualities' },
 		{ id: 'spells', label: 'Spells' },
 		{ id: 'powers', label: 'Adept Powers' },
@@ -108,8 +145,11 @@
 		{ id: 'mentors', label: 'Mentors' },
 		{ id: 'traditions', label: 'Traditions' },
 		{ id: 'streams', label: 'Streams' },
+		{ id: 'weapons', label: 'Weapons' },
+		{ id: 'armor', label: 'Armor' },
 		{ id: 'cyberware', label: 'Cyberware' },
 		{ id: 'bioware', label: 'Bioware' },
+		{ id: 'vehicles', label: 'Vehicles' },
 		{ id: 'gear', label: 'Gear' }
 	];
 
@@ -161,6 +201,77 @@
 				</button>
 			{/each}
 		</nav>
+
+		<!-- Metatypes -->
+		{#if currentCategory === 'metatypes'}
+			<div class="grid gap-2">
+				{#each filteredMetatypes as meta}
+					<div class="cw-card p-3">
+						<div class="flex justify-between items-start">
+							<span class="font-medium text-primary-text">{meta.name}</span>
+							<span class="text-accent-primary text-sm font-mono">{meta.bp} BP</span>
+						</div>
+						<div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-xs text-muted-text mt-2">
+							<span>BOD: <span class="text-secondary-text">{meta.bodmin}-{meta.bodmax}</span></span>
+							<span>AGI: <span class="text-secondary-text">{meta.agimin}-{meta.agimax}</span></span>
+							<span>REA: <span class="text-secondary-text">{meta.reamin}-{meta.reamax}</span></span>
+							<span>STR: <span class="text-secondary-text">{meta.strmin}-{meta.strmax}</span></span>
+							<span>CHA: <span class="text-secondary-text">{meta.chamin}-{meta.chamax}</span></span>
+							<span>INT: <span class="text-secondary-text">{meta.intmin}-{meta.intmax}</span></span>
+							<span>LOG: <span class="text-secondary-text">{meta.logmin}-{meta.logmax}</span></span>
+							<span>WIL: <span class="text-secondary-text">{meta.wilmin}-{meta.wilmax}</span></span>
+						</div>
+						<div class="flex gap-4 text-xs text-muted-text mt-1">
+							<span>EDG: <span class="text-accent-primary">{meta.edgmin}-{meta.edgmax}</span></span>
+							<span>ESS: <span class="text-accent-cyan">{meta.essmax}</span></span>
+						</div>
+						<p class="text-muted-text text-xs mt-1">{meta.source} p.{meta.page}</p>
+					</div>
+				{/each}
+				{#if filteredMetatypes.length === 0}
+					<p class="text-muted-text text-center py-4">No metatypes found.</p>
+				{/if}
+			</div>
+		{/if}
+
+		<!-- Skills -->
+		{#if currentCategory === 'skills'}
+			<div class="grid gap-2">
+				{#each filteredSkills as skill}
+					<div class="cw-card p-3">
+						<div class="flex justify-between items-start">
+							<span class="font-medium text-primary-text">{skill.name}</span>
+							<span class="text-accent-cyan text-sm">{skill.attribute}</span>
+						</div>
+						<div class="flex flex-wrap gap-2 text-xs text-muted-text mt-1">
+							<span>Category: <span class="text-secondary-text">{skill.category}</span></span>
+							{#if skill.group}
+								<span>Group: <span class="text-accent-primary">{skill.group}</span></span>
+							{/if}
+							{#if skill.default}
+								<span class="text-accent-success">Defaultable</span>
+							{/if}
+						</div>
+						{#if skill.specs && skill.specs.length > 0}
+							<div class="flex flex-wrap gap-1 mt-2">
+								{#each skill.specs.slice(0, 5) as spec}
+									<span class="px-1.5 py-0.5 bg-surface-light text-muted-text text-xs rounded">
+										{spec}
+									</span>
+								{/each}
+								{#if skill.specs.length > 5}
+									<span class="text-muted-text text-xs">+{skill.specs.length - 5} more</span>
+								{/if}
+							</div>
+						{/if}
+						<p class="text-muted-text text-xs mt-1">{skill.source} p.{skill.page}</p>
+					</div>
+				{/each}
+				{#if filteredSkills.length === 0}
+					<p class="text-muted-text text-center py-4">No skills found.</p>
+				{/if}
+			</div>
+		{/if}
 
 		<!-- Qualities -->
 		{#if currentCategory === 'qualities'}
@@ -397,6 +508,76 @@
 			</div>
 		{/if}
 
+		<!-- Weapons -->
+		{#if currentCategory === 'weapons'}
+			<div class="mb-4">
+				<select class="cw-input" bind:value={weaponCategory}>
+					<option value="">All Categories</option>
+					{#each weaponCategories as cat}
+						<option value={cat}>{cat}</option>
+					{/each}
+				</select>
+			</div>
+			<div class="grid gap-2">
+				{#each filteredWeapons.slice(0, 100) as weapon}
+					<div class="cw-card p-3">
+						<div class="flex justify-between items-start">
+							<span class="font-medium text-primary-text">{weapon.name}</span>
+							<span class="text-accent-cyan text-sm">{formatNuyen(weapon.cost)}</span>
+						</div>
+						<div class="flex flex-wrap gap-3 text-xs text-muted-text mt-1">
+							<span>Category: <span class="text-secondary-text">{weapon.category}</span></span>
+							<span>Damage: <span class="text-accent-danger">{weapon.damage}</span></span>
+							<span>AP: <span class="text-accent-warning">{weapon.ap}</span></span>
+							{#if weapon.rc}
+								<span>RC: <span class="text-secondary-text">{weapon.rc}</span></span>
+							{/if}
+							{#if weapon.ammo}
+								<span>Ammo: <span class="text-secondary-text">{weapon.ammo}</span></span>
+							{/if}
+							{#if weapon.mode}
+								<span>Mode: <span class="text-secondary-text">{weapon.mode}</span></span>
+							{/if}
+						</div>
+						<div class="text-xs text-muted-text mt-1">
+							Avail: <span class="text-secondary-text">{weapon.avail}</span>
+						</div>
+					</div>
+				{/each}
+				{#if filteredWeapons.length > 100}
+					<p class="text-muted-text text-center py-2">Showing first 100 of {filteredWeapons.length} items. Use search to narrow results.</p>
+				{/if}
+				{#if filteredWeapons.length === 0}
+					<p class="text-muted-text text-center py-4">No weapons found.</p>
+				{/if}
+			</div>
+		{/if}
+
+		<!-- Armor -->
+		{#if currentCategory === 'armor'}
+			<div class="grid gap-2">
+				{#each filteredArmor as armor}
+					<div class="cw-card p-3">
+						<div class="flex justify-between items-start">
+							<span class="font-medium text-primary-text">{armor.name}</span>
+							<span class="text-accent-cyan text-sm">{formatNuyen(armor.cost)}</span>
+						</div>
+						<div class="flex flex-wrap gap-3 text-xs text-muted-text mt-1">
+							<span>Ballistic: <span class="text-accent-primary">{armor.ballistic}</span></span>
+							<span>Impact: <span class="text-accent-warning">{armor.impact}</span></span>
+							{#if armor.capacity}
+								<span>Capacity: <span class="text-secondary-text">{armor.capacity}</span></span>
+							{/if}
+							<span>Avail: <span class="text-secondary-text">{armor.avail}</span></span>
+						</div>
+					</div>
+				{/each}
+				{#if filteredArmor.length === 0}
+					<p class="text-muted-text text-center py-4">No armor found.</p>
+				{/if}
+			</div>
+		{/if}
+
 		<!-- Cyberware -->
 		{#if currentCategory === 'cyberware'}
 			<div class="grid gap-2">
@@ -443,6 +624,44 @@
 				{/if}
 				{#if filteredBioware.length === 0}
 					<p class="text-muted-text text-center py-4">No bioware found.</p>
+				{/if}
+			</div>
+		{/if}
+
+		<!-- Vehicles -->
+		{#if currentCategory === 'vehicles'}
+			<div class="grid gap-2">
+				{#each filteredVehicles.slice(0, 100) as vehicle}
+					<div class="cw-card p-3">
+						<div class="flex justify-between items-start">
+							<span class="font-medium text-primary-text">{vehicle.name}</span>
+							<span class="text-accent-cyan text-sm">{formatNuyen(vehicle.cost)}</span>
+						</div>
+						<div class="text-xs text-muted-text mt-1">
+							Category: <span class="text-secondary-text">{vehicle.category}</span>
+						</div>
+						<div class="grid grid-cols-3 md:grid-cols-6 gap-2 text-xs text-muted-text mt-2">
+							<span>Hand: <span class="text-secondary-text">{vehicle.handling}</span></span>
+							<span>Accel: <span class="text-secondary-text">{vehicle.accel}</span></span>
+							<span>Speed: <span class="text-secondary-text">{vehicle.speed}</span></span>
+							<span>Pilot: <span class="text-secondary-text">{vehicle.pilot}</span></span>
+							<span>Body: <span class="text-secondary-text">{vehicle.body}</span></span>
+							<span>Armor: <span class="text-secondary-text">{vehicle.armor}</span></span>
+						</div>
+						<div class="flex gap-4 text-xs text-muted-text mt-1">
+							<span>Sensor: <span class="text-secondary-text">{vehicle.sensor}</span></span>
+							{#if vehicle.seats}
+								<span>Seats: <span class="text-secondary-text">{vehicle.seats}</span></span>
+							{/if}
+							<span>Avail: <span class="text-secondary-text">{vehicle.avail}</span></span>
+						</div>
+					</div>
+				{/each}
+				{#if filteredVehicles.length > 100}
+					<p class="text-muted-text text-center py-2">Showing first 100 of {filteredVehicles.length} items. Use search to narrow results.</p>
+				{/if}
+				{#if filteredVehicles.length === 0}
+					<p class="text-muted-text text-center py-4">No vehicles found.</p>
 				{/if}
 			</div>
 		{/if}
