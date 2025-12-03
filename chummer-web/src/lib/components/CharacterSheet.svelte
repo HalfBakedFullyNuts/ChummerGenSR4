@@ -3,6 +3,8 @@
 	import type { Character, SkillDefinition, AttributeCode, CharacterWeapon, CharacterSpell } from '$types';
 	import { getWeaponSkill, parseDamage, parseAP, parseFireModes, calculateArmorStacking, calculateInitiativeModifiers, type FiringMode } from '$lib/utils/dice';
 	import { positiveQualities, negativeQualities, type GameQuality } from '$stores/gamedata';
+	import { formatQualityBonus, type FormattedBonus } from '$lib/utils/qualities';
+	import Tooltip from './Tooltip.svelte';
 
 	/** Character to display. */
 	export let char: Character;
@@ -178,11 +180,15 @@
 		return Math.max(0, wil + drainAttr - totalWoundMod);
 	}
 
-	/** Get quality effect description from game data. */
-	function getQualityEffect(qualityName: string): string | undefined {
+	/** Get quality data from game data including effect and bonus. */
+	function getQualityData(qualityName: string): { effect?: string; bonuses: FormattedBonus[] } | undefined {
 		const allQualities = [...($positiveQualities ?? []), ...($negativeQualities ?? [])];
 		const gameQuality = allQualities.find(q => q.name === qualityName);
-		return gameQuality?.effect;
+		if (!gameQuality) return undefined;
+		return {
+			effect: gameQuality.effect,
+			bonuses: formatQualityBonus(gameQuality.bonus)
+		};
 	}
 
 	/** Handle spell click for casting. */
@@ -680,22 +686,32 @@
 			<h2 class="cw-card-header">Qualities</h2>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
 				{#each char.qualities as quality}
-					{@const effect = getQualityEffect(quality.name)}
+					{@const qualityData = getQualityData(quality.name)}
+					{@const hasTooltip = qualityData?.effect || (qualityData?.bonuses?.length ?? 0) > 0}
 					<div class="flex justify-between py-1 border-b border-border group relative">
 						<span class:text-accent-success={quality.category === 'Positive'}
 							  class:text-accent-danger={quality.category === 'Negative'}
-							  class:cursor-help={effect}>
+							  class:cursor-help={hasTooltip}>
 							{quality.name}
 						</span>
 						<span class="text-muted-text">{quality.bp} BP</span>
-						{#if effect}
-							<span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
-								bg-surface-dark text-accent-secondary text-xs rounded
-								opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10
-								max-w-xs text-center whitespace-normal">
-								{effect}
-							</span>
-						{/if}
+						<Tooltip show={hasTooltip} maxWidth="20rem">
+							<div slot="content" class="text-left">
+								{#if qualityData?.effect}
+									<div class="mb-1">{qualityData.effect}</div>
+								{/if}
+								{#if qualityData?.bonuses && qualityData.bonuses.length > 0}
+									<div class="border-t border-border/50 pt-1 mt-1 space-y-0.5">
+										{#each qualityData.bonuses as bonus}
+											<div class:text-accent-success={bonus.positive}
+												 class:text-accent-danger={!bonus.positive}>
+												{bonus.text}
+											</div>
+										{/each}
+									</div>
+								{/if}
+							</div>
+						</Tooltip>
 					</div>
 				{/each}
 			</div>
