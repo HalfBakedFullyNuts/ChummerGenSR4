@@ -94,6 +94,8 @@ export interface QualityBonus {
 	cyberwareessmultiplier?: number;
 	/** Bioware Essence cost multiplier (percentage) */
 	biowareessmultiplier?: number;
+	/** Basic Bioware Essence cost multiplier (percentage) - Type O System */
+	basicbiowareessmultiplier?: number;
 	/** Genetech cost multiplier (percentage) */
 	genetechcostmultiplier?: number;
 	/** Reach modifier for melee */

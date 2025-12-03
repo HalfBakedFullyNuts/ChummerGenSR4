@@ -5,7 +5,7 @@
 		type GameQuality
 	} from '$stores/gamedata';
 	import { character, addQuality, removeQuality } from '$stores/character';
-	import { qualityMatchesSearch, formatQualityBonus, generateQualityTags, type QualityTag } from '$lib/utils/qualities';
+	import { qualityMatchesSearch, formatQualityBonus, generateQualityTags, getQualityDescription, type QualityTag } from '$lib/utils/qualities';
 	import Tooltip from '$lib/components/Tooltip.svelte';
 
 	/** Current tab - positive or negative qualities. */
@@ -196,7 +196,8 @@
 						(q) => q.name === quality.name
 					)}
 					{@const bonuses = gameQual ? formatQualityBonus(gameQual.bonus) : []}
-					{@const hasTooltip = gameQual?.effect || bonuses.length > 0}
+					{@const description = gameQual ? getQualityDescription(gameQual) : undefined}
+					{@const hasTooltip = description || bonuses.length > 0}
 					<button
 						class="px-3 py-1 rounded text-sm flex items-center gap-2 group relative
 							{quality.category === 'Positive'
@@ -209,8 +210,8 @@
 						<span class="text-xs opacity-50">×</span>
 						<Tooltip show={hasTooltip} maxWidth="20rem">
 							<div slot="content" class="text-left">
-								{#if gameQual?.effect}
-									<div class="mb-1">{gameQual.effect}</div>
+								{#if description}
+									<div class="mb-1">{description}</div>
 								{/if}
 								{#if bonuses.length > 0}
 									<div class="border-t border-border/50 pt-1 mt-1 space-y-0.5">
@@ -236,6 +237,7 @@
 			{@const selected = isSelected(quality.name)}
 			{@const bonuses = formatQualityBonus(quality.bonus)}
 			{@const tags = generateQualityTags(quality)}
+			{@const description = getQualityDescription(quality)}
 			<button
 				class="cw-card text-left p-3 transition-all
 					{selected
@@ -269,9 +271,9 @@
 					</span>
 				</div>
 
-				{#if quality.effect}
+				{#if description}
 					<div class="text-accent-secondary text-xs mt-2 italic">
-						{quality.effect}
+						{description}
 					</div>
 				{/if}
 

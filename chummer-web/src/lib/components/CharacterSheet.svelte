@@ -3,7 +3,7 @@
 	import type { Character, SkillDefinition, AttributeCode, CharacterWeapon, CharacterSpell } from '$types';
 	import { getWeaponSkill, parseDamage, parseAP, parseFireModes, calculateArmorStacking, calculateInitiativeModifiers, type FiringMode } from '$lib/utils/dice';
 	import { positiveQualities, negativeQualities, type GameQuality } from '$stores/gamedata';
-	import { formatQualityBonus, type FormattedBonus } from '$lib/utils/qualities';
+	import { formatQualityBonus, getQualityDescription, type FormattedBonus } from '$lib/utils/qualities';
 	import Tooltip from './Tooltip.svelte';
 
 	/** Character to display. */
@@ -186,7 +186,7 @@
 		const gameQuality = allQualities.find(q => q.name === qualityName);
 		if (!gameQuality) return undefined;
 		return {
-			effect: gameQuality.effect,
+			effect: getQualityDescription(gameQuality),
 			bonuses: formatQualityBonus(gameQuality.bonus)
 		};
 	}

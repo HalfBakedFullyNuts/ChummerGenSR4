@@ -6,6 +6,98 @@
 
 import type { QualityBonus, GameQuality } from '$stores/gamedata';
 
+/**
+ * Manual effect descriptions for qualities that don't have mechanical bonuses.
+ * These provide human-readable descriptions based on SR4 rulebooks.
+ */
+export const QUALITY_DESCRIPTIONS: Record<string, string> = {
+	// === Positive Qualities (SR4 Core) ===
+	'360-degree Eyesight': 'Cannot be flanked or surprised from behind; +2 dice to visual Perception',
+	'Ambidextrous': 'No off-hand penalty; gain +1 die before splitting dice pool when using two weapons',
+	'Astral Chameleon': 'Astral signature fades in half normal time; -2 dice to track via astral signature',
+	'Blandness': '-2 dice to attempts to remember or describe you; +2 to blend into crowds',
+	'Codeslinger': '+2 dice to a specific Matrix action (selected at purchase)',
+	'Double Jointed': '+2 dice to escape restraints; can fit through tight spaces',
+	'Erased (1 Week)': 'Public record data has been erased; data theft results deleted in 1 week',
+	'Erased (24 Hours)': 'Public record data has been erased; data theft results deleted in 24 hours',
+	'First Impression': '+2 dice to Social skill tests during first meeting with a person or group',
+	'Guts': '+2 dice to resist fear and intimidation; may spend Edge to auto-succeed fear tests',
+	'High Pain Tolerance': 'Ignore wound modifiers equal to rating',
+	'Home Ground': '+2 dice to tests within chosen area of familiarity',
+	'Human Looking': 'Metahuman appears human; +2 dice to avoid discrimination',
+	'Lucky': '+1 Edge attribute maximum',
+	'Magic Resistance': '+rating x2 dice to resist spells (cannot be targeted by beneficial spells)',
+	'Mentor Spirit': 'Receive guidance and bonuses from a mentor spirit',
+	'Murky Link': 'Ritual spellcasters take -3 dice to target you',
+	'Natural Hardening': 'Immune to Black IC biofeedback damage up to rating',
+	'Natural Immunity': '+2 dice to resist specific toxin or disease (selected at purchase)',
+	'Photographic Memory': '+2 dice to memory tests; never forget anything witnessed directly',
+	'Quick Healer': '+2 dice to Healing tests made on you',
+	'Resistance to Pathogens/Toxins': '+1 die to resist all pathogens and toxins',
+	'Spirit Affinity': '+1 die to summon and bind spirits of chosen type',
+	'Toughness': '+1 Physical Condition Monitor box',
+	'Will to Live': '+1 Overflow box per rating (1-3)',
+
+	// === Negative Qualities (SR4 Core) ===
+	'Addiction (Mild)': 'Must make Addiction test at interval; failure causes craving',
+	'Addiction (Moderate)': 'Must make Addiction test at interval; failure causes withdrawal',
+	'Addiction (Severe)': 'Must make Addiction test at interval; severe withdrawal on failure',
+	'Addiction (Burnout)': 'Automatic withdrawal without regular use; -1 to attributes while addicted',
+	'Allergy (Mild)': 'Suffer 2 boxes damage per minute of exposure (resisted with Body)',
+	'Allergy (Moderate)': 'Suffer 3 boxes damage per Combat Turn of exposure (resisted with Body)',
+	'Allergy (Severe)': 'Suffer 1 box Physical damage per Combat Turn of exposure',
+	'Allergy (Extreme)': 'Suffer 2 boxes Physical damage per Combat Turn of exposure',
+	'Bad Luck': 'Edge does not refresh; only 1 Edge point per session from GM award',
+	'Bad Rep': '+3 Notoriety; -2 dice to Social tests with those who know your reputation',
+	'Codeblock': '-2 dice to a specific Matrix action (selected at purchase)',
+	'Combat Paralysis': 'Always act last in first Combat Turn; -3 dice on Surprise tests',
+	'Elf Poser': 'Human who believes they are an elf; risk of social consequences',
+	'Gremlins': 'Technology glitches around you; devices more likely to fail',
+	'Incompetent': 'Cannot default on chosen skill group; skill group max is 0',
+	'Low Pain Tolerance': 'Wound modifiers doubled',
+	'Ork Poser': 'Human/Elf who believes they are an ork; risk of social consequences',
+	'Scorched': 'Cannot enter VR; BTL exposure causes 1 box Stun damage',
+	'Sensitive Neural Structure': 'Black IC damage and dumpshock deal Physical instead of Stun',
+	'Sensitive System': 'Double Essence cost for all cyberware',
+	'SINner (Standard)': 'Have a legal SIN; can be tracked and identified',
+	'SINner (Criminal)': 'Have a criminal SIN; -1 dice to Social tests when SIN is known',
+	'SINner (Corporate Limited)': 'Limited corporate SIN; tied to a megacorporation',
+	'SINner (Corporate)': 'Full corporate SIN; owned by a megacorporation',
+	'Spirit Bane': '-2 dice when dealing with chosen spirit type; spirits are hostile',
+	'Uncouth': 'Social skill groups cost double Karma; cannot use Social skills as groups',
+	'Uneducated': 'Technical and Academic knowledge skills cost double Karma',
+	'Weak Immune System': '-2 dice to resist diseases and infections',
+
+	// === Additional Common Qualities ===
+	'Adrenaline Surge': '+1 Initiative Pass on first turn of combat; requires Body 5+',
+	'Bilingual': 'Native fluency in two languages',
+	'Common Sense': 'GM warns you before obviously stupid actions',
+	'Focused Concentration': 'Sustain spells without penalty equal to rating',
+	'Restricted Gear': 'May purchase one item with Availability up to 20 at character creation',
+	'School of Hard Knocks': 'Street knowledge comes naturally; +1 die to Street knowledge tests',
+	'Technical School': '+1 die to Technical skill tests when using AR instructions',
+	'College Education': '+1 die to Academic knowledge tests',
+	'Distinctive Style': 'Memorable appearance; +2 dice to identify or remember you',
+	'Flashbacks': 'Risk of flashbacks when stressed; may freeze or act irrationally',
+	'Amnesia': 'Cannot remember past events; backstory unknown',
+	'Astral Beacon': 'Astral signature is unusually bright; +2 dice to track you astrally',
+	'Creature of Comfort': 'Suffer penalties when lifestyle drops below High',
+	'Dependent': 'Have someone who relies on you; must support them',
+	'Loss of Confidence': '-2 dice to a specific skill when under pressure',
+	'Prejudiced': 'Hostile toward a specific group; penalties to social interactions',
+	'Simsense Vertigo': '-2 dice to all actions while in VR or using simsense',
+	'Social Stress': '-1 die to Social tests in specific situations',
+	'Vindictive': 'Compelled to seek revenge; -2 Composure when wronged',
+
+	// === Magic/Resonance Qualities ===
+	'Magician': 'Awakened character capable of casting spells and summoning spirits',
+	'Mystic Adept': 'Awakened with both adept powers and spellcasting ability',
+	'Technomancer': 'Emerged character with innate Matrix abilities',
+	'Astral Perception': 'Can perceive the astral plane at will',
+	'Spirit Whisperer': 'May communicate with unbound spirits; +1 die to Social tests with spirits',
+	'Sprite Affinity': 'Chosen sprite type is more cooperative; +1 die to compile and register'
+};
+
 /** A formatted bonus line for display. */
 export interface FormattedBonus {
 	/** Short description of the bonus. */
@@ -214,22 +306,32 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 		});
 	}
 
-	// Cyberware essence multiplier
+	// Cyberware essence multiplier (stored as percentage, e.g., 90 = 90% of normal cost)
 	if (bonus.cyberwareessmultiplier !== undefined) {
-		const percent = Math.round((bonus.cyberwareessmultiplier - 1) * 100);
+		const percent = Math.round(bonus.cyberwareessmultiplier - 100);
 		const sign = percent >= 0 ? '+' : '';
 		results.push({
-			text: `${sign}${percent}% Cyberware Essence`,
+			text: `${sign}${percent}% Cyberware Essence cost`,
 			positive: percent < 0
 		});
 	}
 
-	// Bioware essence multiplier
+	// Bioware essence multiplier (stored as percentage, e.g., 90 = 90% of normal cost)
 	if (bonus.biowareessmultiplier !== undefined) {
-		const percent = Math.round((bonus.biowareessmultiplier - 1) * 100);
+		const percent = Math.round(bonus.biowareessmultiplier - 100);
 		const sign = percent >= 0 ? '+' : '';
 		results.push({
-			text: `${sign}${percent}% Bioware Essence`,
+			text: `${sign}${percent}% Bioware Essence cost`,
+			positive: percent < 0
+		});
+	}
+
+	// Basic Bioware essence multiplier (Type O System, Ronin)
+	if (bonus.basicbiowareessmultiplier !== undefined) {
+		const percent = Math.round(bonus.basicbiowareessmultiplier - 100);
+		const sign = percent >= 0 ? '+' : '';
+		results.push({
+			text: `${sign}${percent}% Basic Bioware Essence cost`,
 			positive: percent < 0
 		});
 	}
@@ -363,6 +465,31 @@ export function formatQualityBonusSummary(bonus: QualityBonus | undefined): stri
 	return formatted.map(f => f.text).join(', ');
 }
 
+/**
+ * Get a human-readable description for a quality.
+ * Returns the quality's effect field if defined, otherwise looks up
+ * in QUALITY_DESCRIPTIONS, finally returns undefined if not found.
+ */
+export function getQualityDescription(quality: GameQuality): string | undefined {
+	// Prefer the effect from the quality data itself
+	if (quality.effect) {
+		return quality.effect;
+	}
+
+	// Fall back to manual descriptions
+	return QUALITY_DESCRIPTIONS[quality.name];
+}
+
+/**
+ * Check if a quality has any displayable information (effect, bonus, or description).
+ */
+export function hasQualityInfo(quality: GameQuality): boolean {
+	if (quality.effect) return true;
+	if (quality.bonus && formatQualityBonus(quality.bonus).length > 0) return true;
+	if (QUALITY_DESCRIPTIONS[quality.name]) return true;
+	return false;
+}
+
 /** Quality tag categories for searchable keywords. */
 export type QualityTag =
 	| 'combat'
@@ -474,6 +601,7 @@ export function generateQualityTags(quality: GameQuality): QualityTag[] {
 		if (
 			bonus.cyberwareessmultiplier !== undefined ||
 			bonus.biowareessmultiplier !== undefined ||
+			bonus.basicbiowareessmultiplier !== undefined ||
 			bonus.sensitivesystem
 		) {
 			tags.add('essence');
