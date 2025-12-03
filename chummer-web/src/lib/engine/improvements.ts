@@ -10,6 +10,7 @@
  */
 
 import type { Character, CharacterCyberware, CharacterQuality, CharacterPower } from '$types';
+import type { QualityBonus, GameQuality } from '$lib/stores/gamedata';
 
 /* ============================================
  * Improvement Types
@@ -18,13 +19,18 @@ import type { Character, CharacterCyberware, CharacterQuality, CharacterPower } 
 export type ImprovementTarget =
 	| 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil' | 'edg'
 	| 'mag' | 'res' | 'ess'
-	| 'initiative' | 'initiative_dice'
+	| 'initiative' | 'initiative_dice' | 'initiative_pass'
 	| 'armor_ballistic' | 'armor_impact'
-	| 'physical_cm' | 'stun_cm'
-	| 'skill' | 'skill_group'
+	| 'physical_cm' | 'stun_cm' | 'cm_overflow'
+	| 'skill' | 'skill_group' | 'skill_category'
 	| 'physical_limit' | 'mental_limit' | 'social_limit'
-	| 'damage_resistance' | 'spell_resistance'
-	| 'memory' | 'composure' | 'judge_intentions';
+	| 'damage_resistance' | 'spell_resistance' | 'drain_resistance'
+	| 'memory' | 'composure' | 'judge_intentions'
+	| 'notoriety' | 'lifestyle_cost'
+	| 'cyberware_ess_multiplier' | 'bioware_ess_multiplier'
+	| 'reach' | 'unarmed_dv'
+	| 'movement_percent' | 'swim_percent' | 'fly_speed'
+	| 'nuyen_max_bp' | 'restricted_item_count';
 
 export type ImprovementSource =
 	| 'cyberware'
@@ -42,7 +48,12 @@ export interface Improvement {
 	readonly sourceName: string;
 	readonly target: ImprovementTarget;
 	readonly value: number;
+	/** For skill/skill_group/skill_category improvements, the specific name */
+	readonly targetName?: string;
+	/** Conditional text describing when the bonus applies */
 	readonly conditional?: string;
+	/** Whether this is a max modifier (affects limit) vs bonus to rating */
+	readonly isMaxModifier?: boolean;
 }
 
 /* ============================================
@@ -283,85 +294,338 @@ export function getCyberwareImprovements(cyberware: readonly CharacterCyberware[
  * Quality Improvements
  * ============================================ */
 
-/** Extract improvements from qualities. */
-export function getQualityImprovements(qualities: readonly CharacterQuality[]): Improvement[] {
+/** Map attribute names from XML to improvement targets */
+function attrNameToTarget(name: string): ImprovementTarget | null {
+	const map: Record<string, ImprovementTarget> = {
+		'BOD': 'bod', 'AGI': 'agi', 'REA': 'rea', 'STR': 'str',
+		'CHA': 'cha', 'INT': 'int', 'LOG': 'log', 'WIL': 'wil',
+		'EDG': 'edg', 'MAG': 'mag', 'RES': 'res', 'ESS': 'ess'
+	};
+	return map[name.toUpperCase()] || null;
+}
+
+/**
+ * Parse quality bonus data into improvements.
+ * This is the core function that converts QualityBonus structures to Improvement objects.
+ */
+export function parseQualityBonus(
+	qualityId: string,
+	qualityName: string,
+	bonus: QualityBonus,
+	_rating: number = 1
+): Improvement[] {
+	const improvements: Improvement[] = [];
+	let idx = 0;
+
+	// Specific attribute modifiers (min/max/val changes)
+	if (bonus.specificattribute) {
+		for (const attr of bonus.specificattribute) {
+			const target = attrNameToTarget(attr.name);
+			if (target) {
+				const value = attr.min ?? attr.max ?? attr.val ?? 0;
+				if (value !== 0) {
+					improvements.push({
+						id: `${qualityId}-attr-${idx++}`,
+						source: 'quality',
+						sourceName: qualityName,
+						target,
+						value,
+						isMaxModifier: attr.max !== undefined && attr.val === undefined
+					});
+				}
+			}
+		}
+	}
+
+	// Specific skill bonuses
+	if (bonus.specificskill) {
+		for (const skill of bonus.specificskill) {
+			if (skill.bonus && skill.bonus !== 0) {
+				improvements.push({
+					id: `${qualityId}-skill-${idx++}`,
+					source: 'quality',
+					sourceName: qualityName,
+					target: 'skill',
+					targetName: skill.name,
+					value: skill.bonus
+				});
+			}
+			if (skill.max && skill.max !== 0) {
+				improvements.push({
+					id: `${qualityId}-skillmax-${idx++}`,
+					source: 'quality',
+					sourceName: qualityName,
+					target: 'skill',
+					targetName: skill.name,
+					value: skill.max,
+					isMaxModifier: true
+				});
+			}
+		}
+	}
+
+	// Skill group bonuses
+	if (bonus.skillgroup) {
+		for (const group of bonus.skillgroup) {
+			if (group.bonus && group.bonus !== 0) {
+				improvements.push({
+					id: `${qualityId}-skillgrp-${idx++}`,
+					source: 'quality',
+					sourceName: qualityName,
+					target: 'skill_group',
+					targetName: group.name,
+					value: group.bonus
+				});
+			}
+		}
+	}
+
+	// Skill category bonuses
+	if (bonus.skillcategory) {
+		for (const cat of bonus.skillcategory) {
+			if (cat.bonus && cat.bonus !== 0) {
+				improvements.push({
+					id: `${qualityId}-skillcat-${idx++}`,
+					source: 'quality',
+					sourceName: qualityName,
+					target: 'skill_category',
+					targetName: cat.name,
+					value: cat.bonus
+				});
+			}
+		}
+	}
+
+	// Initiative
+	if (bonus.initiative && bonus.initiative !== 0) {
+		improvements.push({
+			id: `${qualityId}-init`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'initiative',
+			value: bonus.initiative
+		});
+	}
+
+	// Initiative Passes
+	if (bonus.initiativepass && bonus.initiativepass !== 0) {
+		improvements.push({
+			id: `${qualityId}-initpass`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'initiative_pass',
+			value: bonus.initiativepass
+		});
+	}
+
+	// Condition Monitor
+	if (bonus.conditionmonitor && bonus.conditionmonitor !== 0) {
+		improvements.push({
+			id: `${qualityId}-cm`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'physical_cm',
+			value: bonus.conditionmonitor
+		});
+	}
+
+	// Notoriety
+	if (bonus.notoriety && bonus.notoriety !== 0) {
+		improvements.push({
+			id: `${qualityId}-notor`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'notoriety',
+			value: bonus.notoriety
+		});
+	}
+
+	// Composure
+	if (bonus.composure && bonus.composure !== 0) {
+		improvements.push({
+			id: `${qualityId}-comp`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'composure',
+			value: bonus.composure
+		});
+	}
+
+	// Judge Intentions
+	if (bonus.judgeintentions && bonus.judgeintentions !== 0) {
+		improvements.push({
+			id: `${qualityId}-judge`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'judge_intentions',
+			value: bonus.judgeintentions
+		});
+	}
+
+	// Damage Resistance
+	if (bonus.damageresistance && bonus.damageresistance !== 0) {
+		improvements.push({
+			id: `${qualityId}-damres`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'damage_resistance',
+			value: bonus.damageresistance
+		});
+	}
+
+	// Drain Resistance
+	if (bonus.drainresist && bonus.drainresist !== 0) {
+		improvements.push({
+			id: `${qualityId}-drain`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'drain_resistance',
+			value: bonus.drainresist
+		});
+	}
+
+	// Lifestyle Cost
+	if (bonus.lifestylecost && bonus.lifestylecost !== 0) {
+		improvements.push({
+			id: `${qualityId}-lifestyle`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'lifestyle_cost',
+			value: bonus.lifestylecost
+		});
+	}
+
+	// Cyberware Essence Multiplier
+	if (bonus.cyberwareessmultiplier && bonus.cyberwareessmultiplier !== 100) {
+		improvements.push({
+			id: `${qualityId}-cyberess`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'cyberware_ess_multiplier',
+			value: bonus.cyberwareessmultiplier
+		});
+	}
+
+	// Bioware Essence Multiplier
+	if (bonus.biowareessmultiplier && bonus.biowareessmultiplier !== 100) {
+		improvements.push({
+			id: `${qualityId}-bioess`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'bioware_ess_multiplier',
+			value: bonus.biowareessmultiplier
+		});
+	}
+
+	// Reach
+	if (bonus.reach && bonus.reach !== 0) {
+		improvements.push({
+			id: `${qualityId}-reach`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'reach',
+			value: bonus.reach
+		});
+	}
+
+	// Unarmed DV
+	if (bonus.unarmeddv && bonus.unarmeddv !== 0) {
+		improvements.push({
+			id: `${qualityId}-unarmed`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'unarmed_dv',
+			value: bonus.unarmeddv
+		});
+	}
+
+	// Movement Percent
+	if (bonus.movementpercent && bonus.movementpercent !== 0) {
+		improvements.push({
+			id: `${qualityId}-move`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'movement_percent',
+			value: bonus.movementpercent
+		});
+	}
+
+	// Swim Percent
+	if (bonus.swimpercent && bonus.swimpercent !== 0) {
+		improvements.push({
+			id: `${qualityId}-swim`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'swim_percent',
+			value: bonus.swimpercent
+		});
+	}
+
+	// Fly Speed
+	if (bonus.flyspeed && bonus.flyspeed !== 0) {
+		improvements.push({
+			id: `${qualityId}-fly`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'fly_speed',
+			value: bonus.flyspeed
+		});
+	}
+
+	// Nuyen Max BP
+	if (bonus.nuyenmaxbp && bonus.nuyenmaxbp !== 0) {
+		improvements.push({
+			id: `${qualityId}-nuyenbp`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'nuyen_max_bp',
+			value: bonus.nuyenmaxbp
+		});
+	}
+
+	// Restricted Item Count
+	if (bonus.restricteditemcount && bonus.restricteditemcount !== 0) {
+		improvements.push({
+			id: `${qualityId}-restrict`,
+			source: 'quality',
+			sourceName: qualityName,
+			target: 'restricted_item_count',
+			value: bonus.restricteditemcount
+		});
+	}
+
+	return improvements;
+}
+
+/**
+ * Extract improvements from character qualities.
+ * Uses the quality's bonus data if available from game data lookup.
+ */
+export function getQualityImprovements(
+	qualities: readonly CharacterQuality[],
+	gameQualities?: readonly GameQuality[]
+): Improvement[] {
 	const improvements: Improvement[] = [];
 
+	// Create a lookup map for game quality data
+	const qualityMap = new Map<string, GameQuality>();
+	if (gameQualities) {
+		for (const gq of gameQualities) {
+			qualityMap.set(gq.name.toLowerCase(), gq);
+		}
+	}
+
 	for (const quality of qualities) {
-		const name = quality.name.toLowerCase();
+		const gameQuality = qualityMap.get(quality.name.toLowerCase());
 
-		// Exceptional Attribute
-		if (name.includes('exceptional attribute')) {
-			// This raises max by 1, handled separately in attribute limits
-		}
-
-		// Toughness
-		if (name === 'toughness') {
-			improvements.push({
-				id: `${quality.id}-tough`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'physical_cm',
-				value: 1
-			});
-		}
-
-		// Will to Live
-		if (name.includes('will to live')) {
-			improvements.push({
-				id: `${quality.id}-wtl`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'physical_cm',
-				value: quality.rating
-			});
-		}
-
-		// High Pain Tolerance
-		if (name.includes('high pain tolerance')) {
-			improvements.push({
-				id: `${quality.id}-hpt`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'damage_resistance',
-				value: quality.rating,
-				conditional: 'Reduces wound modifiers'
-			});
-		}
-
-		// Natural Immunity
-		if (name.includes('natural immunity')) {
-			improvements.push({
-				id: `${quality.id}-immune`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'damage_resistance',
-				value: 2,
-				conditional: 'Toxin/disease resistance'
-			});
-		}
-
-		// Magic Resistance
-		if (name === 'magic resistance') {
-			improvements.push({
-				id: `${quality.id}-mr`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'spell_resistance',
-				value: quality.rating * 2
-			});
-		}
-
-		// Lucky
-		if (name === 'lucky') {
-			improvements.push({
-				id: `${quality.id}-luck`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'edg',
-				value: 1,
-				conditional: 'One extra Edge point'
-			});
+		if (gameQuality?.bonus) {
+			// Use data-driven bonus parsing
+			improvements.push(...parseQualityBonus(
+				quality.id,
+				quality.name,
+				gameQuality.bonus,
+				quality.rating
+			));
 		}
 	}
 
@@ -460,14 +724,17 @@ export function getAdeptPowerImprovements(powers: readonly CharacterPower[]): Im
  * ============================================ */
 
 /** Get all improvements for a character. */
-export function getAllImprovements(char: Character): Improvement[] {
+export function getAllImprovements(
+	char: Character,
+	gameQualities?: readonly GameQuality[]
+): Improvement[] {
 	const improvements: Improvement[] = [];
 
 	// Cyberware (includes bioware currently)
 	improvements.push(...getCyberwareImprovements(char.equipment.cyberware));
 
-	// Qualities
-	improvements.push(...getQualityImprovements(char.qualities));
+	// Qualities - pass game data for bonus lookup
+	improvements.push(...getQualityImprovements(char.qualities, gameQualities));
 
 	// Adept powers
 	if (char.magic?.powers) {
@@ -478,8 +745,12 @@ export function getAllImprovements(char: Character): Improvement[] {
 }
 
 /** Get total improvement value for a target. */
-export function getTotalImprovement(char: Character, target: ImprovementTarget): number {
-	const improvements = getAllImprovements(char);
+export function getTotalImprovement(
+	char: Character,
+	target: ImprovementTarget,
+	gameQualities?: readonly GameQuality[]
+): number {
+	const improvements = getAllImprovements(char, gameQualities);
 
 	return improvements
 		.filter((i) => i.target === target)
@@ -489,16 +760,18 @@ export function getTotalImprovement(char: Character, target: ImprovementTarget):
 /** Get all improvements for a specific target with sources. */
 export function getImprovementsForTarget(
 	char: Character,
-	target: ImprovementTarget
+	target: ImprovementTarget,
+	gameQualities?: readonly GameQuality[]
 ): Improvement[] {
-	return getAllImprovements(char).filter((i) => i.target === target);
+	return getAllImprovements(char, gameQualities).filter((i) => i.target === target);
 }
 
 /** Get improvements grouped by source type. */
 export function getImprovementsBySource(
-	char: Character
+	char: Character,
+	gameQualities?: readonly GameQuality[]
 ): Record<ImprovementSource, Improvement[]> {
-	const all = getAllImprovements(char);
+	const all = getAllImprovements(char, gameQualities);
 
 	return {
 		cyberware: all.filter((i) => i.source === 'cyberware'),
@@ -543,17 +816,23 @@ export interface ImprovementSummary {
 /** Get summary of improvements for a target. */
 export function getImprovementSummary(
 	char: Character,
-	target: ImprovementTarget
+	target: ImprovementTarget,
+	gameQualities?: readonly GameQuality[]
 ): ImprovementSummary {
-	const improvements = getImprovementsForTarget(char, target);
+	const improvements = getImprovementsForTarget(char, target, gameQualities);
 
 	return {
 		target,
 		totalValue: getStackedValue(improvements),
-		sources: improvements.map((i) => ({
-			name: i.sourceName,
-			value: i.value,
-			conditional: i.conditional
-		}))
+		sources: improvements.map((i) => {
+			const source: { readonly name: string; readonly value: number; readonly conditional?: string } = {
+				name: i.sourceName,
+				value: i.value
+			};
+			if (i.conditional) {
+				(source as { name: string; value: number; conditional: string }).conditional = i.conditional;
+			}
+			return source;
+		})
 	};
 }

@@ -70,7 +70,13 @@ export {
 	type GameMartialArt,
 	type GameEcho,
 	type GameStream,
-	type SkillCategoryDef
+	type SkillCategoryDef,
+	/* Quality bonus types */
+	type QualityBonus,
+	type QualityAttributeBonus,
+	type QualitySkillBonus,
+	type QualitySkillGroupBonus,
+	type QualitySkillCategoryBonus
 } from './gamedata';
 
 export {

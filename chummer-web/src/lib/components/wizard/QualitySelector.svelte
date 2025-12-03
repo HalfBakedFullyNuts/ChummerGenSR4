@@ -18,14 +18,15 @@
 	/** Maximum BP from negative qualities. */
 	const MAX_NEGATIVE_BP = 35;
 
-	/** Filter qualities by search query. */
+	/** Filter qualities by search query (searches name, category, and effects). */
 	function filterQualities(quals: readonly GameQuality[], search: string): GameQuality[] {
 		if (!search) return [...quals];
 		const lower = search.toLowerCase();
 		return quals.filter(
 			(q) =>
 				q.name.toLowerCase().includes(lower) ||
-				(q.category?.toLowerCase().includes(lower) ?? false)
+				(q.category?.toLowerCase().includes(lower) ?? false) ||
+				(q.effect?.toLowerCase().includes(lower) ?? false)
 		);
 	}
 
@@ -137,16 +138,28 @@
 			<h3 class="cw-card-header mb-3">Selected Qualities</h3>
 			<div class="flex flex-wrap gap-2">
 				{#each $character.qualities as quality}
+					{@const gameQual = [...($positiveQualities ?? []), ...($negativeQualities ?? [])].find(
+						(q) => q.name === quality.name
+					)}
 					<button
-						class="px-3 py-1 rounded text-sm flex items-center gap-2
+						class="px-3 py-1 rounded text-sm flex items-center gap-2 group relative
 							{quality.category === 'Positive'
 								? 'bg-success/20 text-success border border-success/30'
 								: 'bg-warning/20 text-warning border border-warning/30'}"
 						on:click={() => removeQuality(quality.id)}
+						title={gameQual?.effect ?? ''}
 					>
 						{quality.name}
 						<span class="opacity-70">{quality.bp} BP</span>
 						<span class="text-xs opacity-50">×</span>
+						{#if gameQual?.effect}
+							<span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
+								bg-surface-dark text-accent-secondary text-xs rounded whitespace-nowrap
+								opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10
+								max-w-xs truncate">
+								{gameQual.effect}
+							</span>
+						{/if}
 					</button>
 				{/each}
 			</div>
@@ -190,8 +203,14 @@
 					</span>
 				</div>
 
-				<div class="text-muted-text text-xs mt-2">
-					{quality.source} p.{quality.page}
+				{#if quality.effect}
+					<div class="text-accent-secondary text-xs mt-2 italic">
+						{quality.effect}
+					</div>
+				{/if}
+
+				<div class="text-muted-text text-xs mt-1">
+					{quality.source}{quality.page ? ` p.${quality.page}` : ''}
 				</div>
 			</button>
 		{/each}

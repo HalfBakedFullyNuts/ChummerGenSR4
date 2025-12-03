@@ -9,32 +9,42 @@
  */
 
 import type { Character, CharacterSkill } from '$types';
+import type { GameQuality } from '$lib/stores/gamedata';
+import {
+	getTotalImprovement,
+	type ImprovementTarget
+} from './improvements';
 
 /* ============================================
  * Attribute Helpers
  * ============================================ */
 
-/** Get total attribute value (base + bonus). */
+/** Get total attribute value (base + bonus + improvements). */
 export function getAttributeTotal(
 	char: Character,
-	attr: 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil' | 'edg'
+	attr: 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil' | 'edg',
+	gameQualities?: readonly GameQuality[]
 ): number {
 	const a = char.attributes[attr];
-	return a.base + a.bonus;
+	// Add improvement bonuses from qualities
+	const improvementBonus = getTotalImprovement(char, attr as ImprovementTarget, gameQualities);
+	return a.base + a.bonus + improvementBonus;
 }
 
 /** Get Magic attribute total (0 if mundane). */
-export function getMagicTotal(char: Character): number {
+export function getMagicTotal(char: Character, gameQualities?: readonly GameQuality[]): number {
 	const mag = char.attributes.mag;
 	if (!mag) return 0;
-	return mag.base + mag.bonus;
+	const improvementBonus = getTotalImprovement(char, 'mag', gameQualities);
+	return mag.base + mag.bonus + improvementBonus;
 }
 
 /** Get Resonance attribute total (0 if not technomancer). */
-export function getResonanceTotal(char: Character): number {
+export function getResonanceTotal(char: Character, gameQualities?: readonly GameQuality[]): number {
 	const res = char.attributes.res;
 	if (!res) return 0;
-	return res.base + res.bonus;
+	const improvementBonus = getTotalImprovement(char, 'res', gameQualities);
+	return res.base + res.bonus + improvementBonus;
 }
 
 /** Get current Essence. */
@@ -47,27 +57,27 @@ export function getEssence(char: Character): number {
  * ============================================ */
 
 /** Calculate Physical Condition Monitor boxes. */
-export function calculatePhysicalCM(char: Character): number {
-	const bod = getAttributeTotal(char, 'bod');
-	return Math.ceil(bod / 2) + 8;
+export function calculatePhysicalCM(char: Character, gameQualities?: readonly GameQuality[]): number {
+	const bod = getAttributeTotal(char, 'bod', gameQualities);
+	// Add CM improvement bonuses (e.g., from Toughness quality)
+	const cmBonus = getTotalImprovement(char, 'physical_cm', gameQualities);
+	return Math.ceil(bod / 2) + 8 + cmBonus;
 }
 
 /** Calculate Stun Condition Monitor boxes. */
-export function calculateStunCM(char: Character): number {
-	const wil = getAttributeTotal(char, 'wil');
-	return Math.ceil(wil / 2) + 8;
+export function calculateStunCM(char: Character, gameQualities?: readonly GameQuality[]): number {
+	const wil = getAttributeTotal(char, 'wil', gameQualities);
+	const cmBonus = getTotalImprovement(char, 'stun_cm', gameQualities);
+	return Math.ceil(wil / 2) + 8 + cmBonus;
 }
 
 /** Calculate Overflow boxes (before death). */
-export function calculateOverflow(char: Character): number {
-	return getAttributeTotal(char, 'bod');
+export function calculateOverflow(char: Character, gameQualities?: readonly GameQuality[]): number {
+	return getAttributeTotal(char, 'bod', gameQualities);
 }
 
 /** Get wound modifier from damage. */
-export function getWoundModifier(char: Character): number {
-	const physicalBoxes = calculatePhysicalCM(char);
-	const stunBoxes = calculateStunCM(char);
-
+export function getWoundModifier(char: Character, _gameQualities?: readonly GameQuality[]): number {
 	// Every 3 boxes of damage = -1 modifier
 	const physicalMod = Math.floor(char.condition.physicalCurrent / 3);
 	const stunMod = Math.floor(char.condition.stunCurrent / 3);
@@ -80,10 +90,12 @@ export function getWoundModifier(char: Character): number {
  * ============================================ */
 
 /** Calculate base Initiative score. */
-export function calculateInitiative(char: Character): number {
-	const rea = getAttributeTotal(char, 'rea');
-	const int = getAttributeTotal(char, 'int');
-	return rea + int;
+export function calculateInitiative(char: Character, gameQualities?: readonly GameQuality[]): number {
+	const rea = getAttributeTotal(char, 'rea', gameQualities);
+	const int = getAttributeTotal(char, 'int', gameQualities);
+	// Add initiative improvement bonuses (e.g., from Infected qualities)
+	const initBonus = getTotalImprovement(char, 'initiative', gameQualities);
+	return rea + int + initBonus;
 }
 
 /** Calculate number of Initiative Dice (base is 1). */

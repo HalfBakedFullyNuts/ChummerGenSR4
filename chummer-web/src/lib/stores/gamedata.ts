@@ -26,15 +26,121 @@ interface LoadingState {
 	error: string | null;
 }
 
+/** Attribute modifier in quality bonus. */
+export interface QualityAttributeBonus {
+	name: string;
+	min?: number;
+	max?: number;
+	val?: number;
+	aug?: number;
+}
+
+/** Skill modifier in quality bonus. */
+export interface QualitySkillBonus {
+	name: string;
+	bonus?: number;
+	max?: number;
+}
+
+/** Skill group modifier in quality bonus. */
+export interface QualitySkillGroupBonus {
+	name: string;
+	bonus?: number;
+}
+
+/** Skill category modifier in quality bonus. */
+export interface QualitySkillCategoryBonus {
+	name: string;
+	bonus?: number;
+}
+
+/** Quality bonus data structure. */
+export interface QualityBonus {
+	/** Add a new attribute (e.g., MAG for Adept) */
+	addattribute?: QualityAttributeBonus[];
+	/** Modify specific attribute values */
+	specificattribute?: QualityAttributeBonus[];
+	/** Enable a character tab (adept, magician, technomancer, critter) */
+	enabletab?: string;
+	/** Specific skill bonuses */
+	specificskill?: QualitySkillBonus[];
+	/** Skill group bonuses */
+	skillgroup?: QualitySkillGroupBonus[];
+	/** Skill category bonuses */
+	skillcategory?: QualitySkillCategoryBonus[];
+	/** User-selected skill bonus */
+	selectskill?: { max?: number; bonus?: number };
+	/** User-selected attribute bonus */
+	selectattribute?: { min?: number; max?: number; val?: number };
+	/** Initiative bonus */
+	initiative?: number;
+	/** Additional Initiative Passes */
+	initiativepass?: number;
+	/** Condition Monitor boxes */
+	conditionmonitor?: number;
+	/** Notoriety modifier */
+	notoriety?: number;
+	/** Composure bonus */
+	composure?: number;
+	/** Judge Intentions bonus */
+	judgeintentions?: number;
+	/** Damage Resistance bonus */
+	damageresistance?: number;
+	/** Drain Resistance bonus */
+	drainresist?: number;
+	/** Lifestyle cost modifier (percentage) */
+	lifestylecost?: number;
+	/** Cyberware Essence cost multiplier (percentage) */
+	cyberwareessmultiplier?: number;
+	/** Bioware Essence cost multiplier (percentage) */
+	biowareessmultiplier?: number;
+	/** Genetech cost multiplier (percentage) */
+	genetechcostmultiplier?: number;
+	/** Reach modifier for melee */
+	reach?: number;
+	/** Unarmed damage value modifier */
+	unarmeddv?: number;
+	/** Movement speed modifier (percentage) */
+	movementpercent?: number;
+	/** Swimming speed modifier (percentage) */
+	swimpercent?: number;
+	/** Flying speed */
+	flyspeed?: number;
+	/** Additional restricted item allowance */
+	restricteditemcount?: number;
+	/** Maximum BP that can be spent on Nuyen */
+	nuyenmaxbp?: number;
+	/** Free positive quality BP */
+	freepositivequalities?: number;
+	/** Free negative quality BP */
+	freenegativequalities?: number;
+	/** Skillwire rating */
+	skillwire?: number;
+	/** Uneducated flag - Technical/Academic skills cost double */
+	uneducated?: boolean;
+	/** Uncouth flag - Social skills cost double */
+	uncouth?: boolean;
+	/** Infirm flag - Physical attributes cost double */
+	infirm?: boolean;
+	/** Sensitive System flag - Double Essence cost for cyberware */
+	sensitivesystem?: boolean;
+	/** Black Market Discount access */
+	blackmarketdiscount?: boolean;
+}
+
 /** Quality from game data. */
 export interface GameQuality {
 	name: string;
 	bp: number;
 	category: 'Positive' | 'Negative';
 	source: string;
-	page: number;
+	page?: number;
 	mutant: boolean;
 	limit: boolean;
+	/** Mechanical bonuses from this quality */
+	bonus?: QualityBonus;
+	/** Human-readable effect description */
+	effect?: string;
 }
 
 /** Spell from game data. */

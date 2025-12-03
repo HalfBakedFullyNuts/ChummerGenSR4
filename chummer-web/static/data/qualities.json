@@ -20,7 +20,20 @@
       "source": "SR4",
       "page": 90,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "adept"
+      },
+      "effect": "Grants Magic attribute; Enables Adept powers"
     },
     {
       "name": "Adrenaline Surge",
@@ -47,7 +60,20 @@
       "source": "RC",
       "page": 96,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Data Search",
+            "bonus": 2
+          },
+          {
+            "name": "Software",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Data Search; +2 Software"
     },
     {
       "name": "Animal Empathy",
@@ -56,7 +82,16 @@
       "source": "SR4",
       "page": 90,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillgroup": [
+          {
+            "name": "Animal Husbandry",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Animal Husbandry group"
     },
     {
       "name": "Animal Pelage (Quills)",
@@ -92,7 +127,13 @@
       "source": "SR4",
       "page": 90,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selectskill": {
+          "max": 1
+        }
+      },
+      "effect": "Skill max +1 (selected skill)"
     },
     {
       "name": "Arcane Arrester",
@@ -119,7 +160,49 @@
       "source": "SM",
       "page": 24,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 1,
+            "val": 1,
+            "aug": 1
+          }
+        ],
+        "specificskill": [
+          {
+            "name": "Banishing",
+            "max": -6
+          },
+          {
+            "name": "Binding",
+            "max": -6
+          },
+          {
+            "name": "Counterspelling",
+            "max": -6
+          },
+          {
+            "name": "Enchanting",
+            "max": -6
+          },
+          {
+            "name": "Ritual Spellcasting",
+            "max": -6
+          },
+          {
+            "name": "Spellcasting",
+            "max": -6
+          },
+          {
+            "name": "Summoning",
+            "max": -6
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Banishing max -6; Binding max -6; Counterspelling max -6; Enchanting max -6; Ritual Spellcasting max -6; Spellcasting max -6; Summoning max -6"
     },
     {
       "name": "Authority",
@@ -146,7 +229,11 @@
       "source": "RC",
       "page": 111,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "lifestylecost": -10
+      },
+      "effect": "-10% Lifestyle cost"
     },
     {
       "name": "Bicardiac",
@@ -173,7 +260,11 @@
       "source": "AU",
       "page": 20,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "biowareessmultiplier": 90
+      },
+      "effect": "90% Bioware Essence cost"
     },
     {
       "name": "Biocompatability (Cyberware)",
@@ -182,7 +273,11 @@
       "source": "AU",
       "page": 20,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "cyberwareessmultiplier": 90
+      },
+      "effect": "90% Cyberware Essence cost"
     },
     {
       "name": "Biosonar",
@@ -200,7 +295,11 @@
       "source": "RC",
       "page": 96,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "blackmarketdiscount": true
+      },
+      "effect": "Black market access"
     },
     {
       "name": "Blandness",
@@ -209,7 +308,11 @@
       "source": "SR4",
       "page": 90,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": -1
+      },
+      "effect": "-1 Notoriety"
     },
     {
       "name": "Bone Spikes",
@@ -218,7 +321,11 @@
       "source": "RC",
       "page": 111,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "unarmeddv": 2
+      },
+      "effect": "+2 Unarmed DV"
     },
     {
       "name": "Born Rich",
@@ -227,7 +334,11 @@
       "source": "RC",
       "page": 96,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "nuyenmaxbp": 60
+      },
+      "effect": "+60 max BP to Nuyen"
     },
     {
       "name": "Broad Auditory System (Infrasound)",
@@ -263,7 +374,20 @@
       "source": "RC",
       "page": 96,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Infiltration",
+            "bonus": 1
+          },
+          {
+            "name": "Shadowing",
+            "bonus": 1
+          }
+        ]
+      },
+      "effect": "+1 Infiltration; +1 Shadowing"
     },
     {
       "name": "Celerity",
@@ -272,7 +396,11 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "movementpercent": 50
+      },
+      "effect": "+50% Movement"
     },
     {
       "name": "Changeling (Class I SURGE)",
@@ -281,7 +409,12 @@
       "source": "RC",
       "page": 73,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "freenegativequalities": -5,
+        "freepositivequalities": 10
+      },
+      "effect": "10 free positive quality BP; -5 free negative quality BP"
     },
     {
       "name": "Changeling (Class II SURGE)",
@@ -290,7 +423,12 @@
       "source": "RC",
       "page": 73,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "freenegativequalities": -10,
+        "freepositivequalities": 20
+      },
+      "effect": "20 free positive quality BP; -10 free negative quality BP"
     },
     {
       "name": "Changeling (Class III SURGE)",
@@ -299,7 +437,12 @@
       "source": "RC",
       "page": 73,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "freenegativequalities": -15,
+        "freepositivequalities": 30
+      },
+      "effect": "30 free positive quality BP; -15 free negative quality BP"
     },
     {
       "name": "Chatty",
@@ -380,7 +523,13 @@
       "source": "RC",
       "page": 99,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "composure": 1,
+        "judgeintentions": 1,
+        "notoriety": 2
+      },
+      "effect": "+2 Notoriety; +1 Composure; +1 Judge Intentions"
     },
     {
       "name": "Code of Conduct: Semper Paratis",
@@ -389,7 +538,16 @@
       "source": "RC",
       "page": 100,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Intimidation",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Intimidation"
     },
     {
       "name": "Code of Conduct: Sworn Soldier",
@@ -425,7 +583,16 @@
       "source": "RC",
       "page": 96,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillcategory": [
+          {
+            "name": "Academic",
+            "bonus": 1
+          }
+        ]
+      },
+      "effect": "+1 Academic skills"
     },
     {
       "name": "Common Sense",
@@ -569,7 +736,16 @@
       "source": "SR4",
       "page": 90,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Escape Artist",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Escape Artist"
     },
     {
       "name": "Drake",
@@ -578,7 +754,21 @@
       "source": "RC",
       "page": 76,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "flyspeed": -2
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; Fly speed -2"
     },
     {
       "name": "Drone Pilot",
@@ -614,7 +804,11 @@
       "source": "RC",
       "page": 113,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "reach": 1
+      },
+      "effect": "+1 Reach"
     },
     {
       "name": "Emulate",
@@ -659,7 +853,13 @@
       "source": "SR4",
       "page": 91,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selectattribute": {
+          "max": 1
+        }
+      },
+      "effect": "Attribute bonus (selected)"
     },
     {
       "name": "Fame (Local)",
@@ -704,7 +904,11 @@
       "source": "SR4",
       "page": 91,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": -1
+      },
+      "effect": "-1 Notoriety"
     },
     {
       "name": "Focused Concentration (Rating 1)",
@@ -713,7 +917,11 @@
       "source": "SR4",
       "page": 91,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "drainresist": 1
+      },
+      "effect": "+1 Drain Resistance"
     },
     {
       "name": "Focused Concentration (Rating 2)",
@@ -722,7 +930,11 @@
       "source": "SR4",
       "page": 91,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "drainresist": 2
+      },
+      "effect": "+2 Drain Resistance"
     },
     {
       "name": "Frog Tongue",
@@ -749,7 +961,17 @@
       "source": "RC",
       "page": 113,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Swimming",
+            "bonus": 2
+          }
+        ],
+        "swimpercent": 50
+      },
+      "effect": "+2 Swimming; +50% Swim speed"
     },
     {
       "name": "Functional Tail (Prehensile)",
@@ -794,7 +1016,11 @@
       "source": "AU",
       "page": 20,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "genetechcostmultiplier": 80
+      },
+      "effect": "80% Genetech cost"
     },
     {
       "name": "Genetic Heritage",
@@ -803,7 +1029,10 @@
       "source": "AU",
       "page": 20,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "transgenicsgenetechcost": 80
+      }
     },
     {
       "name": "Gills",
@@ -821,7 +1050,16 @@
       "source": "RC",
       "page": 113,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillcategory": [
+          {
+            "name": "Social Active",
+            "bonus": 3
+          }
+        ]
+      },
+      "effect": "+3 Social Active skills"
     },
     {
       "name": "Greasy Skin",
@@ -911,7 +1149,16 @@
       "source": "RC",
       "page": 98,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Artisan",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Artisan"
     },
     {
       "name": "Improved Realignment",
@@ -929,7 +1176,42 @@
       "source": "RC",
       "page": 80,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "specificattribute": [
+          {
+            "name": "CHA",
+            "min": -2,
+            "max": -2
+          },
+          {
+            "name": "LOG",
+            "min": -1,
+            "max": -1
+          },
+          {
+            "name": "WIL",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; -2 CHA; -1 LOG; +2 WIL; -1 ESS"
     },
     {
       "name": "Infected: Banshee",
@@ -938,7 +1220,39 @@
       "source": "RC",
       "page": 80,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 1,
+        "initiativepass": 1,
+        "specificattribute": [
+          {
+            "name": "INT",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "WIL",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +1 INT; +1 WIL; -1 ESS; +1 Initiative; +1 Initiative Pass"
     },
     {
       "name": "Infected: Dzoo-Noo-Qua",
@@ -947,16 +1261,109 @@
       "source": "RC",
       "page": 80,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 2,
+        "initiativepass": 1,
+        "specificattribute": [
+          {
+            "name": "BOD",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "REA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "STR",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "CHA",
+            "min": -1,
+            "max": -1
+          },
+          {
+            "name": "WIL",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 BOD; +2 REA; +1 STR; -1 CHA; +1 WIL; -1 ESS; +2 Initiative; +1 Initiative Pass"
     },
     {
-      "name": "Infected: Fomóraig",
+      "name": "Infected: Fom\u00f3raig",
       "bp": 45,
       "category": "Positive",
       "source": "RC",
       "page": 80,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 1,
+        "specificattribute": [
+          {
+            "name": "BOD",
+            "min": 3,
+            "max": 3
+          },
+          {
+            "name": "REA",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "STR",
+            "min": 3,
+            "max": 3
+          },
+          {
+            "name": "CHA",
+            "min": -2,
+            "max": -2
+          },
+          {
+            "name": "WIL",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +3 BOD; +1 REA; +3 STR; -2 CHA; +1 WIL; -1 ESS; +1 Initiative"
     },
     {
       "name": "Infected: Ghoul",
@@ -965,7 +1372,58 @@
       "source": "RC",
       "page": 80,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 2,
+        "specificattribute": [
+          {
+            "name": "BOD",
+            "min": 4,
+            "max": 4
+          },
+          {
+            "name": "REA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "STR",
+            "min": 3,
+            "max": 3
+          },
+          {
+            "name": "CHA",
+            "min": -2,
+            "max": -2
+          },
+          {
+            "name": "LOG",
+            "min": -1,
+            "max": -1
+          },
+          {
+            "name": "WIL",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +4 BOD; +2 REA; +3 STR; -2 CHA; -1 LOG; +2 WIL; -1 ESS; +2 Initiative"
     },
     {
       "name": "Infected: Goblin",
@@ -974,7 +1432,59 @@
       "source": "RC",
       "page": 80,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 1,
+        "initiativepass": 1,
+        "specificattribute": [
+          {
+            "name": "BOD",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "REA",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "STR",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "CHA",
+            "min": -2,
+            "max": -2
+          },
+          {
+            "name": "LOG",
+            "min": -2,
+            "max": -2
+          },
+          {
+            "name": "WIL",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +1 BOD; +1 REA; +1 STR; -2 CHA; -2 LOG; +2 WIL; -1 ESS; +1 Initiative; +1 Initiative Pass"
     },
     {
       "name": "Infected: Loup-Garou",
@@ -983,7 +1493,52 @@
       "source": "RC",
       "page": 80,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "specificattribute": [
+          {
+            "name": "BOD",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "STR",
+            "min": 4,
+            "max": 4
+          },
+          {
+            "name": "CHA",
+            "min": -2,
+            "max": -2
+          },
+          {
+            "name": "LOG",
+            "min": -1,
+            "max": -1
+          },
+          {
+            "name": "WIL",
+            "min": -1,
+            "max": 1
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +1 BOD; +4 STR; -2 CHA; -1 LOG; -1 WIL; -1 ESS"
     },
     {
       "name": "Infected: Nosferatu",
@@ -992,7 +1547,69 @@
       "source": "RC",
       "page": 80,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 3,
+        "initiativepass": 1,
+        "specificattribute": [
+          {
+            "name": "BOD",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "AGI",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "REA",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "STR",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "CHA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "INT",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "LOG",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "WIL",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +1 BOD; +1 AGI; +1 REA; +1 STR; +2 CHA; +2 INT; +2 LOG; +2 WIL; -1 ESS; +3 Initiative; +1 Initiative Pass"
     },
     {
       "name": "Infected: Vampire",
@@ -1001,7 +1618,60 @@
       "source": "RC",
       "page": 81,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 3,
+        "initiativepass": 1,
+        "specificattribute": [
+          {
+            "name": "AGI",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "REA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "CHA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "INT",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "WIL",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ],
+        "specificskill": [
+          {
+            "name": "Swimming",
+            "bonus": -4
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 AGI; +2 REA; +2 CHA; +1 INT; +1 WIL; -1 ESS; -4 Swimming; +3 Initiative; +1 Initiative Pass"
     },
     {
       "name": "Infected: Wendigo",
@@ -1010,7 +1680,38 @@
       "source": "RC",
       "page": 81,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiativepass": 1,
+        "specificattribute": [
+          {
+            "name": "AGI",
+            "min": -1,
+            "max": -1
+          },
+          {
+            "name": "CHA",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; -1 AGI; +1 CHA; -1 ESS; +1 Initiative Pass"
     },
     {
       "name": "Infected: Abat",
@@ -1019,7 +1720,60 @@
       "source": "RC",
       "page": 79,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 3,
+        "initiativepass": 1,
+        "specificattribute": [
+          {
+            "name": "AGI",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "REA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "CHA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "INT",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "WIL",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ],
+        "specificskill": [
+          {
+            "name": "Swimming",
+            "bonus": -4
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 AGI; +2 REA; +2 CHA; +1 INT; +1 WIL; -1 ESS; -4 Swimming; +3 Initiative; +1 Initiative Pass"
     },
     {
       "name": "Infected: Amalanhig",
@@ -1028,7 +1782,60 @@
       "source": "RC",
       "page": 79,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 3,
+        "initiativepass": 1,
+        "specificattribute": [
+          {
+            "name": "AGI",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "REA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "CHA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "INT",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "WIL",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ],
+        "specificskill": [
+          {
+            "name": "Swimming",
+            "bonus": -4
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 AGI; +2 REA; +2 CHA; +1 INT; +1 WIL; -1 ESS; -4 Swimming; +3 Initiative; +1 Initiative Pass"
     },
     {
       "name": "Infected: Busaw",
@@ -1037,7 +1844,58 @@
       "source": "RC",
       "page": 79,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 2,
+        "specificattribute": [
+          {
+            "name": "BOD",
+            "min": 4,
+            "max": 4
+          },
+          {
+            "name": "REA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "STR",
+            "min": 3,
+            "max": 3
+          },
+          {
+            "name": "CHA",
+            "min": -2,
+            "max": -2
+          },
+          {
+            "name": "LOG",
+            "min": -1,
+            "max": -1
+          },
+          {
+            "name": "WIL",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +4 BOD; +2 REA; +3 STR; -2 CHA; -1 LOG; +2 WIL; -1 ESS; +2 Initiative"
     },
     {
       "name": "Infected: Gaki",
@@ -1046,7 +1904,58 @@
       "source": "RC",
       "page": 79,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 2,
+        "specificattribute": [
+          {
+            "name": "BOD",
+            "min": 4,
+            "max": 4
+          },
+          {
+            "name": "REA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "STR",
+            "min": 3,
+            "max": 3
+          },
+          {
+            "name": "CHA",
+            "min": -2,
+            "max": -2
+          },
+          {
+            "name": "LOG",
+            "min": -1,
+            "max": -1
+          },
+          {
+            "name": "WIL",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +4 BOD; +2 REA; +3 STR; -2 CHA; -1 LOG; +2 WIL; -1 ESS; +2 Initiative"
     },
     {
       "name": "Infected: Penanggalan",
@@ -1055,7 +1964,60 @@
       "source": "RC",
       "page": 79,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 3,
+        "initiativepass": 1,
+        "specificattribute": [
+          {
+            "name": "AGI",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "REA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "CHA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "INT",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "WIL",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ],
+        "specificskill": [
+          {
+            "name": "Swimming",
+            "bonus": -4
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 AGI; +2 REA; +2 CHA; +1 INT; +1 WIL; -1 ESS; -4 Swimming; +3 Initiative; +1 Initiative Pass"
     },
     {
       "name": "Infected: Sasobonsam",
@@ -1064,7 +2026,59 @@
       "source": "RC",
       "page": 79,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 2,
+        "reach": 1,
+        "specificattribute": [
+          {
+            "name": "BOD",
+            "min": 4,
+            "max": 4
+          },
+          {
+            "name": "REA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "STR",
+            "min": 3,
+            "max": 3
+          },
+          {
+            "name": "CHA",
+            "min": -2,
+            "max": -2
+          },
+          {
+            "name": "LOG",
+            "min": -1,
+            "max": -1
+          },
+          {
+            "name": "WIL",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +4 BOD; +2 REA; +3 STR; -2 CHA; -1 LOG; +2 WIL; -1 ESS; +2 Initiative; +1 Reach"
     },
     {
       "name": "Infected: Sukuyan",
@@ -1073,7 +2087,54 @@
       "source": "RC",
       "page": 79,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "initiative": 3,
+        "initiativepass": 1,
+        "specificattribute": [
+          {
+            "name": "AGI",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "REA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "CHA",
+            "min": 2,
+            "max": 2
+          },
+          {
+            "name": "INT",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "WIL",
+            "min": 1,
+            "max": 1
+          },
+          {
+            "name": "ESS",
+            "max": -1,
+            "val": -1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 AGI; +2 REA; +2 CHA; +1 INT; +1 WIL; -1 ESS; +3 Initiative; +1 Initiative Pass"
     },
     {
       "name": "Intuitive Hacking",
@@ -1154,7 +2215,16 @@
       "source": "RC",
       "page": 98,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillcategory": [
+          {
+            "name": "Language",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Language skills"
     },
     {
       "name": "Lightning Reflexes",
@@ -1163,7 +2233,16 @@
       "source": "RC",
       "page": 98,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificattribute": [
+          {
+            "name": "REA",
+            "val": 2
+          }
+        ]
+      },
+      "effect": "+2 REA"
     },
     {
       "name": "Low-Light Vision",
@@ -1181,7 +2260,17 @@
       "source": "SR4",
       "page": 91,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": -1,
+        "specificattribute": [
+          {
+            "name": "EDG",
+            "max": 1
+          }
+        ]
+      },
+      "effect": "+1 EDG; -1 Notoriety"
     },
     {
       "name": "Made Man",
@@ -1199,7 +2288,20 @@
       "source": "SR4",
       "page": 91,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "magician"
+      },
+      "effect": "Grants Magic attribute; Enables Spellcasting"
     },
     {
       "name": "Magic Resistance (Rating 1)",
@@ -1271,7 +2373,14 @@
       "source": "RC",
       "page": 114,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selectattribute": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      "effect": "Attribute bonus (selected)"
     },
     {
       "name": "Metahuman Traits",
@@ -1325,7 +2434,20 @@
       "source": "SR4",
       "page": 92,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "magician"
+      },
+      "effect": "Grants Magic attribute; Enables Spellcasting"
     },
     {
       "name": "Nasty Vibe",
@@ -1334,7 +2456,16 @@
       "source": "RC",
       "page": 114,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Intimidation",
+            "bonus": 3
+          }
+        ]
+      },
+      "effect": "+3 Intimidation"
     },
     {
       "name": "Natural Athlete",
@@ -1343,7 +2474,20 @@
       "source": "RC",
       "page": 100,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Running",
+            "bonus": 1
+          },
+          {
+            "name": "Gymnastics",
+            "bonus": 1
+          }
+        ]
+      },
+      "effect": "+1 Running; +1 Gymnastics"
     },
     {
       "name": "Natural Hardening",
@@ -1406,7 +2550,11 @@
       "source": "RC",
       "page": 115,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "lifestylecost": -20
+      },
+      "effect": "-20% Lifestyle cost"
     },
     {
       "name": "Outdoorsman",
@@ -1415,7 +2563,16 @@
       "source": "RC",
       "page": 100,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillgroup": [
+          {
+            "name": "Outdoors",
+            "bonus": 1
+          }
+        ]
+      },
+      "effect": "+1 Outdoors group"
     },
     {
       "name": "Paragon",
@@ -1433,7 +2590,20 @@
       "source": "RC",
       "page": 100,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Assensing",
+            "bonus": 1
+          },
+          {
+            "name": "Perception",
+            "bonus": 1
+          }
+        ]
+      },
+      "effect": "+1 Assensing; +1 Perception"
     },
     {
       "name": "Perceptive (+2 Bonus)",
@@ -1442,7 +2612,20 @@
       "source": "RC",
       "page": 100,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Assensing",
+            "bonus": 2
+          },
+          {
+            "name": "Perception",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Assensing; +2 Perception"
     },
     {
       "name": "Perfect Time",
@@ -1469,7 +2652,11 @@
       "source": "RC",
       "page": 115,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "lifestylecost": -10
+      },
+      "effect": "-10% Lifestyle cost"
     },
     {
       "name": "Piloting Origin (Rating 1)",
@@ -1487,7 +2674,10 @@
       "source": "RC",
       "page": 91,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillwire": 6
+      }
     },
     {
       "name": "Privileged Family Name",
@@ -1622,7 +2812,11 @@
       "source": "RC",
       "page": 101,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "restricteditemcount": 1
+      },
+      "effect": "+1 Restricted item"
     },
     {
       "name": "Restricted Gear (Rating 2)",
@@ -1631,7 +2825,11 @@
       "source": "RC",
       "page": 101,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "restricteditemcount": 2
+      },
+      "effect": "+2 Restricted item"
     },
     {
       "name": "Restricted Gear (Rating 3)",
@@ -1640,7 +2838,11 @@
       "source": "RC",
       "page": 101,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "restricteditemcount": 3
+      },
+      "effect": "+3 Restricted item"
     },
     {
       "name": "Retractable Claws",
@@ -1685,7 +2887,17 @@
       "source": "RC",
       "page": 115,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "movementpercent": 50,
+        "specificskill": [
+          {
+            "name": "Gymnastics",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Gymnastics; +50% Movement"
     },
     {
       "name": "School of Hard Knocks",
@@ -1694,7 +2906,16 @@
       "source": "RC",
       "page": 101,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillcategory": [
+          {
+            "name": "Street",
+            "bonus": 1
+          }
+        ]
+      },
+      "effect": "+1 Street skills"
     },
     {
       "name": "Sense of Direction",
@@ -1766,7 +2987,19 @@
       "source": "SM",
       "page": 26,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 1,
+            "val": 1,
+            "aug": 1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute"
     },
     {
       "name": "Spirit Affinity",
@@ -1784,7 +3017,19 @@
       "source": "SM",
       "page": 26,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 1,
+            "val": 1,
+            "aug": 1
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute"
     },
     {
       "name": "Synthetic Sympathy",
@@ -1856,7 +3101,16 @@
       "source": "RC",
       "page": 101,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillcategory": [
+          {
+            "name": "Professional",
+            "bonus": 1
+          }
+        ]
+      },
+      "effect": "+1 Professional skills"
     },
     {
       "name": "Technomancer",
@@ -1865,7 +3119,20 @@
       "source": "SR4",
       "page": 93,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "RES",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "technomancer"
+      },
+      "effect": "Grants Resonance attribute; Enables Technomancer abilities"
     },
     {
       "name": "The Artisan's Way",
@@ -1901,7 +3168,11 @@
       "source": "WA",
       "page": 13,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "biowareessmultiplier": 90
+      },
+      "effect": "90% Bioware Essence cost"
     },
     {
       "name": "The Burnout's Way (Cyberware)",
@@ -1910,7 +3181,11 @@
       "source": "WA",
       "page": 13,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "cyberwareessmultiplier": 90
+      },
+      "effect": "90% Cyberware Essence cost"
     },
     {
       "name": "The Invisible Way",
@@ -2009,7 +3284,11 @@
       "source": "SR4",
       "page": 93,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "damageresistance": 1
+      },
+      "effect": "+1 Damage Resistance"
     },
     {
       "name": "Trust Fund (Medium Lifestyle)",
@@ -2036,7 +3315,10 @@
       "source": "RC",
       "page": 101,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selectskill": {}
+      }
     },
     {
       "name": "Trustworthy (Skill Group)",
@@ -2045,7 +3327,16 @@
       "source": "RC",
       "page": 101,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillgroup": [
+          {
+            "name": "Influence",
+            "bonus": 1
+          }
+        ]
+      },
+      "effect": "+1 Influence group"
     },
     {
       "name": "Type O System",
@@ -2054,7 +3345,10 @@
       "source": "AU",
       "page": 20,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "basicbiowareessmultiplier": 50
+      }
     },
     {
       "name": "Underwater Vision",
@@ -2081,7 +3375,16 @@
       "source": "RC",
       "page": 101,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Swimming",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Swimming"
     },
     {
       "name": "Webbed Hands and Toes",
@@ -2090,7 +3393,16 @@
       "source": "RC",
       "page": 116,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Swimming",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Swimming"
     },
     {
       "name": "Wild Card Nano Prototype",
@@ -2135,7 +3447,11 @@
       "source": "SR4",
       "page": 93,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Addiction (Moderate)",
@@ -2144,7 +3460,11 @@
       "source": "SR4",
       "page": 93,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Addiction (Severe)",
@@ -2153,7 +3473,11 @@
       "source": "SR4",
       "page": 93,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Addiction (Burnout)",
@@ -2162,7 +3486,17 @@
       "source": "SR4",
       "page": 93,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "notoriety": 1,
+        "specificattribute": [
+          {
+            "name": "ESS",
+            "val": -1
+          }
+        ]
+      },
+      "effect": "-1 ESS; +1 Notoriety"
     },
     {
       "name": "Adiposis",
@@ -2171,7 +3505,23 @@
       "source": "RC",
       "page": 116,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "movementpercent": -50,
+        "skillcategory": [
+          {
+            "name": "Physical Active",
+            "bonus": -3
+          }
+        ],
+        "specificskill": [
+          {
+            "name": "Dodge",
+            "bonus": -3
+          }
+        ]
+      },
+      "effect": "-3 Dodge; -3 Physical Active skills; +-50% Movement"
     },
     {
       "name": "AIPS (Rating 1)",
@@ -2288,7 +3638,32 @@
       "source": "SM",
       "page": 26,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Sorcery",
+            "bonus": -4
+          },
+          {
+            "name": "Assensing",
+            "bonus": -4
+          },
+          {
+            "name": "Astral Combat",
+            "bonus": -4
+          },
+          {
+            "name": "Enchanting",
+            "bonus": -4
+          },
+          {
+            "name": "Arcana",
+            "bonus": -4
+          }
+        ]
+      },
+      "effect": "-4 Sorcery; -4 Assensing; -4 Astral Combat; -4 Enchanting; -4 Arcana"
     },
     {
       "name": "Aspected Magician (Sorcerer)",
@@ -2297,7 +3672,32 @@
       "source": "SM",
       "page": 26,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Conjuring",
+            "bonus": -4
+          },
+          {
+            "name": "Assensing",
+            "bonus": -4
+          },
+          {
+            "name": "Astral Combat",
+            "bonus": -4
+          },
+          {
+            "name": "Enchanting",
+            "bonus": -4
+          },
+          {
+            "name": "Arcana",
+            "bonus": -4
+          }
+        ]
+      },
+      "effect": "-4 Conjuring; -4 Assensing; -4 Astral Combat; -4 Enchanting; -4 Arcana"
     },
     {
       "name": "Aspected Magician (Spell Category)",
@@ -2306,7 +3706,24 @@
       "source": "SM",
       "page": 26,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Assensing",
+            "bonus": -4
+          },
+          {
+            "name": "Astral Combat",
+            "bonus": -4
+          },
+          {
+            "name": "Enchanting",
+            "bonus": -4
+          }
+        ]
+      },
+      "effect": "-4 Assensing; -4 Astral Combat; -4 Enchanting"
     },
     {
       "name": "Aspected Magician (Spirit)",
@@ -2315,7 +3732,24 @@
       "source": "SM",
       "page": 26,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Assensing",
+            "bonus": -4
+          },
+          {
+            "name": "Astral Combat",
+            "bonus": -4
+          },
+          {
+            "name": "Enchanting",
+            "bonus": -4
+          }
+        ]
+      },
+      "effect": "-4 Assensing; -4 Astral Combat; -4 Enchanting"
     },
     {
       "name": "Aspected Magician (Astral)",
@@ -2324,7 +3758,28 @@
       "source": "SM",
       "page": 26,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Sorcery",
+            "bonus": -4
+          },
+          {
+            "name": "Conjuring",
+            "bonus": -4
+          },
+          {
+            "name": "Enchanting",
+            "bonus": -4
+          },
+          {
+            "name": "Arcana",
+            "bonus": -4
+          }
+        ]
+      },
+      "effect": "-4 Sorcery; -4 Conjuring; -4 Enchanting; -4 Arcana"
     },
     {
       "name": "Aspected Magician (Enchanter)",
@@ -2333,7 +3788,28 @@
       "source": "SM",
       "page": 26,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Sorcery",
+            "bonus": -4
+          },
+          {
+            "name": "Assensing",
+            "bonus": -4
+          },
+          {
+            "name": "Astral Combat",
+            "bonus": -4
+          },
+          {
+            "name": "Conjuring",
+            "bonus": -4
+          }
+        ]
+      },
+      "effect": "-4 Sorcery; -4 Assensing; -4 Astral Combat; -4 Conjuring"
     },
     {
       "name": "Assensing Rejection",
@@ -2396,7 +3872,11 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Bad Rep",
@@ -2405,7 +3885,11 @@
       "source": "RC",
       "page": 102,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 3
+      },
+      "effect": "+3 Notoriety"
     },
     {
       "name": "Berserker",
@@ -2432,7 +3916,11 @@
       "source": "RC",
       "page": 102,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Bioluminescence",
@@ -2540,7 +4028,11 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Computer Illiterate",
@@ -2576,7 +4068,16 @@
       "source": "RC",
       "page": 117,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillgroup": [
+          {
+            "name": "Animal Husbandry",
+            "bonus": -2
+          }
+        ]
+      },
+      "effect": "-2 Animal Husbandry group"
     },
     {
       "name": "Cursed (Rating 1)",
@@ -2621,7 +4122,16 @@
       "source": "AU",
       "page": 21,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillcategory": [
+          {
+            "name": "Social Active",
+            "bonus": -2
+          }
+        ]
+      },
+      "effect": "-2 Social Active skills"
     },
     {
       "name": "Cyclopean Eye",
@@ -2828,7 +4338,11 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Emotion Leak",
@@ -2963,7 +4477,16 @@
       "source": "AU",
       "page": 21,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Intimidation",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Intimidation"
     },
     {
       "name": "Ghost in the Machine",
@@ -2981,7 +4504,11 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Gremlins (Rating 2)",
@@ -2990,7 +4517,11 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Gremlins (Rating 3)",
@@ -2999,7 +4530,11 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Gremlins (Rating 4)",
@@ -3008,7 +4543,11 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Hallucinations",
@@ -3053,7 +4592,13 @@
       "source": "RC",
       "page": 118,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selectattribute": {
+          "max": -1
+        }
+      },
+      "effect": "Attribute bonus (selected)"
     },
     {
       "name": "Implant-Induced Immune Deficiency",
@@ -3065,7 +4610,7 @@
       "limit": true
     },
     {
-      "name": "In Debt (5,000¥)",
+      "name": "In Debt (5,000\u00a5)",
       "bp": -5,
       "category": "Negative",
       "source": "RC",
@@ -3074,7 +4619,7 @@
       "limit": true
     },
     {
-      "name": "In Debt (10,000¥)",
+      "name": "In Debt (10,000\u00a5)",
       "bp": -10,
       "category": "Negative",
       "source": "RC",
@@ -3083,7 +4628,7 @@
       "limit": true
     },
     {
-      "name": "In Debt (15,000¥)",
+      "name": "In Debt (15,000\u00a5)",
       "bp": -15,
       "category": "Negative",
       "source": "RC",
@@ -3092,7 +4637,7 @@
       "limit": true
     },
     {
-      "name": "In Debt (20,000¥)",
+      "name": "In Debt (20,000\u00a5)",
       "bp": -20,
       "category": "Negative",
       "source": "RC",
@@ -3101,7 +4646,7 @@
       "limit": true
     },
     {
-      "name": "In Debt (25,000¥)",
+      "name": "In Debt (25,000\u00a5)",
       "bp": -25,
       "category": "Negative",
       "source": "RC",
@@ -3110,7 +4655,7 @@
       "limit": true
     },
     {
-      "name": "In Debt (30,000¥)",
+      "name": "In Debt (30,000\u00a5)",
       "bp": -30,
       "category": "Negative",
       "source": "RC",
@@ -3125,7 +4670,14 @@
       "source": "SR4",
       "page": 95,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "notoriety": 1,
+        "selectskill": {
+          "max": -6
+        }
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Infertile Infected (No Infection Power)",
@@ -3152,7 +4704,12 @@
       "source": "SR4",
       "page": 95,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "infirm": true,
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety; Infirm: Physical attributes cost double"
     },
     {
       "name": "Insectoid Features",
@@ -3449,7 +5006,11 @@
       "source": "SR4",
       "page": 95,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Pacifist (Minor)",
@@ -3755,7 +5316,11 @@
       "source": "SR4",
       "page": 95,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Scorched (Tech)",
@@ -3764,7 +5329,11 @@
       "source": "SR4",
       "page": 95,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Scent Glands",
@@ -3800,7 +5369,11 @@
       "source": "SR4",
       "page": 95,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "sensitivesystem": true
+      },
+      "effect": "Sensitive System: Double Essence cost for cyberware"
     },
     {
       "name": "Simsense Vertigo",
@@ -3836,7 +5409,11 @@
       "source": "SR4",
       "page": 95,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Slow Healer",
@@ -3881,7 +5458,11 @@
       "source": "SR4",
       "page": 96,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1
+      },
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Striking Skin Pigmentation",
@@ -3935,7 +5516,11 @@
       "source": "RC",
       "page": 119,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "unarmeddv": 1
+      },
+      "effect": "+1 Unarmed DV"
     },
     {
       "name": "Uncontrolled Metastasis (Slow)",
@@ -3962,7 +5547,12 @@
       "source": "SR4",
       "page": 96,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1,
+        "uncouth": true
+      },
+      "effect": "+1 Notoriety; Uncouth: Social skills cost double"
     },
     {
       "name": "Uneducated",
@@ -3971,7 +5561,12 @@
       "source": "SR4",
       "page": 96,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "notoriety": 1,
+        "uneducated": true
+      },
+      "effect": "+1 Notoriety; Uneducated: Technical/Academic skills cost double"
     },
     {
       "name": "Uneducated (Sapient)",
@@ -3980,7 +5575,11 @@
       "source": "SR4",
       "page": 96,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "uneducated": true
+      },
+      "effect": "Uneducated: Technical/Academic skills cost double"
     },
     {
       "name": "Unusual Hair",
@@ -4151,7 +5750,16 @@
       "source": "WS",
       "page": 10,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Perception",
+            "bonus": 2
+          }
+        ]
+      },
+      "effect": "+2 Perception"
     },
     {
       "name": "Merc",
@@ -4178,7 +5786,16 @@
       "source": "WS",
       "page": 11,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillcategory": [
+          {
+            "name": "Street",
+            "bonus": 1
+          }
+        ]
+      },
+      "effect": "+1 Street skills"
     },
     {
       "name": "Ronin (Bioware)",
@@ -4187,7 +5804,10 @@
       "source": "WS",
       "page": 11,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "basicbiowareessmultiplier": 90
+      }
     },
     {
       "name": "Ronin (Cyberware)",
@@ -4196,7 +5816,11 @@
       "source": "WS",
       "page": 11,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "cyberwareessmultiplier": 90
+      },
+      "effect": "90% Cyberware Essence cost"
     },
     {
       "name": "Sharpshooter",
@@ -4205,7 +5829,16 @@
       "source": "WS",
       "page": 11,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Infiltration",
+            "bonus": 1
+          }
+        ]
+      },
+      "effect": "+1 Infiltration"
     },
     {
       "name": "Street Ninja",
@@ -4223,7 +5856,31 @@
       "source": "COD",
       "page": 137,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "flyspeed": -2,
+        "specificattribute": [
+          {
+            "name": "EDG"
+          },
+          {
+            "name": "ESS",
+            "max": 2,
+            "val": 2
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 ESS; Fly speed -2"
     },
     {
       "name": "True Drake (+1 Power)",
@@ -4232,7 +5889,31 @@
       "source": "COD",
       "page": 137,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "flyspeed": -2,
+        "specificattribute": [
+          {
+            "name": "EDG"
+          },
+          {
+            "name": "ESS",
+            "max": 2,
+            "val": 2
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 ESS; Fly speed -2"
     },
     {
       "name": "True Drake (+2 Powers)",
@@ -4241,7 +5922,31 @@
       "source": "COD",
       "page": 137,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "flyspeed": -2,
+        "specificattribute": [
+          {
+            "name": "EDG"
+          },
+          {
+            "name": "ESS",
+            "max": 2,
+            "val": 2
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 ESS; Fly speed -2"
     },
     {
       "name": "True Drake (+3 Powers)",
@@ -4250,7 +5955,31 @@
       "source": "COD",
       "page": 137,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "flyspeed": -2,
+        "specificattribute": [
+          {
+            "name": "EDG"
+          },
+          {
+            "name": "ESS",
+            "max": 2,
+            "val": 2
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 ESS; Fly speed -2"
     },
     {
       "name": "True Drake (+4 Powers)",
@@ -4259,7 +5988,31 @@
       "source": "COD",
       "page": 137,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "flyspeed": -2,
+        "specificattribute": [
+          {
+            "name": "EDG"
+          },
+          {
+            "name": "ESS",
+            "max": 2,
+            "val": 2
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 ESS; Fly speed -2"
     },
     {
       "name": "True Drake (+5 Powers)",
@@ -4268,7 +6021,31 @@
       "source": "COD",
       "page": 137,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "val": 1,
+            "aug": 6
+          }
+        ],
+        "enabletab": "critter",
+        "flyspeed": -2,
+        "specificattribute": [
+          {
+            "name": "EDG"
+          },
+          {
+            "name": "ESS",
+            "max": 2,
+            "val": 2
+          }
+        ]
+      },
+      "effect": "Grants Magic attribute; Grants critter powers; +2 ESS; Fly speed -2"
     },
     {
       "name": "Drug Tolerant",
@@ -4304,7 +6081,11 @@
       "source": "SDN",
       "page": 14,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "blackmarketdiscount": true
+      },
+      "effect": "Black market access"
     },
     {
       "name": "Dry Addict (Moderate)",
@@ -4313,7 +6094,11 @@
       "source": "SDN",
       "page": 14,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "blackmarketdiscount": true
+      },
+      "effect": "Black market access"
     },
     {
       "name": "Dry Addict (Severe)",
@@ -4322,7 +6107,11 @@
       "source": "SDN",
       "page": 14,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "blackmarketdiscount": true
+      },
+      "effect": "Black market access"
     },
     {
       "name": "Dry Addict (Burnout)",
@@ -4331,7 +6120,11 @@
       "source": "SDN",
       "page": 14,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "blackmarketdiscount": true
+      },
+      "effect": "Black market access"
     },
     {
       "name": "Family Curse",
