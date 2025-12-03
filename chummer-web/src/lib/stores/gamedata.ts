@@ -146,6 +146,14 @@ export interface GameEcho {
 	bonus: string;
 }
 
+/** Metamagic ability from game data. */
+export interface GameMetamagic {
+	name: string;
+	description: string;
+	source: string;
+	page: number;
+}
+
 /** Technomancer stream from game data. */
 export interface GameStream {
 	name: string;
@@ -199,6 +207,8 @@ export interface GameData {
 	/* Technomancer */
 	echoes: GameEcho[];
 	streams: GameStream[];
+	/* Initiation */
+	metamagics: GameMetamagic[];
 }
 
 /** Empty game data for initial state. */
@@ -238,7 +248,8 @@ const EMPTY_GAME_DATA: GameData = {
 	martialArts: [],
 	/* Technomancer */
 	echoes: [],
-	streams: []
+	streams: [],
+	metamagics: []
 };
 
 /* Internal stores */
@@ -316,7 +327,8 @@ export async function loadGameData(): Promise<void> {
 			vehiclesData,
 			martialArtsData,
 			echoesData,
-			streamsData
+			streamsData,
+			metamagicsData
 		] = await Promise.all([
 			fetchDataFile<{ categories: string[]; metatypes: Metatype[] }>('metatypes.json'),
 			fetchDataFile<{ skillGroups: string[]; categories: SkillCategoryDef[]; skills: SkillDefinition[] }>('skills.json'),
@@ -335,7 +347,8 @@ export async function loadGameData(): Promise<void> {
 			fetchDataFile<{ categories: string[]; vehicles: GameVehicle[] }>('vehicles.json'),
 			fetchDataFile<{ styles: GameMartialArt[] }>('martialarts.json'),
 			fetchDataFile<{ echoes: GameEcho[] }>('echoes.json'),
-			fetchDataFile<{ streams: GameStream[] }>('streams.json')
+			fetchDataFile<{ streams: GameStream[] }>('streams.json'),
+			fetchDataFile<{ metamagics: GameMetamagic[] }>('metamagics.json')
 		]);
 
 		/* Combine into single game data object */
@@ -375,7 +388,9 @@ export async function loadGameData(): Promise<void> {
 			martialArts: limitArray(martialArtsData?.styles),
 			/* Technomancer */
 			echoes: limitArray(echoesData?.echoes),
-			streams: limitArray(streamsData?.streams)
+			streams: limitArray(streamsData?.streams),
+			/* Initiation */
+			metamagics: limitArray(metamagicsData?.metamagics)
 		};
 
 		gameDataStore.set(data);
@@ -763,6 +778,12 @@ export const echoes: Readable<GameEcho[]> = derived(
 export const streams: Readable<GameStream[]> = derived(
 	gameData,
 	($data) => $data.streams
+);
+
+/** Derived store for metamagics. */
+export const metamagics: Readable<GameMetamagic[]> = derived(
+	gameData,
+	($data) => $data.metamagics
 );
 
 /**

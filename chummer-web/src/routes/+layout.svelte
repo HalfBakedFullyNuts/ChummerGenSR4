@@ -1,23 +1,38 @@
 <script lang="ts">
 	import '../app.css';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { initializeFirebase } from '$firebase/config';
 	import { loadGameData } from '$stores/gamedata';
+	import { registerServiceWorker, initSyncStatus } from '$lib/pwa';
+	import SyncStatus from '$lib/components/SyncStatus.svelte';
 
 	let initialized = false;
 	let initError: string | null = null;
+	let cleanupSync: (() => void) | null = null;
 
 	/**
-	 * Initialize Firebase and load game data on mount.
+	 * Initialize Firebase, PWA, and load game data on mount.
 	 * Sets initialized flag on success, captures error message on failure.
 	 */
 	onMount(async () => {
+		/* Initialize sync status listeners */
+		cleanupSync = initSyncStatus();
+
+		/* Register service worker for offline support */
+		registerServiceWorker();
+
 		const result = initializeFirebase();
 		if (result.success) {
 			await loadGameData();
 			initialized = true;
 		} else {
 			initError = result.error ?? 'Unknown initialization error';
+		}
+	});
+
+	onDestroy(() => {
+		if (cleanupSync) {
+			cleanupSync();
 		}
 	});
 </script>
@@ -42,6 +57,10 @@
 	</div>
 {:else}
 	<div class="min-h-screen bg-background">
+		<!-- Global sync status indicator -->
+		<div class="fixed top-2 right-2 z-50">
+			<SyncStatus />
+		</div>
 		<slot />
 	</div>
 {/if}
