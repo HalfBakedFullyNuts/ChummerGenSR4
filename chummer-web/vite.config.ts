@@ -10,10 +10,29 @@ export default defineConfig({
 	},
 	build: {
 		target: 'esnext',
-		minify: 'esbuild'
+		minify: 'esbuild',
+		/* Split chunks for better caching */
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					/* Firebase chunk */
+					firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+					/* Vendor chunk for other large dependencies */
+					vendor: ['svelte', 'svelte/store']
+				}
+			}
+		},
+		/* Report compressed sizes */
+		reportCompressedSize: true,
+		/* Chunk size warning limit (500kb) */
+		chunkSizeWarningLimit: 500
 	},
 	server: {
 		port: 3000,
 		strictPort: false
+	},
+	/* Optimize dependency pre-bundling */
+	optimizeDeps: {
+		include: ['firebase/app', 'firebase/auth', 'firebase/firestore']
 	}
 });

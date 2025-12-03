@@ -57,10 +57,16 @@
 	</div>
 {:else}
 	<div class="min-h-screen bg-background">
+		<!-- Skip to main content (Accessibility) -->
+		<a href="#main-content" class="skip-link">
+			Skip to main content
+		</a>
 		<!-- Global sync status indicator -->
 		<div class="fixed top-2 right-2 z-50">
 			<SyncStatus />
 		</div>
-		<slot />
+		<main id="main-content" role="main">
+			<slot />
+		</main>
 	</div>
 {/if}

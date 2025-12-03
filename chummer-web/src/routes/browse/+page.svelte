@@ -30,6 +30,14 @@
 	/** Weapon category filter. */
 	let weaponCategory = '';
 
+	/** Source book filter. */
+	let sourceFilter = '';
+
+	/** Sort option. */
+	type SortOption = 'name' | 'cost' | 'source';
+	let sortBy: SortOption = 'name';
+	let sortAsc = true;
+
 	/** Loading state. */
 	let loading = true;
 
@@ -37,6 +45,48 @@
 		await loadGameData();
 		loading = false;
 	});
+
+	/** Get all unique source books from current data. */
+	$: allSources = (() => {
+		const sources = new Set<string>();
+		$gameData.metatypes?.forEach(m => sources.add(m.source));
+		$gameData.skills?.forEach(s => sources.add(s.source));
+		$qualities?.forEach(q => sources.add(q.source));
+		$spells?.forEach(s => sources.add(s.source));
+		$powers?.forEach(p => sources.add(p.source));
+		return [...sources].filter(Boolean).sort();
+	})();
+
+	/** Generic sort function. */
+	function sortItems<T extends { name: string; cost?: number; source?: string }>(items: T[]): T[] {
+		return [...items].sort((a, b) => {
+			let cmp = 0;
+			if (sortBy === 'name') {
+				cmp = a.name.localeCompare(b.name);
+			} else if (sortBy === 'cost' && 'cost' in a && 'cost' in b) {
+				cmp = ((a.cost as number) ?? 0) - ((b.cost as number) ?? 0);
+			} else if (sortBy === 'source' && a.source && b.source) {
+				cmp = a.source.localeCompare(b.source);
+			}
+			return sortAsc ? cmp : -cmp;
+		});
+	}
+
+	/** Filter by source book. */
+	function filterBySource<T extends { source?: string }>(items: T[]): T[] {
+		if (!sourceFilter) return items;
+		return items.filter(item => item.source === sourceFilter);
+	}
+
+	/** Toggle sort direction. */
+	function toggleSort(option: SortOption): void {
+		if (sortBy === option) {
+			sortAsc = !sortAsc;
+		} else {
+			sortBy = option;
+			sortAsc = true;
+		}
+	}
 
 	/** Get unique spell categories. */
 	$: spellCategories = $spells
@@ -51,86 +101,86 @@
 		? [...new Set($gameData.weapons.map((w) => w.category))].sort()
 		: [];
 
-	/** Filter metatypes by search. */
-	$: filteredMetatypes = ($gameData.metatypes ?? []).filter((m) =>
+	/** Filter metatypes by search and source. */
+	$: filteredMetatypes = sortItems(filterBySource(($gameData.metatypes ?? []).filter((m) =>
 		!search || m.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
-	/** Filter skills by search. */
-	$: filteredSkills = ($gameData.skills ?? []).filter((s) =>
+	/** Filter skills by search and source. */
+	$: filteredSkills = sortItems(filterBySource(($gameData.skills ?? []).filter((s) =>
 		!search || s.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
-	/** Filter qualities by search and type. */
-	$: filteredQualities = ($qualities ?? []).filter((q) => {
+	/** Filter qualities by search, type, and source. */
+	$: filteredQualities = sortItems(filterBySource(($qualities ?? []).filter((q) => {
 		const matchesSearch = !search || q.name.toLowerCase().includes(search.toLowerCase());
 		const matchesType = qualityType === 'all' || q.category === qualityType;
 		return matchesSearch && matchesType;
-	});
+	})));
 
-	/** Filter spells by search and category. */
-	$: filteredSpells = ($spells ?? []).filter((s) => {
+	/** Filter spells by search, category, and source. */
+	$: filteredSpells = sortItems(filterBySource(($spells ?? []).filter((s) => {
 		const matchesSearch = !search || s.name.toLowerCase().includes(search.toLowerCase());
 		const matchesCategory = !spellCategory || s.category === spellCategory;
 		return matchesSearch && matchesCategory;
-	});
+	})));
 
-	/** Filter powers by search. */
-	$: filteredPowers = ($powers ?? []).filter((p) =>
+	/** Filter powers by search and source. */
+	$: filteredPowers = sortItems(filterBySource(($powers ?? []).filter((p) =>
 		!search || p.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
-	/** Filter programs by search. */
-	$: filteredPrograms = ($programs ?? []).filter((p) =>
+	/** Filter programs by search and source. */
+	$: filteredPrograms = sortItems(filterBySource(($programs ?? []).filter((p) =>
 		!search || p.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
-	/** Filter martial arts by search. */
-	$: filteredMartialArts = ($martialArts ?? []).filter((m) =>
+	/** Filter martial arts by search and source. */
+	$: filteredMartialArts = sortItems(filterBySource(($martialArts ?? []).filter((m) =>
 		!search || m.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
-	/** Filter echoes by search. */
-	$: filteredEchoes = ($echoes ?? []).filter((e) =>
+	/** Filter echoes by search and source. */
+	$: filteredEchoes = sortItems(filterBySource(($echoes ?? []).filter((e) =>
 		!search || e.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
-	/** Filter mentors by search. */
-	$: filteredMentors = ($mentors ?? []).filter((m) =>
+	/** Filter mentors by search and source. */
+	$: filteredMentors = sortItems(filterBySource(($mentors ?? []).filter((m) =>
 		!search || m.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
-	/** Filter weapons by search and category. */
-	$: filteredWeapons = ($gameData.weapons ?? []).filter((w) => {
+	/** Filter weapons by search, category, and source. */
+	$: filteredWeapons = sortItems(filterBySource(($gameData.weapons ?? []).filter((w) => {
 		const matchesSearch = !search || w.name.toLowerCase().includes(search.toLowerCase());
 		const matchesCategory = !weaponCategory || w.category === weaponCategory;
 		return matchesSearch && matchesCategory;
-	});
+	})));
 
-	/** Filter armor by search. */
-	$: filteredArmor = ($gameData.armor ?? []).filter((a) =>
+	/** Filter armor by search and source. */
+	$: filteredArmor = sortItems(filterBySource(($gameData.armor ?? []).filter((a) =>
 		!search || a.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
-	/** Filter cyberware by search. */
-	$: filteredCyberware = ($gameData.cyberware ?? []).filter((c) =>
+	/** Filter cyberware by search and source. */
+	$: filteredCyberware = sortItems(filterBySource(($gameData.cyberware ?? []).filter((c) =>
 		!search || c.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
-	/** Filter bioware by search. */
-	$: filteredBioware = ($gameData.bioware ?? []).filter((b) =>
+	/** Filter bioware by search and source. */
+	$: filteredBioware = sortItems(filterBySource(($gameData.bioware ?? []).filter((b) =>
 		!search || b.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
-	/** Filter vehicles by search. */
-	$: filteredVehicles = ($gameData.vehicles ?? []).filter((v) =>
+	/** Filter vehicles by search and source. */
+	$: filteredVehicles = sortItems(filterBySource(($gameData.vehicles ?? []).filter((v) =>
 		!search || v.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
-	/** Filter gear by search. */
-	$: filteredGear = ($gameData.gear ?? []).filter((g) =>
+	/** Filter gear by search and source. */
+	$: filteredGear = sortItems(filterBySource(($gameData.gear ?? []).filter((g) =>
 		!search || g.name.toLowerCase().includes(search.toLowerCase())
-	);
+	)));
 
 	/** Category tabs. */
 	const categories: { id: Category; label: string }[] = [
@@ -173,13 +223,51 @@
 			<a href="/" class="cw-btn cw-btn-secondary text-sm">Back to Home</a>
 		</div>
 
-		<!-- Search -->
-		<input
-			type="text"
-			class="cw-input w-full"
-			placeholder="Search..."
-			bind:value={search}
-		/>
+		<!-- Search and Filters -->
+		<div class="flex flex-col md:flex-row gap-3">
+			<input
+				type="text"
+				class="cw-input flex-1"
+				placeholder="Search..."
+				bind:value={search}
+			/>
+			<select
+				class="cw-input md:w-48"
+				bind:value={sourceFilter}
+				aria-label="Filter by source book"
+			>
+				<option value="">All Sources</option>
+				{#each allSources as source}
+					<option value={source}>{source}</option>
+				{/each}
+			</select>
+		</div>
+
+		<!-- Sort Controls -->
+		<div class="flex items-center gap-2 mt-3">
+			<span class="text-xs text-muted-text">Sort by:</span>
+			<button
+				class="text-xs px-2 py-1 rounded transition-colors
+					{sortBy === 'name' ? 'bg-accent-primary/20 text-accent-primary' : 'bg-surface-light text-secondary-text hover:bg-surface-lighter'}"
+				on:click={() => toggleSort('name')}
+			>
+				Name {sortBy === 'name' ? (sortAsc ? '↑' : '↓') : ''}
+			</button>
+			<button
+				class="text-xs px-2 py-1 rounded transition-colors
+					{sortBy === 'cost' ? 'bg-accent-primary/20 text-accent-primary' : 'bg-surface-light text-secondary-text hover:bg-surface-lighter'}"
+				on:click={() => toggleSort('cost')}
+			>
+				Cost {sortBy === 'cost' ? (sortAsc ? '↑' : '↓') : ''}
+			</button>
+			<button
+				class="text-xs px-2 py-1 rounded transition-colors
+					{sortBy === 'source' ? 'bg-accent-primary/20 text-accent-primary' : 'bg-surface-light text-secondary-text hover:bg-surface-lighter'}"
+				on:click={() => toggleSort('source')}
+			>
+				Source {sortBy === 'source' ? (sortAsc ? '↑' : '↓') : ''}
+			</button>
+		</div>
 	</header>
 
 	{#if loading}
