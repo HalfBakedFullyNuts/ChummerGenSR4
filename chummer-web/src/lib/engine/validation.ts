@@ -32,6 +32,58 @@ export interface ValidationResult {
 	};
 }
 
+/** Parsed availability result. */
+export interface ParsedAvailability {
+	readonly rating: number;
+	readonly restriction: '' | 'R' | 'F';
+}
+
+/* ============================================
+ * Availability Parsing
+ * ============================================ */
+
+/**
+ * Parse an availability string into rating and restriction.
+ * Handles formats like "6", "12R", "16F", "8+2", etc.
+ */
+export function parseAvailability(avail: string): ParsedAvailability {
+	if (!avail || avail === '-' || avail === '0') {
+		return { rating: 0, restriction: '' };
+	}
+
+	// Normalize to uppercase
+	const normalized = avail.toUpperCase().trim();
+
+	// Extract restriction suffix (R or F)
+	let restriction: '' | 'R' | 'F' = '';
+	let ratingStr = normalized;
+
+	if (normalized.endsWith('R')) {
+		restriction = 'R';
+		ratingStr = normalized.slice(0, -1);
+	} else if (normalized.endsWith('F')) {
+		restriction = 'F';
+		ratingStr = normalized.slice(0, -1);
+	}
+
+	// Handle expressions with + (e.g., "8+2")
+	let rating = 0;
+	if (ratingStr.includes('+')) {
+		const parts = ratingStr.split('+');
+		for (const part of parts) {
+			const num = parseInt(part.trim(), 10);
+			if (!isNaN(num)) {
+				rating += num;
+			}
+		}
+	} else {
+		// Simple numeric
+		rating = parseInt(ratingStr, 10) || 0;
+	}
+
+	return { rating, restriction };
+}
+
 /* ============================================
  * BP Limits (Standard SR4 Rules)
  * ============================================ */
@@ -391,6 +443,82 @@ function validateResonance(char: Character): ValidationIssue[] {
 	return issues;
 }
 
+/**
+ * Validate equipment availability restrictions.
+ * SR4 rules: max availability 12 at character creation, Forbidden items not allowed.
+ */
+export function validateAvailability(char: Character): ValidationIssue[] {
+	const issues: ValidationIssue[] = [];
+
+	// Skip availability checks for career mode - can acquire anything with time/contacts
+	if (char.status !== 'creation') {
+		return issues;
+	}
+
+	const maxAvail = char.settings.maxAvailability;
+	const allowForbidden = char.settings.allowForbidden;
+
+	// Helper to check a single item
+	const checkItem = (name: string, availStr: string | undefined, itemType: string) => {
+		if (!availStr) return;
+
+		const parsed = parseAvailability(availStr);
+
+		// Check availability rating
+		if (parsed.rating > maxAvail) {
+			issues.push({
+				code: 'AVAIL_TOO_HIGH',
+				severity: 'error',
+				category: 'Equipment',
+				message: `${name} exceeds availability limit`,
+				details: `Availability ${parsed.rating}${parsed.restriction} exceeds maximum of ${maxAvail} for character creation`
+			});
+		}
+
+		// Check forbidden restriction
+		if (parsed.restriction === 'F' && !allowForbidden) {
+			issues.push({
+				code: 'FORBIDDEN_ITEM',
+				severity: 'error',
+				category: 'Equipment',
+				message: `${name} is Forbidden`,
+				details: `${itemType} with Forbidden (F) availability cannot be purchased at character creation`
+			});
+		}
+	};
+
+	// Check weapons
+	for (const weapon of char.equipment.weapons) {
+		checkItem(weapon.name, weapon.avail, 'Weapon');
+	}
+
+	// Check armor
+	for (const armor of char.equipment.armor) {
+		checkItem(armor.name, armor.avail, 'Armor');
+	}
+
+	// Check cyberware
+	for (const cyber of char.equipment.cyberware) {
+		checkItem(cyber.name, cyber.avail, 'Cyberware');
+		// Also check subsystems
+		for (const sub of cyber.subsystems) {
+			checkItem(sub.name, sub.avail, 'Cyberware');
+		}
+	}
+
+	// Check bioware
+	for (const bio of char.equipment.bioware) {
+		checkItem(bio.name, bio.avail, 'Bioware');
+	}
+
+	// Check gear
+	for (const gear of char.equipment.gear) {
+		checkItem(gear.name, gear.avail, 'Gear');
+	}
+
+	return issues;
+}
+
 /** Validate equipment. */
 function validateEquipment(char: Character): ValidationIssue[] {
 	const issues: ValidationIssue[] = [];
@@ -425,10 +553,6 @@ function validateEquipment(char: Character): ValidationIssue[] {
 			details: 'A lifestyle is required for between-run survival'
 		});
 	}
-
-	// Check availability (12 max at creation)
-	const maxAvail = char.settings.maxAvailability;
-	// Note: We'd need availability data on items to validate this fully
 
 	// Check for negative nuyen
 	if (char.nuyen < 0) {
@@ -702,6 +826,7 @@ export function validateCharacter(char: Character): ValidationResult {
 	allIssues.push(...validateSpirits(char));
 	allIssues.push(...validateSprites(char));
 	allIssues.push(...validateEquipment(char));
+	allIssues.push(...validateAvailability(char));
 	allIssues.push(...validateGearCapacity(char));
 	allIssues.push(...validateContacts(char));
 

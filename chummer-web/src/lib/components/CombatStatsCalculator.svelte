@@ -4,9 +4,10 @@
 	 * ==================================
 	 * Displays combat-relevant stats using the calculations engine.
 	 * Adds interactive damage tracking for condition monitors.
+	 * Includes initiative tracker for combat rounds.
 	 */
 
-	import { character } from '$stores/character';
+	import { character, updateCondition, spendEdge, recoverEdge } from '$stores/character';
 	import {
 		calculatePhysicalCM,
 		calculateStunCM,
@@ -22,14 +23,21 @@
 		calculateMemory,
 		calculateLiftCarry,
 		calculateArmorTotals,
-		getAttributeTotal
+		getAttributeTotal,
+		getWoundModifier
 	} from '$lib/engine/calculations';
 
-	/** Physical damage taken (local state for tracking). */
-	export let physicalDamage = 0;
+	/** Combat tracker state. */
+	let combatActive = false;
+	let currentRound = 1;
+	let currentPass = 1;
+	let rolledInitiative = 0;
 
-	/** Stun damage taken (local state for tracking). */
-	export let stunDamage = 0;
+	/** Get damage from character store (synced with persistence). */
+	$: physicalDamage = $character?.condition.physicalCurrent ?? 0;
+	$: stunDamage = $character?.condition.stunCurrent ?? 0;
+	$: edgeCurrent = $character?.condition.edgeCurrent ?? 0;
+	$: edgeMax = $character ? getAttributeTotal($character, 'edg') : 0;
 
 	/** Condition monitors - use engine calculations when character exists. */
 	$: physicalConditionMonitor = $character ? calculatePhysicalCM($character) : 9;
@@ -66,35 +74,73 @@
 	/** Armor from calculations engine (with SR4 stacking and encumbrance). */
 	$: armorTotals = $character ? calculateArmorTotals($character) : { ballistic: 0, impact: 0, encumbrance: 0 };
 
-	/** Wound modifier calculation (local, based on tracked damage). */
-	function getWoundModifier(damage: number): number {
-		if (damage <= 0) return 0;
-		return -Math.floor(damage / 3);
-	}
+	/** Wound modifier calculation from engine (uses character store condition). */
+	$: totalWoundModifier = $character ? getWoundModifier($character) : 0;
+	$: physicalWoundModifier = -Math.floor(physicalDamage / 3);
+	$: stunWoundModifier = -Math.floor(stunDamage / 3);
 
-	$: physicalWoundModifier = getWoundModifier(physicalDamage);
-	$: stunWoundModifier = getWoundModifier(stunDamage);
-	$: totalWoundModifier = physicalWoundModifier + stunWoundModifier;
-
-	/** Update damage. */
+	/** Update damage using character store. */
 	function addDamage(type: 'physical' | 'stun', amount: number): void {
 		if (type === 'physical') {
-			physicalDamage = Math.min(physicalConditionMonitor + overflowBoxes, Math.max(0, physicalDamage + amount));
+			const newValue = Math.min(physicalConditionMonitor + overflowBoxes, Math.max(0, physicalDamage + amount));
+			updateCondition('physical', newValue);
 		} else {
 			const newStun = stunDamage + amount;
 			if (newStun > stunConditionMonitor) {
+				// Stun overflow converts to physical damage
 				const overflow = newStun - stunConditionMonitor;
-				stunDamage = stunConditionMonitor;
-				physicalDamage = Math.min(physicalConditionMonitor + overflowBoxes, physicalDamage + overflow);
+				updateCondition('stun', stunConditionMonitor);
+				const newPhysical = Math.min(physicalConditionMonitor + overflowBoxes, physicalDamage + overflow);
+				updateCondition('physical', newPhysical);
 			} else {
-				stunDamage = Math.max(0, newStun);
+				updateCondition('stun', Math.max(0, newStun));
 			}
 		}
 	}
 
 	function resetDamage(): void {
-		physicalDamage = 0;
-		stunDamage = 0;
+		updateCondition('physical', 0);
+		updateCondition('stun', 0);
+	}
+
+	/** Initiative tracker functions. */
+	function startCombat(): void {
+		combatActive = true;
+		currentRound = 1;
+		currentPass = 1;
+		rollInitiative();
+	}
+
+	function endCombat(): void {
+		combatActive = false;
+		rolledInitiative = 0;
+	}
+
+	function rollInitiative(): void {
+		// Roll initiative dice (each die is d6)
+		let total = initiative;
+		for (let i = 0; i < initiativePasses; i++) {
+			total += Math.floor(Math.random() * 6) + 1;
+		}
+		rolledInitiative = Math.max(0, total + totalWoundModifier);
+	}
+
+	function nextPass(): void {
+		rolledInitiative -= 10;
+		if (rolledInitiative <= 0) {
+			currentRound++;
+			currentPass = 1;
+			rollInitiative();
+		} else {
+			currentPass++;
+		}
+	}
+
+	function useSeizeInitiative(): void {
+		if (spendEdge()) {
+			// Seize the Initiative: Go first with 5 + rolled hits
+			rolledInitiative = 99; // Effectively first
+		}
 	}
 
 	function getStatus(): { label: string; color: string } {
@@ -133,6 +179,73 @@
 <div class="space-y-4">
 	<h3 class="text-lg font-medium text-primary-text">Combat Stats</h3>
 
+	<!-- Combat Tracker -->
+	<div class="cw-panel p-4">
+		<div class="flex items-center justify-between mb-3">
+			<h4 class="text-xs text-muted-text uppercase tracking-wide">Combat Tracker</h4>
+			{#if !combatActive}
+				<button
+					class="text-xs px-3 py-1 rounded bg-accent-primary/20 text-accent-primary hover:bg-accent-primary/30"
+					on:click={startCombat}
+				>
+					Start Combat
+				</button>
+			{:else}
+				<button
+					class="text-xs px-3 py-1 rounded bg-accent-danger/20 text-accent-danger hover:bg-accent-danger/30"
+					on:click={endCombat}
+				>
+					End Combat
+				</button>
+			{/if}
+		</div>
+
+		{#if combatActive}
+			<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+				<div>
+					<div class="text-xs text-muted-text">Round</div>
+					<div class="text-2xl font-mono text-accent-primary">{currentRound}</div>
+				</div>
+				<div>
+					<div class="text-xs text-muted-text">Pass</div>
+					<div class="text-2xl font-mono text-accent-cyan">{currentPass}</div>
+				</div>
+				<div>
+					<div class="text-xs text-muted-text">Initiative</div>
+					<div class="text-2xl font-mono text-accent-success">{rolledInitiative}</div>
+				</div>
+				<div class="flex flex-col justify-center">
+					<button
+						class="text-xs px-2 py-1 mb-1 rounded bg-accent-cyan/20 text-accent-cyan hover:bg-accent-cyan/30"
+						on:click={nextPass}
+					>
+						Next Pass (-10)
+					</button>
+					<button
+						class="text-xs px-2 py-1 rounded bg-accent-warning/20 text-accent-warning hover:bg-accent-warning/30"
+						on:click={rollInitiative}
+					>
+						Re-roll Init
+					</button>
+				</div>
+			</div>
+			<div class="mt-3 pt-3 border-t border-border flex gap-2">
+				<button
+					class="text-xs px-2 py-1 rounded bg-accent-primary/20 text-accent-primary hover:bg-accent-primary/30"
+					on:click={useSeizeInitiative}
+					disabled={edgeCurrent < 1}
+					title="Spend 1 Edge to go first this round"
+				>
+					Seize Initiative (1 Edge)
+				</button>
+			</div>
+		{:else}
+			<div class="text-center text-sm text-muted-text py-4">
+				Click "Start Combat" to begin tracking initiative
+			</div>
+		{/if}
+	</div>
+
 	<!-- Status Banner -->
 	<div class="cw-panel p-3 flex items-center justify-between">
 		<div class="flex items-center gap-3">
@@ -144,6 +257,49 @@
 				{totalWoundModifier > 0 ? '+' : ''}{totalWoundModifier} wound modifier
 			</span>
 		{/if}
+	</div>
+
+	<!-- Edge Tracker -->
+	<div class="cw-panel p-4">
+		<div class="flex items-center justify-between mb-2">
+			<h4 class="text-xs text-muted-text uppercase tracking-wide">Edge</h4>
+			<span class="text-xs text-muted-text">{edgeCurrent}/{edgeMax}</span>
+		</div>
+		<div class="flex flex-wrap gap-1 mb-3">
+			{#each Array(edgeMax) as _, i}
+				<div
+					class="w-6 h-6 rounded-full border-2 border-accent-primary transition-colors cursor-pointer
+						{i < edgeCurrent ? 'bg-accent-primary' : 'bg-surface-light'}"
+					on:click={() => {
+						if (i < edgeCurrent) {
+							spendEdge(edgeCurrent - i);
+						} else {
+							recoverEdge(i + 1 - edgeCurrent);
+						}
+					}}
+					on:keypress={(e) => e.key === 'Enter' && (i < edgeCurrent ? spendEdge(1) : recoverEdge(1))}
+					role="button"
+					tabindex="0"
+					title={`Edge point ${i + 1}`}
+				/>
+			{/each}
+		</div>
+		<div class="flex gap-2">
+			<button
+				class="text-xs px-2 py-1 rounded bg-accent-danger/20 text-accent-danger hover:bg-accent-danger/30"
+				on:click={() => spendEdge(1)}
+				disabled={edgeCurrent < 1}
+			>
+				Spend Edge
+			</button>
+			<button
+				class="text-xs px-2 py-1 rounded bg-accent-success/20 text-accent-success hover:bg-accent-success/30"
+				on:click={() => recoverEdge(1)}
+				disabled={edgeCurrent >= edgeMax}
+			>
+				Recover Edge
+			</button>
+		</div>
 	</div>
 
 	<!-- Condition Monitors -->
@@ -163,13 +319,9 @@
 							{box.overflow ? 'border-accent-danger/50' : 'border-border'}
 							{box.filled ? (box.overflow ? 'bg-accent-danger' : 'bg-accent-danger') : 'bg-surface-light'}"
 						on:click={() => {
-							if (i < physicalDamage) {
-								physicalDamage = i;
-							} else {
-								physicalDamage = i + 1;
-							}
+							updateCondition('physical', i < physicalDamage ? i : i + 1);
 						}}
-						on:keypress={(e) => e.key === 'Enter' && (physicalDamage = i < physicalDamage ? i : i + 1)}
+						on:keypress={(e) => e.key === 'Enter' && updateCondition('physical', i < physicalDamage ? i : i + 1)}
 						role="button"
 						tabindex="0"
 						title={box.overflow ? 'Overflow' : `Box ${i + 1}`}
@@ -209,13 +361,9 @@
 						class="w-5 h-5 rounded border-2 border-border transition-colors cursor-pointer
 							{box.filled ? 'bg-accent-warning' : 'bg-surface-light'}"
 						on:click={() => {
-							if (i < stunDamage) {
-								stunDamage = i;
-							} else {
-								stunDamage = i + 1;
-							}
+							updateCondition('stun', i < stunDamage ? i : i + 1);
 						}}
-						on:keypress={(e) => e.key === 'Enter' && (stunDamage = i < stunDamage ? i : i + 1)}
+						on:keypress={(e) => e.key === 'Enter' && updateCondition('stun', i < stunDamage ? i : i + 1)}
 						role="button"
 						tabindex="0"
 						title={`Box ${i + 1}`}

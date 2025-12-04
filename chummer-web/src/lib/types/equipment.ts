@@ -77,6 +77,7 @@ export interface CharacterWeapon {
 	readonly currentAmmo: number;
 	readonly conceal: number;
 	readonly cost: number;
+	readonly avail?: string;
 	readonly accessories: readonly WeaponAccessory[];
 	readonly notes: string;
 }
@@ -127,6 +128,7 @@ export interface CharacterArmor {
 	readonly capacityUsed: number;
 	readonly equipped: boolean;
 	readonly cost: number;
+	readonly avail?: string;
 	readonly modifications: readonly ArmorModification[];
 	readonly notes: string;
 }
@@ -211,6 +213,7 @@ export interface CharacterCyberware {
 	readonly capacity: number;
 	readonly capacityUsed: number;
 	readonly location: string;
+	readonly avail?: string;
 	readonly subsystems: readonly CharacterCyberware[];
 	readonly notes: string;
 }
@@ -251,6 +254,7 @@ export interface CharacterBioware {
 	readonly rating: number;
 	readonly essence: number;
 	readonly cost: number;
+	readonly avail?: string;
 	readonly notes: string;
 }
 
@@ -367,6 +371,7 @@ export interface CharacterGear {
 	readonly quantity: number;
 	readonly cost: number;
 	readonly location: string;
+	readonly avail?: string;
 	readonly notes: string;
 	/** Container capacity (if this gear can hold other gear). */
 	readonly capacity: number;
