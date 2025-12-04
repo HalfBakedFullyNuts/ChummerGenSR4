@@ -5,29 +5,29 @@
  */
 
 import { XMLParser } from 'fast-xml-parser';
-import type {
-	Character,
-	BuildMethod,
-	CharacterQuality,
-	CharacterSkill,
-	CharacterSkillGroup,
-	KnowledgeSkill,
-	KnowledgeSkillCategory,
-	SkillGroupName,
-	Contact,
-	CharacterWeapon,
-	WeaponType,
-	CharacterArmor,
-	CharacterCyberware,
-	CharacterGear,
-	CharacterLifestyle,
-	CharacterMagic,
-	CharacterResonance,
-	CharacterSpell,
-	CharacterPower,
-	CyberwareGrade
+import {
+	type Character,
+	type BuildMethod,
+	type CharacterQuality,
+	type CharacterSkill,
+	type CharacterSkillGroup,
+	type KnowledgeSkill,
+	type KnowledgeSkillCategory,
+	type SkillGroupName,
+	type Contact,
+	type CharacterWeapon,
+	type WeaponType,
+	type CharacterArmor,
+	type CharacterCyberware,
+	type CharacterGear,
+	type CharacterLifestyle,
+	type CharacterMagic,
+	type CharacterResonance,
+	type CharacterSpell,
+	type CharacterPower,
+	type CyberwareGrade,
+	createEmptyCharacter
 } from '$types';
-import { createEmptyCharacter } from '$types';
 
 /** Import summary statistics. */
 export interface ImportSummary {

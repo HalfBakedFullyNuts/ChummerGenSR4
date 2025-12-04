@@ -1,5 +1,18 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	/**
+	 * Dice Roller Component
+	 * =====================
+	 * Integrated dice roller for Shadowrun 4th Edition.
+	 * Rolls d6 pools, counts hits, tracks glitches, and maintains history.
+	 */
+
+	import { onMount, createEventDispatcher } from 'svelte';
+	import {
+		rollDicePool,
+		type RollResult,
+		expectedHits,
+		glitchProbability
+	} from '$lib/utils/dice';
 
 	/** Number of dice to roll. */
 	export let dicePool = 6;
@@ -13,89 +26,119 @@
 	/** Compact display mode. */
 	export let compact = false;
 
+	/** Show roll history. */
+	export let showHistory = true;
+
 	/** Dispatch events. */
 	const dispatch = createEventDispatcher<{
 		roll: { results: RollResult };
 	}>();
 
-	/** Roll result type. */
-	interface RollResult {
-		dice: number[];
-		hits: number;
-		ones: number;
-		isGlitch: boolean;
-		isCriticalGlitch: boolean;
-		edgeUsed: boolean;
-		pool: number;
+	/** Roll history entry. */
+	interface RollHistoryEntry {
+		id: string;
+		timestamp: Date;
+		result: RollResult;
+		label: string;
 	}
 
 	/** Last roll results. */
 	let lastRoll: RollResult | null = null;
 
+	/** Roll history. */
+	let history: RollHistoryEntry[] = [];
+
+	/** Maximum history entries. */
+	const MAX_HISTORY = 20;
+
 	/** Animation state. */
 	let rolling = false;
 
-	/** Roll a single d6. */
-	function rollD6(): number {
-		return Math.floor(Math.random() * 6) + 1;
-	}
+	/** Common roll shortcuts. */
+	const shortcuts = [
+		{ label: '4', pool: 4 },
+		{ label: '6', pool: 6 },
+		{ label: '8', pool: 8 },
+		{ label: '10', pool: 10 },
+		{ label: '12', pool: 12 },
+		{ label: '15', pool: 15 }
+	];
+
+	onMount(() => {
+		loadHistory();
+	});
 
 	/** Roll the dice pool. */
-	function roll(): void {
+	function roll(label?: string): void {
 		rolling = true;
 
 		setTimeout(() => {
-			const dice: number[] = [];
-			let extraDice = 0;
+			const result = rollDicePool({
+				pool: dicePool,
+				edge: useEdge,
+				threshold
+			});
 
-			// Roll initial pool
-			for (let i = 0; i < dicePool; i++) {
-				const result = rollD6();
-				dice.push(result);
+			lastRoll = result;
 
-				// Edge: 6s explode (roll again)
-				if (useEdge && result === 6) {
-					extraDice++;
-				}
+			/* Add to history */
+			if (showHistory) {
+				const entry: RollHistoryEntry = {
+					id: crypto.randomUUID(),
+					timestamp: new Date(),
+					result,
+					label: label || `${dicePool}d6${useEdge ? ' (Edge)' : ''}`
+				};
+
+				history = [entry, ...history.slice(0, MAX_HISTORY - 1)];
+				saveHistory();
 			}
 
-			// Roll exploding dice
-			while (extraDice > 0) {
-				const result = rollD6();
-				dice.push(result);
-				extraDice--;
-
-				if (useEdge && result === 6) {
-					extraDice++;
-				}
-			}
-
-			// Count results
-			const hits = dice.filter(d => d >= threshold).length;
-			const ones = dice.filter(d => d === 1).length;
-
-			// Glitch: more than half are 1s
-			const isGlitch = ones > dice.length / 2;
-			const isCriticalGlitch = isGlitch && hits === 0;
-
-			lastRoll = {
-				dice,
-				hits,
-				ones,
-				isGlitch,
-				isCriticalGlitch,
-				edgeUsed: useEdge,
-				pool: dicePool
-			};
-
-			dispatch('roll', { results: lastRoll });
+			dispatch('roll', { results: result });
 			rolling = false;
 		}, 300);
+	}
+
+	/** Quick roll with specific pool. */
+	function quickRoll(pool: number): void {
+		dicePool = pool;
+		roll(`Quick ${pool}d6`);
 	}
 
 	/** Quick adjustment buttons. */
 	function adjustPool(delta: number): void {
 		dicePool = Math.max(1, Math.min(30, dicePool + delta));
+	}
+
+	/** Clear history. */
+	function clearHistory(): void {
+		history = [];
+		saveHistory();
+	}
+
+	/** Load history from localStorage. */
+	function loadHistory(): void {
+		try {
+			const stored = localStorage.getItem('chummer-dice-history');
+			if (stored) {
+				const parsed = JSON.parse(stored);
+				history = parsed.map((e: RollHistoryEntry) => ({
+					...e,
+					timestamp: new Date(e.timestamp)
+				}));
+			}
+		} catch {
+			history = [];
+		}
+	}
+
+	/** Save history to localStorage. */
+	function saveHistory(): void {
+		try {
+			localStorage.setItem('chummer-dice-history', JSON.stringify(history));
+		} catch {
+			/* Ignore storage errors */
+		}
 	}
 
 	/** Get die face display. */
@@ -110,6 +153,20 @@
 		if (value === 1) return 'text-accent-danger';
 		return 'text-secondary-text';
 	}
+
+	/** Format timestamp. */
+	function formatTime(date: Date): string {
+		return date.toLocaleTimeString(undefined, {
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+	}
+
+	/** Calculate expected hits for current pool. */
+	$: expectedHitsValue = expectedHits(dicePool, threshold).toFixed(1);
+
+	/** Calculate glitch probability for current pool. */
+	$: glitchProb = (glitchProbability(dicePool) * 100).toFixed(1);
 </script>
 
 <div class="cw-card {compact ? 'p-3' : 'p-4'}">
@@ -155,12 +212,32 @@
 
 		<button
 			class="cw-btn cw-btn-primary flex-1 md:flex-none md:px-8"
-			on:click={roll}
+			on:click={() => roll()}
 			disabled={rolling}
 		>
 			{rolling ? 'Rolling...' : 'Roll'}
 		</button>
 	</div>
+
+	<!-- Stats & Shortcuts -->
+	{#if !compact}
+		<div class="flex items-center justify-between mb-4">
+			<div class="flex gap-4 text-xs text-muted-text">
+				<span>Expected: <span class="text-accent-cyan font-mono">{expectedHitsValue}</span></span>
+				<span>Glitch: <span class="text-accent-warning font-mono">{glitchProb}%</span></span>
+			</div>
+			<div class="flex gap-1">
+				{#each shortcuts as shortcut}
+					<button
+						class="px-2 py-1 rounded text-xs bg-surface-light text-secondary-text hover:bg-surface-lighter transition-colors"
+						on:click={() => quickRoll(shortcut.pool)}
+					>
+						{shortcut.label}d6
+					</button>
+				{/each}
+			</div>
+		</div>
+	{/if}
 
 	<!-- Results -->
 	{#if lastRoll}
@@ -218,6 +295,43 @@
 					[{lastRoll.dice.join(', ')}]
 				</div>
 			</details>
+		</div>
+	{/if}
+
+	<!-- History -->
+	{#if showHistory && !compact && history.length > 0}
+		<div class="mt-4 pt-4 border-t border-border">
+			<div class="flex items-center justify-between mb-2">
+				<span class="text-xs text-muted-text uppercase tracking-wide">Roll History</span>
+				<button
+					class="text-xs text-accent-danger hover:underline"
+					on:click={clearHistory}
+				>
+					Clear
+				</button>
+			</div>
+			<div class="max-h-32 overflow-y-auto space-y-1">
+				{#each history as entry}
+					<div class="flex items-center justify-between p-2 bg-surface-light rounded text-sm">
+						<div class="flex items-center gap-2">
+							<span class="text-xs text-muted-text font-mono">
+								{formatTime(entry.timestamp)}
+							</span>
+							<span class="text-secondary-text">{entry.label}</span>
+						</div>
+						<div class="flex items-center gap-2">
+							<span class="font-mono font-bold text-accent-success">
+								{entry.result.hits}
+							</span>
+							{#if entry.result.isCriticalGlitch}
+								<span class="text-xs px-1 rounded bg-accent-danger/20 text-accent-danger font-bold">CG!</span>
+							{:else if entry.result.isGlitch}
+								<span class="text-xs px-1 rounded bg-accent-warning/20 text-accent-warning">G</span>
+							{/if}
+						</div>
+					</div>
+				{/each}
+			</div>
 		</div>
 	{/if}
 </div>
