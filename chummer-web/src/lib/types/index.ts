@@ -110,6 +110,8 @@ export type {
 	CharacterEquipment
 } from './equipment';
 
+export type { BiowareGradeMultiplier } from './equipment';
+
 export {
 	CYBERWARE_GRADES,
 	BIOWARE_GRADES,
@@ -120,5 +122,18 @@ export {
 	calculateBiowareEssenceCost,
 	calculateTotalEssenceCost,
 	bpToNuyen,
-	nuyenToBp
+	nuyenToBp,
+	getCyberwareGradeMultiplier,
+	getBiowareGradeMultiplier
 } from './equipment';
+
+/* Result types for async operations */
+export type { Result } from './result';
+
+export {
+	success,
+	failure,
+	getErrorMessage,
+	wrapAsync,
+	wrapSync
+} from './result';

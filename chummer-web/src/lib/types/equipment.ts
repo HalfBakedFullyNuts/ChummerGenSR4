@@ -186,6 +186,12 @@ export const CYBERWARE_GRADES: readonly CyberwareGradeMultiplier[] = [
 	{ name: 'Used', essMultiplier: 1.2, costMultiplier: 0.5, availModifier: -1 }
 ] as const;
 
+/** Get cyberware grade multipliers by grade name. */
+export function getCyberwareGradeMultiplier(grade: CyberwareGrade): CyberwareGradeMultiplier {
+	const found = CYBERWARE_GRADES.find((g) => g.name === grade);
+	return found ?? CYBERWARE_GRADES[0];
+}
+
 /** Game data cyberware definition. */
 export interface GameCyberware {
 	readonly name: string;
@@ -244,6 +250,19 @@ export const BIOWARE_GRADES = [
 	{ name: 'Standard', essMultiplier: 1.0, costMultiplier: 1 },
 	{ name: 'Cultured', essMultiplier: 0.75, costMultiplier: 4 }
 ] as const;
+
+/** Bioware grade multiplier type. */
+export interface BiowareGradeMultiplier {
+	readonly name: BiowareGrade;
+	readonly essMultiplier: number;
+	readonly costMultiplier: number;
+}
+
+/** Get bioware grade multipliers by grade name. */
+export function getBiowareGradeMultiplier(grade: BiowareGrade): BiowareGradeMultiplier {
+	const found = BIOWARE_GRADES.find((g) => g.name === grade);
+	return found ?? BIOWARE_GRADES[0];
+}
 
 /** Bioware installed on a character. */
 export interface CharacterBioware {

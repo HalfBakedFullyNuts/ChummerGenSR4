@@ -11,13 +11,10 @@ import {
 	type User
 } from 'firebase/auth';
 import { getAuthInstance } from './config';
+import { type Result, success, failure, getErrorMessage } from '$types';
 
-/** Result type for auth operations. */
-interface AuthResult {
-	success: boolean;
-	error?: string;
-	user?: User;
-}
+/** Result type for auth operations (extends base Result with user). */
+export type AuthResult = Result<User>;
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -31,13 +28,12 @@ export async function signInWithGoogle(): Promise<AuthResult> {
 		const result = await signInWithPopup(auth, googleProvider);
 
 		if (!result.user) {
-			return { success: false, error: 'No user returned from sign-in' };
+			return failure('No user returned from sign-in');
 		}
 
-		return { success: true, user: result.user };
+		return success(result.user);
 	} catch (error) {
-		const message = error instanceof Error ? error.message : 'Sign-in failed';
-		return { success: false, error: message };
+		return failure(getErrorMessage(error));
 	}
 }
 
@@ -45,14 +41,13 @@ export async function signInWithGoogle(): Promise<AuthResult> {
  * Sign out current user.
  * Returns success status and error message if failed.
  */
-export async function signOutUser(): Promise<AuthResult> {
+export async function signOutUser(): Promise<Result> {
 	try {
 		const auth = getAuthInstance();
 		await signOut(auth);
-		return { success: true };
+		return success();
 	} catch (error) {
-		const message = error instanceof Error ? error.message : 'Sign-out failed';
-		return { success: false, error: message };
+		return failure(getErrorMessage(error));
 	}
 }
 

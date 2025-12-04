@@ -33,7 +33,9 @@ import {
 	type BiowareGrade,
 	type ExpenseEntry,
 	bpToNuyen,
-	createEmptyCharacter
+	createEmptyCharacter,
+	getCyberwareGradeMultiplier,
+	getBiowareGradeMultiplier
 } from '$types';
 import {
 	findMetatype,
@@ -1275,18 +1277,10 @@ export function addCyberware(
 	const char = get(characterStore);
 	if (!char) return;
 
-	/* Get grade multipliers */
-	const gradeMultipliers: Record<CyberwareGrade, { ess: number; cost: number }> = {
-		'Standard': { ess: 1.0, cost: 1 },
-		'Alphaware': { ess: 0.8, cost: 2 },
-		'Betaware': { ess: 0.7, cost: 4 },
-		'Deltaware': { ess: 0.5, cost: 10 },
-		'Used': { ess: 1.2, cost: 0.5 }
-	};
-
-	const multiplier = gradeMultipliers[grade];
-	const essenceCost = cyber.ess * multiplier.ess;
-	const nuyenCost = Math.floor(cyber.cost * multiplier.cost);
+	/* Get grade multipliers from centralized type definitions */
+	const multiplier = getCyberwareGradeMultiplier(grade);
+	const essenceCost = cyber.ess * multiplier.essMultiplier;
+	const nuyenCost = Math.floor(cyber.cost * multiplier.costMultiplier);
 
 	/* Check if we have enough nuyen and essence */
 	if (char.nuyen < nuyenCost) return;
@@ -1367,15 +1361,10 @@ export function addBioware(
 	const char = get(characterStore);
 	if (!char) return;
 
-	/* Get grade multipliers */
-	const gradeMultipliers: Record<BiowareGrade, { ess: number; cost: number }> = {
-		'Standard': { ess: 1.0, cost: 1 },
-		'Cultured': { ess: 0.75, cost: 4 }
-	};
-
-	const multiplier = gradeMultipliers[grade];
-	const essenceCost = bio.ess * multiplier.ess * rating;
-	const nuyenCost = Math.floor(bio.cost * multiplier.cost * rating);
+	/* Get grade multipliers from centralized type definitions */
+	const multiplier = getBiowareGradeMultiplier(grade);
+	const essenceCost = bio.ess * multiplier.essMultiplier * rating;
+	const nuyenCost = Math.floor(bio.cost * multiplier.costMultiplier * rating);
 
 	/* Check if we have enough nuyen and essence */
 	if (char.nuyen < nuyenCost) return;
