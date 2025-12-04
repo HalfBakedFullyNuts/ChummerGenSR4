@@ -29,11 +29,36 @@ import type {
 } from '$types';
 import { createEmptyCharacter } from '$types';
 
+/** Import summary statistics. */
+export interface ImportSummary {
+	readonly metatype: string;
+	readonly buildPoints: number;
+	readonly buildMethod: string;
+	readonly attributeCount: number;
+	readonly skillCount: number;
+	readonly knowledgeSkillCount: number;
+	readonly qualityCount: number;
+	readonly positiveQualityBP: number;
+	readonly negativeQualityBP: number;
+	readonly contactCount: number;
+	readonly weaponCount: number;
+	readonly armorCount: number;
+	readonly cyberwareCount: number;
+	readonly gearCount: number;
+	readonly spellCount: number;
+	readonly powerCount: number;
+	readonly nuyen: number;
+	readonly karma: number;
+	readonly status: 'creation' | 'career';
+	readonly warnings: string[];
+}
+
 /** Result of import operation. */
 export interface ImportResult {
 	success: boolean;
 	error?: string;
 	character?: Character;
+	summary?: ImportSummary;
 }
 
 /**
@@ -58,11 +83,63 @@ export function importFromChummer(xmlString: string, userId: string): ImportResu
 		}
 
 		const character = parseCharacter(charData, userId);
-		return { success: true, character };
+		const summary = generateImportSummary(character);
+
+		return { success: true, character, summary };
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'Failed to parse XML';
 		return { success: false, error: message };
 	}
+}
+
+/**
+ * Generate import summary from parsed character.
+ */
+function generateImportSummary(char: Character): ImportSummary {
+	const warnings: string[] = [];
+
+	/* Check for potential issues */
+	if (!char.identity.name) {
+		warnings.push('Character has no name');
+	}
+	if (!char.identity.metatype) {
+		warnings.push('Character has no metatype');
+	}
+	if (char.skills.length === 0) {
+		warnings.push('No active skills imported');
+	}
+	if (char.qualities.length === 0) {
+		warnings.push('No qualities imported');
+	}
+	if (char.equipment.weapons.length === 0 && char.equipment.armor.length === 0) {
+		warnings.push('No weapons or armor imported');
+	}
+
+	const positiveQualities = char.qualities.filter(q => q.category === 'Positive');
+	const negativeQualities = char.qualities.filter(q => q.category === 'Negative');
+
+	return {
+		metatype: char.identity.metatype || 'Unknown',
+		buildPoints: char.buildPoints,
+		buildMethod: char.buildMethod === 'karma' ? 'Karma' : 'Build Points',
+		attributeCount: 8, /* Standard 8 attributes */
+		skillCount: char.skills.length,
+		knowledgeSkillCount: char.knowledgeSkills.length,
+		qualityCount: char.qualities.length,
+		positiveQualityBP: positiveQualities.reduce((sum, q) => sum + q.bp, 0),
+		negativeQualityBP: negativeQualities.reduce((sum, q) => sum + Math.abs(q.bp), 0),
+		contactCount: char.contacts.length,
+		weaponCount: char.equipment.weapons.length,
+		armorCount: char.equipment.armor.length,
+		cyberwareCount: char.equipment.cyberware.length,
+		gearCount: char.equipment.gear.length,
+		spellCount: char.magic?.spells.length || 0,
+		powerCount: char.magic?.powers.length || 0,
+		nuyen: char.nuyen,
+		karma: char.karma,
+		status: char.status,
+		warnings
+	};
 }
 
 /**
