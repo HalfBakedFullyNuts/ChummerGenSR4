@@ -1037,7 +1037,7 @@ export function addArmor(armor: GameArmor): void {
 		impact: armor.impact,
 		capacity: armor.capacity,
 		capacityUsed: 0,
-		equipped: false,
+		equipped: true,
 		cost: armor.cost,
 		modifications: [],
 		notes: ''
@@ -1077,6 +1077,219 @@ export function removeArmor(armorId: string): void {
 	};
 
 	characterStore.set(updated);
+}
+
+/**
+ * Add an accessory to a weapon.
+ */
+export function addWeaponAccessory(
+	weaponId: string,
+	accessory: { name: string; mount: string; cost: number }
+): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) return { success: false, error: 'No character loaded' };
+
+	const weapon = char.equipment.weapons.find((w) => w.id === weaponId);
+	if (!weapon) return { success: false, error: 'Weapon not found' };
+
+	if (char.nuyen < accessory.cost) {
+		return { success: false, error: `Not enough nuyen. Need ${accessory.cost}¥` };
+	}
+
+	const newAccessory = {
+		id: generateId(),
+		name: accessory.name,
+		mount: accessory.mount,
+		cost: accessory.cost
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			weapons: char.equipment.weapons.map((w) =>
+				w.id === weaponId
+					? { ...w, accessories: [...w.accessories, newAccessory] }
+					: w
+			)
+		},
+		nuyen: char.nuyen - accessory.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+	return { success: true };
+}
+
+/**
+ * Remove an accessory from a weapon.
+ */
+export function removeWeaponAccessory(
+	weaponId: string,
+	accessoryId: string
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const weapon = char.equipment.weapons.find((w) => w.id === weaponId);
+	if (!weapon) return;
+
+	const accessory = weapon.accessories.find((a) => a.id === accessoryId);
+	if (!accessory) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			weapons: char.equipment.weapons.map((w) =>
+				w.id === weaponId
+					? { ...w, accessories: w.accessories.filter((a) => a.id !== accessoryId) }
+					: w
+			)
+		},
+		nuyen: char.nuyen + accessory.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Toggle armor equipped status.
+ */
+export function toggleArmorEquipped(armorId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			armor: char.equipment.armor.map((a) =>
+				a.id === armorId ? { ...a, equipped: !a.equipped } : a
+			)
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Add a modification to armor.
+ */
+export function addArmorModification(
+	armorId: string,
+	mod: { name: string; rating: number; cost: number; capacityCost: number }
+): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) return { success: false, error: 'No character loaded' };
+
+	const armor = char.equipment.armor.find((a) => a.id === armorId);
+	if (!armor) return { success: false, error: 'Armor not found' };
+
+	const currentCapacity = armor.modifications?.reduce((sum, m) => sum + m.capacityCost, 0) ?? 0;
+	if (currentCapacity + mod.capacityCost > armor.capacity) {
+		return { success: false, error: 'Not enough capacity' };
+	}
+
+	if (char.nuyen < mod.cost) {
+		return { success: false, error: `Not enough nuyen. Need ${mod.cost}¥` };
+	}
+
+	const newMod = {
+		id: generateId(),
+		name: mod.name,
+		rating: mod.rating,
+		cost: mod.cost,
+		capacityCost: mod.capacityCost
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			armor: char.equipment.armor.map((a) =>
+				a.id === armorId
+					? { ...a, modifications: [...(a.modifications || []), newMod] }
+					: a
+			)
+		},
+		nuyen: char.nuyen - mod.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+	return { success: true };
+}
+
+/**
+ * Remove a modification from armor.
+ */
+export function removeArmorModification(armorId: string, modId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const armor = char.equipment.armor.find((a) => a.id === armorId);
+	if (!armor) return;
+
+	const mod = armor.modifications?.find((m) => m.id === modId);
+	if (!mod) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			armor: char.equipment.armor.map((a) =>
+				a.id === armorId
+					? { ...a, modifications: a.modifications?.filter((m) => m.id !== modId) || [] }
+					: a
+			)
+		},
+		nuyen: char.nuyen + mod.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Calculate total armor value using SR4 stacking rules.
+ * Primary armor + half of highest secondary armor (rounded down).
+ * Also calculates encumbrance penalty.
+ */
+export function calculateTotalArmor(): {
+	ballistic: number;
+	impact: number;
+	encumbrance: number;
+} {
+	const char = get(characterStore);
+	if (!char) return { ballistic: 0, impact: 0, encumbrance: 0 };
+
+	const equippedArmor = char.equipment.armor.filter((a) => a.equipped);
+	if (equippedArmor.length === 0) return { ballistic: 0, impact: 0, encumbrance: 0 };
+
+	/* Sort by ballistic rating to find primary */
+	const sorted = [...equippedArmor].sort((a, b) => b.ballistic - a.ballistic);
+	const primary = sorted[0];
+	const secondary = sorted[1];
+
+	let ballistic = primary.ballistic;
+	let impact = primary.impact;
+
+	/* Add half of secondary armor if present */
+	if (secondary) {
+		ballistic += Math.floor(secondary.ballistic / 2);
+		impact += Math.floor(secondary.impact / 2);
+	}
+
+	/* Calculate encumbrance: penalty if total armor > BOD */
+	const bodAttr = char.attributes.bod;
+	const body = bodAttr ? bodAttr.base + bodAttr.bonus : 3;
+	const totalArmor = ballistic;
+	const encumbrance = Math.max(0, totalArmor - body);
+
+	return { ballistic, impact, encumbrance };
 }
 
 /**

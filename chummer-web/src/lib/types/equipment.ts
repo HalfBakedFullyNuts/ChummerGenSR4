@@ -136,7 +136,7 @@ export interface ArmorModification {
 	readonly id: string;
 	readonly name: string;
 	readonly rating: number;
-	readonly capacity: number;
+	readonly capacityCost: number;
 	readonly cost: number;
 }
 
