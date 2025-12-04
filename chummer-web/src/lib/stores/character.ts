@@ -42,6 +42,7 @@ import {
 	type GameVehicle,
 	type GameMartialArt
 } from './gamedata';
+import { calculateArmorTotals, type ArmorTotals } from '$lib/engine/calculations';
 
 /** Maximum BP for standard character creation. */
 const MAX_BP = 400;
@@ -1255,41 +1256,12 @@ export function removeArmorModification(armorId: string, modId: string): void {
 
 /**
  * Calculate total armor value using SR4 stacking rules.
- * Primary armor + half of highest secondary armor (rounded down).
- * Also calculates encumbrance penalty.
+ * Delegates to calculations engine for DRY compliance.
  */
-export function calculateTotalArmor(): {
-	ballistic: number;
-	impact: number;
-	encumbrance: number;
-} {
+export function calculateTotalArmor(): ArmorTotals {
 	const char = get(characterStore);
 	if (!char) return { ballistic: 0, impact: 0, encumbrance: 0 };
-
-	const equippedArmor = char.equipment.armor.filter((a) => a.equipped);
-	if (equippedArmor.length === 0) return { ballistic: 0, impact: 0, encumbrance: 0 };
-
-	/* Sort by ballistic rating to find primary */
-	const sorted = [...equippedArmor].sort((a, b) => b.ballistic - a.ballistic);
-	const primary = sorted[0];
-	const secondary = sorted[1];
-
-	let ballistic = primary.ballistic;
-	let impact = primary.impact;
-
-	/* Add half of secondary armor if present */
-	if (secondary) {
-		ballistic += Math.floor(secondary.ballistic / 2);
-		impact += Math.floor(secondary.impact / 2);
-	}
-
-	/* Calculate encumbrance: penalty if total armor > BOD */
-	const bodAttr = char.attributes.bod;
-	const body = bodAttr ? bodAttr.base + bodAttr.bonus : 3;
-	const totalArmor = ballistic;
-	const encumbrance = Math.max(0, totalArmor - body);
-
-	return { ballistic, impact, encumbrance };
+	return calculateArmorTotals(char);
 }
 
 /**

@@ -308,6 +308,36 @@ export function calculateArmorImpact(char: Character): number {
 	return total;
 }
 
+/**
+ * Calculate armor encumbrance penalty.
+ * SR4 p.160 - If total Ballistic armor exceeds BOD, apply penalty to AGI and REA.
+ */
+export function calculateArmorEncumbrance(char: Character): number {
+	const ballistic = calculateArmorBallistic(char);
+	const body = getAttributeTotal(char, 'bod');
+	return Math.max(0, ballistic - body);
+}
+
+/** Combined armor values with SR4 stacking rules and encumbrance. */
+export interface ArmorTotals {
+	ballistic: number;
+	impact: number;
+	encumbrance: number;
+}
+
+/**
+ * Calculate all armor values at once.
+ * Uses SR4 stacking rules: Primary armor + half of secondary (rounded down).
+ * Includes encumbrance calculation.
+ */
+export function calculateArmorTotals(char: Character): ArmorTotals {
+	return {
+		ballistic: calculateArmorBallistic(char),
+		impact: calculateArmorImpact(char),
+		encumbrance: calculateArmorEncumbrance(char)
+	};
+}
+
 /* ============================================
  * Magic Values
  * ============================================ */
@@ -394,6 +424,7 @@ export interface CharacterCalculations {
 	defense: number;
 	armorBallistic: number;
 	armorImpact: number;
+	armorEncumbrance: number;
 
 	// Special Attributes
 	composure: number;
@@ -432,6 +463,7 @@ export function calculateAll(char: Character): CharacterCalculations {
 		defense: calculateDefense(char),
 		armorBallistic: calculateArmorBallistic(char),
 		armorImpact: calculateArmorImpact(char),
+		armorEncumbrance: calculateArmorEncumbrance(char),
 
 		composure: calculateComposure(char),
 		judgeIntentions: calculateJudgeIntentions(char),

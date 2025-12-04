@@ -6,7 +6,7 @@
 	 * Adds interactive damage tracking for condition monitors.
 	 */
 
-	import { character, calculateTotalArmor } from '$stores/character';
+	import { character } from '$stores/character';
 	import {
 		calculatePhysicalCM,
 		calculateStunCM,
@@ -21,6 +21,7 @@
 		calculateJudgeIntentions,
 		calculateMemory,
 		calculateLiftCarry,
+		calculateArmorTotals,
 		getAttributeTotal
 	} from '$lib/engine/calculations';
 
@@ -62,8 +63,8 @@
 	$: liftCarry = $character ? calculateLiftCarry($character) : 6;
 	$: memory = $character ? calculateMemory($character) : 6;
 
-	/** Armor from character store (includes encumbrance not in engine). */
-	$: armorTotals = calculateTotalArmor();
+	/** Armor from calculations engine (with SR4 stacking and encumbrance). */
+	$: armorTotals = $character ? calculateArmorTotals($character) : { ballistic: 0, impact: 0, encumbrance: 0 };
 
 	/** Wound modifier calculation (local, based on tracked damage). */
 	function getWoundModifier(damage: number): number {
