@@ -2,117 +2,84 @@
 	/**
 	 * Combat Stats Calculator Component
 	 * ==================================
-	 * Calculates and displays combat-relevant stats including:
-	 * - Initiative
-	 * - Movement rates
-	 * - Wound modifiers
-	 * - Condition monitors
-	 * - Defense pools
+	 * Displays combat-relevant stats using the calculations engine.
+	 * Adds interactive damage tracking for condition monitors.
 	 */
 
 	import { character, calculateTotalArmor } from '$stores/character';
+	import {
+		calculatePhysicalCM,
+		calculateStunCM,
+		calculateOverflow,
+		calculateInitiative,
+		calculateInitiativeDice,
+		calculateInitiativeBonus,
+		calculateWalkSpeed,
+		calculateRunSpeed,
+		calculateDefense,
+		calculateComposure,
+		calculateJudgeIntentions,
+		calculateMemory,
+		calculateLiftCarry,
+		getAttributeTotal
+	} from '$lib/engine/calculations';
 
-	/** Physical damage taken. */
+	/** Physical damage taken (local state for tracking). */
 	export let physicalDamage = 0;
 
-	/** Stun damage taken. */
+	/** Stun damage taken (local state for tracking). */
 	export let stunDamage = 0;
 
-	/** Helper to get attribute total (base + bonus). */
-	function getAttr(attr: { base: number; bonus: number } | null | undefined, fallback: number): number {
-		if (!attr) return fallback;
-		return attr.base + attr.bonus;
-	}
+	/** Condition monitors - use engine calculations when character exists. */
+	$: physicalConditionMonitor = $character ? calculatePhysicalCM($character) : 9;
+	$: stunConditionMonitor = $character ? calculateStunCM($character) : 9;
+	$: overflowBoxes = $character ? calculateOverflow($character) : 3;
 
-	/** Raw attributes from character. */
-	$: rawAttrs = $character?.attributes;
+	/** Initiative values from engine. */
+	$: initiative = $character ? calculateInitiative($character) + calculateInitiativeBonus($character) : 6;
+	$: initiativePasses = $character ? calculateInitiativeDice($character) : 1;
 
-	/** Computed attribute values. */
-	$: attributes = {
-		bod: rawAttrs ? getAttr(rawAttrs.bod, 3) : 3,
-		agi: rawAttrs ? getAttr(rawAttrs.agi, 3) : 3,
-		rea: rawAttrs ? getAttr(rawAttrs.rea, 3) : 3,
-		str: rawAttrs ? getAttr(rawAttrs.str, 3) : 3,
-		cha: rawAttrs ? getAttr(rawAttrs.cha, 3) : 3,
-		int: rawAttrs ? getAttr(rawAttrs.int, 3) : 3,
-		log: rawAttrs ? getAttr(rawAttrs.log, 3) : 3,
-		wil: rawAttrs ? getAttr(rawAttrs.wil, 3) : 3,
-		edg: rawAttrs ? getAttr(rawAttrs.edg, 2) : 2,
-		ess: rawAttrs?.ess ?? 6,
-		mag: rawAttrs ? getAttr(rawAttrs.mag, 0) : 0,
-		res: rawAttrs ? getAttr(rawAttrs.res, 0) : 0,
-		ip: 1 // Initiative passes - augmented by cyberware/magic
-	};
+	/** Movement from engine. */
+	$: walkingRate = $character ? calculateWalkSpeed($character) : 6;
+	$: runningRate = $character ? calculateRunSpeed($character) : 12;
+	$: sprintingRate = runningRate; /* +2m per hit on Running test */
 
-	/** Calculate initiative. */
-	$: initiative = attributes.rea + attributes.int;
+	/** Swimming/climbing (not in engine, calculate here). */
+	$: swimmingRate = $character
+		? Math.ceil((getAttributeTotal($character, 'agi') + getAttributeTotal($character, 'str')) / 2)
+		: 3;
+	$: climbingRate = $character
+		? Math.ceil(getAttributeTotal($character, 'agi') / 2)
+		: 2;
 
-	/** Initiative passes (base is 1, augmented by cyberware/magic). */
-	$: initiativePasses = attributes.ip || 1;
+	/** Defense from engine. */
+	$: defensePool = $character ? calculateDefense($character) : 6;
+	$: dodgeEstimate = $character ? getAttributeTotal($character, 'rea') : 3;
 
-	/** Calculate physical condition monitor boxes. */
-	$: physicalConditionMonitor = 8 + Math.ceil(attributes.bod / 2);
+	/** Derived stats from engine. */
+	$: composure = $character ? calculateComposure($character) : 6;
+	$: judgeIntentions = $character ? calculateJudgeIntentions($character) : 6;
+	$: liftCarry = $character ? calculateLiftCarry($character) : 6;
+	$: memory = $character ? calculateMemory($character) : 6;
 
-	/** Calculate stun condition monitor boxes. */
-	$: stunConditionMonitor = 8 + Math.ceil(attributes.wil / 2);
+	/** Armor from character store (includes encumbrance not in engine). */
+	$: armorTotals = calculateTotalArmor();
 
-	/** Calculate overflow boxes (BOD). */
-	$: overflowBoxes = attributes.bod;
-
-	/** Calculate wound modifier based on damage taken. */
-	function getWoundModifier(damage: number, boxes: number): number {
+	/** Wound modifier calculation (local, based on tracked damage). */
+	function getWoundModifier(damage: number): number {
 		if (damage <= 0) return 0;
-		/* Every 3 boxes of damage = -1 modifier */
 		return -Math.floor(damage / 3);
 	}
 
-	/** Physical wound modifier. */
-	$: physicalWoundModifier = getWoundModifier(physicalDamage, physicalConditionMonitor);
-
-	/** Stun wound modifier. */
-	$: stunWoundModifier = getWoundModifier(stunDamage, stunConditionMonitor);
-
-	/** Total wound modifier (cumulative). */
+	$: physicalWoundModifier = getWoundModifier(physicalDamage);
+	$: stunWoundModifier = getWoundModifier(stunDamage);
 	$: totalWoundModifier = physicalWoundModifier + stunWoundModifier;
-
-	/** Movement rates (in meters). */
-	$: walkingRate = attributes.agi * 2;
-	$: runningRate = attributes.agi * 4;
-	$: sprintingRate = attributes.agi * 4; /* +2m per hit on Running test */
-
-	/** Swimming rate. */
-	$: swimmingRate = Math.ceil((attributes.agi + attributes.str) / 2);
-
-	/** Climbing rate. */
-	$: climbingRate = Math.ceil(attributes.agi / 2);
-
-	/** Armor values. */
-	$: armorTotals = calculateTotalArmor();
-
-	/** Defense pool (REA + INT, modified by wounds). */
-	$: defensePool = Math.max(0, attributes.rea + attributes.int + totalWoundModifier);
-
-	/** Dodge pool (REA + Dodge skill, but we'll use REA + AGI as estimate without skill). */
-	$: dodgeEstimate = Math.max(0, attributes.rea + totalWoundModifier);
-
-	/** Composure (CHA + WIL). */
-	$: composure = attributes.cha + attributes.wil;
-
-	/** Judge Intentions (CHA + INT). */
-	$: judgeIntentions = attributes.cha + attributes.int;
-
-	/** Lifting/Carrying (STR + BOD). */
-	$: liftCarry = attributes.str + attributes.bod;
-
-	/** Memory (LOG + WIL). */
-	$: memory = attributes.log + attributes.wil;
 
 	/** Update damage. */
 	function addDamage(type: 'physical' | 'stun', amount: number): void {
 		if (type === 'physical') {
 			physicalDamage = Math.min(physicalConditionMonitor + overflowBoxes, Math.max(0, physicalDamage + amount));
 		} else {
-			/* Stun overflow converts to physical */
 			const newStun = stunDamage + amount;
 			if (newStun > stunConditionMonitor) {
 				const overflow = newStun - stunConditionMonitor;
@@ -124,13 +91,11 @@
 		}
 	}
 
-	/** Reset damage. */
 	function resetDamage(): void {
 		physicalDamage = 0;
 		stunDamage = 0;
 	}
 
-	/** Get status based on damage. */
 	function getStatus(): { label: string; color: string } {
 		if (physicalDamage >= physicalConditionMonitor + overflowBoxes) {
 			return { label: 'Dead', color: 'text-gray-500' };
@@ -152,7 +117,6 @@
 
 	$: status = getStatus();
 
-	/** Render condition monitor boxes. */
 	function getBoxes(filled: number, total: number, overflow = 0): { filled: boolean; overflow: boolean }[] {
 		const boxes: { filled: boolean; overflow: boolean }[] = [];
 		for (let i = 0; i < total; i++) {
@@ -306,12 +270,12 @@
 			</div>
 			<div>
 				<div class="text-xs text-muted-text">Defense</div>
-				<div class="text-xl font-mono text-accent-success">{defensePool}</div>
+				<div class="text-xl font-mono text-accent-success">{Math.max(0, defensePool + totalWoundModifier)}</div>
 				<div class="text-xs text-muted-text">REA + INT</div>
 			</div>
 			<div>
 				<div class="text-xs text-muted-text">Dodge</div>
-				<div class="text-xl font-mono text-primary-text">{dodgeEstimate}+</div>
+				<div class="text-xl font-mono text-primary-text">{Math.max(0, dodgeEstimate + totalWoundModifier)}+</div>
 				<div class="text-xs text-muted-text">+ Dodge skill</div>
 			</div>
 		</div>
