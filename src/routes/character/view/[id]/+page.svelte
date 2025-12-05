@@ -1,0 +1,768 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { loadSavedCharacter, character, updateCondition, updateEdge, setAmmo, reloadWeapon, spendAmmo } from '$stores';
+	import { gameData, loadGameData } from '$stores/gamedata';
+	import {
+		CharacterSheet,
+		CombatTracker,
+		DiceRoller,
+		CombatModifiersPanel,
+		MatrixPanel,
+		VehiclePanel,
+		MagicPanel,
+		TechnomancerPanel,
+		CareerAdvancement
+	} from '$lib/components';
+	import { rollInitiative } from '$lib/utils/dice';
+
+	/** Roll history entry type. */
+	interface RollHistoryEntry {
+		id: number;
+		timestamp: Date;
+		testName: string;
+		pool: number;
+		hits: number;
+		isGlitch: boolean;
+		isCriticalGlitch: boolean;
+		edgeUsed: boolean;
+		dice: number[];
+	}
+
+	/** Show dice roller panel. */
+	let showDiceRoller = false;
+
+	/** Show roll history panel. */
+	let showRollHistory = false;
+
+	/** Show combat tracker panel. */
+	let showCombatTracker = false;
+
+	/** Show combat modifiers panel. */
+	let showCombatModifiers = false;
+
+	/** Show matrix panel (for hackers). */
+	let showMatrixPanel = false;
+
+	/** Show vehicle panel (for riggers). */
+	let showVehiclePanel = false;
+
+	/** Show magic panel (for awakened). */
+	let showMagicPanel = false;
+
+	/** Show technomancer panel. */
+	let showTechnomancerPanel = false;
+
+	/** Show career advancement panel. */
+	let showCareerAdvancement = false;
+
+	/** Current combat modifier total. */
+	let combatModifierTotal = 0;
+
+	/** Current dice pool for roller. */
+	let dicePool = 6;
+
+	/** Last rolled test name. */
+	let lastTestName = '';
+
+	/** Roll history (most recent first). */
+	let rollHistory: RollHistoryEntry[] = [];
+	let rollIdCounter = 0;
+
+	/** Loading state. */
+	let loading = true;
+	let loadError: string | null = null;
+
+	/** Load character on mount. */
+	onMount(async () => {
+		// Load game data for skill definitions
+		await loadGameData();
+
+		const characterId = $page.params.id;
+
+		if (!characterId) {
+			loadError = 'No character ID provided';
+			loading = false;
+			return;
+		}
+
+		const result = await loadSavedCharacter(characterId);
+
+		if (!result.success) {
+			loadError = result.error || 'Failed to load character';
+		} else if (!result.data) {
+			loadError = 'Character not found';
+		}
+
+		loading = false;
+	});
+
+	/** Navigate to edit page. */
+	function handleEdit(): void {
+		if ($character) {
+			goto(`/character/edit/${$character.id}`);
+		}
+	}
+
+	/** Handle skill roll from character sheet. */
+	function handleSkillRoll(event: CustomEvent<{ name: string; pool: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = event.detail.name;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle attribute roll from character sheet. */
+	function handleAttributeRoll(event: CustomEvent<{ name: string; pool: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = event.detail.name;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle roll result from dice roller. */
+	function handleRollResult(event: CustomEvent<{ results: {
+		dice: number[];
+		hits: number;
+		ones: number;
+		isGlitch: boolean;
+		isCriticalGlitch: boolean;
+		edgeUsed: boolean;
+		pool: number;
+	} }>): void {
+		const r = event.detail.results;
+		const entry: RollHistoryEntry = {
+			id: rollIdCounter++,
+			timestamp: new Date(),
+			testName: lastTestName || 'Manual Roll',
+			pool: r.pool,
+			hits: r.hits,
+			isGlitch: r.isGlitch,
+			isCriticalGlitch: r.isCriticalGlitch,
+			edgeUsed: r.edgeUsed,
+			dice: r.dice
+		};
+		rollHistory = [entry, ...rollHistory].slice(0, 50); // Keep last 50
+	}
+
+	/** Clear roll history. */
+	function clearHistory(): void {
+		rollHistory = [];
+	}
+
+	/** Format time for display. */
+	function formatTime(date: Date): string {
+		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+	}
+
+	/** Handle damage change from condition monitor. */
+	function handleDamageChanged(event: CustomEvent<{ type: 'physical' | 'stun'; value: number }>): void {
+		updateCondition(event.detail.type, event.detail.value);
+	}
+
+	/** Handle Edge change. */
+	function handleEdgeChanged(event: CustomEvent<{ value: number }>): void {
+		updateEdge(event.detail.value);
+	}
+
+	/** Handle initiative roll from character sheet. */
+	function handleInitiativeRoll(event: CustomEvent<{ base: number; dice: number }>): void {
+		const result = rollInitiative({ base: event.detail.base, dice: event.detail.dice });
+
+		// Add to roll history
+		const entry: RollHistoryEntry = {
+			id: rollIdCounter++,
+			timestamp: new Date(),
+			testName: 'Initiative',
+			pool: result.dice.length,
+			hits: result.total,  // Using hits field for total
+			isGlitch: false,
+			isCriticalGlitch: false,
+			edgeUsed: false,
+			dice: result.dice
+		};
+		rollHistory = [entry, ...rollHistory].slice(0, 50);
+
+		// Show combat tracker if not already visible
+		if (!showCombatTracker) {
+			showCombatTracker = true;
+		}
+	}
+
+	/** Handle initiative rolled from combat tracker. */
+	function handleCombatInitiative(event: CustomEvent<{ total: number; passes: number; dice: number[] }>): void {
+		const entry: RollHistoryEntry = {
+			id: rollIdCounter++,
+			timestamp: new Date(),
+			testName: `Initiative (${event.detail.passes} pass${event.detail.passes !== 1 ? 'es' : ''})`,
+			pool: event.detail.dice.length,
+			hits: event.detail.total,
+			isGlitch: false,
+			isCriticalGlitch: false,
+			edgeUsed: false,
+			dice: event.detail.dice
+		};
+		rollHistory = [entry, ...rollHistory].slice(0, 50);
+	}
+
+	/** Get player base initiative. */
+	$: playerBaseInit = $character
+		? ($character.attributes.rea.base + $character.attributes.rea.bonus) +
+		  ($character.attributes.int.base + $character.attributes.int.bonus)
+		: 10;
+
+	/** Currently selected weapon for attack. */
+	let selectedWeapon: { id: string; name: string; damage: string; ap: string; damageMod: number; ammoUsed: number } | null = null;
+
+	/** Currently selected spell for casting. */
+	let selectedSpell: { name: string; drainPool: number; drainValue: string } | null = null;
+
+	/** Handle weapon attack roll. */
+	function handleWeaponRoll(event: CustomEvent<{
+		weapon: { id: string; name: string; damage: string; ap: string };
+		pool: number;
+		skillName: string;
+		firingMode?: { code: string; name: string; ammoPerShot: number; damageMod: number }
+	}>): void {
+		const { weapon, pool, skillName, firingMode } = event.detail;
+
+		// Calculate damage modifier and ammo consumption from firing mode
+		const damageMod = firingMode?.damageMod ?? 0;
+		const ammoUsed = firingMode?.ammoPerShot ?? 1;
+
+		// Spend ammo for ranged attack
+		if (ammoUsed > 0) {
+			spendAmmo(weapon.id, ammoUsed);
+		}
+
+		selectedWeapon = {
+			id: weapon.id,
+			name: weapon.name,
+			damage: weapon.damage,
+			ap: weapon.ap,
+			damageMod,
+			ammoUsed
+		};
+		selectedSpell = null;
+
+		// Apply combat modifiers to attack pool (minimum 1 die)
+		const modifiedPool = Math.max(1, pool + combatModifierTotal);
+		dicePool = modifiedPool;
+
+		// Include modifier info in test name if non-zero
+		const modStr = combatModifierTotal !== 0
+			? ` [${combatModifierTotal >= 0 ? '+' : ''}${combatModifierTotal}]`
+			: '';
+		lastTestName = firingMode
+			? `${weapon.name} (${firingMode.code})${modStr}`
+			: `${weapon.name} (${skillName})${modStr}`;
+		showDiceRoller = true;
+	}
+
+	/** Handle spell cast roll. */
+	function handleSpellRoll(event: CustomEvent<{ spell: { name: string }; castPool: number; drainPool: number; drainValue: string }>): void {
+		const { spell, castPool, drainPool, drainValue } = event.detail;
+		selectedSpell = { name: spell.name, drainPool, drainValue };
+		selectedWeapon = null;
+		dicePool = castPool;
+		lastTestName = `Cast ${spell.name}`;
+		showDiceRoller = true;
+	}
+
+	/** Handle ammo change. */
+	function handleAmmoChanged(event: CustomEvent<{ weaponId: string; value: number }>): void {
+		setAmmo(event.detail.weaponId, event.detail.value);
+	}
+
+	/** Handle weapon reload. */
+	function handleReloadWeapon(event: CustomEvent<{ weaponId: string }>): void {
+		reloadWeapon(event.detail.weaponId);
+	}
+
+	/** Handle defense roll. */
+	function handleDefenseRoll(event: CustomEvent<{ name: string; pool: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = event.detail.name;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle soak roll. */
+	function handleSoakRoll(event: CustomEvent<{ name: string; pool: number; armor: number; ap?: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = event.detail.name;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle combat modifier changes. */
+	function handleModifierChanged(event: CustomEvent<{ total: number; modifiers: string[]; calledShot: string | null }>): void {
+		combatModifierTotal = event.detail.total;
+	}
+
+	/** Handle Matrix action roll. */
+	function handleMatrixRoll(event: CustomEvent<{ action: { name: string }; pool: number; opposed: boolean; opposedBy?: string }>): void {
+		const { action, pool, opposed, opposedBy } = event.detail;
+		dicePool = pool;
+		lastTestName = `Matrix: ${action.name}${opposed ? ` (vs ${opposedBy})` : ''}`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle Vehicle test roll. */
+	function handleVehicleRoll(event: CustomEvent<{ test: { name: string }; pool: number; opposed: boolean }>): void {
+		const { test, pool } = event.detail;
+		dicePool = pool;
+		lastTestName = `Vehicle: ${test.name}`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle gunnery roll. */
+	function handleGunneryRoll(event: CustomEvent<{ pool: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = 'Gunnery';
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle ram roll. */
+	function handleRamRoll(event: CustomEvent<{ pool: number; damage: number }>): void {
+		dicePool = event.detail.pool;
+		lastTestName = `Ram (${event.detail.damage}P damage)`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle astral action roll. */
+	function handleAstralRoll(event: CustomEvent<{ action: { name: string }; pool: number; opposed: boolean; opposedBy?: string }>): void {
+		const { action, pool, opposed, opposedBy } = event.detail;
+		dicePool = pool;
+		lastTestName = `${action.name}${opposed ? ` (vs ${opposedBy})` : ''}`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle summoning roll. */
+	function handleSummoningRoll(event: CustomEvent<{ pool: number; spiritType: string; force: number; resistPool: number }>): void {
+		const { pool, spiritType, force, resistPool } = event.detail;
+		dicePool = pool;
+		lastTestName = `Summon ${spiritType} (F${force}, vs ${resistPool}d6)`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle drain roll. */
+	function handleDrainRoll(event: CustomEvent<{ pool: number; drainValue: number; isPhysical: boolean }>): void {
+		const { pool, drainValue, isPhysical } = event.detail;
+		dicePool = pool;
+		lastTestName = `Resist Drain (${drainValue} ${isPhysical ? 'P' : 'S'})`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle technomancer compiling roll. */
+	function handleCompilingRoll(event: CustomEvent<{ pool: number; spriteType: string; rating: number; resistPool: number }>): void {
+		const { pool, spriteType, rating, resistPool } = event.detail;
+		dicePool = pool;
+		lastTestName = `Compile ${spriteType} (R${rating}, vs ${resistPool}d6)`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle technomancer threading roll. */
+	function handleThreadingRoll(event: CustomEvent<{ pool: number; formName: string; rating: number; fadingValue: number }>): void {
+		const { pool, formName, rating, fadingValue } = event.detail;
+		dicePool = pool;
+		lastTestName = `Thread ${formName} (R${rating}, Fading ${fadingValue})`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Handle fading resistance roll. */
+	function handleFadingRoll(event: CustomEvent<{ pool: number; fadingValue: number; isPhysical: boolean }>): void {
+		const { pool, fadingValue, isPhysical } = event.detail;
+		dicePool = pool;
+		lastTestName = `Resist Fading (${fadingValue} ${isPhysical ? 'P' : 'S'})`;
+		selectedWeapon = null;
+		selectedSpell = null;
+		showDiceRoller = true;
+	}
+
+	/** Character attribute helpers. */
+	$: charLogic = $character ? ($character.attributes.log.base + $character.attributes.log.bonus) : 3;
+	$: charIntuition = $character ? ($character.attributes.int.base + $character.attributes.int.bonus) : 3;
+	$: charCharisma = $character ? ($character.attributes.cha.base + $character.attributes.cha.bonus) : 3;
+	$: charWillpower = $character ? ($character.attributes.wil.base + $character.attributes.wil.bonus) : 3;
+	$: charReaction = $character ? ($character.attributes.rea.base + $character.attributes.rea.bonus) : 3;
+	$: charAgility = $character ? ($character.attributes.agi.base + $character.attributes.agi.bonus) : 3;
+	$: charMagic = $character?.attributes.mag ? ($character.attributes.mag.base + $character.attributes.mag.bonus) : null;
+	$: charResonance = $character?.attributes.res ? ($character.attributes.res.base + $character.attributes.res.bonus) : null;
+
+	/** Get character skill ratings as a map. */
+	$: characterSkills = $character ? Object.fromEntries(
+		$character.skills.map(s => [s.name, s.rating + s.bonus])
+	) : {};
+
+	/** Check if character is awakened. */
+	$: isAwakened = $character?.magic !== null;
+
+	/** Check if character is a technomancer. */
+	$: isTechnomancer = $character?.resonance !== null;
+
+	/** Character's tradition. */
+	$: tradition = $character?.magic?.tradition || 'hermetic';
+</script>
+
+<svelte:head>
+	<title>{$character?.identity.name || 'Character'} - Chummer Web</title>
+</svelte:head>
+
+<main class="container mx-auto px-4 py-6 max-w-6xl">
+	{#if loading}
+		<div class="flex items-center justify-center h-64">
+			<span class="text-primary-dark animate-pulse">Loading character...</span>
+		</div>
+	{:else if loadError}
+		<div class="cw-card text-center py-12">
+			<h2 class="text-xl text-error-main mb-4">Error Loading Character</h2>
+			<p class="text-text-secondary mb-6">{loadError}</p>
+			<a href="/characters" class="cw-btn cw-btn-primary">
+				Back to Characters
+			</a>
+		</div>
+	{:else if $character}
+		<!-- Header with actions -->
+		<header class="mb-6">
+			<div class="flex items-center justify-between mb-3">
+				<a href="/characters" class="cw-btn cw-btn-secondary text-sm">
+					Back to Characters
+				</a>
+				<div class="flex gap-2">
+					<button
+						class="cw-btn cw-btn-primary"
+						on:click={handleEdit}
+					>
+						Edit Character
+					</button>
+					<button
+						class="cw-btn"
+						on:click={() => window.print()}
+						title="Print character sheet"
+					>
+						Print
+					</button>
+				</div>
+			</div>
+
+			<!-- Panel toggles -->
+			<div class="flex flex-wrap gap-2">
+				<button
+					class="cw-btn text-sm {showCombatTracker ? 'cw-btn-primary' : ''}"
+					on:click={() => showCombatTracker = !showCombatTracker}
+					title="Toggle combat tracker"
+				>
+					Combat
+				</button>
+				<button
+					class="cw-btn text-sm {showCombatModifiers ? 'cw-btn-primary' : ''}"
+					on:click={() => showCombatModifiers = !showCombatModifiers}
+					title="Toggle combat modifiers"
+				>
+					Modifiers {#if combatModifierTotal !== 0}<span class="text-xs">({combatModifierTotal >= 0 ? '+' : ''}{combatModifierTotal})</span>{/if}
+				</button>
+				<button
+					class="cw-btn text-sm {showDiceRoller ? 'cw-btn-primary' : ''}"
+					on:click={() => showDiceRoller = !showDiceRoller}
+					title="Toggle dice roller"
+				>
+					Dice
+				</button>
+				<button
+					class="cw-btn text-sm {showRollHistory ? 'cw-btn-primary' : ''}"
+					on:click={() => showRollHistory = !showRollHistory}
+					title="Toggle roll history"
+				>
+					History {#if rollHistory.length > 0}<span class="text-xs">({rollHistory.length})</span>{/if}
+				</button>
+				<span class="w-px h-6 bg-border mx-1 self-center"></span>
+				<button
+					class="cw-btn text-sm {showMatrixPanel ? 'cw-btn-primary' : ''}"
+					on:click={() => showMatrixPanel = !showMatrixPanel}
+					title="Toggle Matrix actions"
+				>
+					Matrix
+				</button>
+				<button
+					class="cw-btn text-sm {showVehiclePanel ? 'cw-btn-primary' : ''}"
+					on:click={() => showVehiclePanel = !showVehiclePanel}
+					title="Toggle vehicle combat"
+				>
+					Vehicles
+				</button>
+				{#if isAwakened}
+					<button
+						class="cw-btn text-sm {showMagicPanel ? 'cw-btn-primary' : ''}"
+						on:click={() => showMagicPanel = !showMagicPanel}
+						title="Toggle magic & astral"
+					>
+						Magic
+					</button>
+				{/if}
+				{#if isTechnomancer}
+					<button
+						class="cw-btn text-sm {showTechnomancerPanel ? 'cw-btn-primary' : ''}"
+						on:click={() => showTechnomancerPanel = !showTechnomancerPanel}
+						title="Toggle technomancer"
+					>
+						Resonance
+					</button>
+				{/if}
+				{#if $character.status === 'career'}
+					<span class="w-px h-6 bg-border mx-1 self-center"></span>
+					<button
+						class="cw-btn text-sm {showCareerAdvancement ? 'cw-btn-primary' : ''}"
+						on:click={() => showCareerAdvancement = !showCareerAdvancement}
+						title="Toggle career advancement"
+					>
+						Advancement
+					</button>
+				{/if}
+			</div>
+		</header>
+
+		<!-- Combat Tracker Panel -->
+		{#if showCombatTracker}
+			<div class="mb-6 combat-tracker-panel">
+				<CombatTracker
+					playerName={$character.identity.name || 'Player'}
+					playerBaseInit={playerBaseInit}
+					playerInitDice={1}
+					on:initiativeRolled={handleCombatInitiative}
+				/>
+			</div>
+		{/if}
+
+		<!-- Combat Modifiers Panel -->
+		{#if showCombatModifiers}
+			<div class="mb-6 combat-modifiers-panel">
+				<CombatModifiersPanel
+					bind:totalModifier={combatModifierTotal}
+					on:modifierChanged={handleModifierChanged}
+				/>
+			</div>
+		{/if}
+
+		<!-- Specialized Role Panels Grid -->
+		{#if showMatrixPanel || showVehiclePanel || showMagicPanel || showTechnomancerPanel}
+			<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6 role-panels">
+				{#if showMatrixPanel}
+					<MatrixPanel
+						logic={charLogic}
+						intuition={charIntuition}
+						charisma={charCharisma}
+						resonance={charResonance}
+						skills={characterSkills}
+						on:rollMatrix={handleMatrixRoll}
+					/>
+				{/if}
+
+				{#if showVehiclePanel}
+					<VehiclePanel
+						pilotSkill={characterSkills['Pilot Ground Craft'] || characterSkills['Pilot Aircraft'] || 0}
+						gunnerySkill={characterSkills['Gunnery'] || 0}
+						reaction={charReaction}
+						agility={charAgility}
+						on:rollVehicle={handleVehicleRoll}
+						on:rollGunnery={handleGunneryRoll}
+						on:rollRam={handleRamRoll}
+					/>
+				{/if}
+
+				{#if showMagicPanel && isAwakened && charMagic}
+					<MagicPanel
+						magic={charMagic}
+						willpower={charWillpower}
+						intuition={charIntuition}
+						charisma={charCharisma}
+						logic={charLogic}
+						tradition={tradition}
+						skills={characterSkills}
+						on:rollAstral={handleAstralRoll}
+						on:rollSummoning={handleSummoningRoll}
+						on:rollDrain={handleDrainRoll}
+					/>
+				{/if}
+
+				{#if showTechnomancerPanel && isTechnomancer && charResonance}
+					<TechnomancerPanel
+						resonance={charResonance}
+						willpower={charWillpower}
+						skills={characterSkills}
+						on:rollCompiling={handleCompilingRoll}
+						on:rollThreading={handleThreadingRoll}
+						on:rollFading={handleFadingRoll}
+					/>
+				{/if}
+			</div>
+		{/if}
+
+		<!-- Dice Roller Panel -->
+		{#if showDiceRoller}
+			<div class="mb-6 dice-roller-panel">
+				{#if lastTestName}
+					<div class="text-sm text-secondary-dark mb-2">Rolling: {lastTestName}</div>
+				{/if}
+				{#if combatModifierTotal !== 0 && selectedWeapon}
+					<div class="cw-panel mb-2 p-2 border-l-4 {combatModifierTotal < 0 ? 'border-error-main bg-error-main/10' : 'border-success-main bg-success-main/10'}">
+						<span class="text-sm text-text-secondary">Combat Modifiers Applied: </span>
+						<span class="font-mono font-bold {combatModifierTotal < 0 ? 'text-error-main' : 'text-success-main'}">
+							{combatModifierTotal >= 0 ? '+' : ''}{combatModifierTotal}
+						</span>
+					</div>
+				{/if}
+				{#if selectedWeapon}
+					<div class="cw-card mb-2 p-3">
+						<div class="flex flex-wrap gap-4 text-sm">
+							<span class="text-text-secondary">
+								Damage: <span class="text-error-main font-bold">{selectedWeapon.damage}</span>
+								{#if selectedWeapon.damageMod > 0}
+									<span class="text-success-main">+{selectedWeapon.damageMod}</span>
+								{/if}
+							</span>
+							<span class="text-text-secondary">
+								AP: <span class="text-warning-main font-bold">{selectedWeapon.ap}</span>
+							</span>
+							{#if selectedWeapon.ammoUsed > 0}
+								<span class="text-text-muted text-xs">({selectedWeapon.ammoUsed} ammo)</span>
+							{/if}
+							<span class="text-text-muted text-xs">(Net hits add to damage)</span>
+						</div>
+					</div>
+				{/if}
+				{#if selectedSpell}
+					<div class="cw-card mb-2 p-3">
+						<div class="flex flex-wrap gap-4 text-sm">
+							<span class="text-text-secondary">
+								Drain: <span class="text-info-main font-bold">{selectedSpell.drainValue}</span>
+							</span>
+							<span class="text-text-secondary">
+								Resist: <span class="text-secondary-dark font-bold">{selectedSpell.drainPool}d6</span>
+							</span>
+							<span class="text-text-muted text-xs">(Hits on spellcasting determine Force)</span>
+						</div>
+					</div>
+				{/if}
+				<DiceRoller bind:dicePool on:roll={handleRollResult} />
+			</div>
+		{/if}
+
+		<!-- Roll History Panel -->
+		{#if showRollHistory}
+			<div class="mb-6 cw-card p-4 roll-history-panel">
+				<div class="flex items-center justify-between mb-3">
+					<h3 class="text-text-primary font-medium">Roll History</h3>
+					{#if rollHistory.length > 0}
+						<button
+							class="cw-btn text-xs text-error-main"
+							on:click={clearHistory}
+						>
+							Clear
+						</button>
+					{/if}
+				</div>
+				{#if rollHistory.length === 0}
+					<p class="text-text-muted text-sm">No rolls yet this session.</p>
+				{:else}
+					<div class="space-y-2 max-h-64 overflow-y-auto">
+						{#each rollHistory as entry (entry.id)}
+							<div class="flex items-center justify-between py-2 border-b border-border text-sm">
+								<div class="flex-1">
+									<span class="text-text-secondary">{entry.testName}</span>
+									<span class="text-text-muted text-xs ml-2">({entry.pool}d6)</span>
+									{#if entry.edgeUsed}
+										<span class="text-primary-dark text-xs ml-1">Edge</span>
+									{/if}
+								</div>
+								<div class="flex items-center gap-3">
+									<span class="font-mono font-bold
+										{entry.isCriticalGlitch ? 'text-error-main' : ''}
+										{entry.isGlitch && !entry.isCriticalGlitch ? 'text-warning-main' : ''}
+										{!entry.isGlitch ? 'text-success-main' : ''}">
+										{entry.hits} hit{entry.hits !== 1 ? 's' : ''}
+										{#if entry.isCriticalGlitch}
+											<span class="text-xs">(CG!)</span>
+										{:else if entry.isGlitch}
+											<span class="text-xs">(G)</span>
+										{/if}
+									</span>
+									<span class="text-text-muted text-xs">{formatTime(entry.timestamp)}</span>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
+		{/if}
+
+		<!-- Career Advancement Panel -->
+		{#if showCareerAdvancement && $character.status === 'career'}
+			<div class="mb-6 career-advancement-panel">
+				<CareerAdvancement />
+			</div>
+		{/if}
+
+		<!-- Character Sheet -->
+		<CharacterSheet
+			char={$character}
+			skillDefs={$gameData.skills}
+			interactive={true}
+			on:rollSkill={handleSkillRoll}
+			on:rollAttribute={handleAttributeRoll}
+			on:rollInitiative={handleInitiativeRoll}
+			on:rollWeapon={handleWeaponRoll}
+			on:rollSpell={handleSpellRoll}
+			on:rollDefense={handleDefenseRoll}
+			on:rollSoak={handleSoakRoll}
+			on:damageChanged={handleDamageChanged}
+			on:edgeChanged={handleEdgeChanged}
+			on:ammoChanged={handleAmmoChanged}
+			on:reloadWeapon={handleReloadWeapon}
+		/>
+	{:else}
+		<div class="cw-card text-center py-12">
+			<p class="text-text-secondary">No character data available.</p>
+			<a href="/characters" class="cw-btn cw-btn-primary mt-4">
+				Back to Characters
+			</a>
+		</div>
+	{/if}
+</main>
+
+<style>
+	@media print {
+		header,
+		.combat-tracker-panel,
+		.combat-modifiers-panel,
+		.role-panels,
+		.dice-roller-panel,
+		.roll-history-panel,
+		.career-advancement-panel {
+			display: none;
+		}
+	}
+</style>

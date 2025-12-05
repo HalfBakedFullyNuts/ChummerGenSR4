@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Metatype &amp; Attributes Step</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #718096;
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background-color: #718096;
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #4a5568 #1a202c;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00e5ff", // Neon Cyan
+                        "background-light": "#e2e8f0", // slate-200
+                        "background-dark": "#0d1117", // near-black
+                    },
+                    fontFamily: {
+                        display: ["Roboto Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem", // 4px
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-sm">
+    <div class="h-screen w-screen flex flex-col p-4 gap-4 text-gray-800 dark:text-gray-300" id="app">
+        <header class="flex items-center justify-between flex-shrink-0">
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                CHUMMER :: <span class="text-primary font-semibold">CHARACTER CREATION</span>
+            </h1>
+            <div class="flex items-center space-x-2 text-gray-900 dark:text-white">
+                <span class="text-xs">BUILD POINTS: 15 / 100</span>
+                <div class="w-40 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                    <div class="h-full bg-primary rounded-full" style="width: 15%;"></div>
+                </div>
+            </div>
+        </header>
+        <main class="grid grid-cols-3 gap-4 flex-grow min-h-0">
+            <div
+                class="col-span-1 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700 rounded p-3 flex flex-col min-h-0">
+                <div
+                    class="flex items-center justify-between pb-3 border-b border-gray-300 dark:border-gray-700 mb-3 flex-shrink-0">
+                    <h2 class="font-bold text-gray-900 dark:text-white">SELECT METATYPE</h2>
+                </div>
+                <div class="overflow-y-auto flex-grow space-y-3 pr-2">
+                    <div class="p-3 rounded border-2 border-primary bg-primary/20 cursor-pointer">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-base text-gray-900 dark:text-white">Human</h3>
+                            <span class="text-xs font-semibold text-primary">0 BP</span>
+                        </div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">The most common metatype, humans are
+                            adaptable and numerous, but lack the specialized abilities of other metatypes.</p>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>BOD</span><span>1/6</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>STR</span><span>1/6</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>AGI</span><span>1/6</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>REA</span><span>1/6</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>CHA</span><span>1/6</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>INT</span><span>1/6</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>LOG</span><span>1/6</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>WIL</span><span>1/6</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600 text-primary">
+                                <span>EDG</span><span>2/7</span></div>
+                        </div>
+                    </div>
+                    <div
+                        class="p-3 rounded border border-gray-300 dark:border-gray-700 hover:border-primary/50 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-base text-gray-900 dark:text-white">Elf</h3>
+                            <span class="text-xs font-semibold text-primary">30 BP</span>
+                        </div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Known for their grace and charisma,
+                            elves are naturally agile and possess an otherworldly beauty. They often have low-light
+                            vision.</p>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>BOD</span><span>1/6</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600 text-primary">
+                                <span>AGI</span><span>2/7</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>STR</span><span>1/6</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600 text-primary">
+                                <span>CHA</span><span>3/8</span></div>
+                        </div>
+                    </div>
+                    <div
+                        class="p-3 rounded border border-gray-300 dark:border-gray-700 hover:border-primary/50 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-base text-gray-900 dark:text-white">Dwarf</h3>
+                            <span class="text-xs font-semibold text-primary">25 BP</span>
+                        </div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Stout and resilient, dwarves are known
+                            for their toughness and willpower. They possess thermographic vision and a natural
+                            resistance to toxins.</p>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600 text-primary">
+                                <span>BOD</span><span>2/7</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600 text-primary">
+                                <span>STR</span><span>3/8</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>REA</span><span>1/5</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600 text-primary">
+                                <span>WIL</span><span>2/7</span></div>
+                        </div>
+                    </div>
+                    <div
+                        class="p-3 rounded border border-gray-300 dark:border-gray-700 hover:border-primary/50 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-base text-gray-900 dark:text-white">Ork</h3>
+                            <span class="text-xs font-semibold text-primary">20 BP</span>
+                        </div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">Physically imposing, orks are strong
+                            and tough, built for the rigors of the streets. They often face social prejudice ("tusker").
+                        </p>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600 text-primary">
+                                <span>BOD</span><span>4/9</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600 text-primary">
+                                <span>STR</span><span>3/8</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>CHA</span><span>1/5</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>LOG</span><span>1/5</span></div>
+                        </div>
+                    </div>
+                    <div
+                        class="p-3 rounded border border-gray-300 dark:border-gray-700 hover:border-primary/50 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-base text-gray-900 dark:text-white">Troll</h3>
+                            <span class="text-xs font-semibold text-primary">40 BP</span>
+                        </div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">The largest and strongest metatype,
+                            trolls are incredibly durable but often slow and less socially adept. They have natural
+                            armor.</p>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600 text-primary">
+                                <span>BOD</span><span>5/10</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600 text-primary">
+                                <span>STR</span><span>5/10</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>AGI</span><span>1/5</span></div>
+                            <div
+                                class="flex justify-between border-b border-dashed border-gray-400 dark:border-gray-600">
+                                <span>LOG</span><span>1/5</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="col-span-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700 rounded p-4 flex flex-col min-h-0">
+                <div
+                    class="flex items-center justify-between pb-3 border-b border-gray-300 dark:border-gray-700 mb-4 flex-shrink-0">
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">ATTRIBUTES</h2>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xs uppercase">Racial Min / Max</span>
+                        <span class="text-xs uppercase">Value</span>
+                        <span class="text-xs uppercase">BP Cost</span>
+                    </div>
+                </div>
+                <div class="flex-grow overflow-y-auto pr-2">
+                    <div class="space-y-2 text-xs">
+                        <div class="grid grid-cols-12 gap-4 items-center p-2 rounded bg-gray-100 dark:bg-gray-800/50">
+                            <div class="col-span-4 font-bold text-gray-900 dark:text-white">BODY</div>
+                            <div class="col-span-2 text-center text-gray-500 dark:text-gray-400">1 / 6</div>
+                            <div class="col-span-4 flex items-center justify-center">
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-l">-</button>
+                                <input
+                                    class="w-10 text-center bg-white dark:bg-gray-800 border-y border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                    type="number" value="1" />
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r">+</button>
+                            </div>
+                            <div class="col-span-2 text-right font-semibold text-primary">0</div>
+                        </div>
+                        <div class="grid grid-cols-12 gap-4 items-center p-2 rounded">
+                            <div class="col-span-4 font-bold text-gray-900 dark:text-white">AGILITY</div>
+                            <div class="col-span-2 text-center text-gray-500 dark:text-gray-400">1 / 6</div>
+                            <div class="col-span-4 flex items-center justify-center">
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-l">-</button>
+                                <input
+                                    class="w-10 text-center bg-white dark:bg-gray-800 border-y border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                    type="number" value="1" />
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r">+</button>
+                            </div>
+                            <div class="col-span-2 text-right font-semibold text-primary">0</div>
+                        </div>
+                        <div class="grid grid-cols-12 gap-4 items-center p-2 rounded bg-gray-100 dark:bg-gray-800/50">
+                            <div class="col-span-4 font-bold text-gray-900 dark:text-white">REACTION</div>
+                            <div class="col-span-2 text-center text-gray-500 dark:text-gray-400">1 / 6</div>
+                            <div class="col-span-4 flex items-center justify-center">
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-l">-</button>
+                                <input
+                                    class="w-10 text-center bg-white dark:bg-gray-800 border-y border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                    type="number" value="1" />
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r">+</button>
+                            </div>
+                            <div class="col-span-2 text-right font-semibold text-primary">0</div>
+                        </div>
+                        <div class="grid grid-cols-12 gap-4 items-center p-2 rounded">
+                            <div class="col-span-4 font-bold text-gray-900 dark:text-white">STRENGTH</div>
+                            <div class="col-span-2 text-center text-gray-500 dark:text-gray-400">1 / 6</div>
+                            <div class="col-span-4 flex items-center justify-center">
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-l">-</button>
+                                <input
+                                    class="w-10 text-center bg-white dark:bg-gray-800 border-y border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                    type="number" value="1" />
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r">+</button>
+                            </div>
+                            <div class="col-span-2 text-right font-semibold text-primary">0</div>
+                        </div>
+                        <div class="grid grid-cols-12 gap-4 items-center p-2 rounded bg-gray-100 dark:bg-gray-800/50">
+                            <div class="col-span-4 font-bold text-gray-900 dark:text-white">CHARISMA</div>
+                            <div class="col-span-2 text-center text-gray-500 dark:text-gray-400">1 / 6</div>
+                            <div class="col-span-4 flex items-center justify-center">
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-l">-</button>
+                                <input
+                                    class="w-10 text-center bg-white dark:bg-gray-800 border-y border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                    type="number" value="1" />
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r">+</button>
+                            </div>
+                            <div class="col-span-2 text-right font-semibold text-primary">0</div>
+                        </div>
+                        <div class="grid grid-cols-12 gap-4 items-center p-2 rounded">
+                            <div class="col-span-4 font-bold text-gray-900 dark:text-white">INTUITION</div>
+                            <div class="col-span-2 text-center text-gray-500 dark:text-gray-400">1 / 6</div>
+                            <div class="col-span-4 flex items-center justify-center">
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-l">-</button>
+                                <input
+                                    class="w-10 text-center bg-white dark:bg-gray-800 border-y border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                    type="number" value="1" />
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r">+</button>
+                            </div>
+                            <div class="col-span-2 text-right font-semibold text-primary">0</div>
+                        </div>
+                        <div class="grid grid-cols-12 gap-4 items-center p-2 rounded bg-gray-100 dark:bg-gray-800/50">
+                            <div class="col-span-4 font-bold text-gray-900 dark:text-white">LOGIC</div>
+                            <div class="col-span-2 text-center text-gray-500 dark:text-gray-400">1 / 6</div>
+                            <div class="col-span-4 flex items-center justify-center">
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-l">-</button>
+                                <input
+                                    class="w-10 text-center bg-white dark:bg-gray-800 border-y border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                    type="number" value="1" />
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r">+</button>
+                            </div>
+                            <div class="col-span-2 text-right font-semibold text-primary">0</div>
+                        </div>
+                        <div class="grid grid-cols-12 gap-4 items-center p-2 rounded">
+                            <div class="col-span-4 font-bold text-gray-900 dark:text-white">WILLPOWER</div>
+                            <div class="col-span-2 text-center text-gray-500 dark:text-gray-400">1 / 6</div>
+                            <div class="col-span-4 flex items-center justify-center">
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-l">-</button>
+                                <input
+                                    class="w-10 text-center bg-white dark:bg-gray-800 border-y border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                    type="number" value="1" />
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r">+</button>
+                            </div>
+                            <div class="col-span-2 text-right font-semibold text-primary">0</div>
+                        </div>
+                        <div class="border-b border-dashed border-gray-300 dark:border-gray-700 my-3"></div>
+                        <div class="grid grid-cols-12 gap-4 items-center p-2 rounded bg-gray-100 dark:bg-gray-800/50">
+                            <div class="col-span-4 font-bold text-primary">EDGE</div>
+                            <div class="col-span-2 text-center text-gray-500 dark:text-gray-400">2 / 7</div>
+                            <div class="col-span-4 flex items-center justify-center">
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-l">-</button>
+                                <input
+                                    class="w-10 text-center bg-white dark:bg-gray-800 border-y border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                                    type="number" value="2" />
+                                <button
+                                    class="px-2 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r">+</button>
+                            </div>
+                            <div class="col-span-2 text-right font-semibold text-primary">0</div>
+                        </div>
+                        <div class="grid grid-cols-12 gap-4 items-center p-2 rounded">
+                            <div class="col-span-4 font-bold text-gray-500 dark:text-gray-400">MAGIC</div>
+                            <div class="col-span-2 text-center text-gray-500 dark:text-gray-400">0 / 6</div>
+                            <div class="col-span-4 flex items-center justify-center">
+                                <button class="px-2 py-1 bg-gray-300 dark:bg-gray-700 rounded-l" disabled="">-</button>
+                                <input
+                                    class="w-10 text-center bg-gray-200 dark:bg-gray-900 border-y border-gray-300 dark:border-gray-600 text-gray-500"
+                                    disabled="" type="number" value="0" />
+                                <button class="px-2 py-1 bg-gray-300 dark:bg-gray-700 rounded-r" disabled="">+</button>
+                            </div>
+                            <div class="col-span-2 text-right font-semibold text-primary">0</div>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <h3 class="font-semibold text-primary mb-2 uppercase tracking-wider">Metatype Qualities</h3>
+                        <div
+                            class="bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded p-3 space-y-2">
+                            <div class="flex justify-between items-center text-xs p-1">
+                                <span>No special qualities for this metatype.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer class="flex items-center justify-between flex-shrink-0">
+            <div class="flex space-x-2">
+                <button
+                    class="px-4 py-2 text-xs font-bold uppercase tracking-wider bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 rounded transition-colors">Previous
+                    Step</button>
+            </div>
+            <div class="flex space-x-2">
+                <button
+                    class="px-4 py-2 text-xs font-bold uppercase tracking-wider bg-primary text-gray-900 hover:bg-cyan-300 rounded transition-colors">Next
+                    Step: Qualities</button>
+            </div>
+        </footer>
+    </div>
+
+</body>
+
+</html>

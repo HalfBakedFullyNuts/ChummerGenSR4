@@ -1,0 +1,678 @@
+/**
+ * CHUMMERWEB DESIGN SYSTEM
+ * ========================
+ * Material UI-inspired light mode design system for ChummerWeb.
+ * Features high information density with clean, functional aesthetics.
+ */
+
+/* ============================================
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ============================================ */
+:root {
+  /* Background Colors - Light Mode */
+  --cw-background: #F5F5F5;
+  --cw-background-paper: #FFFFFF;
+  --cw-background-elevated: #FFFFFF;
+
+  /* Surface Colors */
+  --cw-surface: #FFFFFF;
+  --cw-surface-variant: #FAFAFA;
+
+  /* Border Colors */
+  --cw-border: #E0E0E0;
+  --cw-border-light: #EEEEEE;
+  --cw-border-dark: #BDBDBD;
+
+  /* Text Colors - Light Mode */
+  --cw-text-primary: #212121;
+  --cw-text-secondary: #616161;
+  --cw-text-muted: #9E9E9E;
+  --cw-text-disabled: #BDBDBD;
+
+  /* Primary - Cyan */
+  --cw-primary-main: #00e5ff;
+  --cw-primary-light: #33EAFF;
+  --cw-primary-dark: #00A0B2;
+  --cw-primary-contrast: #000000;
+
+  /* Secondary - Blue */
+  --cw-secondary-main: #58A6FF;
+  --cw-secondary-light: #79B7FF;
+  --cw-secondary-dark: #79B7FF;
+  --cw-secondary-contrast: #FFFFFF;
+
+  /* Error - Red */
+  --cw-error-main: #F85149;
+  --cw-error-light: #F9736D;
+  --cw-error-dark: #AD3833;
+  --cw-error-contrast: #FFFFFF;
+
+  /* Warning - Amber */
+  --cw-warning-main: #D29922;
+  --cw-warning-light: #DBAD4E;
+  --cw-warning-dark: #936B17;
+  --cw-warning-contrast: #000000;
+
+  /* Success - Green */
+  --cw-success-main: #2EA043;
+  --cw-success-light: #57B368;
+  --cw-success-dark: #20702E;
+  --cw-success-contrast: #FFFFFF;
+
+  /* Info - Purple */
+  --cw-info-main: #A371F7;
+  --cw-info-light: #B58DF8;
+  --cw-info-dark: #724FAC;
+  --cw-info-contrast: #FFFFFF;
+
+  /* Typography */
+  --cw-font-display: 'Roboto Mono', monospace;
+  --cw-font-body: 'Roboto Mono', monospace;
+  --cw-font-mono: 'Roboto Mono', monospace;
+
+  /* Font Sizes */
+  --cw-text-xs: 0.75rem;
+  --cw-text-sm: 0.875rem;
+  --cw-text-base: 1rem;
+  --cw-text-lg: 1.125rem;
+  --cw-text-xl: 1.25rem;
+  --cw-text-2xl: 1.5rem;
+
+  /* Spacing */
+  --cw-space-xs: 0.25rem;
+  --cw-space-sm: 0.5rem;
+  --cw-space-md: 1rem;
+  --cw-space-lg: 1.5rem;
+  --cw-space-xl: 2rem;
+
+  /* Border Radius */
+  --cw-radius-sm: 4px;
+  --cw-radius-md: 6px;
+  --cw-radius-lg: 8px;
+
+  /* Shadows */
+  --cw-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --cw-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --cw-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --cw-shadow-primary: 0 4px 14px 0 rgba(0, 229, 255, 0.25);
+
+  /* Transitions */
+  --cw-transition-fast: 150ms ease;
+  --cw-transition-normal: 250ms ease;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+/* @layer base { */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--cw-background);
+  color: var(--cw-text-primary);
+  font-family: var(--cw-font-display);
+  font-size: var(--cw-text-sm);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--cw-font-display);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--cw-text-primary);
+}
+
+/* Material Icons */
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar - Light theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #BDBDBD;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #9E9E9E;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #BDBDBD #F5F5F5;
+}
+
+/* Hide number input spinners */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Selection */
+::selection {
+  background: var(--cw-primary-light);
+  color: var(--cw-primary-contrast);
+}
+
+/* } */
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+/* @layer utilities { */
+/* Panel - White card on grey background */
+.cw-panel {
+  background-color: var(--cw-surface);
+  border: 1px solid var(--cw-border);
+  border-radius: var(--cw-radius-md);
+  box-shadow: var(--cw-shadow-md);
+}
+
+/* Selected state */
+.cw-selected {
+  background-color: rgba(0, 229, 255, 0.12);
+  border: 1px solid var(--cw-primary-main);
+}
+
+/* Primary text color */
+.text-primary {
+  color: var(--cw-primary-dark);
+}
+
+/* } */
+
+/* ============================================
+   COMPONENT: App Header
+   ============================================ */
+.cw-app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background-color: var(--cw-surface);
+  border-bottom: 1px solid var(--cw-border);
+  box-shadow: var(--cw-shadow-sm);
+}
+
+.cw-app-title {
+  display: flex;
+  align-items: center;
+  font-size: var(--cw-text-lg);
+  font-weight: 700;
+  color: var(--cw-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+
+.cw-app-title:hover {
+  text-decoration: none;
+}
+
+/* ============================================
+   COMPONENT: Page Header
+   ============================================ */
+.cw-page-header {
+  font-size: var(--cw-text-2xl);
+  font-weight: 700;
+  color: var(--cw-primary-dark);
+  margin-bottom: 0.5rem;
+}
+
+.cw-page-subheader {
+  font-size: var(--cw-text-sm);
+  color: var(--cw-text-secondary);
+}
+
+/* ============================================
+   COMPONENT: Button
+   ============================================ */
+.cw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cw-space-sm);
+  padding: 0.5rem 1rem;
+  font-family: var(--cw-font-display);
+  font-size: var(--cw-text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-radius: var(--cw-radius-md);
+  cursor: pointer;
+  transition: all var(--cw-transition-fast);
+  border: none;
+}
+
+.cw-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary button */
+.cw-btn-primary {
+  background-color: var(--cw-primary-main);
+  color: var(--cw-primary-contrast);
+  box-shadow: var(--cw-shadow-primary);
+}
+
+.cw-btn-primary:hover:not(:disabled) {
+  background-color: var(--cw-primary-dark);
+  box-shadow: 0 6px 20px 0 rgba(0, 229, 255, 0.35);
+}
+
+/* Secondary button */
+.cw-btn-secondary {
+  background-color: var(--cw-border-light);
+  color: var(--cw-text-primary);
+}
+
+.cw-btn-secondary:hover:not(:disabled) {
+  background-color: var(--cw-border);
+}
+
+/* Icon button */
+.cw-btn-icon {
+  padding: 0.5rem;
+  background-color: var(--cw-border-light);
+  color: var(--cw-text-secondary);
+  border-radius: var(--cw-radius-md);
+}
+
+.cw-btn-icon:hover:not(:disabled) {
+  background-color: var(--cw-border);
+  color: var(--cw-text-primary);
+}
+
+/* Increment/Decrement buttons */
+button.cw-btn-inc-dec {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: var(--cw-primary-light) !important;
+  border: 1px solid var(--cw-primary-main) !important;
+  border-radius: var(--cw-radius-sm);
+  cursor: pointer;
+  transition: all var(--cw-transition-fast);
+  color: var(--cw-primary-dark) !important;
+}
+
+button.cw-btn-inc-dec:hover:not(:disabled) {
+  background-color: var(--cw-primary-main) !important;
+  border-color: var(--cw-primary-dark) !important;
+  color: var(--cw-primary-contrast) !important;
+}
+
+button.cw-btn-inc-dec:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: var(--cw-border-light) !important;
+  border-color: var(--cw-border) !important;
+  color: var(--cw-text-muted) !important;
+}
+
+/* ============================================
+   COMPONENT: Card
+   ============================================ */
+.cw-card {
+  background-color: var(--cw-surface);
+  border: 1px solid var(--cw-border);
+  border-radius: var(--cw-radius-md);
+  box-shadow: var(--cw-shadow-sm);
+  transition: all var(--cw-transition-normal);
+}
+
+.cw-card:hover {
+  border-color: var(--cw-border-dark);
+  box-shadow: var(--cw-shadow-md);
+}
+
+.cw-card-selected {
+  background-color: rgba(0, 229, 255, 0.08);
+  border: 2px solid var(--cw-primary-main);
+  box-shadow: var(--cw-shadow-primary);
+}
+
+.cw-card-header {
+  font-size: var(--cw-text-sm);
+  font-weight: 600;
+  color: var(--cw-primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 2px solid var(--cw-primary-main);
+}
+
+/* ============================================
+   COMPONENT: Input
+   ============================================ */
+.cw-input {
+  width: 100%;
+  background-color: var(--cw-surface);
+  border: 1px solid var(--cw-border);
+  border-radius: var(--cw-radius-md);
+  color: var(--cw-text-primary);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--cw-font-display);
+  font-size: var(--cw-text-sm);
+  transition: all var(--cw-transition-fast);
+}
+
+.cw-input:hover {
+  border-color: var(--cw-border-dark);
+}
+
+.cw-input:focus {
+  outline: none;
+  border-color: var(--cw-primary-main);
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.15);
+}
+
+.cw-input::placeholder {
+  color: var(--cw-text-muted);
+}
+
+/* ============================================
+   COMPONENT: Select
+   ============================================ */
+.cw-select {
+  appearance: none;
+  width: 100%;
+  background-color: var(--cw-surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23616161' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  border: 1px solid var(--cw-border);
+  border-radius: var(--cw-radius-md);
+  color: var(--cw-text-primary);
+  padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+  font-family: var(--cw-font-display);
+  font-size: var(--cw-text-sm);
+  cursor: pointer;
+  transition: all var(--cw-transition-fast);
+}
+
+.cw-select:hover {
+  border-color: var(--cw-border-dark);
+}
+
+.cw-select:focus {
+  outline: none;
+  border-color: var(--cw-primary-main);
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.15);
+}
+
+/* ============================================
+   COMPONENT: Badge
+   ============================================ */
+.cw-badge-primary {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: var(--cw-text-xs);
+  font-weight: 600;
+  background-color: rgba(0, 229, 255, 0.15);
+  color: var(--cw-primary-dark);
+  border-radius: var(--cw-radius-sm);
+}
+
+/* ============================================
+   COMPONENT: Section Header
+   ============================================ */
+.cw-section-header {
+  display: flex;
+  align-items: center;
+  font-size: var(--cw-text-sm);
+  font-weight: 600;
+  color: var(--cw-primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--cw-primary-main);
+}
+
+/* ============================================
+   COMPONENT: Stat Row
+   ============================================ */
+.cw-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--cw-border-light);
+}
+
+.cw-stat-row:last-child {
+  border-bottom: none;
+}
+
+.cw-stat-row:nth-child(odd) {
+  background-color: var(--cw-surface-variant);
+}
+
+/* ============================================
+   COMPONENT: Data Row (dashed)
+   ============================================ */
+.cw-data-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.375rem 0;
+  border-bottom: 1px dashed var(--cw-border);
+  font-size: var(--cw-text-sm);
+}
+
+.cw-data-row:last-child {
+  border-bottom: none;
+}
+
+/* ============================================
+   COMPONENT: List Item
+   ============================================ */
+.cw-list-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  color: var(--cw-text-secondary);
+  cursor: pointer;
+  transition: all var(--cw-transition-fast);
+  border: 1px solid transparent;
+  border-radius: var(--cw-radius-sm);
+}
+
+.cw-list-item:hover {
+  background-color: var(--cw-surface-variant);
+  color: var(--cw-text-primary);
+}
+
+.cw-list-item.cw-selected {
+  background-color: rgba(0, 229, 255, 0.12);
+  color: var(--cw-primary-dark);
+  border-color: var(--cw-primary-main);
+}
+
+/* ============================================
+   COMPONENT: Collapsible
+   ============================================ */
+.cw-collapsible {
+  border: 1px solid var(--cw-border);
+  border-radius: var(--cw-radius-md);
+  background-color: var(--cw-surface);
+}
+
+.cw-collapsible-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  color: var(--cw-text-secondary);
+  transition: all var(--cw-transition-fast);
+}
+
+.cw-collapsible-header::-webkit-details-marker {
+  display: none;
+}
+
+.cw-collapsible-header:hover {
+  background-color: var(--cw-surface-variant);
+  color: var(--cw-text-primary);
+}
+
+.cw-collapsible[open] .cw-collapsible-header {
+  border-bottom: 1px solid var(--cw-border);
+}
+
+/* ============================================
+   COMPONENT: Progress Bar
+   ============================================ */
+.cw-progress {
+  width: 100%;
+  height: 8px;
+  background-color: var(--cw-border-light);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cw-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cw-primary-main), var(--cw-primary-light));
+  transition: width var(--cw-transition-normal);
+  border-radius: 4px;
+}
+
+/* ============================================
+   COMPONENT: BP Cost Display
+   ============================================ */
+.cw-bp-cost {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: var(--cw-text-xs);
+  font-weight: 700;
+  background-color: rgba(0, 229, 255, 0.15);
+  color: var(--cw-primary-dark);
+  border-radius: var(--cw-radius-sm);
+}
+
+/* ============================================
+   COMPONENT: Source Reference
+   ============================================ */
+.cw-source {
+  font-size: var(--cw-text-xs);
+  color: var(--cw-text-muted);
+  font-style: italic;
+}
+
+/* ============================================
+   LAYOUT: Panel Header
+   ============================================ */
+.cw-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--cw-border);
+  margin-bottom: 0.75rem;
+}
+
+/* ============================================
+   LAYOUT: Panel Solid Background
+   ============================================ */
+.cw-panel-solid {
+  background-color: var(--cw-surface-variant);
+}
+
+/* ============================================
+   COLOR UTILITIES
+   ============================================ */
+.text-primary-main {
+  color: var(--cw-primary-main);
+}
+
+.text-primary-dark {
+  color: var(--cw-primary-dark);
+}
+
+.text-secondary-main {
+  color: var(--cw-secondary-main);
+}
+
+.text-error-main {
+  color: var(--cw-error-main);
+}
+
+.text-warning-main {
+  color: var(--cw-warning-main);
+}
+
+.text-success-main {
+  color: var(--cw-success-main);
+}
+
+.text-info-main {
+  color: var(--cw-info-main);
+}
+
+.bg-primary-main {
+  background-color: var(--cw-primary-main);
+}
+
+.bg-primary-light {
+  background-color: var(--cw-primary-light);
+}
+
+.bg-error-light {
+  background-color: var(--cw-error-light);
+}
+
+.bg-warning-light {
+  background-color: var(--cw-warning-light);
+}
+
+.bg-success-light {
+  background-color: var(--cw-success-light);
+}
+
+.bg-info-light {
+  background-color: var(--cw-info-light);
+}

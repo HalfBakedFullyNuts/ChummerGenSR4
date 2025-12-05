@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Contacts &amp; Lifestyles Manager</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #718096;
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background-color: #718096;
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #4a5568 #1a202c;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00e5ff", // Neon Cyan
+                        "background-light": "#e2e8f0", // slate-200
+                        "background-dark": "#0d1117", // near-black
+                    },
+                    fontFamily: {
+                        display: ["Roboto Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem", // 4px
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-sm">
+    <div class="h-screen w-screen flex flex-col p-4 gap-4 text-gray-800 dark:text-gray-300" id="app">
+        <header class="flex items-center justify-between flex-shrink-0">
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                CHUMMER :: <span class="text-primary font-semibold">Contacts &amp; Lifestyles</span>
+            </h1>
+            <div class="flex items-center space-x-4">
+                <button
+                    class="bg-gray-200 dark:bg-gray-800 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                    <span class="material-icons text-base">save</span>
+                </button>
+                <button
+                    class="bg-gray-200 dark:bg-gray-800 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                    <span class="material-icons text-base">settings</span>
+                </button>
+            </div>
+        </header>
+        <main class="grid grid-cols-3 gap-4 flex-grow min-h-0">
+            <div
+                class="col-span-1 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700 rounded p-3 flex flex-col min-h-0">
+                <div
+                    class="flex items-center justify-between pb-3 border-b border-gray-300 dark:border-gray-700 mb-3 flex-shrink-0">
+                    <h2 class="font-bold text-gray-900 dark:text-white">NETWORK</h2>
+                    <div class="flex items-center gap-2">
+                        <input
+                            class="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded py-1 px-2 text-xs w-32 focus:ring-primary focus:border-primary"
+                            placeholder="Filter..." type="search" />
+                        <button class="text-primary hover:text-cyan-300 transition-colors">
+                            <span class="material-icons text-xl">add_circle</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-y-auto flex-grow">
+                    <div class="space-y-2">
+                        <details open="">
+                            <summary
+                                class="flex items-center justify-between cursor-pointer font-semibold text-gray-900 dark:text-white list-none hover:bg-gray-100 dark:hover:bg-gray-800 rounded p-1">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-base mr-2 text-primary">group</span>
+                                    CONTACTS
+                                </span>
+                                <span
+                                    class="material-icons text-base transition-transform duration-200 transform">expand_more</span>
+                            </summary>
+                            <ul class="pl-2 mt-1 space-y-1 text-xs">
+                                <li
+                                    class="flex justify-between items-center p-2 rounded cursor-pointer bg-primary/20 border border-primary text-gray-900 dark:text-white">
+                                    <span>"Zip" - Infochant</span>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div class="flex flex-col items-center">
+                                            <span
+                                                class="text-gray-500 dark:text-gray-400 text-[10px] leading-tight">CON</span>
+                                            <span class="font-bold">4</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <span
+                                                class="text-gray-500 dark:text-gray-400 text-[10px] leading-tight">LOY</span>
+                                            <span class="font-bold">2</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li
+                                    class="flex justify-between items-center p-2 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    <span>Misty - Street Samurai</span>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div class="flex flex-col items-center">
+                                            <span
+                                                class="text-gray-500 dark:text-gray-400 text-[10px] leading-tight">CON</span>
+                                            <span class="font-bold">5</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <span
+                                                class="text-gray-500 dark:text-gray-400 text-[10px] leading-tight">LOY</span>
+                                            <span class="font-bold">3</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li
+                                    class="flex justify-between items-center p-2 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    <span>Dr. Anya Sharma - Ripperdoc</span>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div class="flex flex-col items-center">
+                                            <span
+                                                class="text-gray-500 dark:text-gray-400 text-[10px] leading-tight">CON</span>
+                                            <span class="font-bold">6</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <span
+                                                class="text-gray-500 dark:text-gray-400 text-[10px] leading-tight">LOY</span>
+                                            <span class="font-bold">1</span>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </details>
+                        <details open="">
+                            <summary
+                                class="flex items-center justify-between cursor-pointer font-semibold text-gray-900 dark:text-white list-none hover:bg-gray-100 dark:hover:bg-gray-800 rounded p-1">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-base mr-2 text-primary">villa</span>
+                                    LIFESTYLES
+                                </span>
+                                <span
+                                    class="material-icons text-base transition-transform duration-200 transform">expand_more</span>
+                            </summary>
+                            <ul class="pl-2 mt-1 space-y-1 text-xs">
+                                <li
+                                    class="flex justify-between items-center p-2 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    <span>Squat (The Warrens)</span>
+                                    <span class="font-bold text-gray-500 dark:text-gray-400">¥500/mo</span>
+                                </li>
+                                <li
+                                    class="flex justify-between items-center p-2 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    <span>Safehouse (Downtown)</span>
+                                    <span class="font-bold text-gray-500 dark:text-gray-400">¥1,000/mo</span>
+                                </li>
+                            </ul>
+                        </details>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="col-span-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700 rounded p-4 flex flex-col min-h-0">
+                <div
+                    class="flex items-center justify-between pb-3 border-b border-gray-300 dark:border-gray-700 mb-3 flex-shrink-0">
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">"Zip" - Infochant</h2>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Source: Runner's Companion p. 88</span>
+                </div>
+                <div class="flex-grow overflow-y-auto pr-2">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-semibold text-primary mb-2 uppercase tracking-wider">Details</h3>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                                <div
+                                    class="flex justify-between border-b border-dashed border-gray-300 dark:border-gray-600 py-1">
+                                    <span>Connection</span>
+                                    <span class="font-semibold text-gray-900 dark:text-white">4</span>
+                                </div>
+                                <div
+                                    class="flex justify-between border-b border-dashed border-gray-300 dark:border-gray-600 py-1">
+                                    <span>Loyalty</span>
+                                    <span class="font-semibold text-gray-900 dark:text-white">2</span>
+                                </div>
+                                <div
+                                    class="flex justify-between border-b border-dashed border-gray-300 dark:border-gray-600 py-1 col-span-2">
+                                    <span>Location</span>
+                                    <span class="font-semibold text-gray-900 dark:text-white">Downtown, Data-Haven
+                                        Node</span>
+                                </div>
+                                <div
+                                    class="flex justify-between border-b border-dashed border-gray-300 dark:border-gray-600 py-1 col-span-2">
+                                    <span>Cost</span>
+                                    <span class="font-semibold text-gray-900 dark:text-white">6 BP</span>
+                                </div>
+                            </div>
+                            <h3 class="font-semibold text-primary mt-4 mb-2 uppercase tracking-wider">Services</h3>
+                            <div
+                                class="bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded p-3 space-y-2 text-xs">
+                                <div class="flex justify-between items-center p-1 bg-gray-200 dark:bg-gray-700 rounded">
+                                    <span>Data Search &amp; Retrieval</span>
+                                </div>
+                                <div class="flex justify-between items-center p-1 bg-gray-200 dark:bg-gray-700 rounded">
+                                    <span>Matrix Rumors &amp; Gossip</span>
+                                </div>
+                                <div class="flex justify-between items-center p-1 bg-gray-200 dark:bg-gray-700 rounded">
+                                    <span>Paydata Fencing</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-primary mb-2 uppercase tracking-wider">Description</h3>
+                            <p
+                                class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed bg-gray-100 dark:bg-gray-800/50 p-3 rounded border border-gray-300 dark:border-gray-700">
+                                A shadowy figure in the Matrix, Zip deals in secrets and raw data. He's paranoid and
+                                flighty, but his information is almost always solid gold. Prefers to be paid in
+                                certified credsticks or untraceable crypto. Never meets face-to-face.
+                            </p>
+                            <h3 class="font-semibold text-primary mt-4 mb-2 uppercase tracking-wider">Notes</h3>
+                            <textarea
+                                class="w-full text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded p-2 focus:ring-primary focus:border-primary"
+                                placeholder="Add character-specific notes here..."
+                                rows="4">Owes me a favor after I pulled his virtual butt out of a Renraku data-spike trap.</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        // Simple script to handle details/summary arrow rotation
+        document.querySelectorAll('details').forEach((detail) => {
+            detail.addEventListener('toggle', event => {
+                const summary = detail.querySelector('summary');
+                const icon = summary.querySelector('.material-icons:last-child');
+                if (detail.open) {
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            });
+        });
+        // Set initial state for open details
+        document.querySelectorAll('details[open]').forEach((detail) => {
+            const summary = detail.querySelector('summary');
+            const icon = summary.querySelector('.material-icons:last-child');
+            icon.style.transform = 'rotate(180deg)';
+        });
+    </script>
+</body>
+
+</html>

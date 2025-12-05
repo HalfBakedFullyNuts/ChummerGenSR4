@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Skills Editor - High Density</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #718096;
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background-color: #718096;
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #4a5568 #1a202c;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00e5ff", // Neon Cyan
+                        "background-light": "#e2e8f0", // slate-200
+                        "background-dark": "#0d1117", // near-black
+                    },
+                    fontFamily: {
+                        display: ["Roboto Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem", // 4px
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-sm">
+    <div class="h-screen w-screen flex flex-col p-4 gap-4 text-gray-800 dark:text-gray-300" id="app">
+        <header class="flex items-center justify-between flex-shrink-0">
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                CHUMMER :: <span class="text-primary font-semibold">Skills</span>
+            </h1>
+            <div class="flex items-center space-x-4">
+                <button
+                    class="bg-gray-200 dark:bg-gray-800 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                    <span class="material-icons text-base">save</span>
+                </button>
+                <button
+                    class="bg-gray-200 dark:bg-gray-800 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                    <span class="material-icons text-base">settings</span>
+                </button>
+            </div>
+        </header>
+        <main class="grid grid-cols-3 gap-4 flex-grow min-h-0">
+            <div
+                class="col-span-1 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700 rounded p-3 flex flex-col min-h-0">
+                <div
+                    class="flex items-center justify-between pb-3 border-b border-gray-300 dark:border-gray-700 mb-3 flex-shrink-0">
+                    <h2 class="font-bold text-gray-900 dark:text-white">SKILLS</h2>
+                    <div class="flex items-center gap-2">
+                        <input
+                            class="bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded py-1 px-2 text-xs w-32 focus:ring-primary focus:border-primary"
+                            placeholder="Filter..." type="search" />
+                        <button class="text-primary hover:text-cyan-300 transition-colors">
+                            <span class="material-icons text-xl">add_circle</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-y-auto flex-grow">
+                    <div class="space-y-2">
+                        <details open="">
+                            <summary
+                                class="flex items-center justify-between cursor-pointer font-semibold text-gray-900 dark:text-white list-none hover:bg-gray-100 dark:hover:bg-gray-800 rounded p-1">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-base mr-2 text-primary">gavel</span>
+                                    COMBAT SKILLS
+                                </span>
+                                <span
+                                    class="material-icons text-base transition-transform duration-200 transform">expand_more</span>
+                            </summary>
+                            <ul class="pl-6 mt-1 space-y-1 text-xs border-l border-gray-300 dark:border-gray-600 ml-2">
+                                <li
+                                    class="p-1 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 flex justify-between">
+                                    <span>Automatics</span> <span
+                                        class="font-semibold text-gray-900 dark:text-white">4</span></li>
+                                <li
+                                    class="p-1 rounded cursor-pointer bg-primary/20 border border-primary text-gray-900 dark:text-white flex justify-between">
+                                    <span>Pistols</span> <span
+                                        class="font-semibold text-gray-900 dark:text-white">6</span></li>
+                                <li
+                                    class="p-1 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 flex justify-between">
+                                    <span>Unarmed Combat</span> <span
+                                        class="font-semibold text-gray-900 dark:text-white">3</span></li>
+                            </ul>
+                        </details>
+                        <details open="">
+                            <summary
+                                class="flex items-center justify-between cursor-pointer font-semibold text-gray-900 dark:text-white list-none hover:bg-gray-100 dark:hover:bg-gray-800 rounded p-1">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-base mr-2 text-primary">groups</span>
+                                    SOCIAL SKILLS
+                                </span>
+                                <span
+                                    class="material-icons text-base transition-transform duration-200 transform">expand_more</span>
+                            </summary>
+                            <ul class="pl-6 mt-1 space-y-1 text-xs border-l border-gray-300 dark:border-gray-600 ml-2">
+                                <li
+                                    class="p-1 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 flex justify-between">
+                                    <span>Con</span> <span class="font-semibold text-gray-900 dark:text-white">2</span>
+                                </li>
+                                <li
+                                    class="p-1 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 flex justify-between">
+                                    <span>Etiquette</span> <span
+                                        class="font-semibold text-gray-900 dark:text-white">4</span></li>
+                                <li
+                                    class="p-1 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 flex justify-between">
+                                    <span>Negotiation</span> <span
+                                        class="font-semibold text-gray-900 dark:text-white">5</span></li>
+                            </ul>
+                        </details>
+                        <details>
+                            <summary
+                                class="flex items-center justify-between cursor-pointer font-semibold text-gray-900 dark:text-white list-none hover:bg-gray-100 dark:hover:bg-gray-800 rounded p-1">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-base mr-2 text-primary">engineering</span>
+                                    TECHNICAL SKILLS
+                                </span>
+                                <span
+                                    class="material-icons text-base transition-transform duration-200 transform">expand_more</span>
+                            </summary>
+                            <ul class="pl-6 mt-1 space-y-1 text-xs border-l border-gray-300 dark:border-gray-600 ml-2">
+                            </ul>
+                        </details>
+                        <details>
+                            <summary
+                                class="flex items-center justify-between cursor-pointer font-semibold text-gray-900 dark:text-white list-none hover:bg-gray-100 dark:hover:bg-gray-800 rounded p-1">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-base mr-2 text-primary">auto_awesome</span>
+                                    MAGICAL SKILLS
+                                </span>
+                                <span
+                                    class="material-icons text-base transition-transform duration-200 transform">expand_more</span>
+                            </summary>
+                            <ul class="pl-6 mt-1 space-y-1 text-xs border-l border-gray-300 dark:border-gray-600 ml-2">
+                            </ul>
+                        </details>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="col-span-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-700 rounded p-4 flex flex-col min-h-0">
+                <div
+                    class="flex items-center justify-between pb-3 border-b border-gray-300 dark:border-gray-700 mb-3 flex-shrink-0">
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Pistols</h2>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Source: Core Rulebook p. 128</span>
+                </div>
+                <div class="flex-grow overflow-y-auto pr-2">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-semibold text-primary mb-2 uppercase tracking-wider">Skill Details</h3>
+                            <div
+                                class="bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded p-3 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs">Current Rank</span>
+                                    <div class="flex items-center gap-2">
+                                        <button
+                                            class="bg-gray-300 dark:bg-gray-600 h-6 w-6 rounded text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">-</button>
+                                        <input
+                                            class="w-12 text-center bg-gray-200 dark:bg-gray-700 border-none rounded p-1 font-bold text-base text-gray-900 dark:text-white"
+                                            readonly="" type="number" value="6" />
+                                        <button
+                                            class="bg-gray-300 dark:bg-gray-600 h-6 w-6 rounded text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">+</button>
+                                    </div>
+                                </div>
+                                <div
+                                    class="flex justify-between items-center border-t border-gray-300 dark:border-gray-600 pt-3">
+                                    <span class="text-xs">Linked Attribute</span>
+                                    <span class="font-semibold text-gray-900 dark:text-white text-xs">Agility (5)</span>
+                                </div>
+                                <div
+                                    class="flex justify-between items-center border-t border-gray-300 dark:border-gray-600 pt-3">
+                                    <span class="text-xs">Dice Pool</span>
+                                    <span class="font-bold text-primary text-lg">11</span>
+                                </div>
+                            </div>
+                            <h3 class="font-semibold text-primary mt-4 mb-2 uppercase tracking-wider">Specializations
+                            </h3>
+                            <div
+                                class="bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded p-3 space-y-2">
+                                <div
+                                    class="flex justify-between items-center text-xs p-1 bg-gray-200 dark:bg-gray-700 rounded">
+                                    <span>Revolvers</span>
+                                    <span class="text-gray-500 dark:text-gray-400 font-mono">+2 Dice</span>
+                                </div>
+                                <div
+                                    class="flex justify-between items-center text-xs p-1 bg-gray-200 dark:bg-gray-700 rounded">
+                                    <span>Semi-Automatics</span>
+                                    <span class="text-gray-500 dark:text-gray-400 font-mono">+2 Dice</span>
+                                </div>
+                                <div class="text-center pt-2">
+                                    <button class="text-xs text-primary hover:underline">+ Add Specialization</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-primary mb-2 uppercase tracking-wider">Description</h3>
+                            <p
+                                class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed bg-gray-100 dark:bg-gray-800/50 p-3 rounded border border-gray-300 dark:border-gray-700">
+                                This skill covers the use of handheld, pistol-sized firearms, including hold-outs, light
+                                and heavy pistols, machine pistols, and tasers. It governs aiming, firing, and basic
+                                maintenance of these weapons in various conditions.
+                            </p>
+                            <h3 class="font-semibold text-primary mt-4 mb-2 uppercase tracking-wider">Notes</h3>
+                            <textarea
+                                class="w-full text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded p-2 focus:ring-primary focus:border-primary"
+                                placeholder="Add character-specific notes here..." rows="4"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        // Simple script to handle details/summary arrow rotation
+        document.querySelectorAll('details').forEach((detail) => {
+            detail.addEventListener('toggle', event => {
+                const summary = detail.querySelector('summary');
+                const icon = summary.querySelector('.material-icons:last-child');
+                if (detail.open) {
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            });
+        });
+        // Set initial state for open details
+        document.querySelectorAll('details[open]').forEach((detail) => {
+            const summary = detail.querySelector('summary');
+            const icon = summary.querySelector('.material-icons:last-child');
+            icon.style.transform = 'rotate(180deg)';
+        });
+    </script>
+</body>
+
+</html>
