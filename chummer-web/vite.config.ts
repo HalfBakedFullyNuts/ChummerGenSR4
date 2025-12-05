@@ -12,17 +12,6 @@ export default defineConfig({
 	build: {
 		target: 'esnext',
 		minify: 'esbuild',
-		/* Split chunks for better caching */
-		rollupOptions: {
-			output: {
-				manualChunks: {
-					/* Firebase chunk */
-					firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
-					/* Vendor chunk for other large dependencies */
-					vendor: ['svelte', 'svelte/store']
-				}
-			}
-		},
 		/* Report compressed sizes */
 		reportCompressedSize: true,
 		/* Chunk size warning limit (500kb) */
