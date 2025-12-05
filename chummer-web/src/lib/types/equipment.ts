@@ -77,6 +77,7 @@ export interface CharacterWeapon {
 	readonly currentAmmo: number;
 	readonly conceal: number;
 	readonly cost: number;
+	readonly avail?: string;
 	readonly accessories: readonly WeaponAccessory[];
 	readonly notes: string;
 }
@@ -127,6 +128,7 @@ export interface CharacterArmor {
 	readonly capacityUsed: number;
 	readonly equipped: boolean;
 	readonly cost: number;
+	readonly avail?: string;
 	readonly modifications: readonly ArmorModification[];
 	readonly notes: string;
 }
@@ -136,7 +138,7 @@ export interface ArmorModification {
 	readonly id: string;
 	readonly name: string;
 	readonly rating: number;
-	readonly capacity: number;
+	readonly capacityCost: number;
 	readonly cost: number;
 }
 
@@ -184,6 +186,12 @@ export const CYBERWARE_GRADES: readonly CyberwareGradeMultiplier[] = [
 	{ name: 'Used', essMultiplier: 1.2, costMultiplier: 0.5, availModifier: -1 }
 ] as const;
 
+/** Get cyberware grade multipliers by grade name. */
+export function getCyberwareGradeMultiplier(grade: CyberwareGrade): CyberwareGradeMultiplier {
+	const found = CYBERWARE_GRADES.find((g) => g.name === grade);
+	return found ?? CYBERWARE_GRADES[0];
+}
+
 /** Game data cyberware definition. */
 export interface GameCyberware {
 	readonly name: string;
@@ -211,6 +219,7 @@ export interface CharacterCyberware {
 	readonly capacity: number;
 	readonly capacityUsed: number;
 	readonly location: string;
+	readonly avail?: string;
 	readonly subsystems: readonly CharacterCyberware[];
 	readonly notes: string;
 }
@@ -242,6 +251,19 @@ export const BIOWARE_GRADES = [
 	{ name: 'Cultured', essMultiplier: 0.75, costMultiplier: 4 }
 ] as const;
 
+/** Bioware grade multiplier type. */
+export interface BiowareGradeMultiplier {
+	readonly name: BiowareGrade;
+	readonly essMultiplier: number;
+	readonly costMultiplier: number;
+}
+
+/** Get bioware grade multipliers by grade name. */
+export function getBiowareGradeMultiplier(grade: BiowareGrade): BiowareGradeMultiplier {
+	const found = BIOWARE_GRADES.find((g) => g.name === grade);
+	return found ?? BIOWARE_GRADES[0];
+}
+
 /** Bioware installed on a character. */
 export interface CharacterBioware {
 	readonly id: string;
@@ -251,6 +273,7 @@ export interface CharacterBioware {
 	readonly rating: number;
 	readonly essence: number;
 	readonly cost: number;
+	readonly avail?: string;
 	readonly notes: string;
 }
 
@@ -367,6 +390,7 @@ export interface CharacterGear {
 	readonly quantity: number;
 	readonly cost: number;
 	readonly location: string;
+	readonly avail?: string;
 	readonly notes: string;
 	/** Container capacity (if this gear can hold other gear). */
 	readonly capacity: number;

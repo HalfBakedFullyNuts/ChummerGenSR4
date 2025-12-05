@@ -82,7 +82,11 @@ chummer-web/
 │   │   ├── engine/        # Rules engine
 │   │   ├── firebase/      # Firebase integration
 │   │   ├── types/         # TypeScript definitions
+│   │   ├── utils/         # Utility functions
 │   │   ├── xml/           # Chummer XML import/export
+│   │   ├── calendar/      # In-game time tracking
+│   │   ├── sharing/       # Character sharing
+│   │   ├── pwa/           # Offline sync
 │   │   └── styles/        # Design system CSS
 │   ├── routes/            # SvelteKit routes
 │   └── app.css            # Global styles
@@ -90,6 +94,81 @@ chummer-web/
 │   └── data/              # Game data (JSON)
 ├── scripts/               # Build scripts
 └── tests/                 # Test files
+```
+
+## Architecture Patterns
+
+### Result Type Pattern
+
+All async operations return a `Result<T>` type for consistent error handling:
+
+```typescript
+import { type Result, success, failure, getErrorMessage } from '$types';
+
+async function fetchData(): Promise<Result<Data>> {
+  try {
+    const data = await api.get();
+    return success(data);
+  } catch (error) {
+    return failure(getErrorMessage(error));
+  }
+}
+
+// Usage
+const result = await fetchData();
+if (result.success) {
+  console.log(result.data);
+} else {
+  console.error(result.error);
+}
+```
+
+### Generic Collection Utilities
+
+Use the collection utilities in `$lib/utils/collections.ts` for common operations:
+
+```typescript
+import { findByName, filterByCategory, groupBy } from '$lib/utils/collections';
+
+// Find by name (case-insensitive)
+const skill = findByName(skills, 'Pistols');
+
+// Filter by category
+const combatSkills = filterByCategory(skills, 'Combat Active');
+
+// Group by key
+const skillsByCategory = groupBy(skills, (s) => s.category);
+```
+
+### Data-Driven Improvements Engine
+
+Equipment bonuses are defined declaratively in `engine/improvement-data.ts`:
+
+```typescript
+// Adding a new cyberware effect
+export const CYBERWARE_EFFECTS: readonly ItemEffectConfig[] = [
+  {
+    pattern: 'wired reflexes',
+    source: 'cyberware',
+    effects: [
+      { target: 'initiative', idSuffix: 'init', multiplier: 1 },
+      { target: 'initiative_dice', idSuffix: 'init-dice', multiplier: 1 }
+    ]
+  }
+  // Add more effects here...
+];
+```
+
+### Grade Multiplier Access
+
+Use centralized helper functions for equipment grades:
+
+```typescript
+import { getCyberwareGradeMultiplier, getBiowareGradeMultiplier } from '$types';
+
+const grade = getCyberwareGradeMultiplier('Alphaware');
+const essenceCost = baseEssence * grade.essMultiplier;
+const nuyenCost = baseCost * grade.costMultiplier;
 ```
 
 ## Code Quality

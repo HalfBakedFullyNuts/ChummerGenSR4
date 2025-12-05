@@ -1,0 +1,100 @@
+{
+	"metamagics": [
+		{
+			"name": "Centering",
+			"description": "Reduce drain from spellcasting or adept powers through focus and ritual.",
+			"source": "SR4",
+			"page": 196
+		},
+		{
+			"name": "Cleansing",
+			"description": "Remove background count penalties from an area.",
+			"source": "SR4",
+			"page": 196
+		},
+		{
+			"name": "Divining",
+			"description": "Gain cryptic insights about the future through ritual.",
+			"source": "SR4",
+			"page": 196
+		},
+		{
+			"name": "Geomancy",
+			"description": "Shape and manipulate mana lines and power sites.",
+			"source": "SM",
+			"page": 49
+		},
+		{
+			"name": "Invoking",
+			"description": "Summon more powerful spirits beyond normal limits.",
+			"source": "SM",
+			"page": 50
+		},
+		{
+			"name": "Masking",
+			"description": "Hide your magical nature from astral perception.",
+			"source": "SR4",
+			"page": 196
+		},
+		{
+			"name": "Shielding",
+			"description": "Add dice to spell defense for yourself or others.",
+			"source": "SR4",
+			"page": 196
+		},
+		{
+			"name": "Quickening",
+			"description": "Make a sustained spell permanent using karma.",
+			"source": "SM",
+			"page": 50
+		},
+		{
+			"name": "Anchoring",
+			"description": "Create magical anchors that trigger spells under conditions.",
+			"source": "SM",
+			"page": 48
+		},
+		{
+			"name": "Flexible Signature",
+			"description": "Alter your astral signature to avoid identification.",
+			"source": "SM",
+			"page": 49
+		},
+		{
+			"name": "Absorption",
+			"description": "Absorb drain from spells as temporary power.",
+			"source": "SM",
+			"page": 48
+		},
+		{
+			"name": "Reflecting",
+			"description": "Reflect spells back at their caster.",
+			"source": "SM",
+			"page": 50
+		},
+		{
+			"name": "Attunement",
+			"description": "Attune to a specific location for bonuses.",
+			"source": "SM",
+			"page": 48
+		},
+		{
+			"name": "Extended Masking",
+			"description": "Extend masking to cover foci and spells.",
+			"source": "SM",
+			"page": 49
+		},
+		{
+			"name": "Power Point",
+			"description": "Gain an additional power point for adept powers.",
+			"source": "SR4",
+			"page": 196
+		},
+		{
+			"name": "Sympathetic Linking",
+			"description": "Create ritual links to targets for remote spellcasting.",
+			"source": "SM",
+			"page": 51
+		}
+	]
+}

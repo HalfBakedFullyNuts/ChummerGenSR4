@@ -13,8 +13,14 @@ import {
 	setResourcesBP,
 	addWeapon,
 	removeWeapon,
+	addWeaponAccessory,
+	removeWeaponAccessory,
 	addArmor,
 	removeArmor,
+	toggleArmorEquipped,
+	addArmorModification,
+	removeArmorModification,
+	calculateTotalArmor,
 	addCyberware,
 	removeCyberware,
 	addGear,
@@ -522,5 +528,305 @@ describe('Equipment Store - Combined Purchases', () => {
 
 		expect(get(currentEssence)).toBeCloseTo(5.9);
 		expect(get(remainingNuyen)).toBeLessThan(275000);
+	});
+});
+
+describe('Equipment Store - Weapon Accessories', () => {
+	beforeEach(() => {
+		startNewCharacter('test-user', 'bp');
+		setResourcesBP(50); // 275,000 nuyen
+		addWeapon(mockWeapon);
+	});
+
+	it('should add accessory to weapon', () => {
+		const weapon = get(character)?.equipment.weapons[0];
+		expect(weapon).toBeDefined();
+
+		const result = addWeaponAccessory(weapon!.id, {
+			name: 'Smartgun System',
+			mount: 'Internal',
+			cost: 400
+		});
+
+		expect(result.success).toBe(true);
+
+		const updatedWeapon = get(character)?.equipment.weapons[0];
+		expect(updatedWeapon?.accessories).toHaveLength(1);
+		expect(updatedWeapon?.accessories[0]?.name).toBe('Smartgun System');
+	});
+
+	it('should deduct accessory cost from nuyen', () => {
+		const weapon = get(character)?.equipment.weapons[0];
+		const nuyenBefore = get(remainingNuyen);
+
+		addWeaponAccessory(weapon!.id, {
+			name: 'Laser Sight',
+			mount: 'Under',
+			cost: 125
+		});
+
+		expect(get(remainingNuyen)).toBe(nuyenBefore - 125);
+	});
+
+	it('should fail if not enough nuyen', () => {
+		setResourcesBP(0); // Reset to 0 nuyen
+
+		const weapon = get(character)?.equipment.weapons[0];
+		const result = addWeaponAccessory(weapon!.id, {
+			name: 'Expensive Accessory',
+			mount: 'Top',
+			cost: 10000
+		});
+
+		expect(result.success).toBe(false);
+		expect(result.error).toContain('nuyen');
+	});
+
+	it('should remove accessory and refund nuyen', () => {
+		const weapon = get(character)?.equipment.weapons[0];
+
+		addWeaponAccessory(weapon!.id, {
+			name: 'Sound Suppressor',
+			mount: 'Barrel',
+			cost: 500
+		});
+
+		const nuyenAfterAdd = get(remainingNuyen);
+		const accessory = get(character)?.equipment.weapons[0]?.accessories[0];
+
+		removeWeaponAccessory(weapon!.id, accessory!.id);
+
+		expect(get(character)?.equipment.weapons[0]?.accessories).toHaveLength(0);
+		expect(get(remainingNuyen)).toBe(nuyenAfterAdd + 500);
+	});
+
+	it('should allow multiple accessories on one weapon', () => {
+		const weapon = get(character)?.equipment.weapons[0];
+
+		addWeaponAccessory(weapon!.id, { name: 'Smartgun', mount: 'Internal', cost: 400 });
+		addWeaponAccessory(weapon!.id, { name: 'Laser Sight', mount: 'Under', cost: 125 });
+		addWeaponAccessory(weapon!.id, { name: 'Extended Clip', mount: 'Internal', cost: 75 });
+
+		expect(get(character)?.equipment.weapons[0]?.accessories).toHaveLength(3);
+	});
+});
+
+describe('Equipment Store - Armor Management', () => {
+	const mockArmor2: GameArmor = {
+		name: 'Armor Vest',
+		category: 'Armor',
+		ballistic: 6,
+		impact: 4,
+		capacity: 6,
+		avail: '2',
+		cost: 600,
+		source: 'SR4',
+		page: 325
+	};
+
+	beforeEach(() => {
+		startNewCharacter('test-user', 'bp');
+		setResourcesBP(50);
+	});
+
+	describe('Armor Equipped Toggle', () => {
+		it('should add armor as equipped by default', () => {
+			addArmor(mockArmor);
+
+			const armor = get(character)?.equipment.armor[0];
+			expect(armor?.equipped).toBe(true);
+		});
+
+		it('should toggle armor equipped status', () => {
+			addArmor(mockArmor);
+			const armor = get(character)?.equipment.armor[0];
+
+			toggleArmorEquipped(armor!.id);
+
+			expect(get(character)?.equipment.armor[0]?.equipped).toBe(false);
+
+			toggleArmorEquipped(armor!.id);
+
+			expect(get(character)?.equipment.armor[0]?.equipped).toBe(true);
+		});
+	});
+
+	describe('Armor Modifications', () => {
+		it('should add modification to armor', () => {
+			addArmor(mockArmor);
+			const armor = get(character)?.equipment.armor[0];
+
+			const result = addArmorModification(armor!.id, {
+				name: 'Fire Resistance',
+				rating: 2,
+				capacityCost: 2,
+				cost: 200
+			});
+
+			expect(result.success).toBe(true);
+
+			const updatedArmor = get(character)?.equipment.armor[0];
+			expect(updatedArmor?.modifications).toHaveLength(1);
+			expect(updatedArmor?.modifications[0]?.name).toBe('Fire Resistance');
+		});
+
+		it('should deduct modification cost from nuyen', () => {
+			addArmor(mockArmor);
+			const armor = get(character)?.equipment.armor[0];
+			const nuyenBefore = get(remainingNuyen);
+
+			addArmorModification(armor!.id, {
+				name: 'Insulation',
+				rating: 3,
+				capacityCost: 3,
+				cost: 300
+			});
+
+			expect(get(remainingNuyen)).toBe(nuyenBefore - 300);
+		});
+
+		it('should fail if not enough capacity', () => {
+			addArmor(mockArmor); // 8 capacity
+			const armor = get(character)?.equipment.armor[0];
+
+			const result = addArmorModification(armor!.id, {
+				name: 'Huge Mod',
+				rating: 10,
+				capacityCost: 10, // More than armor's capacity
+				cost: 100
+			});
+
+			expect(result.success).toBe(false);
+			expect(result.error).toContain('capacity');
+		});
+
+		it('should track cumulative capacity usage', () => {
+			addArmor(mockArmor); // 8 capacity
+			const armor = get(character)?.equipment.armor[0];
+
+			addArmorModification(armor!.id, { name: 'Mod1', rating: 1, capacityCost: 3, cost: 100 });
+			addArmorModification(armor!.id, { name: 'Mod2', rating: 1, capacityCost: 3, cost: 100 });
+
+			// Should fail - only 2 capacity left
+			const result = addArmorModification(armor!.id, {
+				name: 'Mod3',
+				rating: 1,
+				capacityCost: 3,
+				cost: 100
+			});
+
+			expect(result.success).toBe(false);
+		});
+
+		it('should remove modification and refund nuyen', () => {
+			addArmor(mockArmor);
+			const armor = get(character)?.equipment.armor[0];
+
+			addArmorModification(armor!.id, {
+				name: 'Chemical Protection',
+				rating: 2,
+				capacityCost: 2,
+				cost: 500
+			});
+
+			const nuyenAfterAdd = get(remainingNuyen);
+			const mod = get(character)?.equipment.armor[0]?.modifications[0];
+
+			removeArmorModification(armor!.id, mod!.id);
+
+			expect(get(character)?.equipment.armor[0]?.modifications).toHaveLength(0);
+			expect(get(remainingNuyen)).toBe(nuyenAfterAdd + 500);
+		});
+	});
+
+	describe('SR4 Armor Stacking Rules', () => {
+		/**
+		 * SR4 p.159 - Armor Layering
+		 * Primary armor + half of highest secondary armor (rounded down)
+		 */
+		it('should return 0/0 with no armor equipped', () => {
+			const totals = calculateTotalArmor();
+
+			expect(totals.ballistic).toBe(0);
+			expect(totals.impact).toBe(0);
+		});
+
+		it('should return primary armor values with single armor', () => {
+			addArmor(mockArmor); // 8/6
+
+			const totals = calculateTotalArmor();
+
+			expect(totals.ballistic).toBe(8);
+			expect(totals.impact).toBe(6);
+		});
+
+		it('should calculate stacked armor correctly', () => {
+			addArmor(mockArmor);   // 8/6 - Primary (highest ballistic)
+			addArmor(mockArmor2);  // 6/4 - Secondary
+
+			const totals = calculateTotalArmor();
+
+			// Primary: 8/6
+			// Secondary half: 6/2 = 3, 4/2 = 2
+			// Total: 8+3=11, 6+2=8
+			expect(totals.ballistic).toBe(11);
+			expect(totals.impact).toBe(8);
+		});
+
+		it('should only count equipped armor', () => {
+			addArmor(mockArmor);
+			addArmor(mockArmor2);
+
+			// Unequip second armor
+			const secondArmor = get(character)?.equipment.armor[1];
+			toggleArmorEquipped(secondArmor!.id);
+
+			const totals = calculateTotalArmor();
+
+			// Only primary should count
+			expect(totals.ballistic).toBe(8);
+			expect(totals.impact).toBe(6);
+		});
+
+		it('should use highest ballistic as primary', () => {
+			addArmor(mockArmor2);  // 6/4 - Added first
+			addArmor(mockArmor);   // 8/6 - Higher ballistic
+
+			const totals = calculateTotalArmor();
+
+			// Primary should be 8/6, secondary half: 3/2
+			expect(totals.ballistic).toBe(11);
+			expect(totals.impact).toBe(8);
+		});
+	});
+
+	describe('Armor Encumbrance', () => {
+		/**
+		 * SR4 p.160 - Armor Encumbrance
+		 * If total Ballistic armor exceeds BOD, apply penalty to AGI and REA
+		 * Note: Test characters start with BOD 0, so encumbrance = armor - 0 = armor
+		 */
+		it('should calculate encumbrance when armor exceeds BOD', () => {
+			addArmor(mockArmor2); // 6 ballistic, character BOD is 0
+
+			const totals = calculateTotalArmor();
+			// BOD 0, Armor 6 -> encumbrance = 6
+			expect(totals.encumbrance).toBe(6);
+		});
+
+		it('should calculate encumbrance for stacked armor', () => {
+			addArmor(mockArmor);  // 8/6
+			addArmor(mockArmor2); // 6/4 -> stacked to 11/8
+
+			const totals = calculateTotalArmor();
+
+			// BOD 0, Armor 11 -> encumbrance = 11
+			expect(totals.encumbrance).toBe(11);
+		});
+
+		it('should return 0 encumbrance with no armor', () => {
+			const totals = calculateTotalArmor();
+			expect(totals.encumbrance).toBe(0);
+		});
 	});
 });

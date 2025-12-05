@@ -33,7 +33,9 @@ import {
 	type BiowareGrade,
 	type ExpenseEntry,
 	bpToNuyen,
-	createEmptyCharacter
+	createEmptyCharacter,
+	getCyberwareGradeMultiplier,
+	getBiowareGradeMultiplier
 } from '$types';
 import {
 	findMetatype,
@@ -42,6 +44,7 @@ import {
 	type GameVehicle,
 	type GameMartialArt
 } from './gamedata';
+import { calculateArmorTotals, type ArmorTotals } from '$lib/engine/calculations';
 
 /** Maximum BP for standard character creation. */
 const MAX_BP = 400;
@@ -1037,7 +1040,7 @@ export function addArmor(armor: GameArmor): void {
 		impact: armor.impact,
 		capacity: armor.capacity,
 		capacityUsed: 0,
-		equipped: false,
+		equipped: true,
 		cost: armor.cost,
 		modifications: [],
 		notes: ''
@@ -1080,6 +1083,190 @@ export function removeArmor(armorId: string): void {
 }
 
 /**
+ * Add an accessory to a weapon.
+ */
+export function addWeaponAccessory(
+	weaponId: string,
+	accessory: { name: string; mount: string; cost: number }
+): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) return { success: false, error: 'No character loaded' };
+
+	const weapon = char.equipment.weapons.find((w) => w.id === weaponId);
+	if (!weapon) return { success: false, error: 'Weapon not found' };
+
+	if (char.nuyen < accessory.cost) {
+		return { success: false, error: `Not enough nuyen. Need ${accessory.cost}¥` };
+	}
+
+	const newAccessory = {
+		id: generateId(),
+		name: accessory.name,
+		mount: accessory.mount,
+		cost: accessory.cost
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			weapons: char.equipment.weapons.map((w) =>
+				w.id === weaponId
+					? { ...w, accessories: [...w.accessories, newAccessory] }
+					: w
+			)
+		},
+		nuyen: char.nuyen - accessory.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+	return { success: true };
+}
+
+/**
+ * Remove an accessory from a weapon.
+ */
+export function removeWeaponAccessory(
+	weaponId: string,
+	accessoryId: string
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const weapon = char.equipment.weapons.find((w) => w.id === weaponId);
+	if (!weapon) return;
+
+	const accessory = weapon.accessories.find((a) => a.id === accessoryId);
+	if (!accessory) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			weapons: char.equipment.weapons.map((w) =>
+				w.id === weaponId
+					? { ...w, accessories: w.accessories.filter((a) => a.id !== accessoryId) }
+					: w
+			)
+		},
+		nuyen: char.nuyen + accessory.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Toggle armor equipped status.
+ */
+export function toggleArmorEquipped(armorId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			armor: char.equipment.armor.map((a) =>
+				a.id === armorId ? { ...a, equipped: !a.equipped } : a
+			)
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Add a modification to armor.
+ */
+export function addArmorModification(
+	armorId: string,
+	mod: { name: string; rating: number; cost: number; capacityCost: number }
+): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) return { success: false, error: 'No character loaded' };
+
+	const armor = char.equipment.armor.find((a) => a.id === armorId);
+	if (!armor) return { success: false, error: 'Armor not found' };
+
+	const currentCapacity = armor.modifications?.reduce((sum, m) => sum + m.capacityCost, 0) ?? 0;
+	if (currentCapacity + mod.capacityCost > armor.capacity) {
+		return { success: false, error: 'Not enough capacity' };
+	}
+
+	if (char.nuyen < mod.cost) {
+		return { success: false, error: `Not enough nuyen. Need ${mod.cost}¥` };
+	}
+
+	const newMod = {
+		id: generateId(),
+		name: mod.name,
+		rating: mod.rating,
+		cost: mod.cost,
+		capacityCost: mod.capacityCost
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			armor: char.equipment.armor.map((a) =>
+				a.id === armorId
+					? { ...a, modifications: [...(a.modifications || []), newMod] }
+					: a
+			)
+		},
+		nuyen: char.nuyen - mod.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+	return { success: true };
+}
+
+/**
+ * Remove a modification from armor.
+ */
+export function removeArmorModification(armorId: string, modId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const armor = char.equipment.armor.find((a) => a.id === armorId);
+	if (!armor) return;
+
+	const mod = armor.modifications?.find((m) => m.id === modId);
+	if (!mod) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			armor: char.equipment.armor.map((a) =>
+				a.id === armorId
+					? { ...a, modifications: a.modifications?.filter((m) => m.id !== modId) || [] }
+					: a
+			)
+		},
+		nuyen: char.nuyen + mod.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Calculate total armor value using SR4 stacking rules.
+ * Delegates to calculations engine for DRY compliance.
+ */
+export function calculateTotalArmor(): ArmorTotals {
+	const char = get(characterStore);
+	if (!char) return { ballistic: 0, impact: 0, encumbrance: 0 };
+	return calculateArmorTotals(char);
+}
+
+/**
  * Add cyberware to the character.
  * Reduces essence based on grade.
  */
@@ -1090,18 +1277,10 @@ export function addCyberware(
 	const char = get(characterStore);
 	if (!char) return;
 
-	/* Get grade multipliers */
-	const gradeMultipliers: Record<CyberwareGrade, { ess: number; cost: number }> = {
-		'Standard': { ess: 1.0, cost: 1 },
-		'Alphaware': { ess: 0.8, cost: 2 },
-		'Betaware': { ess: 0.7, cost: 4 },
-		'Deltaware': { ess: 0.5, cost: 10 },
-		'Used': { ess: 1.2, cost: 0.5 }
-	};
-
-	const multiplier = gradeMultipliers[grade];
-	const essenceCost = cyber.ess * multiplier.ess;
-	const nuyenCost = Math.floor(cyber.cost * multiplier.cost);
+	/* Get grade multipliers from centralized type definitions */
+	const multiplier = getCyberwareGradeMultiplier(grade);
+	const essenceCost = cyber.ess * multiplier.essMultiplier;
+	const nuyenCost = Math.floor(cyber.cost * multiplier.costMultiplier);
 
 	/* Check if we have enough nuyen and essence */
 	if (char.nuyen < nuyenCost) return;
@@ -1182,15 +1361,10 @@ export function addBioware(
 	const char = get(characterStore);
 	if (!char) return;
 
-	/* Get grade multipliers */
-	const gradeMultipliers: Record<BiowareGrade, { ess: number; cost: number }> = {
-		'Standard': { ess: 1.0, cost: 1 },
-		'Cultured': { ess: 0.75, cost: 4 }
-	};
-
-	const multiplier = gradeMultipliers[grade];
-	const essenceCost = bio.ess * multiplier.ess * rating;
-	const nuyenCost = Math.floor(bio.cost * multiplier.cost * rating);
+	/* Get grade multipliers from centralized type definitions */
+	const multiplier = getBiowareGradeMultiplier(grade);
+	const essenceCost = bio.ess * multiplier.essMultiplier * rating;
+	const nuyenCost = Math.floor(bio.cost * multiplier.costMultiplier * rating);
 
 	/* Check if we have enough nuyen and essence */
 	if (char.nuyen < nuyenCost) return;

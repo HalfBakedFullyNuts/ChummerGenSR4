@@ -76,6 +76,22 @@ export interface Contact {
 	readonly notes: string;
 }
 
+/** Expense category for grouping transactions. */
+export type ExpenseCategory =
+	| 'Attribute'
+	| 'Skill'
+	| 'Quality'
+	| 'Spell'
+	| 'Power'
+	| 'ComplexForm'
+	| 'Initiation'
+	| 'Submersion'
+	| 'Gear'
+	| 'Lifestyle'
+	| 'Contact'
+	| 'Mission'
+	| 'Other';
+
 /**
  * Expense log entry for tracking karma/nuyen.
  * Records all transactions in career mode.
@@ -86,6 +102,10 @@ export interface ExpenseEntry {
 	readonly type: 'karma' | 'nuyen';
 	readonly amount: number;
 	readonly reason: string;
+	/** Category for filtering (e.g., Skill, Attribute, Gear). */
+	readonly category?: ExpenseCategory;
+	/** Session identifier for grouping by game session. */
+	readonly session?: string;
 }
 
 /**

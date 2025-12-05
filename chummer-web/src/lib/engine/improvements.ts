@@ -7,9 +7,22 @@
  * - Quality effects
  * - Adept power bonuses
  * - Gear bonuses
+ *
+ * Uses data-driven configuration from improvement-data.ts
  */
 
 import type { Character, CharacterCyberware, CharacterQuality, CharacterPower } from '$types';
+import {
+	CYBERWARE_EFFECTS,
+	BIOWARE_EFFECTS,
+	COMPLEX_CYBERWARE_EFFECTS,
+	QUALITY_EFFECTS,
+	ADEPT_POWER_EFFECTS,
+	findMatchingConfig,
+	matchesPattern,
+	calculateEffectValue,
+	type EffectDefinition
+} from './improvement-data';
 
 /* ============================================
  * Improvement Types
@@ -46,233 +59,63 @@ export interface Improvement {
 }
 
 /* ============================================
+ * Generic Improvement Extraction
+ * ============================================ */
+
+/** Create improvements from effect definitions. */
+function createImprovements(
+	itemId: string,
+	itemName: string,
+	source: ImprovementSource,
+	effects: readonly EffectDefinition[],
+	rating: number
+): Improvement[] {
+	return effects.map((effect) => ({
+		id: `${itemId}-${effect.idSuffix}`,
+		source,
+		sourceName: itemName,
+		target: effect.target,
+		value: calculateEffectValue(effect, rating),
+		conditional: effect.conditional
+	}));
+}
+
+/* ============================================
  * Cyberware Improvements
  * ============================================ */
 
-/** Extract improvements from cyberware. */
+/** Extract improvements from cyberware using data-driven configuration. */
 export function getCyberwareImprovements(cyberware: readonly CharacterCyberware[]): Improvement[] {
 	const improvements: Improvement[] = [];
 
 	for (const cyber of cyberware) {
-		const name = cyber.name.toLowerCase();
+		const name = cyber.name;
 		const rating = cyber.rating || 1;
 
-		// Wired Reflexes
-		if (name.includes('wired reflexes')) {
-			improvements.push({
-				id: `${cyber.id}-init`,
-				source: 'cyberware',
-				sourceName: cyber.name,
-				target: 'initiative',
-				value: rating
-			});
-			improvements.push({
-				id: `${cyber.id}-init-dice`,
-				source: 'cyberware',
-				sourceName: cyber.name,
-				target: 'initiative_dice',
-				value: rating
-			});
+		// Check standard cyberware effects
+		const cyberConfig = findMatchingConfig(CYBERWARE_EFFECTS, name);
+		if (cyberConfig) {
+			improvements.push(
+				...createImprovements(cyber.id, name, cyberConfig.source, cyberConfig.effects, rating)
+			);
 		}
 
-		// Synaptic Booster
-		if (name.includes('synaptic booster')) {
-			improvements.push({
-				id: `${cyber.id}-init`,
-				source: 'bioware',
-				sourceName: cyber.name,
-				target: 'initiative',
-				value: rating
-			});
-			improvements.push({
-				id: `${cyber.id}-init-dice`,
-				source: 'bioware',
-				sourceName: cyber.name,
-				target: 'initiative_dice',
-				value: rating
-			});
+		// Check bioware effects (some augmentations are categorized as cyberware)
+		const bioConfig = findMatchingConfig(BIOWARE_EFFECTS, name);
+		if (bioConfig) {
+			improvements.push(
+				...createImprovements(cyber.id, name, bioConfig.source, bioConfig.effects, rating)
+			);
 		}
 
-		// Reaction Enhancers
-		if (name.includes('reaction enhancers') || name.includes('reaction enhancer')) {
-			improvements.push({
-				id: `${cyber.id}-rea`,
-				source: 'cyberware',
-				sourceName: cyber.name,
-				target: 'rea',
-				value: rating
-			});
-		}
-
-		// Muscle Replacement
-		if (name.includes('muscle replacement')) {
-			improvements.push({
-				id: `${cyber.id}-str`,
-				source: 'cyberware',
-				sourceName: cyber.name,
-				target: 'str',
-				value: rating
-			});
-			improvements.push({
-				id: `${cyber.id}-agi`,
-				source: 'cyberware',
-				sourceName: cyber.name,
-				target: 'agi',
-				value: rating
-			});
-		}
-
-		// Muscle Toner
-		if (name.includes('muscle toner')) {
-			improvements.push({
-				id: `${cyber.id}-agi`,
-				source: 'bioware',
-				sourceName: cyber.name,
-				target: 'agi',
-				value: rating
-			});
-		}
-
-		// Muscle Augmentation
-		if (name.includes('muscle augmentation')) {
-			improvements.push({
-				id: `${cyber.id}-str`,
-				source: 'bioware',
-				sourceName: cyber.name,
-				target: 'str',
-				value: rating
-			});
-		}
-
-		// Cerebral Booster
-		if (name.includes('cerebral booster')) {
-			improvements.push({
-				id: `${cyber.id}-log`,
-				source: 'bioware',
-				sourceName: cyber.name,
-				target: 'log',
-				value: rating
-			});
-		}
-
-		// Mnemonic Enhancer
-		if (name.includes('mnemonic enhancer')) {
-			improvements.push({
-				id: `${cyber.id}-memory`,
-				source: 'bioware',
-				sourceName: cyber.name,
-				target: 'memory',
-				value: rating
-			});
-		}
-
-		// Bone Lacing/Density
-		if (name.includes('bone lacing') || name.includes('bone density')) {
-			let armorValue = 0;
-			if (name.includes('plastic')) armorValue = 1;
-			else if (name.includes('aluminum')) armorValue = 2;
-			else if (name.includes('titanium')) armorValue = 3;
-
-			if (armorValue > 0) {
-				improvements.push({
-					id: `${cyber.id}-armor`,
-					source: 'cyberware',
-					sourceName: cyber.name,
-					target: 'armor_ballistic',
-					value: armorValue
-				});
-				improvements.push({
-					id: `${cyber.id}-armor-i`,
-					source: 'cyberware',
-					sourceName: cyber.name,
-					target: 'armor_impact',
-					value: armorValue
-				});
+		// Check complex cyberware effects (items with special logic)
+		for (const complexConfig of COMPLEX_CYBERWARE_EFFECTS) {
+			if (matchesPattern(name, complexConfig.pattern)) {
+				const effects = complexConfig.getEffects(name.toLowerCase(), rating);
+				improvements.push(
+					...createImprovements(cyber.id, name, complexConfig.source, effects, rating)
+				);
 			}
-		}
-
-		// Dermal Plating
-		if (name.includes('dermal plating')) {
-			improvements.push({
-				id: `${cyber.id}-armor-b`,
-				source: 'cyberware',
-				sourceName: cyber.name,
-				target: 'armor_ballistic',
-				value: rating
-			});
-			improvements.push({
-				id: `${cyber.id}-armor-i`,
-				source: 'cyberware',
-				sourceName: cyber.name,
-				target: 'armor_impact',
-				value: rating
-			});
-		}
-
-		// Orthoskin
-		if (name.includes('orthoskin')) {
-			improvements.push({
-				id: `${cyber.id}-armor-b`,
-				source: 'bioware',
-				sourceName: cyber.name,
-				target: 'armor_ballistic',
-				value: rating
-			});
-			improvements.push({
-				id: `${cyber.id}-armor-i`,
-				source: 'bioware',
-				sourceName: cyber.name,
-				target: 'armor_impact',
-				value: rating
-			});
-		}
-
-		// Platelet Factories
-		if (name.includes('platelet factories')) {
-			improvements.push({
-				id: `${cyber.id}-dam-res`,
-				source: 'bioware',
-				sourceName: cyber.name,
-				target: 'damage_resistance',
-				value: 1
-			});
-		}
-
-		// Pain Editor
-		if (name.includes('pain editor')) {
-			improvements.push({
-				id: `${cyber.id}-pain`,
-				source: 'bioware',
-				sourceName: cyber.name,
-				target: 'damage_resistance',
-				value: 2,
-				conditional: 'Ignores wound modifiers'
-			});
-		}
-
-		// Move-by-Wire
-		if (name.includes('move-by-wire')) {
-			improvements.push({
-				id: `${cyber.id}-init`,
-				source: 'cyberware',
-				sourceName: cyber.name,
-				target: 'initiative',
-				value: rating * 2
-			});
-			improvements.push({
-				id: `${cyber.id}-init-dice`,
-				source: 'cyberware',
-				sourceName: cyber.name,
-				target: 'initiative_dice',
-				value: rating
-			});
-			improvements.push({
-				id: `${cyber.id}-rea`,
-				source: 'cyberware',
-				sourceName: cyber.name,
-				target: 'rea',
-				value: rating
-			});
 		}
 	}
 
@@ -283,86 +126,19 @@ export function getCyberwareImprovements(cyberware: readonly CharacterCyberware[
  * Quality Improvements
  * ============================================ */
 
-/** Extract improvements from qualities. */
+/** Extract improvements from qualities using data-driven configuration. */
 export function getQualityImprovements(qualities: readonly CharacterQuality[]): Improvement[] {
 	const improvements: Improvement[] = [];
 
 	for (const quality of qualities) {
-		const name = quality.name.toLowerCase();
-
-		// Exceptional Attribute
-		if (name.includes('exceptional attribute')) {
-			// This raises max by 1, handled separately in attribute limits
+		const config = findMatchingConfig(QUALITY_EFFECTS, quality.name);
+		if (config) {
+			improvements.push(
+				...createImprovements(quality.id, quality.name, config.source, config.effects, quality.rating)
+			);
 		}
 
-		// Toughness
-		if (name === 'toughness') {
-			improvements.push({
-				id: `${quality.id}-tough`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'physical_cm',
-				value: 1
-			});
-		}
-
-		// Will to Live
-		if (name.includes('will to live')) {
-			improvements.push({
-				id: `${quality.id}-wtl`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'physical_cm',
-				value: quality.rating
-			});
-		}
-
-		// High Pain Tolerance
-		if (name.includes('high pain tolerance')) {
-			improvements.push({
-				id: `${quality.id}-hpt`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'damage_resistance',
-				value: quality.rating,
-				conditional: 'Reduces wound modifiers'
-			});
-		}
-
-		// Natural Immunity
-		if (name.includes('natural immunity')) {
-			improvements.push({
-				id: `${quality.id}-immune`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'damage_resistance',
-				value: 2,
-				conditional: 'Toxin/disease resistance'
-			});
-		}
-
-		// Magic Resistance
-		if (name === 'magic resistance') {
-			improvements.push({
-				id: `${quality.id}-mr`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'spell_resistance',
-				value: quality.rating * 2
-			});
-		}
-
-		// Lucky
-		if (name === 'lucky') {
-			improvements.push({
-				id: `${quality.id}-luck`,
-				source: 'quality',
-				sourceName: quality.name,
-				target: 'edg',
-				value: 1,
-				conditional: 'One extra Edge point'
-			});
-		}
+		// Note: Exceptional Attribute raises max by 1, handled in attribute limits
 	}
 
 	return improvements;
@@ -372,84 +148,22 @@ export function getQualityImprovements(qualities: readonly CharacterQuality[]): 
  * Adept Power Improvements
  * ============================================ */
 
-/** Extract improvements from adept powers. */
+/** Extract improvements from adept powers using data-driven configuration. */
 export function getAdeptPowerImprovements(powers: readonly CharacterPower[]): Improvement[] {
 	const improvements: Improvement[] = [];
 
 	for (const power of powers) {
-		const name = power.name.toLowerCase();
 		const level = power.level || 1;
+		const config = findMatchingConfig(ADEPT_POWER_EFFECTS, power.name);
 
-		// Improved Reflexes
-		if (name.includes('improved reflexes')) {
-			improvements.push({
-				id: `${power.id}-init`,
-				source: 'adept_power',
-				sourceName: power.name,
-				target: 'initiative',
-				value: level
-			});
-			improvements.push({
-				id: `${power.id}-init-dice`,
-				source: 'adept_power',
-				sourceName: power.name,
-				target: 'initiative_dice',
-				value: level
-			});
+		if (config) {
+			improvements.push(
+				...createImprovements(power.id, power.name, config.source, config.effects, level)
+			);
 		}
 
-		// Improved Physical Attribute
-		if (name.includes('improved physical attribute')) {
-			// Would need to know which attribute
-			// This is typically selected when the power is taken
-		}
-
-		// Improved Ability
-		if (name.includes('improved ability')) {
-			// Would need to know which skill
-		}
-
-		// Combat Sense
-		if (name.includes('combat sense')) {
-			improvements.push({
-				id: `${power.id}-cs`,
-				source: 'adept_power',
-				sourceName: power.name,
-				target: 'rea',
-				value: level,
-				conditional: 'Defense and surprise tests only'
-			});
-		}
-
-		// Mystic Armor
-		if (name.includes('mystic armor')) {
-			improvements.push({
-				id: `${power.id}-armor-b`,
-				source: 'adept_power',
-				sourceName: power.name,
-				target: 'armor_ballistic',
-				value: level
-			});
-			improvements.push({
-				id: `${power.id}-armor-i`,
-				source: 'adept_power',
-				sourceName: power.name,
-				target: 'armor_impact',
-				value: level
-			});
-		}
-
-		// Pain Resistance
-		if (name.includes('pain resistance')) {
-			improvements.push({
-				id: `${power.id}-pr`,
-				source: 'adept_power',
-				sourceName: power.name,
-				target: 'damage_resistance',
-				value: level,
-				conditional: 'Ignores wound modifiers'
-			});
-		}
+		// Note: Improved Physical Attribute and Improved Ability need specific attribute/skill
+		// These are typically selected when the power is taken
 	}
 
 	return improvements;

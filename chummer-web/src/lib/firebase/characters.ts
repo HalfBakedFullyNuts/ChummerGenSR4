@@ -18,17 +18,10 @@ import {
 	type QuerySnapshot
 } from 'firebase/firestore';
 import { getDbInstance } from './config';
-import type { Character } from '$types';
+import { type Character, type Result, success, failure, getErrorMessage } from '$types';
 
 /** Collection name for characters. */
 const CHARACTERS_COLLECTION = 'characters';
-
-/** Result type for database operations. */
-interface DbResult<T = void> {
-	success: boolean;
-	error?: string;
-	data?: T;
-}
 
 /** Character summary for list views. */
 export interface CharacterSummary {
@@ -45,7 +38,7 @@ export interface CharacterSummary {
  * Save a character to Firestore.
  * Creates new document or updates existing one.
  */
-export async function saveCharacter(character: Character): Promise<DbResult> {
+export async function saveCharacter(character: Character): Promise<Result> {
 	try {
 		const db = getDbInstance();
 		const charRef = doc(db, CHARACTERS_COLLECTION, character.id);
@@ -57,10 +50,9 @@ export async function saveCharacter(character: Character): Promise<DbResult> {
 		};
 
 		await setDoc(charRef, charToSave);
-		return { success: true };
+		return success();
 	} catch (error) {
-		const message = error instanceof Error ? error.message : 'Failed to save character';
-		return { success: false, error: message };
+		return failure(getErrorMessage(error));
 	}
 }
 
@@ -68,36 +60,34 @@ export async function saveCharacter(character: Character): Promise<DbResult> {
  * Load a character from Firestore by ID.
  * Returns null if character not found.
  */
-export async function loadCharacter(characterId: string): Promise<DbResult<Character | null>> {
+export async function loadCharacter(characterId: string): Promise<Result<Character | null>> {
 	try {
 		const db = getDbInstance();
 		const charRef = doc(db, CHARACTERS_COLLECTION, characterId);
 		const charSnap = await getDoc(charRef);
 
 		if (!charSnap.exists()) {
-			return { success: true, data: null };
+			return success(null);
 		}
 
 		const data = charSnap.data() as Character;
-		return { success: true, data };
+		return success(data);
 	} catch (error) {
-		const message = error instanceof Error ? error.message : 'Failed to load character';
-		return { success: false, error: message };
+		return failure(getErrorMessage(error));
 	}
 }
 
 /**
  * Delete a character from Firestore.
  */
-export async function deleteCharacter(characterId: string): Promise<DbResult> {
+export async function deleteCharacter(characterId: string): Promise<Result> {
 	try {
 		const db = getDbInstance();
 		const charRef = doc(db, CHARACTERS_COLLECTION, characterId);
 		await deleteDoc(charRef);
-		return { success: true };
+		return success();
 	} catch (error) {
-		const message = error instanceof Error ? error.message : 'Failed to delete character';
-		return { success: false, error: message };
+		return failure(getErrorMessage(error));
 	}
 }
 
@@ -108,7 +98,7 @@ export async function deleteCharacter(characterId: string): Promise<DbResult> {
 export async function listUserCharacters(
 	userId: string,
 	maxResults: number = 100
-): Promise<DbResult<CharacterSummary[]>> {
+): Promise<Result<CharacterSummary[]>> {
 	try {
 		const db = getDbInstance();
 		const charsRef = collection(db, CHARACTERS_COLLECTION);
@@ -122,10 +112,10 @@ export async function listUserCharacters(
 		const snapshot: QuerySnapshot<DocumentData> = await getDocs(q);
 		const characters: CharacterSummary[] = [];
 
-		snapshot.forEach((doc) => {
-			const data = doc.data();
+		snapshot.forEach((docSnap) => {
+			const data = docSnap.data();
 			characters.push({
-				id: doc.id,
+				id: docSnap.id,
 				name: data.identity?.name || 'Unnamed',
 				alias: data.identity?.alias || '',
 				metatype: data.identity?.metatype || 'Unknown',
@@ -135,10 +125,9 @@ export async function listUserCharacters(
 			});
 		});
 
-		return { success: true, data: characters };
+		return success(characters);
 	} catch (error) {
-		const message = error instanceof Error ? error.message : 'Failed to list characters';
-		return { success: false, error: message };
+		return failure(getErrorMessage(error));
 	}
 }
 
@@ -149,22 +138,21 @@ export async function listUserCharacters(
 export async function verifyCharacterOwnership(
 	characterId: string,
 	userId: string
-): Promise<DbResult<boolean>> {
+): Promise<Result<boolean>> {
 	try {
 		const db = getDbInstance();
 		const charRef = doc(db, CHARACTERS_COLLECTION, characterId);
 		const charSnap = await getDoc(charRef);
 
 		if (!charSnap.exists()) {
-			return { success: true, data: false };
+			return success(false);
 		}
 
 		const data = charSnap.data();
 		const isOwner = data.userId === userId;
-		return { success: true, data: isOwner };
+		return success(isOwner);
 	} catch (error) {
-		const message = error instanceof Error ? error.message : 'Failed to verify ownership';
-		return { success: false, error: message };
+		return failure(getErrorMessage(error));
 	}
 }
 
@@ -176,19 +164,19 @@ export async function duplicateCharacter(
 	characterId: string,
 	newId: string,
 	userId: string
-): Promise<DbResult<Character | null>> {
+): Promise<Result<Character | null>> {
 	try {
 		/* Load existing character */
 		const loadResult = await loadCharacter(characterId);
 		if (!loadResult.success || !loadResult.data) {
-			return { success: false, error: 'Source character not found' };
+			return failure('Source character not found');
 		}
 
 		const original = loadResult.data;
 
 		/* Verify ownership */
 		if (original.userId !== userId) {
-			return { success: false, error: 'Not authorized to duplicate this character' };
+			return failure('Not authorized to duplicate this character');
 		}
 
 		/* Create duplicate with new ID and timestamps */
@@ -207,12 +195,11 @@ export async function duplicateCharacter(
 		/* Save duplicate */
 		const saveResult = await saveCharacter(duplicate);
 		if (!saveResult.success) {
-			return { success: false, error: saveResult.error || 'Failed to save duplicate' };
+			return failure(saveResult.error || 'Failed to save duplicate');
 		}
 
-		return { success: true, data: duplicate };
+		return success(duplicate);
 	} catch (error) {
-		const message = error instanceof Error ? error.message : 'Failed to duplicate character';
-		return { success: false, error: message };
+		return failure(getErrorMessage(error));
 	}
 }
