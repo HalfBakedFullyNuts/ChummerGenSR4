@@ -1,12 +1,16 @@
 /**
  * User store module.
  * Manages auth state as a reactive Svelte store.
+ *
+ * FIREBASE DISABLED: Currently using local-only mode.
+ * To re-enable Firebase auth, uncomment the Firebase imports and createUserStore logic.
  */
 
 import { writable, type Readable } from 'svelte/store';
-import type { User } from 'firebase/auth';
-import { subscribeToAuthState } from '$firebase/auth';
-import { browser } from '$app/environment';
+// FIREBASE DISABLED:
+// import type { User } from 'firebase/auth';
+// import { subscribeToAuthState } from '$firebase/auth';
+// import { browser } from '$app/environment';
 
 /** User type exposed by the store. */
 export interface AppUser {
@@ -17,40 +21,16 @@ export interface AppUser {
 }
 
 /**
- * Convert Firebase User to AppUser.
- * Extracts only the fields we need for the app.
- */
-function toAppUser(firebaseUser: User): AppUser {
-	return {
-		uid: firebaseUser.uid,
-		email: firebaseUser.email,
-		displayName: firebaseUser.displayName,
-		photoURL: firebaseUser.photoURL
-	};
-}
-
-/**
  * Create the user store.
- * Subscribes to Firebase auth state changes in browser.
+ * FIREBASE DISABLED: Returns null (local-only mode).
  */
 function createUserStore(): Readable<AppUser | null> {
-	const { subscribe, set } = writable<AppUser | null>(null);
-
-	if (browser) {
-		/* Subscribe to auth state changes */
-		subscribeToAuthState((firebaseUser: User | null) => {
-			if (firebaseUser) {
-				set(toAppUser(firebaseUser));
-			} else {
-				set(null);
-			}
-		});
-	}
-
+	const { subscribe } = writable<AppUser | null>(null);
+	// FIREBASE DISABLED: No auth subscription
 	return { subscribe };
 }
 
-/** Reactive user store - null when not signed in. */
+/** Reactive user store - null when not signed in (Firebase disabled). */
 export const user = createUserStore();
 
 /**

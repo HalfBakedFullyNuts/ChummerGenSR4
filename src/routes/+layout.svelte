@@ -3,10 +3,12 @@
 	import '$styles/chummer-design-system.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { initializeFirebase } from '$firebase/config';
+	// FIREBASE DISABLED:
+	// import { initializeFirebase } from '$firebase/config';
 	import { loadGameData } from '$stores/gamedata';
 	import { user } from '$stores/user';
-	import { signOutUser } from '$firebase/auth';
+	// FIREBASE DISABLED:
+	// import { signOutUser } from '$firebase/auth';
 
 	let initialized = false;
 	let initError: string | null = null;
@@ -25,16 +27,17 @@
 	}
 
 	async function handleSignOut(): Promise<void> {
-		await signOutUser();
+		// FIREBASE DISABLED: No sign out needed in local mode
+		console.log('Sign out not available - Firebase disabled');
 	}
 
 	onMount(async () => {
-		const result = initializeFirebase();
-		if (result.success) {
+		// FIREBASE DISABLED: Skip Firebase initialization
+		try {
 			await loadGameData();
 			initialized = true;
-		} else {
-			initError = result.error ?? 'Unknown initialization error';
+		} catch (error) {
+			initError = error instanceof Error ? error.message : 'Failed to load game data';
 		}
 	});
 </script>
@@ -50,7 +53,7 @@
 			<h1 class="text-error text-xl mb-4">Initialization Error</h1>
 			<p class="text-text-secondary mb-4">{initError}</p>
 			<p class="text-text-muted text-sm">
-				Please check your Firebase configuration.
+				Please refresh the page or check the console for details.
 			</p>
 		</div>
 	</div>
