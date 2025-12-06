@@ -1038,7 +1038,7 @@ export function addWeapon(weapon: GameWeapon): void {
 
 	// Parse max ammo from ammo string
 	const ammoMatch = weapon.ammo.match(/^(\d+)/);
-	const maxAmmo = ammoMatch ? parseInt(ammoMatch[1], 10) : 0;
+	const maxAmmo = ammoMatch && ammoMatch[1] ? parseInt(ammoMatch[1], 10) : 0;
 
 	const newWeapon: CharacterWeapon = {
 		id: generateId(),
@@ -1635,7 +1635,8 @@ export function removeGear(gearId: string): void {
 	const idsToRemove = new Set<string>([gearId]);
 
 	function addContainedItems(containerId: string): void {
-		for (const item of char.equipment.gear) {
+		const charGear = char!.equipment.gear;
+		for (const item of charGear) {
 			if (item.containerId === containerId) {
 				idsToRemove.add(item.id);
 				refund += item.cost * item.quantity;
@@ -3234,7 +3235,7 @@ export function refreshEdge(): void {
  */
 export function getMaxAmmo(ammoString: string): number {
 	const match = ammoString.match(/^(\d+)/);
-	return match ? parseInt(match[1], 10) : 0;
+	return match && match[1] ? parseInt(match[1], 10) : 0;
 }
 
 /**

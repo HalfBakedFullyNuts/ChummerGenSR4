@@ -272,8 +272,9 @@
 		<h4 class="text-xs text-text-muted uppercase tracking-wide mb-2">Summoning</h4>
 		<div class="grid grid-cols-2 gap-3 mb-3">
 			<div>
-				<label class="text-xs text-text-muted block mb-1">Spirit Type</label>
+				<label for="spirit-type" class="text-xs text-text-muted block mb-1">Spirit Type</label>
 				<select
+					id="spirit-type"
 					class="cw-input text-sm w-full"
 					bind:value={selectedSpiritType}
 				>
@@ -283,8 +284,9 @@
 				</select>
 			</div>
 			<div>
-				<label class="text-xs text-text-muted block mb-1">Force</label>
+				<label for="spirit-force" class="text-xs text-text-muted block mb-1">Force</label>
 				<input
+					id="spirit-force"
 					type="number"
 					class="cw-input text-sm w-full"
 					bind:value={spiritForce}
@@ -347,8 +349,9 @@
 				<span class="font-mono text-success-main">{counterspellingPool}d6</span>
 			</div>
 			<div class="flex items-center gap-2 p-2 bg-surface-variant rounded">
-				<label class="text-xs text-text-muted">Protecting:</label>
+				<label for="num-protected" class="text-xs text-text-muted">Protecting:</label>
 				<input
+					id="num-protected"
 					type="number"
 					class="cw-input text-xs w-16"
 					bind:value={numProtected}

@@ -13,6 +13,7 @@
 		percentage > 100 ? 'error' : percentage > 80 ? 'warning' : percentage > 50 ? 'primary' : 'success';
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div class="cw-progress-wrapper">
 	{#if showLabel || label}
 		<div class="cw-progress-label">

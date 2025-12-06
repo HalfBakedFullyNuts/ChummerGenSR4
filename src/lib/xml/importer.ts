@@ -164,7 +164,9 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 			spells: spellBP,
 			complexForms: 0,
 			contacts: contactBP,
-			resources: nuyenBP
+			resources: nuyenBP,
+			mentor: 0,
+			martialArts: 0
 		},
 		attributes,
 		attributeLimits,
@@ -181,7 +183,10 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 			armor,
 			cyberware,
 			gear,
-			lifestyle
+			lifestyle,
+			bioware: [],
+			vehicles: [],
+			martialArts: []
 		},
 		nuyen: getNumber(data, 'nuyen'),
 		startingNuyen: 0,
@@ -197,7 +202,8 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 			physicalCurrent: getNumber(data, 'physicalcmfilled'),
 			stunMax: 10,
 			stunCurrent: getNumber(data, 'stuncmfilled'),
-			overflow: 0
+			overflow: 0,
+			edgeCurrent: 0
 		},
 		expenseLog: [],
 		createdAt: new Date().toISOString(),
@@ -517,7 +523,12 @@ function parseGear(gears: unknown): CharacterGear[] {
 				quantity: getNumber(gear, 'qty') || 1,
 				cost: getNumber(gear, 'cost'),
 				location: getString(gear, 'location'),
-				notes: getString(gear, 'notes')
+				notes: getString(gear, 'notes'),
+				capacity: 0,
+				capacityUsed: 0,
+				capacityCost: 0,
+				containerId: null,
+				containedItems: []
 			});
 		}
 	}

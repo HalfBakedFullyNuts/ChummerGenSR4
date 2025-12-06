@@ -200,18 +200,18 @@
 		</h2>
 		<div class="cw-panel p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
 			<div>
-				<label class="text-xs text-text-secondary uppercase tracking-wide block mb-1">
+				<label for="text-input-demo" class="text-xs text-text-secondary uppercase tracking-wide block mb-1">
 					Text Input
 				</label>
 				<input
 					type="text"
 					class="cw-input w-full"
-					placeholder="Enter character name..."
+					id="text-input-demo" placeholder="Enter character name..."
 					bind:value={inputValue}
 				/>
 			</div>
 			<div>
-				<label class="text-xs text-text-secondary uppercase tracking-wide block mb-1">
+				<label for="text-input-demo" class="text-xs text-text-secondary uppercase tracking-wide block mb-1">
 					Search Input
 				</label>
 				<div class="relative">
@@ -224,7 +224,7 @@
 				</div>
 			</div>
 			<div>
-				<label class="text-xs text-text-secondary uppercase tracking-wide block mb-1">
+				<label for="text-input-demo" class="text-xs text-text-secondary uppercase tracking-wide block mb-1">
 					Select
 				</label>
 				<select class="cw-select w-full" bind:value={selectValue}>
@@ -235,7 +235,7 @@
 				</select>
 			</div>
 			<div>
-				<label class="text-xs text-text-secondary uppercase tracking-wide block mb-1">
+				<label for="text-input-demo" class="text-xs text-text-secondary uppercase tracking-wide block mb-1">
 					Number Input
 				</label>
 				<input type="number" class="cw-input cw-input-number w-full" value="42" min="0" max="100" />

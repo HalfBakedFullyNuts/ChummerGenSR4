@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { Character, SkillDefinition, AttributeCode, CharacterWeapon, CharacterSpell } from '$types';
-	import { getWeaponSkill, parseDamage, parseAP, parseFireModes, calculateArmorStacking, calculateInitiativeModifiers, type FiringMode } from '$lib/utils/dice';
-	import { positiveQualities, negativeQualities, type GameQuality } from '$stores/gamedata';
+	import { getWeaponSkill, parseFireModes, calculateArmorStacking, calculateInitiativeModifiers, type FiringMode } from '$lib/utils/dice';
+	import { positiveQualities, negativeQualities } from '$stores/gamedata';
 	import { formatQualityBonus, type FormattedBonus } from '$lib/utils/qualities';
 	import Tooltip from './ui/Tooltip.svelte';
 
@@ -33,7 +33,7 @@
 	/** Get max ammo from ammo string. */
 	function getMaxAmmo(ammoString: string): number {
 		const match = ammoString.match(/^(\d+)/);
-		return match ? parseInt(match[1], 10) : 0;
+		return match && match[1] ? parseInt(match[1], 10) : 0;
 	}
 
 	/** Handle ammo spend. */
@@ -98,7 +98,7 @@
 		dispatch('rollSkill', {
 			name: specialization ? `${skillName} (${specialization})` : skillName,
 			pool: pool + specBonus,
-			attribute: def?.attribute || 'AGI'
+			attribute: def?.attribute || 'agi'
 		});
 	}
 
@@ -152,7 +152,7 @@
 		// Apply firing mode modifier if specified
 		const adjustedPool = firingMode ? Math.max(0, pool + firingMode.poolMod) : pool;
 
-		dispatch('rollWeapon', { weapon, pool: adjustedPool, skillName, firingMode });
+		dispatch('rollWeapon', { weapon, pool: adjustedPool, skillName, firingMode: firingMode ?? undefined });
 	}
 
 	/** Get spellcasting pool. */
@@ -186,7 +186,7 @@
 		const gameQuality = allQualities.find(q => q.name === qualityName);
 		if (!gameQuality) return undefined;
 		return {
-			effect: gameQuality.effect,
+			effect: gameQuality.effect ?? undefined,
 			bonuses: formatQualityBonus(gameQuality.bonus)
 		};
 	}
@@ -286,7 +286,7 @@
 	$: bodyTotal = getAttrTotal(char.attributes.bod);
 
 	/** Calculate stacked armor values (SR4 layering rules). */
-	$: armorStack = calculateArmorStacking(char.equipment.armor, bodyTotal);
+	$: armorStack = calculateArmorStacking([...char.equipment.armor], bodyTotal);
 	$: totalBallistic = armorStack.ballistic;
 	$: totalImpact = armorStack.impact;
 	$: armorEncumbrance = armorStack.encumbrancePenalty;
@@ -632,7 +632,7 @@
 			<p class="text-text-muted text-sm">No skills.</p>
 		{:else}
 			<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-sm">
-				{#each char.skills.sort((a, b) => a.name.localeCompare(b.name)) as skill}
+				{#each [...char.skills].sort((a, b) => a.name.localeCompare(b.name)) as skill}
 					<button
 						type="button"
 						class="flex justify-between py-1 border-b border-border text-left w-full
@@ -667,7 +667,7 @@
 		<div class="cw-card">
 			<h2 class="cw-card-header">Knowledge Skills</h2>
 			<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-sm">
-				{#each char.knowledgeSkills.sort((a, b) => a.name.localeCompare(b.name)) as skill}
+				{#each [...char.knowledgeSkills].sort((a, b) => a.name.localeCompare(b.name)) as skill}
 					<div class="flex justify-between py-1 border-b border-border">
 						<span class="text-text-secondary truncate" title={skill.name}>
 							{skill.name}

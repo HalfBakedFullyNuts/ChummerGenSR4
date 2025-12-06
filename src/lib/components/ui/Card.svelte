@@ -5,6 +5,7 @@
 	export let padding: 'none' | 'sm' | 'md' | 'lg' = 'md';
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	class="cw-card"
 	class:cw-card-selected={selected}

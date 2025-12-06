@@ -99,9 +99,9 @@
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
 			<!-- Name -->
 			<div>
-				<label class="block text-text-secondary text-sm mb-1">Name</label>
+				<label for="contact-name" class="block text-text-secondary text-sm mb-1">Name</label>
 				<input
-					type="text"
+					id="contact-name" type="text"
 					placeholder="Contact name..."
 					class="cw-input w-full"
 					bind:value={newName}
@@ -110,8 +110,8 @@
 
 			<!-- Type -->
 			<div>
-				<label class="block text-text-secondary text-sm mb-1">Type</label>
-				<select class="cw-input w-full" bind:value={newType}>
+				<label for="contact-type" class="block text-text-secondary text-sm mb-1">Type</label>
+				<select id="contact-type" class="cw-input w-full" bind:value={newType}>
 					{#each CONTACT_TYPES as type}
 						<option value={type}>{type}</option>
 					{/each}
@@ -120,13 +120,13 @@
 
 			<!-- Loyalty -->
 			<div>
-				<label class="block text-text-secondary text-sm mb-1">
+				<label for="contact-loyalty" class="block text-text-secondary text-sm mb-1">
 					Loyalty: {newLoyalty}
 					<span class="text-text-muted">({getLoyaltyDesc(newLoyalty)})</span>
 				</label>
 				<div class="flex items-center gap-2">
 					<input
-						type="range"
+						id="contact-loyalty" type="range"
 						min="1"
 						max="6"
 						class="flex-1"
@@ -138,13 +138,13 @@
 
 			<!-- Connection -->
 			<div>
-				<label class="block text-text-secondary text-sm mb-1">
+				<label for="contact-connection" class="block text-text-secondary text-sm mb-1">
 					Connection: {newConnection}
 					<span class="text-text-muted">({getConnectionDesc(newConnection)})</span>
 				</label>
 				<div class="flex items-center gap-2">
 					<input
-						type="range"
+						id="contact-connection" type="range"
 						min="1"
 						max="6"
 						class="flex-1"

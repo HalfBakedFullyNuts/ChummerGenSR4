@@ -11,17 +11,21 @@
 	export let error: string = '';
 	export let label: string = '';
 	export let value: string = '';
+
+	// Generate a unique ID for label association
+	const inputId = `input-${Math.random().toString(36).slice(2, 9)}`;
 </script>
 
 <div class="cw-input-wrapper">
 	{#if label}
-		<label class="cw-input-label">{label}</label>
+		<label for={inputId} class="cw-input-label">{label}</label>
 	{/if}
 	<div class="cw-input-container" class:cw-input-error={error}>
 		{#if icon}
 			<span class="material-icons cw-input-icon">{icon}</span>
 		{/if}
 		<input
+			id={inputId}
 			class="cw-input"
 			class:pl-9={icon}
 			bind:value

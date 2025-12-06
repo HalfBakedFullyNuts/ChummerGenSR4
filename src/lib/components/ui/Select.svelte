@@ -19,14 +19,17 @@
 	export let error: string = '';
 	export let placeholder: string = '';
 	export let value: string = '';
+
+	// Generate a unique ID for label association
+	const selectId = `select-${Math.random().toString(36).slice(2, 9)}`;
 </script>
 
 <div class="cw-select-wrapper">
 	{#if label}
-		<label class="cw-select-label">{label}</label>
+		<label for={selectId} class="cw-select-label">{label}</label>
 	{/if}
 	<div class="cw-select-container" class:cw-select-error={error}>
-		<select class="cw-select" bind:value {...$$restProps} on:change on:focus on:blur>
+		<select id={selectId} class="cw-select" bind:value {...$$restProps} on:change on:focus on:blur>
 			{#if placeholder}
 				<option value="" disabled>{placeholder}</option>
 			{/if}

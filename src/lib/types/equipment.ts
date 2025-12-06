@@ -451,36 +451,36 @@ export interface CharacterEquipment {
 export function calculateEquipmentCost(equipment: CharacterEquipment): number {
 	let total = 0;
 
-	for (const weapon of equipment.weapons) {
+	for (const weapon of equipment.weapons ?? []) {
 		total += weapon.cost;
-		for (const acc of weapon.accessories) {
+		for (const acc of weapon.accessories ?? []) {
 			total += acc.cost;
 		}
 	}
 
-	for (const armor of equipment.armor) {
+	for (const armor of equipment.armor ?? []) {
 		total += armor.cost;
-		for (const mod of armor.modifications) {
+		for (const mod of armor.modifications ?? []) {
 			total += mod.cost;
 		}
 	}
 
-	for (const cyber of equipment.cyberware) {
+	for (const cyber of equipment.cyberware ?? []) {
 		total += cyber.cost;
 	}
 
-	for (const bio of equipment.bioware) {
+	for (const bio of equipment.bioware ?? []) {
 		total += bio.cost;
 	}
 
-	for (const vehicle of equipment.vehicles) {
+	for (const vehicle of equipment.vehicles ?? []) {
 		total += vehicle.cost;
-		for (const mod of vehicle.mods) {
+		for (const mod of vehicle.mods ?? []) {
 			total += mod.cost;
 		}
 	}
 
-	for (const item of equipment.gear) {
+	for (const item of equipment.gear ?? []) {
 		total += item.cost * item.quantity;
 	}
 

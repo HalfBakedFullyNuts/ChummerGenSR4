@@ -20,7 +20,7 @@
 		awardNuyen,
 		improveAttribute,
 		improveSkill,
-		learnNewSkill,
+		// learnNewSkill,  // TODO: implement new skill learning UI
 		getInitiationCost,
 		initiate,
 		learnMetamagic,
@@ -36,9 +36,9 @@
 		registerSprite,
 		getExpenseLog
 	} from '$stores';
-	import { gameData, echoes as echoesStore } from '$stores/gamedata';
+	import { echoes as echoesStore } from '$stores/gamedata';
 
-	const dispatch = createEventDispatcher();
+	// const dispatch = createEventDispatcher();  // TODO: Add event dispatching when needed
 
 	/** Current tab. */
 	type Tab = 'overview' | 'attributes' | 'skills' | 'magic' | 'resonance' | 'spirits' | 'sprites' | 'history';

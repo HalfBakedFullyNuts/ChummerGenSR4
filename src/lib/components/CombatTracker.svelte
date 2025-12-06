@@ -315,7 +315,9 @@
 		<div class="border-t border-border pt-4 mb-4">
 			<h3 class="text-sm font-medium text-text-secondary mb-2">Add Combatant</h3>
 			<div class="flex gap-2 flex-wrap">
+				<label for="combatant-name" class="sr-only">Combatant Name</label>
 				<input
+					id="combatant-name"
 					type="text"
 					bind:value={newName}
 					placeholder="Name"
@@ -323,8 +325,9 @@
 					on:keydown={(e) => e.key === 'Enter' && addCombatant()}
 				/>
 				<div class="flex items-center gap-1">
-					<label class="text-text-muted text-xs">Init:</label>
+					<label for="combatant-init" class="text-text-muted text-xs">Init:</label>
 					<input
+						id="combatant-init"
 						type="number"
 						bind:value={newBaseInit}
 						min="1"
@@ -333,8 +336,9 @@
 					/>
 				</div>
 				<div class="flex items-center gap-1">
-					<label class="text-text-muted text-xs">Dice:</label>
+					<label for="combatant-dice" class="text-text-muted text-xs">Dice:</label>
 					<input
+						id="combatant-dice"
 						type="number"
 						bind:value={newInitDice}
 						min="1"

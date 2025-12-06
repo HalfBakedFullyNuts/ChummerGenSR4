@@ -138,8 +138,9 @@
 
 		<div class="grid grid-cols-2 gap-3 mb-3">
 			<div>
-				<label class="text-xs text-text-muted block mb-1">Sprite Type</label>
+				<label for="sprite-type" class="text-xs text-text-muted block mb-1">Sprite Type</label>
 				<select
+					id="sprite-type"
 					class="cw-input text-sm w-full"
 					bind:value={selectedSpriteType}
 				>
@@ -149,8 +150,9 @@
 				</select>
 			</div>
 			<div>
-				<label class="text-xs text-text-muted block mb-1">Rating</label>
+				<label for="sprite-rating" class="text-xs text-text-muted block mb-1">Rating</label>
 				<input
+					id="sprite-rating"
 					type="number"
 					class="cw-input text-sm w-full"
 					bind:value={spriteRating}
@@ -215,8 +217,9 @@
 
 		<div class="grid grid-cols-2 gap-3 mb-3">
 			<div>
-				<label class="text-xs text-text-muted block mb-1">Complex Form</label>
+				<label for="complex-form" class="text-xs text-text-muted block mb-1">Complex Form</label>
 				<select
+					id="complex-form"
 					class="cw-input text-sm w-full"
 					bind:value={formName}
 				>
@@ -226,8 +229,9 @@
 				</select>
 			</div>
 			<div>
-				<label class="text-xs text-text-muted block mb-1">Target Rating</label>
+				<label for="form-rating" class="text-xs text-text-muted block mb-1">Target Rating</label>
 				<input
+					id="form-rating"
 					type="number"
 					class="cw-input text-sm w-full"
 					bind:value={formRating}

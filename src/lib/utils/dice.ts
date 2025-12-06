@@ -312,12 +312,12 @@ export interface DamageRollResult {
 export function parseDamage(damage: string): { value: number; type: 'P' | 'S'; special: string } {
 	// Extract the numeric value
 	const numMatch = damage.match(/(\d+)/);
-	const value = numMatch ? parseInt(numMatch[1], 10) : 0;
+	const value = numMatch && numMatch[1] ? parseInt(numMatch[1], 10) : 0;
 
 	// Determine damage type (P or S) - look for standalone P or S followed by end, space, or (
 	// This avoids matching 'S' in 'STR'
 	const typeMatch = damage.match(/(?<![A-Z])([PS])(?:\(|$)/i);
-	const type = (typeMatch ? typeMatch[1].toUpperCase() : 'P') as 'P' | 'S';
+	const type = (typeMatch && typeMatch[1] ? typeMatch[1].toUpperCase() : 'P') as 'P' | 'S';
 
 	// Extract special modifiers like (f) for fire, (e) for electric
 	const specialMatch = damage.match(/\([^)]+\)/g);
@@ -907,7 +907,7 @@ export function calculateMatrixDefense(
  * @returns Damage amount and type.
  */
 export function calculateBiofeedbackDamage(
-	attackHits: number,
+	_attackHits: number,
 	netHits: number,
 	isBlackIce: boolean = false
 ): { damage: number; type: 'P' | 'S' } {
@@ -1524,7 +1524,7 @@ export function calculateSpiritServices(summonerHits: number, spiritHits: number
  * @param spiritHits - Spirit's hits in the opposed test.
  * @returns Drain value (number of boxes).
  */
-export function calculateSummoningDrain(spiritForce: number, spiritHits: number): number {
+export function calculateSummoningDrain(_spiritForce: number, spiritHits: number): number {
 	// Drain equals the spirit's hits (minimum 2 for summoning)
 	return Math.max(2, spiritHits);
 }
@@ -1664,10 +1664,10 @@ export function calculateArmorStacking(armorPieces: ArmorPiece[], body: number):
 
 	// Add half of secondary armors (SR4 layered armor rules)
 	for (let i = 1; i < sortedByBallistic.length; i++) {
-		totalBallistic += Math.floor(sortedByBallistic[i].ballistic / 2);
+		totalBallistic += Math.floor(sortedByBallistic[i]!.ballistic / 2);
 	}
 	for (let i = 1; i < sortedByImpact.length; i++) {
-		totalImpact += Math.floor(sortedByImpact[i].impact / 2);
+		totalImpact += Math.floor(sortedByImpact[i]!.impact / 2);
 	}
 
 	// Calculate encumbrance penalty
