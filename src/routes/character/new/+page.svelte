@@ -8,6 +8,7 @@
 		remainingBP,
 		startNewCharacter,
 		setBuildMethod,
+		setCustomBuildPoints,
 		nextWizardStep,
 		prevWizardStep,
 		setWizardStep,
@@ -31,6 +32,10 @@
 	/** Saving state. */
 	let saving = false;
 	let saveError: string | null = null;
+
+	/** Custom build points editing state. */
+	let isEditingBP = false;
+	let customBPInput = '';
 
 	/** Initialize new character on mount. */
 	onMount(() => {
@@ -83,6 +88,27 @@
 		}
 
 		saving = false;
+	}
+
+	/** Start editing custom build points. */
+	function startEditingBP(): void {
+		customBPInput = String($character?.buildPoints ?? 400);
+		isEditingBP = true;
+	}
+
+	/** Apply custom build points and close editor. */
+	function applyCustomBP(): void {
+		const value = parseInt(customBPInput, 10);
+		if (!isNaN(value) && value > 0) {
+			setCustomBuildPoints(value);
+		}
+		isEditingBP = false;
+	}
+
+	/** Cancel editing and close editor. */
+	function cancelEditBP(): void {
+		isEditingBP = false;
+		customBPInput = '';
 	}
 
 	/** Check if current step allows proceeding. */
@@ -250,7 +276,7 @@
 					</button>
 				</div>
 
-				<div class="mt-6 p-4 bg-surface-variant rounded-lg border border-border">
+					<div class="mt-6 p-4 bg-surface-variant rounded-lg border border-border">
 					<div class="flex items-center justify-between">
 						<span class="text-text-secondary">Selected Method:</span>
 						<span class="font-medium {$character?.buildMethod === 'karma' ? 'text-secondary-dark' : 'text-primary-dark'}">
@@ -259,11 +285,53 @@
 					</div>
 					<div class="flex items-center justify-between mt-2">
 						<span class="text-text-secondary">Starting Points:</span>
-						<span class="font-mono text-lg {$character?.buildMethod === 'karma' ? 'text-secondary-dark' : 'text-primary-dark'}">
-							{$character?.buildPoints ?? 400}
-							{$character?.buildMethod === 'karma' ? ' Karma' : ' BP'}
-						</span>
+						{#if isEditingBP}
+							<div class="flex items-center gap-2">
+								<input
+									type="number"
+									bind:value={customBPInput}
+									class="w-24 px-2 py-1 text-right font-mono border border-primary-main rounded focus:outline-none focus:ring-2 focus:ring-primary-main/50"
+									min={$character?.buildMethod === 'karma' ? 400 : 200}
+									max={$character?.buildMethod === 'karma' ? 1200 : 800}
+									on:keydown={(e) => e.key === 'Enter' && applyCustomBP()}
+								/>
+								<span class="text-text-muted text-sm">{$character?.buildMethod === 'karma' ? 'Karma' : 'BP'}</span>
+								<button
+									class="p-1 text-success-main hover:bg-success-main/10 rounded"
+									on:click={applyCustomBP}
+									title="Apply"
+								>
+									<span class="material-icons text-sm">check</span>
+								</button>
+								<button
+									class="p-1 text-error-main hover:bg-error-main/10 rounded"
+									on:click={cancelEditBP}
+									title="Cancel"
+								>
+									<span class="material-icons text-sm">close</span>
+								</button>
+							</div>
+						{:else}
+							<div class="flex items-center gap-2">
+								<span class="font-mono text-lg {$character?.buildMethod === 'karma' ? 'text-secondary-dark' : 'text-primary-dark'}">
+									{$character?.buildPoints ?? 400}
+									{$character?.buildMethod === 'karma' ? ' Karma' : ' BP'}
+								</span>
+								<button
+									class="p-1 text-text-muted hover:text-primary-main hover:bg-primary-main/10 rounded transition-colors"
+									on:click={startEditingBP}
+									title="Customize starting points"
+								>
+									<span class="material-icons text-sm">edit</span>
+								</button>
+							</div>
+						{/if}
 					</div>
+					{#if !isEditingBP}
+						<p class="text-text-muted text-xs mt-2">
+							Click the edit button to customize your starting {$character?.buildMethod === 'karma' ? 'karma' : 'build points'}.
+						</p>
+					{/if}
 				</div>
 			</div>
 		{:else if $currentStep === 'metatype'}

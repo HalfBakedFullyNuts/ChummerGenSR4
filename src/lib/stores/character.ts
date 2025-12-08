@@ -271,6 +271,9 @@ export type AttributeValueKey = 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 
 /** All attribute keys for iteration. */
 const ALL_ATTR_KEYS: readonly AttributeValueKey[] = ['bod', 'agi', 'rea', 'str', 'cha', 'int', 'log', 'wil', 'edg'];
 
+/** Non-special attribute keys (excludes Edge for BP limit calculations). */
+const NON_SPECIAL_ATTR_KEYS: readonly AttributeValueKey[] = ['bod', 'agi', 'rea', 'str', 'cha', 'int', 'log', 'wil'];
+
 /** BP cost per attribute point above minimum. */
 const BP_PER_ATTRIBUTE_POINT = 10;
 
@@ -313,6 +316,68 @@ function calculateTotalAttributeCost(char: Character): number {
 	}
 
 	return total;
+}
+
+/**
+ * Calculate BP spent on non-special attributes only.
+ * This is used for the 50% BP limit rule - non-special attributes are:
+ * BOD, AGI, REA, STR, CHA, INT, LOG, WIL (Edge is excluded as it's "special")
+ */
+function calculateNonSpecialAttributeBP(char: Character): number {
+	if (char.buildMethod === 'karma') return 0; // Only applies to BP build
+
+	let total = 0;
+	for (const code of NON_SPECIAL_ATTR_KEYS) {
+		const attr = char.attributes[code];
+		const limits = char.attributeLimits[code];
+		if (!attr || typeof attr === 'number' || !limits) continue;
+
+		const pointsAboveMin = attr.base - limits.min;
+		const isAtMax = attr.base === limits.max;
+
+		if (isAtMax && pointsAboveMin > 0) {
+			total += (pointsAboveMin - 1) * BP_PER_ATTRIBUTE_POINT;
+			total += BP_FOR_MAX_ATTRIBUTE;
+		} else {
+			total += pointsAboveMin * BP_PER_ATTRIBUTE_POINT;
+		}
+	}
+	return total;
+}
+
+/**
+ * Count how many attributes are currently at their natural maximum.
+ * Per SR4 rules, only one attribute may be raised to natural max during creation.
+ */
+function countMaxedAttributes(char: Character): number {
+	let count = 0;
+	for (const code of NON_SPECIAL_ATTR_KEYS) {
+		const attr = char.attributes[code];
+		const limits = char.attributeLimits[code];
+		if (!attr || typeof attr === 'number' || !limits) continue;
+
+		if (attr.base === limits.max) {
+			count++;
+		}
+	}
+	return count;
+}
+
+/**
+ * Get the name of the attribute currently at max, if any.
+ * Returns null if no attribute is at max.
+ */
+function getMaxedAttributeName(char: Character): AttributeValueKey | null {
+	for (const code of NON_SPECIAL_ATTR_KEYS) {
+		const attr = char.attributes[code];
+		const limits = char.attributeLimits[code];
+		if (!attr || typeof attr === 'number' || !limits) continue;
+
+		if (attr.base === limits.max) {
+			return code;
+		}
+	}
+	return null;
 }
 
 /**
@@ -383,6 +448,48 @@ export function addQuality(
 	const newQuality: CharacterQuality = {
 		id: generateId(),
 		name,
+		category,
+		bp,
+		rating: 1,
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		qualities: [...char.qualities, newQuality],
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			qualities: char.buildPointsSpent.qualities + bp
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Add another instance of a quality (for qualities that can be taken multiple times).
+ * Creates a numbered instance like "Allergy (Mild) #2".
+ */
+export function addQualityAgain(
+	baseName: string,
+	category: 'Positive' | 'Negative',
+	bp: number
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	/* Count existing instances of this quality */
+	const instanceCount = char.qualities.filter((q) =>
+		q.name === baseName || q.name.startsWith(`${baseName} #`)
+	).length;
+
+	/* Create unique name with instance number */
+	const instanceName = instanceCount === 0 ? baseName : `${baseName} #${instanceCount + 1}`;
+
+	const newQuality: CharacterQuality = {
+		id: generateId(),
+		name: instanceName,
 		category,
 		bp,
 		rating: 1,
@@ -582,6 +689,83 @@ export const hasMetatype: Readable<boolean> = derived(
 	character,
 	($char) => !!$char?.identity.metatype
 );
+
+/** Attribute validation state for BP build limits. */
+export interface AttributeValidation {
+	/** BP spent on non-special attributes (BOD, AGI, REA, STR, CHA, INT, LOG, WIL) */
+	nonSpecialBP: number;
+	/** Maximum allowed BP for non-special attributes (50% of starting BP) */
+	maxNonSpecialBP: number;
+	/** Number of attributes currently at their natural maximum */
+	maxedAttributeCount: number;
+	/** The attribute currently at max, if any */
+	maxedAttribute: AttributeValueKey | null;
+	/** Whether current allocation is within limits */
+	isValid: boolean;
+	/** Whether the 50% limit is exceeded */
+	isOverBPLimit: boolean;
+	/** Whether more than one attribute is at max */
+	isOverMaxLimit: boolean;
+}
+
+/** Derived store for attribute allocation validation (BP build only). */
+export const attributeValidation: Readable<AttributeValidation> = derived(
+	character,
+	($char): AttributeValidation => {
+		if (!$char || $char.buildMethod === 'karma') {
+			// Karma build doesn't have these limits
+			return {
+				nonSpecialBP: 0,
+				maxNonSpecialBP: 0,
+				maxedAttributeCount: 0,
+				maxedAttribute: null,
+				isValid: true,
+				isOverBPLimit: false,
+				isOverMaxLimit: false
+			};
+		}
+
+		const nonSpecialBP = calculateNonSpecialAttributeBP($char);
+		const maxNonSpecialBP = Math.floor($char.buildPoints * 0.5);
+		const maxedAttributeCount = countMaxedAttributes($char);
+		const maxedAttribute = getMaxedAttributeName($char);
+		const isOverBPLimit = nonSpecialBP > maxNonSpecialBP;
+		const isOverMaxLimit = maxedAttributeCount > 1;
+		const isValid = !isOverBPLimit && !isOverMaxLimit;
+
+		return {
+			nonSpecialBP,
+			maxNonSpecialBP,
+			maxedAttributeCount,
+			maxedAttribute,
+			isValid,
+			isOverBPLimit,
+			isOverMaxLimit
+		};
+	}
+);
+
+/**
+ * Set custom starting build points.
+ * Allows players to use non-standard starting values.
+ */
+export function setCustomBuildPoints(amount: number): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	// Clamp to reasonable bounds
+	const min = char.buildMethod === 'karma' ? 400 : 200;
+	const max = char.buildMethod === 'karma' ? 1200 : 800;
+	const clampedAmount = Math.max(min, Math.min(max, amount));
+
+	const updated: Character = {
+		...char,
+		buildPoints: clampedAmount,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
 
 /** Technomancer quality names. */
 const TECHNOMANCER_QUALITIES = ['Technomancer', 'Latent Technomancer'] as const;

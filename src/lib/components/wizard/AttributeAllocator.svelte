@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { character, setAttribute, KARMA_BUILD_COSTS, type AttributeValueKey } from '$stores/character';
+	import { character, setAttribute, KARMA_BUILD_COSTS, type AttributeValueKey, attributeValidation } from '$stores/character';
 	import type { AttributeValue } from '$types';
 	import { ATTRIBUTE_NAMES } from '$types';
 
@@ -86,6 +86,26 @@
 		return total;
 	}
 
+	/** Check if a specific attribute is at its natural maximum. */
+	function isAtMax(code: AttributeValueKey): boolean {
+		const attr = getAttrValue($character, code);
+		const limits = getAttrLimits($character, code);
+		if (!attr || !limits) return false;
+		return attr.base === limits.max;
+	}
+
+	/** Check if incrementing this attribute would exceed limits. */
+	function wouldExceedMaxLimit(code: AttributeValueKey): boolean {
+		if (isKarmaBuild) return false;
+		const attr = getAttrValue($character, code);
+		const limits = getAttrLimits($character, code);
+		if (!attr || !limits) return false;
+		// If we're not at max yet but incrementing would put us at max,
+		// and another attribute is already at max, block it
+		const wouldBeAtMax = attr.base + 1 === limits.max;
+		return wouldBeAtMax && $attributeValidation.maxedAttributeCount >= 1;
+	}
+
 	// Compound test calculations (reactive to attribute changes)
 	$: bodValue = getAttrValue($character, 'bod')?.base ?? 0;
 	$: agiValue = getAttrValue($character, 'agi')?.base ?? 0;
@@ -112,12 +132,17 @@
 	$: isKarmaBuild = $character?.buildMethod === 'karma';
 	$: attrCost = isKarmaBuild ? calculateAttrKarma($character) : calculateAttrBP($character);
 	$: costLabel = isKarmaBuild ? 'Karma' : 'BP';
+	
+	// BP limit progress (for non-karma builds)
+	$: bpLimitPercent = $attributeValidation.maxNonSpecialBP > 0 
+		? Math.min(100, ($attributeValidation.nonSpecialBP / $attributeValidation.maxNonSpecialBP) * 100)
+		: 0;
 </script>
 
 <div class="space-y-4">
 	<!-- Cost Summary (centered) -->
 	<div class="flex justify-center">
-		<div class="bg-white border border-gray-200 rounded-lg shadow-md p-4 inline-block">
+		<div class="bg-white border border-gray-200 rounded-lg shadow-md p-4 inline-block min-w-[300px]">
 			<div class="flex items-center gap-4">
 				<span class="text-black flex items-center gap-2">
 					<span class="material-icons text-sm">analytics</span>
@@ -129,9 +154,39 @@
 				{#if isKarmaBuild}
 					Each point costs (new rating × 5) karma
 				{:else}
-					Each point above minimum costs 10 BP
+					Each point above minimum costs 10 BP (25 BP for max)
 				{/if}
 			</p>
+			
+			<!-- BP Limit Progress (non-karma only) -->
+			{#if !isKarmaBuild}
+				<div class="mt-3 pt-3 border-t border-gray-100">
+					<div class="flex justify-between text-xs mb-1">
+						<span class="text-gray-600">Non-Special Attributes</span>
+						<span class="{$attributeValidation.isOverBPLimit ? 'text-red-600 font-semibold' : 'text-gray-600'}">
+							{$attributeValidation.nonSpecialBP} / {$attributeValidation.maxNonSpecialBP} BP (50% max)
+						</span>
+					</div>
+					<div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+						<div 
+							class="h-full transition-all duration-300 {$attributeValidation.isOverBPLimit ? 'bg-red-500' : bpLimitPercent > 80 ? 'bg-amber-500' : 'bg-green-500'}"
+							style="width: {bpLimitPercent}%"
+						></div>
+					</div>
+					
+					<!-- Maxed Attribute Warning -->
+					{#if $attributeValidation.maxedAttributeCount > 0}
+						<div class="mt-2 flex items-center gap-1 text-xs {$attributeValidation.isOverMaxLimit ? 'text-red-600' : 'text-amber-600'}">
+							<span class="material-icons text-sm">{$attributeValidation.isOverMaxLimit ? 'error' : 'info'}</span>
+							{#if $attributeValidation.isOverMaxLimit}
+								Only 1 attribute may be at natural max (you have {$attributeValidation.maxedAttributeCount})
+							{:else}
+								{ATTRIBUTE_NAMES[$attributeValidation.maxedAttribute ?? 'bod']} is at natural max (1 allowed)
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{/if}
 		</div>
 	</div>
 
