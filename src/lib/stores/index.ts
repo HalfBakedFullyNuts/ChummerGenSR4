@@ -142,6 +142,7 @@ export {
 	saveCurrentCharacter,
 	loadSavedCharacter,
 	loadImportedCharacter,
+	startManualCharacter,
 	deleteSavedCharacter,
 	listCharacters,
 	duplicateCurrentCharacter,

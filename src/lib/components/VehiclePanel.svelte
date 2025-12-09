@@ -113,7 +113,7 @@
 			pool: finalControlPool,
 			modifiers: totalModifiers,
 			opposed: test.opposed,
-			opposedBy: test.opposedBy
+			...(test.opposedBy && { opposedBy: test.opposedBy })
 		});
 	}
 

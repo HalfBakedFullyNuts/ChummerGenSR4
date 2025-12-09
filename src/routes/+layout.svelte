@@ -9,6 +9,7 @@
 	import { user } from '$stores/user';
 	// FIREBASE DISABLED:
 	// import { signOutUser } from '$firebase/auth';
+	import AddCharacterButton from '$lib/components/AddCharacterButton.svelte';
 
 	let initialized = false;
 	let initError: string | null = null;
@@ -84,9 +85,7 @@
 				<a href="/" class="cw-btn cw-btn-icon" title="Home">
 					<span class="material-icons text-sm">home</span>
 				</a>
-				<a href="/character/new" class="cw-btn cw-btn-icon" title="New Character">
-					<span class="material-icons text-sm">add</span>
-				</a>
+				<AddCharacterButton variant="icon" position="bottom-center" userId={$user?.uid ?? null} />
 				<a href="/characters" class="cw-btn cw-btn-icon" title="My Characters">
 					<span class="material-icons text-sm">folder</span>
 				</a>

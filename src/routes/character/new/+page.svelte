@@ -121,7 +121,7 @@
 			case 'metatype':
 				return !!char.identity.metatype;
 			case 'attributes':
-				return true; // Attributes have minimums set by metatype
+				return true; // Hard limit enforced in store
 			case 'qualities':
 				return true; // Qualities are optional
 			case 'skills':
@@ -142,9 +142,48 @@
 	$: canGoNext = canProceed($currentStep, $character);
 	$: canGoBack = $currentStepIndex > 0;
 	$: isLastStep = $currentStepIndex === WIZARD_STEPS.length - 1;
+
+	/** Handle keyboard navigation. */
+	function handleKeydown(event: KeyboardEvent): void {
+		// Don't navigate if user is typing in an input
+		if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+			return;
+		}
+
+		if (event.key === 'ArrowLeft' && canGoBack) {
+			handlePrev();
+		} else if (event.key === 'ArrowRight' && canGoNext && !saving) {
+			handleNext();
+		}
+	}
 </script>
 
-<main class="container mx-auto px-4 py-6 max-w-6xl">
+<svelte:window on:keydown={handleKeydown} />
+
+<!-- Fixed Side Navigation Buttons -->
+<button
+	class="nav-btn nav-btn-prev"
+	on:click={handlePrev}
+	disabled={!canGoBack}
+	title="Previous step (Left Arrow)"
+>
+	<span class="material-icons">chevron_left</span>
+</button>
+
+<button
+	class="nav-btn nav-btn-next"
+	on:click={handleNext}
+	disabled={!canGoNext || saving}
+	title="Next step (Right Arrow)"
+>
+	{#if saving}
+		<span class="material-icons animate-spin">sync</span>
+	{:else}
+		<span class="material-icons">chevron_right</span>
+	{/if}
+</button>
+
+<main class="container mx-auto px-4 py-6 max-w-6xl pl-16 pr-16">
 	<!-- Header with BP Counter -->
 	<header class="flex items-center justify-between mb-6">
 		<div>
@@ -353,32 +392,74 @@
 		{/if}
 	</section>
 
-	<!-- Navigation Footer -->
-	<footer class="mt-8 flex items-center justify-between">
-		<button
-			class="cw-btn cw-btn-secondary"
-			on:click={handlePrev}
-			disabled={!canGoBack}
-		>
-			Previous
-		</button>
-
+	<!-- Step Indicator (centered) -->
+	<div class="mt-8 text-center">
 		<span class="text-text-muted text-sm">
 			Step {$currentStepIndex + 1} of {WIZARD_STEPS.length}
-		</span>
-
-		<button
-			class="cw-btn cw-btn-primary"
-			on:click={handleNext}
-			disabled={!canGoNext || saving}
-		>
-			{#if saving}
-				Saving...
-			{:else if isLastStep}
-				Save Character
-			{:else}
-				Next
+			{#if isLastStep}
+				<span class="text-primary-main ml-2">• Press → to save</span>
 			{/if}
-		</button>
-	</footer>
+		</span>
+	</div>
 </main>
+
+<style>
+	/* Fixed side navigation buttons */
+	:global(.nav-btn) {
+		position: fixed;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 50;
+
+		/* Base size increased by 20% */
+		width: 3rem;      /* 2.5rem * 1.2 */
+		height: 3.6rem;   /* 3rem * 1.2 */
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		background: var(--color-primary-main, #1976d2);
+		color: white;
+		border: none;
+		border-radius: 0.5rem;
+		cursor: pointer;
+
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		transition: all 0.2s ease;
+	}
+
+	:global(.nav-btn:hover:not(:disabled)) {
+		background: var(--color-primary-dark, #1565c0);
+		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+	}
+
+	:global(.nav-btn:disabled) {
+		background: var(--color-surface-variant, #e0e0e0);
+		color: var(--color-text-muted, #9e9e9e);
+		cursor: not-allowed;
+		box-shadow: none;
+	}
+
+	:global(.nav-btn .material-icons) {
+		font-size: 2rem;  /* Larger icons */
+	}
+
+	:global(.nav-btn-prev) {
+		left: max(0.5rem, calc(50% - 38rem)); /* At content edge, min 0.5rem from viewport */
+	}
+
+	:global(.nav-btn-next) {
+		right: max(0.5rem, calc(50% - 38rem)); /* At content edge, min 0.5rem from viewport */
+	}
+
+	/* Spin animation for saving state */
+	:global(.animate-spin) {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	}
+</style>

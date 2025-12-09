@@ -152,7 +152,12 @@
 		// Apply firing mode modifier if specified
 		const adjustedPool = firingMode ? Math.max(0, pool + firingMode.poolMod) : pool;
 
-		dispatch('rollWeapon', { weapon, pool: adjustedPool, skillName, firingMode: firingMode ?? undefined });
+		dispatch('rollWeapon', {
+			weapon,
+			pool: adjustedPool,
+			skillName,
+			...(firingMode && { firingMode })
+		});
 	}
 
 	/** Get spellcasting pool. */
@@ -186,7 +191,7 @@
 		const gameQuality = allQualities.find(q => q.name === qualityName);
 		if (!gameQuality) return undefined;
 		return {
-			effect: gameQuality.effect ?? undefined,
+			...(gameQuality.effect && { effect: gameQuality.effect }),
 			bonuses: formatQualityBonus(gameQuality.bonus)
 		};
 	}

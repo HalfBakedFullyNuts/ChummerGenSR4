@@ -104,7 +104,7 @@
 			action,
 			pool,
 			opposed: action.opposed,
-			opposedBy: action.opposedBy
+			...(action.opposedBy && { opposedBy: action.opposedBy })
 		});
 	}
 

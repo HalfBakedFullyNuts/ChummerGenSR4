@@ -553,7 +553,7 @@ export function getImprovementSummary(
 		sources: improvements.map((i) => ({
 			name: i.sourceName,
 			value: i.value,
-			conditional: i.conditional
+			...(i.conditional && { conditional: i.conditional })
 		}))
 	};
 }

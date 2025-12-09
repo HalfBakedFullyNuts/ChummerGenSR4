@@ -12,6 +12,7 @@
 	const ALL_ATTRS: readonly AttributeValueKey[] = [...PHYSICAL_ATTRS, ...MENTAL_ATTRS, ...SPECIAL_ATTRS];
 
 	const BP_PER_POINT = 10;
+	const BP_FOR_MAX = 25;
 
 	function getAttrValue(
 		char: typeof $character,
@@ -67,7 +68,16 @@
 			const limits = getAttrLimits(char, code);
 			if (!attr || !limits) continue;
 			const pointsAboveMin = attr.base - limits.min;
-			total += pointsAboveMin * BP_PER_POINT;
+			const isAtMaximum = attr.base === limits.max;
+
+			if (isAtMaximum && pointsAboveMin > 0) {
+				// All points except the last cost 10 BP, the last costs 25 BP
+				total += (pointsAboveMin - 1) * BP_PER_POINT;
+				total += BP_FOR_MAX;
+			} else {
+				// Not at max, all points cost 10 BP
+				total += pointsAboveMin * BP_PER_POINT;
+			}
 		}
 		return total;
 	}

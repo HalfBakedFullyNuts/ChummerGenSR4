@@ -3,10 +3,7 @@
 	import {
 		listCharacters,
 		loadSavedCharacter,
-		loadImportedCharacter,
 		deleteSavedCharacter,
-		startNewCharacter,
-		saveCurrentCharacter,
 		type CharacterSummary
 	} from '$stores/character';
 	import {
@@ -16,8 +13,9 @@
 		subscribeToAuthState
 	} from '$lib/firebase';
 	import { loadCharacter } from '$lib/firebase/characters';
-	import { downloadAsChum, importFromFile } from '$lib/xml';
+	import { downloadAsChum } from '$lib/xml';
 	import type { User } from 'firebase/auth';
+	import AddCharacterButton from './AddCharacterButton.svelte';
 
 	/** Current authenticated user. */
 	let user: User | null = null;
@@ -36,12 +34,6 @@
 
 	/** Auth state unsubscribe function. */
 	let unsubscribeAuth: (() => void) | null = null;
-
-	/** File input reference for import. */
-	let fileInput: HTMLInputElement;
-
-	/** Import in progress. */
-	let importing = false;
 
 	/** Export in progress. */
 	let exporting: string | null = null;
@@ -158,13 +150,6 @@
 		deleteConfirm = null;
 	}
 
-	/** Create new character. */
-	function handleNewCharacter() {
-		if (!user) return;
-		startNewCharacter(user.uid, 'bp');
-		dispatch('newCharacter');
-	}
-
 	/** Format date for display. */
 	function formatDate(isoString: string): string {
 		if (!isoString) return 'Unknown';
@@ -191,51 +176,9 @@
 
 		exporting = null;
 	}
-
-	/** Handle file selection for import. */
-	async function handleImportFile(event: Event) {
-		const target = event.target as HTMLInputElement;
-		const file = target.files?.[0];
-		if (!file || !user) return;
-
-		importing = true;
-		error = null;
-
-		const result = await importFromFile(file, user.uid);
-		if (result.success && result.character) {
-			/* Store imported character and save */
-			loadImportedCharacter(result.character);
-			const saveResult = await saveCurrentCharacter();
-			if (saveResult.success) {
-				await refreshCharacters();
-			} else {
-				error = saveResult.error || 'Failed to save imported character';
-			}
-		} else {
-			error = result.error || 'Failed to import character';
-		}
-
-		importing = false;
-		/* Reset file input */
-		target.value = '';
-	}
-
-	/** Trigger file input click. */
-	function triggerImport() {
-		fileInput?.click();
-	}
 </script>
 
 <div class="space-y-6">
-	<!-- Hidden file input for import -->
-	<input
-		type="file"
-		accept=".chum,.xml"
-		class="hidden"
-		bind:this={fileInput}
-		on:change={handleImportFile}
-	/>
-
 	<!-- Header -->
 	<div class="flex items-center justify-between">
 		<h2 class="cw-page-header">Characters</h2>
@@ -281,46 +224,9 @@
 
 	<!-- Character List -->
 	{#if !loading && user}
-		<!-- Action Buttons -->
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-			<!-- New Character Button -->
-			<button
-				class="cw-card p-6 text-left hover:border-primary-main/50 transition-colors group"
-				on:click={handleNewCharacter}
-			>
-				<div class="flex items-center gap-4">
-					<div class="w-12 h-12 rounded-full bg-primary-main/20 flex items-center justify-center text-primary-dark text-2xl group-hover:bg-primary-main group-hover:text-primary-contrast transition-colors">
-						+
-					</div>
-					<div>
-						<h3 class="text-text-primary font-medium">Create New Character</h3>
-						<p class="text-text-secondary text-sm">Start the character creation wizard</p>
-					</div>
-				</div>
-			</button>
-
-			<!-- Import Button -->
-			<button
-				class="cw-card p-6 text-left hover:border-secondary-main/50 transition-colors group"
-				on:click={triggerImport}
-				disabled={importing}
-			>
-				<div class="flex items-center gap-4">
-					<div class="w-12 h-12 rounded-full bg-secondary-main/20 flex items-center justify-center text-secondary-dark text-xl group-hover:bg-secondary-main group-hover:text-secondary-contrast transition-colors">
-						{#if importing}
-							<span class="animate-spin">↻</span>
-						{:else}
-							↑
-						{/if}
-					</div>
-					<div>
-						<h3 class="text-text-primary font-medium">
-							{importing ? 'Importing...' : 'Import Character'}
-						</h3>
-						<p class="text-text-secondary text-sm">Load .chum file from desktop Chummer</p>
-					</div>
-				</div>
-			</button>
+		<!-- Action Button -->
+		<div class="relative max-w-md">
+			<AddCharacterButton variant="card" userId={user?.uid ?? null} />
 		</div>
 
 		<!-- Character Cards -->
@@ -328,7 +234,7 @@
 			<div class="cw-panel p-8 text-center">
 				<p class="text-text-muted">No saved characters yet.</p>
 				<p class="text-text-secondary text-sm mt-2">
-					Click "Create New Character" above to get started.
+					Click "Add Character" above to get started.
 				</p>
 			</div>
 		{:else}

@@ -407,8 +407,8 @@ export function parseCustomContent(xmlString: string): ParseResult {
 		id: generateContentId(),
 		name,
 		version,
-		author,
-		description,
+		...(author && { author }),
+		...(description && { description }),
 		source,
 		createdAt: new Date().toISOString(),
 		content

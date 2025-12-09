@@ -42,7 +42,8 @@
       "source": "RC",
       "page": 96,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "effect": "Allows the character to act first in the first Initiative Pass of a new combat regardless of their actual Initiative Score."
     },
     {
       "name": "Ambidextrous",
@@ -251,7 +252,8 @@
       "source": "RC",
       "page": 96,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Allows the character to read, write, and speak a second language fluently, listing the second language as Native."
     },
     {
       "name": "Biocompatability (Bioware)",
@@ -601,7 +603,8 @@
       "source": "RC",
       "page": 96,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Requires the gamemaster to warn the player when the character is about to do something foolish by acting as the character's inner voice of reason."
     },
     {
       "name": "Corrosive Spit",
@@ -709,7 +712,8 @@
       "source": "RC",
       "page": 97,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Causes the character's digital data trail to be attributed to someone else's identity, resulting in a +2 threshold for data searches or tracking the character on their current ID."
     },
     {
       "name": "Dormant Metagenetics (Human)",
@@ -844,7 +848,8 @@
       "source": "RC",
       "page": 97,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants the character the ability to pass through security checks that rely on biometric data by cross-referencing with the original DNA donor."
     },
     {
       "name": "Exceptional Attribute",
@@ -1032,7 +1037,8 @@
       "limit": true,
       "bonus": {
         "transgenicsgenetechcost": 80
-      }
+      },
+      "effect": "The character can start play with one free genetic modification and has a 20 percent cost reduction on transgenic genetic enhancements."
     },
     {
       "name": "Gills",
@@ -1095,7 +1101,8 @@
       "source": "RC",
       "page": 98,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants a +1 dice pool modifier to Perception Tests to spot something at a distance and reduces unaugmented Weapon Range Modifiers by one level."
     },
     {
       "name": "High Pain Tolerance (Rating 1)",
@@ -1311,7 +1318,7 @@
       "effect": "Grants Magic attribute; Grants critter powers; +2 BOD; +2 REA; +1 STR; -1 CHA; +1 WIL; -1 ESS; +2 Initiative; +1 Initiative Pass"
     },
     {
-      "name": "Infected: Fom\u00f3raig",
+      "name": "Infected: Fomóraig",
       "bp": 45,
       "category": "Positive",
       "source": "RC",
@@ -2152,7 +2159,8 @@
       "source": "RC",
       "page": 98,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Allows the character to perform temporary, complicated technical feats with bare minimum materials, contingent on a successful Mechanics Skill Test."
     },
     {
       "name": "Keen-Eared",
@@ -2179,7 +2187,8 @@
       "source": "SM",
       "page": 25,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Allows a character to Awaken later in the game, gaining a Magic attribute of 1 and an appropriate magical quality for a Karma cost."
     },
     {
       "name": "Latent Dracomorphosis",
@@ -2279,7 +2288,8 @@
       "source": "RC",
       "page": 98,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Designates the character as a minor member of an organized crime syndicate, granting the syndicate as a free Group Contact with Connection 8 and Loyalty 4."
     },
     {
       "name": "Magician",
@@ -2532,7 +2542,8 @@
       "source": "RC",
       "page": 100,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "effect": "Grants human characters the advantages of low-light vision, allowing them to see normally in dim environments."
     },
     {
       "name": "Obscure",
@@ -2634,7 +2645,8 @@
       "source": "RC",
       "page": 100,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Allows the character to always know the current time, to the minute, due to a split-second sense of timing."
     },
     {
       "name": "Photographic Memory",
@@ -2686,7 +2698,8 @@
       "source": "RC",
       "page": 100,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Makes the character's name recognizable and grants them a 'get out of jail free card' for small legal violations and misdemeanors in their home sprawl."
     },
     {
       "name": "Proboscis",
@@ -2924,7 +2937,8 @@
       "source": "RC",
       "page": 101,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Ensures the character always knows where true north lies and can always retrace his path if he possesses the Survival skill."
     },
     {
       "name": "Sensei",
@@ -2933,7 +2947,8 @@
       "source": "RC",
       "page": 101,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Designates one contact who can act as the character's Instructor for a specific skill group, allowing the character to gain instruction benefits without searching for a teacher."
     },
     {
       "name": "Setae",
@@ -2978,7 +2993,8 @@
       "source": "RC",
       "page": 101,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Allows the character to read a full page of written text (about 800 words) in about 5 seconds."
     },
     {
       "name": "Spell Knack",
@@ -3348,7 +3364,8 @@
       "limit": true,
       "bonus": {
         "basicbiowareessmultiplier": 50
-      }
+      },
+      "effect": "Off-the-rack, basic bioware is treated as delta grade for the character, reducing Essence Costs by half."
     },
     {
       "name": "Underwater Vision",
@@ -3411,7 +3428,8 @@
       "source": "AU",
       "page": 20,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "A character is field testing a state-of-the-art hard nanite system that can be reprogrammed to perform as any internal nanoware system also at Rating 3."
     },
     {
       "name": "Will to Live (Rating 1)",
@@ -3863,7 +3881,8 @@
       "source": "AU",
       "page": 21,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "The character suffers from a strong urge to seek out better and more interesting body modifications, acting like a Moderate drug addiction psychologically."
     },
     {
       "name": "Bad Luck",
@@ -3898,7 +3917,8 @@
       "source": "RC",
       "page": 116,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Allows the character to voluntarily trigger a berserk state, gaining +1 to all Physical attributes but lowering all Mental attributes by 1."
     },
     {
       "name": "Bi-Polar",
@@ -3929,7 +3949,8 @@
       "source": "RC",
       "page": 116,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Causes the character to emit a glow that negates visibility modifiers in low light, but makes them easily visible and targetable."
     },
     {
       "name": "Biosystem Overstress",
@@ -3938,7 +3959,8 @@
       "source": "AU",
       "page": 21,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Leads to slower healing times and faster onset of fatigue from bioware implants, doubling the normal interval for Healing Tests and halving the base period before Fatigue sets in."
     },
     {
       "name": "Borrowed Time",
@@ -4001,7 +4023,8 @@
       "source": "RC",
       "page": 116,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Inflicts a –3 dice pool modifier when resisting damage to the head/torso due to soft skull material."
     },
     {
       "name": "Chronic Dissociation Syndrome (CDS)",
@@ -4140,7 +4163,8 @@
       "source": "RC",
       "page": 117,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Imposes a –1 dice pool modifier for all Combat Tests and precision-based skill tests due to lacking binocular vision."
     },
     {
       "name": "Data Shadow (Rating 1)",
@@ -4369,7 +4393,8 @@
       "source": "RC",
       "page": 117,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Changes the character's eye color to an unusual shade, which has no direct game effect but may lead to negative social modifiers."
     },
     {
       "name": "Feathers",
@@ -4378,7 +4403,8 @@
       "source": "RC",
       "page": 117,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Causes the character to sprout feathers that offer no protective value and are incompatible with other hair/skin modifications."
     },
     {
       "name": "Fixated",
@@ -4468,7 +4494,8 @@
       "source": "SM",
       "page": 27,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "effect": "A restriction the Awakened character voluntarily imposes on his own magical power; if the restriction is broken, the character's Magic attribute is reduced by 1 point."
     },
     {
       "name": "Gene Freak",
@@ -4565,7 +4592,8 @@
       "source": "AU",
       "page": 22,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "A specific cyberware implant suffers from an unfixable glitch that requires constant vigilance and maintenance to prevent it from failing and shutting down."
     },
     {
       "name": "Hung Out to Dry",
@@ -4607,10 +4635,11 @@
       "source": "AU",
       "page": 22,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Inflicts a –2 dice pool modifier to all Body Tests to resist the effects of diseases, drugs, and toxins due to decreased immunity from implants."
     },
     {
-      "name": "In Debt (5,000\u00a5)",
+      "name": "In Debt (5,000¥)",
       "bp": -5,
       "category": "Negative",
       "source": "RC",
@@ -4619,7 +4648,7 @@
       "limit": true
     },
     {
-      "name": "In Debt (10,000\u00a5)",
+      "name": "In Debt (10,000¥)",
       "bp": -10,
       "category": "Negative",
       "source": "RC",
@@ -4628,7 +4657,7 @@
       "limit": true
     },
     {
-      "name": "In Debt (15,000\u00a5)",
+      "name": "In Debt (15,000¥)",
       "bp": -15,
       "category": "Negative",
       "source": "RC",
@@ -4637,7 +4666,7 @@
       "limit": true
     },
     {
-      "name": "In Debt (20,000\u00a5)",
+      "name": "In Debt (20,000¥)",
       "bp": -20,
       "category": "Negative",
       "source": "RC",
@@ -4646,7 +4675,7 @@
       "limit": true
     },
     {
-      "name": "In Debt (25,000\u00a5)",
+      "name": "In Debt (25,000¥)",
       "bp": -25,
       "category": "Negative",
       "source": "RC",
@@ -4655,7 +4684,7 @@
       "limit": true
     },
     {
-      "name": "In Debt (30,000\u00a5)",
+      "name": "In Debt (30,000¥)",
       "bp": -30,
       "category": "Negative",
       "source": "RC",
@@ -4718,7 +4747,8 @@
       "source": "RC",
       "page": 117,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Imposes social penalties and makes the character a primary target in combat due to possessing insect-like features."
     },
     {
       "name": "Judas",
@@ -4880,7 +4910,8 @@
       "source": "RC",
       "page": 117,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Causes the character's hair to change colors according to their emotional state, imposing a +2 dice pool modifier for all Judge Intentions Tests against the character."
     },
     {
       "name": "Mysterious Implant (5 BP)",
@@ -4934,7 +4965,8 @@
       "source": "AU",
       "page": 22,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "A specific implant emits an intermittent and subtle but annoying noise, applying a +2 dice pool modifier to any Hearing Perception Tests made against the character."
     },
     {
       "name": "Multiple Personality Disorder (MPD)",
@@ -4952,7 +4984,8 @@
       "source": "AU",
       "page": 22,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Nanoware systems degrade faster (1 rating point every 4 days) due to a hyper-sensitive immune system."
     },
     {
       "name": "Neoteny",
@@ -4961,7 +4994,8 @@
       "source": "RC",
       "page": 117,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Reduces the character's default Physical Condition Monitor due to retaining childlike physical traits, making them easily mistaken for children."
     },
     {
       "name": "Night Blindness",
@@ -4979,7 +5013,8 @@
       "source": "RC",
       "page": 117,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Reduces all Mental attributes by 1 during daylight hours due to an abnormal circadian rhythm."
     },
     {
       "name": "Oblivious",
@@ -5217,7 +5252,8 @@
       "source": "RC",
       "page": 118,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Imposes a –3 dice pool modifier to all Physical Tests due to accelerated aging and cardiovascular problems."
     },
     {
       "name": "Quadriplegic",
@@ -5307,7 +5343,8 @@
       "source": "RC",
       "page": 118,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Causes the character to have scaly skin that offers no protective value and is incompatible with other hair/skin modifications."
     },
     {
       "name": "Scorched",
@@ -5342,7 +5379,8 @@
       "source": "RC",
       "page": 118,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Causes the character to produce a foul odor when stressed, imposing a –2 dice pool modifier to all Social Tests when the odor is not masked."
     },
     {
       "name": "Sensitive Neural Structure",
@@ -5422,7 +5460,8 @@
       "source": "RC",
       "page": 119,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Imposes a –2 dice pool modifier to all Healing Tests made by or for the character."
     },
     {
       "name": "Sensory Overload Syndrome",
@@ -5471,7 +5510,8 @@
       "source": "RC",
       "page": 119,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Causes unusual skin colors that are obvious and visible, making the character easier to notice and potentially subjecting her to prejudice."
     },
     {
       "name": "Stubby Arms",
@@ -5480,7 +5520,8 @@
       "source": "RC",
       "page": 119,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Reduces the reach of melee weapons by 1 and imposes a –1 dice pool modifier for physical tests requiring dexterity with the arms."
     },
     {
       "name": "Symbiosis",
@@ -5489,7 +5530,8 @@
       "source": "RC",
       "page": 119,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Causes the character to become physically attuned to her permanent home, granting survival bonuses but potentially making her sick if the environment is polluted."
     },
     {
       "name": "Temporal Lobe Epilepsy",
@@ -5498,7 +5540,8 @@
       "source": "AU",
       "page": 22,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "The character suffers from chronic degenerative temporal lobe epilepsy with complications, leading to acute epileptic seizures in stressful situations."
     },
     {
       "name": "Third Eye",
@@ -5507,7 +5550,8 @@
       "source": "RC",
       "page": 119,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants a third eye on the forehead that incurs no vision modifiers, but makes the character easily noticeable, subjecting them to social penalties."
     },
     {
       "name": "Thorns",
@@ -5588,7 +5632,8 @@
       "source": "RC",
       "page": 119,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Causes the character's hair to change to an unusual color, texture, or pattern, making her incompatible with other hair modifications."
     },
     {
       "name": "Vendetta",
@@ -5606,7 +5651,8 @@
       "source": "RC",
       "page": 119,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants a small, non-functional tail that has no other purpose than being a physical feature."
     },
     {
       "name": "Virtual Personality (Rating 1)",

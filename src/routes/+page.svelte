@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { user } from '$stores/user';
 	import { signInWithGoogle } from '$firebase/auth';
+	import AddCharacterButton from '$lib/components/AddCharacterButton.svelte';
 
 	let isLoading = false;
 	let errorMessage: string | null = null;
@@ -84,17 +85,9 @@
 
 	<!-- Quick Actions -->
 	<section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-		<a href="/character/new" class="cw-card p-4 group hover:border-primary-dark transition-colors">
-			<div class="flex items-center gap-3 mb-2">
-				<span class="material-icons text-primary-dark">add_circle</span>
-				<h3 class="text-text-primary font-medium group-hover:text-primary-dark transition-colors">
-					New Character
-				</h3>
-			</div>
-			<p class="text-text-muted text-sm">
-				Create a new SR4 character from scratch using the build point system.
-			</p>
-		</a>
+		<div class="relative">
+			<AddCharacterButton variant="card" userId={$user?.uid ?? null} />
+		</div>
 
 		<a href="/characters" class="cw-card p-4 group hover:border-secondary-dark transition-colors">
 			<div class="flex items-center gap-3 mb-2">

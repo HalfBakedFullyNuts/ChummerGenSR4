@@ -415,6 +415,20 @@ export function setAttribute(
 		updatedAt: new Date().toISOString()
 	};
 
+	/* For BP build, enforce 50% limit on non-special attributes */
+	if (char.buildMethod === 'bp') {
+		const isNonSpecial = attrCode !== 'edg'; // Edge is the only special attribute
+		if (isNonSpecial) {
+			const projectedNonSpecialBP = calculateNonSpecialAttributeBP(updatedWithAttr);
+			const maxNonSpecialBP = Math.floor(char.buildPoints * 0.5);
+
+			/* Reject if this would exceed the 50% limit */
+			if (projectedNonSpecialBP > maxNonSpecialBP) {
+				return; // Don't apply the change
+			}
+		}
+	}
+
 	/* Calculate and update total attribute BP cost */
 	const attrCost = calculateTotalAttributeCost(updatedWithAttr);
 
@@ -2091,6 +2105,31 @@ export function loadImportedCharacter(importedChar: Character): void {
 	if (importedChar.status === 'creation') {
 		currentStepStore.set('finalize');
 	}
+}
+
+/**
+ * Start a manual character entry.
+ * Creates a character with ignoreRules: true for unrestricted editing.
+ * Used for quick data entry without validation.
+ */
+export function startManualCharacter(
+	userId: string,
+	buildMethod: BuildMethod = 'bp'
+): void {
+	const id = generateId();
+	const char = createEmptyCharacter(id, userId, buildMethod);
+
+	/* Set ignoreRules to true for manual entry */
+	const manualChar: Character = {
+		...char,
+		settings: {
+			...char.settings,
+			ignoreRules: true
+		}
+	};
+
+	characterStore.set(manualChar);
+	currentStepStore.set('finalize');
 }
 
 /**
