@@ -91,12 +91,22 @@
 		return char.qualities.some((q) => q.name.startsWith('Changeling'));
 	}
 
+	/** Check if adding a quality would exceed the BP limit. */
+	function wouldExceedLimit(quality: GameQuality): boolean {
+		const category = quality.bp >= 0 ? 'Positive' : 'Negative';
+		const currentBP = category === 'Positive' ? positiveBP : negativeBP;
+		const maxBP = category === 'Positive' ? MAX_POSITIVE_BP : MAX_NEGATIVE_BP;
+		return currentBP + Math.abs(quality.bp) > maxBP;
+	}
+
 	/** Handle quality selection (for ungrouped qualities). */
 	function toggleQuality(quality: GameQuality): void {
 		if (isSelected(quality.name)) {
 			const id = getSelectedId(quality.name);
 			if (id) removeQuality(id);
 		} else {
+			// Check BP limit before adding
+			if (wouldExceedLimit(quality)) return;
 			const category = quality.bp >= 0 ? 'Positive' : 'Negative';
 			addQuality(quality.name, category, quality.bp);
 		}
@@ -107,7 +117,10 @@
 		if (group.isGroup) {
 			openVariantGroup = group;
 		} else {
-			toggleQuality(group.variants[0]);
+			const firstVariant = group.variants[0];
+			if (firstVariant) {
+				toggleQuality(firstVariant);
+			}
 		}
 	}
 
@@ -117,6 +130,8 @@
 			const id = getSelectedId(quality.name);
 			if (id) removeQuality(id);
 		} else {
+			// Check BP limit before adding
+			if (wouldExceedLimit(quality)) return;
 			const category = quality.bp >= 0 ? 'Positive' : 'Negative';
 			addQuality(quality.name, category, quality.bp);
 		}
@@ -149,6 +164,11 @@
 
 	/** Handle take again button click. */
 	function handleTakeAgain(quality: { name: string; category: 'Positive' | 'Negative'; bp: number }): void {
+		// Check BP limit before adding
+		const currentBP = quality.category === 'Positive' ? positiveBP : negativeBP;
+		const maxBP = quality.category === 'Positive' ? MAX_POSITIVE_BP : MAX_NEGATIVE_BP;
+		if (currentBP + Math.abs(quality.bp) > maxBP) return;
+
 		// Get base name (remove #N suffix if present)
 		const baseName = quality.name.replace(/\s+#\d+$/, '');
 		addQualityAgain(baseName, quality.category, quality.bp);
@@ -171,32 +191,6 @@
 </script>
 
 <div class="space-y-6">
-	<!-- BP Summary -->
-	<div class="grid grid-cols-2 gap-4">
-		<div class="cw-panel p-4">
-			<div class="flex items-center justify-between">
-				<span class="text-text-secondary">Positive Qualities:</span>
-				<span
-					class="font-mono text-xl
-						{positiveBP > MAX_POSITIVE_BP ? 'text-error-main' : 'text-success-main'}"
-				>
-					{positiveBP} / {MAX_POSITIVE_BP} BP
-				</span>
-			</div>
-		</div>
-		<div class="cw-panel p-4">
-			<div class="flex items-center justify-between">
-				<span class="text-text-secondary">Negative Qualities:</span>
-				<span
-					class="font-mono text-xl
-						{negativeBP > MAX_NEGATIVE_BP ? 'text-error-main' : 'text-warning-main'}"
-				>
-					{negativeBP} / {MAX_NEGATIVE_BP} BP
-				</span>
-			</div>
-		</div>
-	</div>
-	
 	<!-- Metagenetic Counter (only shown for Changelings) -->
 	{#if showMetageneticCounter}
 		<div class="cw-panel p-4 bg-purple-50 border-purple-200">
@@ -246,22 +240,28 @@
 		/>
 	</div>
 
-	<!-- Selected Qualities -->
-	{#if $character && $character.qualities.length > 0}
-		<div class="cw-card">
-			<h3 class="cw-card-header mb-3">Selected Qualities</h3>
-			<div class="flex flex-wrap gap-2">
-				{#each $character.qualities as quality}
+	<!-- Selected Qualities (always visible, split positive/negative) -->
+	<div class="grid grid-cols-2 gap-4">
+		<!-- Positive Qualities (Left) -->
+		<div class="cw-panel p-3 min-h-[84px] max-h-[200px] overflow-y-auto">
+			<h4 class="text-xs font-semibold text-success-main uppercase tracking-wide mb-2 flex items-center gap-1">
+				<span class="material-icons text-xs">add_circle</span>
+				Positive ({positiveBP}/{MAX_POSITIVE_BP} BP)
+			</h4>
+			<div class="flex flex-wrap gap-y-px gap-x-[5%]">
+				{#each ($character?.qualities ?? []).filter(q => q.category === 'Positive') as quality}
 					{@const baseQualName = quality.name.replace(/\s+#\d+$/, '')}
 					{@const gameQual = getGameQuality(baseQualName)}
 					{@const bonuses = gameQual ? getQualityBonuses(gameQual) : []}
-					{@const hasTooltip = gameQual?.effect || bonuses.length > 0}
+					{@const hasTooltip = !!gameQual?.effect || bonuses.length > 0}
 					{@const repeatable = canTakeAgain(quality.name)}
-					<div class="flex items-center gap-1 px-3 py-1 rounded text-sm
-						{quality.category === 'Positive'
-							? 'bg-success-main/20 text-success-main border border-success-main/30'
-							: 'bg-warning-main/20 text-warning-main border border-warning-main/30'}">
-						<span class="{hasTooltip ? 'cursor-help' : ''}">
+					<button
+						class="flex items-center gap-0.5 px-1.5 py-0 rounded text-xs w-[45%] text-left
+							bg-success-main/20 text-success-main border border-success-main/30
+							hover:bg-success-main/30 transition-colors cursor-pointer"
+						on:click={() => removeQuality(quality.id)}
+						title="Click to remove">
+						<span class="flex-1 truncate {hasTooltip ? 'cursor-help' : ''}">
 							{quality.name}
 							<Tooltip show={hasTooltip} maxWidth="20rem">
 								<div slot="content" class="text-left">
@@ -281,28 +281,85 @@
 								</div>
 							</Tooltip>
 						</span>
-						<span class="opacity-70">{quality.bp} BP</span>
-						{#if repeatable}
-							<button
+						<span class="opacity-70 text-xs">{quality.bp}</span>
+						{#if repeatable && positiveBP + quality.bp <= MAX_POSITIVE_BP}
+							<span
 								class="p-0.5 hover:bg-white/20 rounded transition-colors"
 								title="Take this quality again"
 								on:click|stopPropagation={() => handleTakeAgain(quality)}
+								on:keydown|stopPropagation={(e) => e.key === 'Enter' && handleTakeAgain(quality)}
+								role="button"
+								tabindex="0"
 							>
 								<span class="material-icons text-xs">add</span>
-							</button>
+							</span>
 						{/if}
-						<button
-							class="p-0.5 hover:bg-white/20 rounded transition-colors"
-							title="Remove quality"
-							on:click|stopPropagation={() => removeQuality(quality.id)}
-						>
-							<span class="material-icons text-xs">close</span>
-						</button>
-					</div>
+					</button>
+				{:else}
+					<span class="text-text-muted text-xs italic">No positive qualities selected</span>
 				{/each}
 			</div>
 		</div>
-	{/if}
+
+		<!-- Negative Qualities (Right) -->
+		<div class="cw-panel p-3 min-h-[84px] max-h-[200px] overflow-y-auto">
+			<h4 class="text-xs font-semibold text-warning-main uppercase tracking-wide mb-2 flex items-center gap-1">
+				<span class="material-icons text-xs">remove_circle</span>
+				Negative ({negativeBP}/{MAX_NEGATIVE_BP} BP)
+			</h4>
+			<div class="flex flex-wrap gap-y-px gap-x-[5%]">
+				{#each ($character?.qualities ?? []).filter(q => q.category === 'Negative') as quality}
+					{@const baseQualName = quality.name.replace(/\s+#\d+$/, '')}
+					{@const gameQual = getGameQuality(baseQualName)}
+					{@const bonuses = gameQual ? getQualityBonuses(gameQual) : []}
+					{@const hasTooltip = !!gameQual?.effect || bonuses.length > 0}
+					{@const repeatable = canTakeAgain(quality.name)}
+					<button
+						class="flex items-center gap-0.5 px-1.5 py-0 rounded text-xs w-[45%] text-left
+							bg-warning-main/20 text-warning-main border border-warning-main/30
+							hover:bg-warning-main/30 transition-colors cursor-pointer"
+						on:click={() => removeQuality(quality.id)}
+						title="Click to remove">
+						<span class="flex-1 truncate {hasTooltip ? 'cursor-help' : ''}">
+							{quality.name}
+							<Tooltip show={hasTooltip} maxWidth="20rem">
+								<div slot="content" class="text-left">
+									{#if gameQual?.effect}
+										<div class="mb-1">{gameQual.effect}</div>
+									{/if}
+									{#if bonuses.length > 0}
+										<div class="border-t border-gray-700 pt-1 mt-1 space-y-0.5">
+											{#each bonuses as bonus}
+												<div class:text-green-400={bonus.positive}
+													 class:text-red-400={!bonus.positive}>
+													{bonus.text}
+												</div>
+											{/each}
+										</div>
+									{/if}
+								</div>
+							</Tooltip>
+						</span>
+						<span class="opacity-70 text-xs">{quality.bp}</span>
+						{#if repeatable && negativeBP + Math.abs(quality.bp) <= MAX_NEGATIVE_BP}
+							<span
+								class="p-0.5 hover:bg-white/20 rounded transition-colors"
+								title="Take this quality again"
+								on:click|stopPropagation={() => handleTakeAgain(quality)}
+								on:keydown|stopPropagation={(e) => e.key === 'Enter' && handleTakeAgain(quality)}
+								role="button"
+								tabindex="0"
+							>
+								<span class="material-icons text-xs">add</span>
+							</span>
+						{/if}
+					</button>
+				{:else}
+					<span class="text-text-muted text-xs italic">No negative qualities selected</span>
+				{/each}
+			</div>
+		</div>
+	</div>
 
 	<!-- Quality List (Grouped) -->
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -310,7 +367,7 @@
 			{@const selected = isGroupSelected(group)}
 			{@const selectedVariants = getSelectedVariants(group)}
 			{@const bonuses = getQualityBonuses(group.representative)}
-			{@const hasTooltip = group.representative.effect || bonuses.length > 0}
+			{@const hasTooltip = !!group.representative.effect || bonuses.length > 0}
 			<button
 				class="cw-card text-left p-3 transition-all group relative
 					{selected

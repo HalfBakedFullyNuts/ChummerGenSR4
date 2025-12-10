@@ -8,7 +8,6 @@
 		isFadingPhysical,
 		calculateCompilingSpritePool,
 		calculateSpriteResistance,
-		calculateSpriteTasks,
 		calculateRegisteringSpritePool,
 		type SpriteType
 	} from '$lib/utils/dice';

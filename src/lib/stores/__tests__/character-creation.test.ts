@@ -127,7 +127,14 @@ const mockGameData: GameData = {
 	cyberwareCategories: [],
 	cyberwareGrades: [],
 	gear: [],
-	gearCategories: []
+	gearCategories: [],
+	bioware: [],
+	biowareCategories: [],
+	vehicles: [],
+	vehicleCategories: [],
+	martialArts: [],
+	echoes: [],
+	streams: []
 };
 
 describe('Character Creation - Metatype BP Costs', () => {

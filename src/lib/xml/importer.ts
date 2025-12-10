@@ -27,7 +27,7 @@ import type {
 	CharacterPower,
 	CyberwareGrade
 } from '$types';
-import { createEmptyCharacter } from '$types';
+import { createEmptyCharacter, getKnowledgeSkillAttribute } from '$types';
 
 /** Result of import operation. */
 export interface ImportResult {
@@ -160,6 +160,7 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 			attributes: 0, /* Calculated elsewhere */
 			skills: skillBP,
 			skillGroups: skillGroupBP,
+			knowledgeSkills: 0,
 			qualities: qualityBP,
 			spells: spellBP,
 			complexForms: 0,
@@ -307,10 +308,12 @@ function parseSkills(skills: unknown): { activeSkills: CharacterSkill[]; knowled
 			if (isKnowledge) {
 				const category = getString(skill, 'skillcategory');
 				const validCategories = ['Academic', 'Interest', 'Language', 'Professional', 'Street'];
+				const validCategory = validCategories.includes(category) ? category as KnowledgeSkillCategory : 'Interest';
 				knowledgeSkills.push({
 					id: generateId(),
 					name: getString(skill, 'name'),
-					category: validCategories.includes(category) ? category as KnowledgeSkillCategory : 'Interest',
+					category: validCategory,
+					attribute: getKnowledgeSkillAttribute(validCategory),
 					rating,
 					specialization: getString(skill, 'spec') || null
 				});

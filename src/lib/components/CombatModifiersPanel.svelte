@@ -141,9 +141,9 @@
 				</button>
 			{/each}
 		</div>
-		{#if selectedCalledShot}
+		{#if selectedCalledShot && CALLED_SHOTS[selectedCalledShot]}
 			<p class="text-xs text-secondary-dark mt-2">
-				Effect: {CALLED_SHOTS[selectedCalledShot].effect}
+				Effect: {CALLED_SHOTS[selectedCalledShot]?.effect}
 			</p>
 		{/if}
 	</div>
@@ -154,11 +154,13 @@
 			<div class="text-xs text-text-muted">
 				Active:
 				{#each selectedModifiers as mod, i}
-					<span class="text-text-secondary">{COMBAT_MODIFIERS[mod].name}</span>{i < selectedModifiers.length - 1 ? ', ' : ''}
+					{#if COMBAT_MODIFIERS[mod]}
+						<span class="text-text-secondary">{COMBAT_MODIFIERS[mod]?.name}</span>{i < selectedModifiers.length - 1 ? ', ' : ''}
+					{/if}
 				{/each}
-				{#if selectedCalledShot}
+				{#if selectedCalledShot && CALLED_SHOTS[selectedCalledShot]}
 					{selectedModifiers.length > 0 ? ', ' : ''}
-					<span class="text-warning-main">{CALLED_SHOTS[selectedCalledShot].name}</span>
+					<span class="text-warning-main">{CALLED_SHOTS[selectedCalledShot]?.name}</span>
 				{/if}
 			</div>
 		</div>

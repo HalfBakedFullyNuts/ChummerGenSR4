@@ -190,7 +190,7 @@ describe('Equipment Cost Calculation', () => {
 		const equipment = {
 			...EMPTY_EQUIPMENT,
 			gear: [
-				{ id: '1', name: 'Stim Patch', category: 'Slap Patches', rating: 6, quantity: 5, cost: 150, location: '', notes: '' }
+				{ id: '1', name: 'Stim Patch', category: 'Slap Patches', rating: 6, quantity: 5, cost: 150, location: '', notes: '', capacity: 0, capacityUsed: 0, capacityCost: 0, containerId: null, containedItems: [] }
 			]
 		};
 		expect(calculateEquipmentCost(equipment)).toBe(750); // 150 * 5
@@ -209,8 +209,11 @@ describe('Equipment Cost Calculation', () => {
 			weapons: [{ id: '1', name: 'Pistol', category: 'Light Pistols', type: 'Ranged' as const, reach: 0, damage: '5P', ap: '-', mode: 'SA', rc: '0', ammo: '15(c)', currentAmmo: 15, conceal: 0, cost: 500, accessories: [], notes: '' }],
 			armor: [{ id: '1', name: 'Jacket', category: 'Armor', ballistic: 8, impact: 6, capacity: 8, capacityUsed: 0, equipped: true, cost: 900, modifications: [], notes: '' }],
 			cyberware: [{ id: '1', name: 'Datajack', category: 'Headware', grade: 'Standard' as const, rating: 1, essence: 0.1, cost: 1000, capacity: 0, capacityUsed: 0, location: '', subsystems: [], notes: '' }],
-			gear: [{ id: '1', name: 'Commlink', category: 'Commlink', rating: 3, quantity: 1, cost: 700, location: '', notes: '' }],
-			lifestyle: { id: '1', name: 'Low', level: 'Low', monthlyCost: 2000, monthsPrepaid: 1, location: '', notes: '' }
+			bioware: [],
+			vehicles: [],
+			gear: [{ id: '1', name: 'Commlink', category: 'Commlink', rating: 3, quantity: 1, cost: 700, location: '', notes: '', capacity: 0, capacityUsed: 0, capacityCost: 0, containerId: null, containedItems: [] }],
+			lifestyle: { id: '1', name: 'Low', level: 'Low', monthlyCost: 2000, monthsPrepaid: 1, location: '', notes: '' },
+			martialArts: []
 		};
 		expect(calculateEquipmentCost(equipment)).toBe(500 + 900 + 1000 + 700 + 2000);
 	});

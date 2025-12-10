@@ -127,7 +127,6 @@ describe('Career Mode', () => {
 		});
 
 		it('should fail if not enough nuyen', () => {
-			const char = get(character);
 			const result = spendNuyen(1000000, 'Too expensive');
 
 			expect(result.success).toBe(false);
@@ -176,16 +175,14 @@ describe('Career Mode', () => {
 		});
 
 		it('should fail if not enough karma', () => {
-			const result = improveAttribute('bod');
-			/* With 100 karma and BOD 1, cost is (1+1)*5 = 10, should have enough */
-			/* But let's test with no karma */
+			/* Test with no karma - start fresh */
 			startNewCharacter('test-user', 'bp');
 			enterCareerMode();
 			/* No karma added */
 
-			const result2 = improveAttribute('bod');
-			expect(result2.success).toBe(false);
-			expect(result2.error).toContain('Not enough karma');
+			const result = improveAttribute('bod');
+			expect(result.success).toBe(false);
+			expect(result.error).toContain('Not enough karma');
 		});
 
 		it('should fail if at maximum', () => {

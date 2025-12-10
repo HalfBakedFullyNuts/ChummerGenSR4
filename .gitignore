@@ -33,3 +33,6 @@ npm-debug.log*
 # Cache
 .cache/
 .turbo/
+
+# Stale build artifacts
+chummer-web/

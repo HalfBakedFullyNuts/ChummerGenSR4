@@ -36,6 +36,55 @@
 		return naturalMax + Math.floor(naturalMax / 2);
 	}
 
+	/**
+	 * Check if incrementing this attribute would violate the "only 1 at natural max" rule.
+	 */
+	function wouldViolateMaxRule(code: AttributeValueKey, validation: typeof $attributeValidation): boolean {
+		const attr = getAttrValue($character, code);
+		const limits = getAttrLimits($character, code);
+		if (!attr || !limits) return false;
+
+		// If this attribute is already at max, it's fine (can't increment anyway)
+		if (attr.base >= limits.max) return false;
+
+		// If incrementing would put this at max, check if another is already at max
+		if (attr.base + 1 === limits.max) {
+			const anotherAtMax = validation.maxedAttributeCount > 0 && validation.maxedAttribute !== code;
+			return anotherAtMax;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get inline message for natural max status of an attribute.
+	 * Returns null if no message needed.
+	 */
+	function getMaxMessage(code: AttributeValueKey, validation: typeof $attributeValidation): { text: string; isError: boolean } | null {
+		const attr = getAttrValue($character, code);
+		const limits = getAttrLimits($character, code);
+		if (!attr || !limits) return null;
+
+		const isThisAtMax = attr.base === limits.max;
+		const anotherAtMax = validation.maxedAttributeCount > 0 && validation.maxedAttribute !== code;
+
+		if (isThisAtMax) {
+			if (validation.maxedAttributeCount > 1) {
+				// This is at max AND another is too - error state
+				return { text: 'Natural max (limit: 1)', isError: true };
+			}
+			// Just this one at max - info state
+			return { text: 'Natural max', isError: false };
+		}
+
+		// Check if this attribute could go to max but is blocked
+		if (anotherAtMax && attr.base === limits.max - 1) {
+			return { text: 'Already have attr. at max', isError: true };
+		}
+
+		return null;
+	}
+
 	function formatRange(min: number, max: number, augmented: number): string {
 		// Format: "X - XX (XX)" with right-aligned components
 		const minStr = String(min);
@@ -96,36 +145,14 @@
 		return total;
 	}
 
-	/** Check if a specific attribute is at its natural maximum. */
-	function isAtMax(code: AttributeValueKey): boolean {
-		const attr = getAttrValue($character, code);
-		const limits = getAttrLimits($character, code);
-		if (!attr || !limits) return false;
-		return attr.base === limits.max;
-	}
-
-	/** Check if incrementing this attribute would exceed limits. */
-	function wouldExceedMaxLimit(code: AttributeValueKey): boolean {
-		if (isKarmaBuild) return false;
-		const attr = getAttrValue($character, code);
-		const limits = getAttrLimits($character, code);
-		if (!attr || !limits) return false;
-		// If we're not at max yet but incrementing would put us at max,
-		// and another attribute is already at max, block it
-		const wouldBeAtMax = attr.base + 1 === limits.max;
-		return wouldBeAtMax && $attributeValidation.maxedAttributeCount >= 1;
-	}
-
 	// Compound test calculations (reactive to attribute changes)
 	$: bodValue = getAttrValue($character, 'bod')?.base ?? 0;
-	$: agiValue = getAttrValue($character, 'agi')?.base ?? 0;
 	$: reaValue = getAttrValue($character, 'rea')?.base ?? 0;
 	$: strValue = getAttrValue($character, 'str')?.base ?? 0;
 	$: chaValue = getAttrValue($character, 'cha')?.base ?? 0;
 	$: intValue = getAttrValue($character, 'int')?.base ?? 0;
 	$: logValue = getAttrValue($character, 'log')?.base ?? 0;
 	$: wilValue = getAttrValue($character, 'wil')?.base ?? 0;
-	$: edgValue = getAttrValue($character, 'edg')?.base ?? 0;
 
 	// Condition Monitors
 	$: physicalCM = 8 + Math.ceil(bodValue / 2);
@@ -184,18 +211,7 @@
 						></div>
 					</div>
 					
-					<!-- Maxed Attribute Warning -->
-					{#if $attributeValidation.maxedAttributeCount > 0}
-						<div class="mt-2 flex items-center gap-1 text-xs {$attributeValidation.isOverMaxLimit ? 'text-red-600' : 'text-amber-600'}">
-							<span class="material-icons text-sm">{$attributeValidation.isOverMaxLimit ? 'error' : 'info'}</span>
-							{#if $attributeValidation.isOverMaxLimit}
-								Only 1 attribute may be at natural max (you have {$attributeValidation.maxedAttributeCount})
-							{:else}
-								{ATTRIBUTE_NAMES[$attributeValidation.maxedAttribute ?? 'bod']} is at natural max (1 allowed)
-							{/if}
-						</div>
-					{/if}
-				</div>
+					</div>
 			{/if}
 		</div>
 	</div>
@@ -217,9 +233,16 @@
 					{@const attr = getAttrValue($character, code)}
 					{@const limits = getAttrLimits($character, code)}
 					{@const augmented = limits ? getAugmentedLimit(limits.max) : 0}
+					{@const maxMsg = !isKarmaBuild ? getMaxMessage(code, $attributeValidation) : null}
+					{@const blockedByMaxRule = !isKarmaBuild && wouldViolateMaxRule(code, $attributeValidation)}
 					<div class="flex items-center px-4 py-3 border-b border-gray-100 {idx % 2 === 1 ? 'bg-gray-50' : 'bg-white'}">
-						<div class="flex-1">
+						<div class="flex-1 flex items-center gap-2">
 							<span class="text-black font-medium">{ATTRIBUTE_NAMES[code]}</span>
+							{#if maxMsg}
+								<span class="text-xs {maxMsg.isError ? 'text-red-600' : 'text-amber-600'}">
+									({maxMsg.text})
+								</span>
+							{/if}
 						</div>
 						<div class="flex items-center gap-1">
 							<button
@@ -235,7 +258,7 @@
 							<button
 								class="cw-btn-inc-dec"
 								on:click={() => incrementAttr(code)}
-								disabled={!attr || !limits || attr.base >= limits.max}
+								disabled={!attr || !limits || attr.base >= limits.max || blockedByMaxRule}
 							>
 								<span class="material-icons text-xs">add</span>
 							</button>
@@ -260,9 +283,16 @@
 					{@const attr = getAttrValue($character, code)}
 					{@const limits = getAttrLimits($character, code)}
 					{@const augmented = limits ? getAugmentedLimit(limits.max) : 0}
+					{@const maxMsg = !isKarmaBuild ? getMaxMessage(code, $attributeValidation) : null}
+					{@const blockedByMaxRule = !isKarmaBuild && wouldViolateMaxRule(code, $attributeValidation)}
 					<div class="flex items-center px-4 py-3 border-b border-gray-100 {idx % 2 === 1 ? 'bg-gray-50' : 'bg-white'}">
-						<div class="flex-1">
+						<div class="flex-1 flex items-center gap-2">
 							<span class="text-black font-medium">{ATTRIBUTE_NAMES[code]}</span>
+							{#if maxMsg}
+								<span class="text-xs {maxMsg.isError ? 'text-red-600' : 'text-amber-600'}">
+									({maxMsg.text})
+								</span>
+							{/if}
 						</div>
 						<div class="flex items-center gap-1">
 							<button
@@ -278,7 +308,7 @@
 							<button
 								class="cw-btn-inc-dec"
 								on:click={() => incrementAttr(code)}
-								disabled={!attr || !limits || attr.base >= limits.max}
+								disabled={!attr || !limits || attr.base >= limits.max || blockedByMaxRule}
 							>
 								<span class="material-icons text-xs">add</span>
 							</button>
@@ -303,9 +333,16 @@
 					{@const attr = getAttrValue($character, code)}
 					{@const limits = getAttrLimits($character, code)}
 					{@const augmented = limits ? getAugmentedLimit(limits.max) : 0}
+					{@const maxMsg = !isKarmaBuild ? getMaxMessage(code, $attributeValidation) : null}
+					{@const blockedByMaxRule = !isKarmaBuild && wouldViolateMaxRule(code, $attributeValidation)}
 					<div class="flex items-center px-4 py-3 border-b border-gray-100 {idx % 2 === 1 ? 'bg-gray-50' : 'bg-white'}">
-						<div class="flex-1">
+						<div class="flex-1 flex items-center gap-2">
 							<span class="text-black font-medium">{ATTRIBUTE_NAMES[code]}</span>
+							{#if maxMsg}
+								<span class="text-xs {maxMsg.isError ? 'text-red-600' : 'text-amber-600'}">
+									({maxMsg.text})
+								</span>
+							{/if}
 						</div>
 						<div class="flex items-center gap-1">
 							<button
@@ -321,7 +358,7 @@
 							<button
 								class="cw-btn-inc-dec"
 								on:click={() => incrementAttr(code)}
-								disabled={!attr || !limits || attr.base >= limits.max}
+								disabled={!attr || !limits || attr.base >= limits.max || blockedByMaxRule}
 							>
 								<span class="material-icons text-xs">add</span>
 							</button>

@@ -9,8 +9,6 @@
 	export let size: 'sm' | 'md' | 'lg' = 'md';
 
 	$: percentage = Math.min(100, Math.max(0, (value / max) * 100));
-	$: autoVariant =
-		percentage > 100 ? 'error' : percentage > 80 ? 'warning' : percentage > 50 ? 'primary' : 'success';
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->

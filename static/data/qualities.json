@@ -52,7 +52,8 @@
       "source": "SR4",
       "page": 90,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "effect": "The character does not suffer any modifiers for using an off-hand weapon."
     },
     {
       "name": "Analytical Mind",
@@ -143,7 +144,8 @@
       "source": "RC",
       "page": 111,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character treats Force-based spell effects against them at half their actual strength."
     },
     {
       "name": "Astral Chameleon",
@@ -152,7 +154,8 @@
       "source": "SR4",
       "page": 90,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "The character's astral signature blends quickly, lasting only half as long, and providing a -2 dice pool modifier to others attempting to assense it."
     },
     {
       "name": "Astral Sight",
@@ -212,7 +215,8 @@
       "source": "UN",
       "page": 168,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Receives a +2 modifier on Spoof Command Tests and the modifier for hacking security or admin accounts is reduced by 2."
     },
     {
       "name": "Balance Receptor",
@@ -221,7 +225,8 @@
       "source": "RC",
       "page": 111,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Adds a +1 dice pool modifier to all tests involving balance."
     },
     {
       "name": "Beak",
@@ -243,7 +248,8 @@
       "source": "RC",
       "page": 111,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses a second heart, allowing them to take a maximum of 8 boxes of Stun or Fatigue damage instead of the usual 6."
     },
     {
       "name": "Bilingual",
@@ -288,7 +294,8 @@
       "source": "RC",
       "page": 111,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses a sophisticated biological echolocation system similar to a bat's or dolphin's, functioning like the cyberware senses."
     },
     {
       "name": "Black Market Pipeline",
@@ -349,7 +356,8 @@
       "source": "RC",
       "page": 111,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Enables the character to hear infrasonic sounds beyond the normal metahuman hearing range."
     },
     {
       "name": "Broad Auditory System (Ultrasound)",
@@ -358,7 +366,8 @@
       "source": "RC",
       "page": 111,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Enables the character to hear ultrasonic sounds beyond the normal metahuman hearing range."
     },
     {
       "name": "Camouflage",
@@ -367,7 +376,8 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character's skin pigmentation grants a dice pool modifier (up to +4) for Infiltration Tests in certain environments."
     },
     {
       "name": "Catlike",
@@ -453,7 +463,8 @@
       "source": "UN",
       "page": 36,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Gains a +2 dice pool modifier to Social Skill Tests when communicating via AR or VR."
     },
     {
       "name": "Claws",
@@ -462,7 +473,8 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character's fingernails/toenails harden into claws, allowing them to attack with Unarmed Combat skill, inflicting (STR/2)P damage."
     },
     {
       "name": "Climate Adaptation (Arctic)",
@@ -471,7 +483,8 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants a +2 dice pool modifier for Survival Tests and resisting damage from extreme cold."
     },
     {
       "name": "Climate Adaptation (Desert)",
@@ -480,7 +493,8 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants a +2 dice pool modifier for Survival Tests and resisting damage from extreme heat."
     },
     {
       "name": "Code Flux",
@@ -489,7 +503,8 @@
       "source": "UN",
       "page": 168,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "AI's access code fluctuates semi-randomly when it moves between nodes, making it exceptionally difficult to track."
     },
     {
       "name": "Code of Conduct: Assassin's Creed",
@@ -576,7 +591,8 @@
       "source": "SR4",
       "page": 90,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Receives a +2 dice pool modifier to a specified Matrix action."
     },
     {
       "name": "College Education",
@@ -613,7 +629,8 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses glands that produce a highly corrosive mucus that can be spit as a ranged attack using Exotic Ranged Weapon skill."
     },
     {
       "name": "Deep Cover (1 Trigger Known)",
@@ -622,7 +639,8 @@
       "source": "RC",
       "page": 97,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Preserves the character's real personality while operating under a false identity. One trigger snaps them back to their true self."
     },
     {
       "name": "Deep Cover (2 Triggers Known)",
@@ -631,7 +649,8 @@
       "source": "RC",
       "page": 97,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Preserves the character's real personality while operating under a false identity. Two triggers snap them back to their true self."
     },
     {
       "name": "Dermal Alteration (Bark Skin)",
@@ -640,7 +659,8 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses bark-like skin granting natural armor or resistance bonuses."
     },
     {
       "name": "Dermal Alteration (Blubber)",
@@ -649,7 +669,8 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses a thick layer of blubber granting cold resistance."
     },
     {
       "name": "Dermal Alteration (Dragon Skin)",
@@ -658,7 +679,8 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses scaled skin granting natural armor."
     },
     {
       "name": "Dermal Alteration (Granite Shell)",
@@ -667,7 +689,8 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses rock-like skin granting significant natural armor."
     },
     {
       "name": "Dermal Alteration (Rhino Hide)",
@@ -676,7 +699,8 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses thick, leathery skin granting natural armor."
     },
     {
       "name": "Dermal Deposits",
@@ -685,7 +709,8 @@
       "source": "RC",
       "page": 112,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses tough, sinewy deposits under the skin that count as 1 natural Ballistic/Impact Armor, cumulative with worn armor."
     },
     {
       "name": "Defensive Secretion",
@@ -703,7 +728,8 @@
       "source": "UN",
       "page": 168,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "AI grants an additional +2 modifier to the Response and Signal attributes of its home node."
     },
     {
       "name": "Digital Doppelganger",
@@ -722,7 +748,8 @@
       "source": "RC",
       "page": 74,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses unexpressed metagenetic predispositions that may be triggered by magic during play, causing them to transform into a changeling."
     },
     {
       "name": "Dormant Metagenetics (Non-Human)",
@@ -731,7 +758,8 @@
       "source": "RC",
       "page": 74,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses unexpressed metagenetic predispositions that may be triggered by magic during play, causing them to transform into a changeling."
     },
     {
       "name": "Double Jointed",
@@ -781,7 +809,8 @@
       "source": "UN",
       "page": 169,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "AI may 'jump into' drones and control them like a rigger, using its rating in place of Pilot and using drone autosofts."
     },
     {
       "name": "Dynamic Coloration",
@@ -799,7 +828,8 @@
       "source": "RC",
       "page": 113,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character gains the capacity to sense electricity and changes to electric fields in the real world within (Essence) meters."
     },
     {
       "name": "Elongated Limbs",
@@ -821,7 +851,8 @@
       "source": "UN",
       "page": 169,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "AI is able to emulate programs it needs, using Rating + Software without causing Fading."
     },
     {
       "name": "Erased (1 Week)",
@@ -830,7 +861,8 @@
       "source": "SR4",
       "page": 90,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "The character's data trail and records vanish from all but the most secure systems within 1 week of being entered."
     },
     {
       "name": "Erased (24 Hours)",
@@ -839,7 +871,8 @@
       "source": "SR4",
       "page": 90,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "The character's data trail and records vanish from all but the most secure systems within 24 hours of being entered."
     },
     {
       "name": "Escaped Clone",
@@ -873,7 +906,8 @@
       "source": "RC",
       "page": 97,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Provides a +2 dice pool modifier to Social Skill Tests in appropriate situations where the character's public profile can be leveraged."
     },
     {
       "name": "Fame (National)",
@@ -882,7 +916,8 @@
       "source": "RC",
       "page": 97,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Provides a +4 dice pool modifier to Social Skill Tests in appropriate situations where the character's public profile can be leveraged."
     },
     {
       "name": "Fame (Global)",
@@ -891,7 +926,8 @@
       "source": "RC",
       "page": 97,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Provides a +6 dice pool modifier to Social Skill Tests in appropriate situations where the character's public profile can be leveraged."
     },
     {
       "name": "Fangs",
@@ -900,7 +936,8 @@
       "source": "RC",
       "page": 113,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character's canine teeth are enlarged and sharpened, allowing them to attack with Unarmed Combat skill, suffering a -1 Reach penalty."
     },
     {
       "name": "First Impression",
@@ -1003,7 +1040,8 @@
       "source": "RC",
       "page": 98,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "effect": "Grants a +1 dice pool bonus to all Piloting Tests for a specific vehicle type."
     },
     {
       "name": "Gearhead (Category)",
@@ -1012,7 +1050,8 @@
       "source": "RC",
       "page": 98,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "effect": "Grants a +2 dice pool bonus to all Piloting Tests for a category of vehicles."
     },
     {
       "name": "Genecrafted",
@@ -1047,7 +1086,8 @@
       "source": "RC",
       "page": 113,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses amphibian-like gills on the sides of the neck, allowing them to breathe underwater."
     },
     {
       "name": "Glamour",
@@ -1074,7 +1114,8 @@
       "source": "RC",
       "page": 114,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character's skin produces a lubricant in stressful situations, granting a -2 dice modifier against grappling attempts if mostly unclothed."
     },
     {
       "name": "Goring Horns",
@@ -1083,7 +1124,8 @@
       "source": "RC",
       "page": 114,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses horns that can be used in combat with the Exotic Melee Weapon: Horns skill, inflicting (STR/2+1)P damage."
     },
     {
       "name": "Guts",
@@ -1092,7 +1134,8 @@
       "source": "SR4",
       "page": 91,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "effect": "Receives a +2 dice pool modifier on tests made to resist fear and intimidation."
     },
     {
       "name": "Hawk Eye",
@@ -1111,7 +1154,8 @@
       "source": "SR4",
       "page": 91,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "effect": "Can ignore 1 box of damage when calculating wound modifiers."
     },
     {
       "name": "High Pain Tolerance (Rating 2)",
@@ -1120,7 +1164,8 @@
       "source": "SR4",
       "page": 91,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "effect": "Can ignore 2 boxes of damage when calculating wound modifiers."
     },
     {
       "name": "High Pain Tolerance (Rating 3)",
@@ -1129,7 +1174,8 @@
       "source": "SR4",
       "page": 91,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "effect": "Can ignore 3 boxes of damage when calculating wound modifiers."
     },
     {
       "name": "Home Ground",
@@ -1138,7 +1184,8 @@
       "source": "SR4",
       "page": 91,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Provides a +2 dice pool modifier for all Active Skill Tests and a +4 modifier for relevant Knowledge skills within the character's home turf."
     },
     {
       "name": "Human-Looking",
@@ -1147,7 +1194,8 @@
       "source": "SR4",
       "page": 91,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "A metahuman character can 'pass' for human in most circumstances, receiving neutral attitudes from human NPCs in Social Skill Tests."
     },
     {
       "name": "Inspired",
@@ -2169,7 +2217,8 @@
       "source": "RC",
       "page": 114,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants a +1 die bonus to hearing-based Perception Tests, but risks penalties from sound distraction."
     },
     {
       "name": "Larger Tusks",
@@ -2178,7 +2227,8 @@
       "source": "RC",
       "page": 114,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Allows an Unarmed Combat attack inflicting (STR/2+1)P damage due to enlarged incisor teeth."
     },
     {
       "name": "Latent Awakening",
@@ -2260,7 +2310,8 @@
       "source": "RC",
       "page": 114,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Allows the character to see normally in light levels as low as starlight, negating penalties for low-light conditions."
     },
     {
       "name": "Lucky",
@@ -2356,7 +2407,8 @@
       "source": "RC",
       "page": 114,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character has an innate magnetic compass that provides a constant reference to magnetic north, granting +2 to Navigation Tests."
     },
     {
       "name": "Marsupial Pouch",
@@ -2365,7 +2417,8 @@
       "source": "RC",
       "page": 114,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character has an abdominal pouch capable of holding small items (up to 2 kg), granting +2 to Palming Tests for concealing items."
     },
     {
       "name": "Mentor Spirit",
@@ -2533,7 +2586,8 @@
       "source": "RC",
       "page": 115,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character can produce a natural venom (Power 6, Speed 1 Combat Turn, Vector: Injection) deliverable via bite, stinger, or spitting."
     },
     {
       "name": "Night Vision",
@@ -2708,7 +2762,8 @@
       "source": "RC",
       "page": 115,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character has a retractable feeding tube that can drain blood, dealing 1 box of Stun damage per Combat Turn (resisted by BOD). Victim's blood provides 1 meal equivalent per box drained."
     },
     {
       "name": "Quick Healer",
@@ -2957,7 +3012,8 @@
       "source": "RC",
       "page": 115,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character has microscopic hair-like structures on hands and feet enabling climbing on smooth vertical surfaces and ceilings at half walking speed. Grants +4 to Climbing Tests."
     },
     {
       "name": "Shiva Arms",
@@ -2966,7 +3022,8 @@
       "source": "RC",
       "page": 115,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "effect": "Character has an extra pair of fully functional arms, allowing additional actions and +2 dice to grappling. Can be taken multiple times for additional pairs."
     },
     {
       "name": "Snooper",
@@ -3157,7 +3214,8 @@
       "source": "WA",
       "page": 13,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants a 25% discount on several key Technical/Vehicle powers, enhances item Attunement, and modifies Adept Centering for technical skills."
     },
     {
       "name": "The Artist's Way",
@@ -3166,7 +3224,8 @@
       "source": "WA",
       "page": 13,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants a 25% discount on powers enhancing artistic/social performance and perception, and enhances certain specialized perception metamagic techniques."
     },
     {
       "name": "The Athlete's Way",
@@ -3175,7 +3234,8 @@
       "source": "WA",
       "page": 13,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants a 25% discount on powers enhancing physical attributes, movement, and endurance, and improves Adept Centering and Infusion metamagic for physical skills."
     },
     {
       "name": "The Burnout's Way (Bioware)",
@@ -3210,7 +3270,8 @@
       "source": "WA",
       "page": 13,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants 25% discount on powers enhancing stealth, agility, and disguise, and improves Masking and Flexible Signature metamagic techniques for subtlety."
     },
     {
       "name": "The Magician's Way",
@@ -3219,7 +3280,8 @@
       "source": "WA",
       "page": 14,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Allows Mystic Adepts to specialize by gaining discounted powers from another Way, plus enhancement to either chosen metamagics or Centering for Sorcery."
     },
     {
       "name": "The Speaker's Way",
@@ -3228,7 +3290,8 @@
       "source": "WA",
       "page": 14,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants 25% discount on powers enhancing social interaction, empathy, and influence, and improves Flexible Signature and Cognition metamagical techniques."
     },
     {
       "name": "The Totem's Way",
@@ -3237,7 +3300,8 @@
       "source": "WA",
       "page": 14,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Allows specialization based on Mentor Spirit, grants discounted powers related to senses/animals, and improves Attunement (Animal) and Empower Animal metamagics."
     },
     {
       "name": "The Warrior's Way",
@@ -3246,7 +3310,8 @@
       "source": "WA",
       "page": 14,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants a 25% discount on powers enhancing combat speed, defense, and damage, and improves Adept Centering and weapon Attunement metamagic for combat skills."
     },
     {
       "name": "Thermal Sensitivity",
@@ -3255,7 +3320,8 @@
       "source": "RC",
       "page": 115,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Grants infrared-sensitive receptors allowing the character to perceive radiated heat."
     },
     {
       "name": "Thermographic Vision",
@@ -3264,7 +3330,8 @@
       "source": "RC",
       "page": 115,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Provides natural thermographic vision."
     },
     {
       "name": "Tough as Nails (Rating 1)",
@@ -3374,7 +3441,8 @@
       "source": "RC",
       "page": 115,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses a specially-adapted membrane to the outer eye that enables them to use their normal vision unrestricted in and out of water."
     },
     {
       "name": "Vomeronasal Organ",
@@ -3383,7 +3451,8 @@
       "source": "RC",
       "page": 116,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character possesses auxiliary olfactory organelles that augment the sense of smell, granting a higher sensitivity and contrast to body odors."
     },
     {
       "name": "Water Sprite",
@@ -3438,7 +3507,8 @@
       "source": "SR4",
       "page": 93,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Gains 1 additional Damage Overflow Box."
     },
     {
       "name": "Will to Live (Rating 2)",
@@ -3447,7 +3517,8 @@
       "source": "SR4",
       "page": 93,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Gains 2 additional Damage Overflow Boxes."
     },
     {
       "name": "Will to Live (Rating 3)",
@@ -3456,7 +3527,8 @@
       "source": "SR4",
       "page": 93,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Gains 3 additional Damage Overflow Boxes."
     },
     {
       "name": "Addiction (Mild)",
@@ -3506,15 +3578,9 @@
       "mutant": false,
       "limit": false,
       "bonus": {
-        "notoriety": 1,
-        "specificattribute": [
-          {
-            "name": "ESS",
-            "val": -1
-          }
-        ]
+        "notoriety": 1
       },
-      "effect": "-1 ESS; +1 Notoriety"
+      "effect": "+1 Notoriety"
     },
     {
       "name": "Adiposis",
@@ -3548,7 +3614,8 @@
       "source": "UN",
       "page": 37,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Inflicts a -1 dice pool penalty to Perception Tests while within Signal range of a Matrix device due to a psychological disorder."
     },
     {
       "name": "AIPS (Rating 2)",
@@ -3557,7 +3624,8 @@
       "source": "UN",
       "page": 37,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Inflicts a -2 dice pool penalty to Perception Tests while within Signal range of a Matrix device due to a psychological disorder."
     },
     {
       "name": "AIPS (Rating 3)",
@@ -3566,7 +3634,8 @@
       "source": "UN",
       "page": 37,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Inflicts a -3 dice pool penalty to Perception Tests while within Signal range of a Matrix device due to a psychological disorder."
     },
     {
       "name": "Albinism",
@@ -3575,7 +3644,8 @@
       "source": "RC",
       "page": 102,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "effect": "Character is photosensitive, suffering increased visibility modifiers from glare and treating sunlight as a Moderate Allergy."
     },
     {
       "name": "Allergy (Uncommon, Mild)",
@@ -3638,7 +3708,8 @@
       "source": "RC",
       "page": 102,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "The character has lost some of their memory, potentially including skills and abilities from their past."
     },
     {
       "name": "Amnesia (Everything)",
@@ -3647,7 +3718,8 @@
       "source": "RC",
       "page": 102,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "The character has lost all of their memory, including their identity, skills, and abilities."
     },
     {
       "name": "Aspected Magician (Conjuror)",
@@ -3836,7 +3908,8 @@
       "source": "AU",
       "page": 163,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character is incapable of consciously acknowledging the results of any Assensing Tests, though still generally aware of astral forms."
     },
     {
       "name": "Asthma",
@@ -3845,7 +3918,8 @@
       "source": "RC",
       "page": 102,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "effect": "Character suffers from a permanent minor allergy to multiple common allergens and uses half their Body rating to determine the threshold before taking Fatigue damage from exertion."
     },
     {
       "name": "Astral Beacon",
@@ -3854,7 +3928,8 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "The astral signature of the character sticks out, lasting twice as long, and providing a +2 dice pool modifier to others assensing it."
     },
     {
       "name": "Astral Hazing (non-Awakened)",
@@ -3863,7 +3938,8 @@
       "source": "RC",
       "page": 116,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character becomes an aspected domain that taints astral space around them, reducing Magic by the local background count."
     },
     {
       "name": "Astral Hazing (Awakened)",
@@ -3872,7 +3948,8 @@
       "source": "RC",
       "page": 116,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character becomes an aspected domain that taints astral space around them, reducing Magic by the local background count and impairing their own magic."
     },
     {
       "name": "Augmentation Addict",
@@ -3927,7 +4004,8 @@
       "source": "RC",
       "page": 102,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character vacillates between manic activity (Physical attribute bonuses/Mental penalties) and bouts of depression (Mental/Physical penalties)."
     },
     {
       "name": "Big Regret",
@@ -3969,7 +4047,8 @@
       "source": "RC",
       "page": 102,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character is living on borrowed time due to a fatal condition and may die at any moment after a gamemaster-determined number of game months."
     },
     {
       "name": "Buggy 'Ware (Rating 1)",
@@ -4042,7 +4121,8 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character always has trouble with a particular Matrix action, receiving a -2 dice pool modifier anytime they attempt it."
     },
     {
       "name": "Combat Paralysis",
@@ -4064,7 +4144,8 @@
       "source": "RC",
       "page": 103,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Inflicts a -2 dice pool modifier to all tests that involve a computer, electronic device, or Matrix-connected system."
     },
     {
       "name": "Corruptor",
@@ -4073,7 +4154,8 @@
       "source": "UN",
       "page": 170,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "AI suffers from the Gremlins quality at Rating 2, causing malfunctions in programs it interacts with."
     },
     {
       "name": "Cranial Bomb",
@@ -4082,7 +4164,8 @@
       "source": "RC",
       "page": 103,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Someone has planted an explosive device in the character's head. The gamemaster decides who planted it and what that person wants."
     },
     {
       "name": "Critter Spook",
@@ -5438,7 +5521,8 @@
       "source": "SR4",
       "page": 95,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Character was born with or acquired a legal System Identification Number (SIN), meaning their identity is stored and accessible in numerous databanks."
     },
     {
       "name": "SINner (Criminal)",
@@ -5470,7 +5554,8 @@
       "source": "RC",
       "page": 109,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "effect": "Requires a Willpower (3) Test in a sensory-saturated environment to avoid suffering seizures and temporary incapacitation."
     },
     {
       "name": "Signature",

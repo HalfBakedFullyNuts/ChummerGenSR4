@@ -8,10 +8,7 @@
 		calculateAssensingPool,
 		calculateSummoningPool,
 		calculateSpiritResistance,
-		calculateSpiritServices,
-		calculateSummoningDrain,
 		calculateDrainResistancePool,
-		isDrainPhysical,
 		calculateCounterspellingPool,
 		calculateSpellDefenseDice,
 		calculateBanishingPool,
@@ -169,16 +166,6 @@
 		dispatch('rollCounterspelling', {
 			pool: counterspellingPool,
 			numProtected
-		});
-	}
-
-	/** Calculate drain after summoning. */
-	function rollDrainResist(spiritHits: number): void {
-		const drainValue = calculateSummoningDrain(spiritForce, spiritHits);
-		dispatch('rollDrain', {
-			pool: drainResistPool,
-			drainValue,
-			isPhysical: isDrainPhysical(drainValue, magic)
 		});
 	}
 

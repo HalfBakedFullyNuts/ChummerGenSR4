@@ -35,7 +35,6 @@ import {
 	calculateAutopilotPool,
 	getVCRBonus,
 	calculateSensorTargetingPool,
-	WEAPON_SKILL_MAP,
 	FIRING_MODES,
 	COMBAT_MODIFIERS,
 	CALLED_SHOTS,
@@ -62,8 +61,7 @@ import {
 	calculateSpellcastingPool,
 	calculateSpellResistancePool,
 	calculateSpellDrain,
-	calculateInitiativeModifiers,
-	type RollResult
+	calculateInitiativeModifiers
 } from '../dice';
 
 describe('Dice Rolling Utilities', () => {
@@ -99,7 +97,7 @@ describe('Dice Rolling Utilities', () => {
 			// Create RNG that returns specific values
 			const values = [0.1, 0.3, 0.6, 0.8, 0.99]; // 1, 2, 4, 5, 6
 			let index = 0;
-			const rng = () => values[index++];
+			const rng = (): number => values[index++]!;
 
 			const result = rollDicePool({ pool: 5, rng });
 
@@ -124,7 +122,7 @@ describe('Dice Rolling Utilities', () => {
 
 			const result = rollDicePool({
 				pool: 5,
-				rng: () => values[index++]
+				rng: (): number => values[index++]!
 			});
 
 			expect(result.isGlitch).toBe(true);
@@ -150,7 +148,7 @@ describe('Dice Rolling Utilities', () => {
 
 			const result = rollDicePool({
 				pool: 3,
-				rng: () => values[index++]
+				rng: (): number => values[index++]!
 			});
 
 			expect(result.isGlitch).toBe(true);
@@ -166,7 +164,7 @@ describe('Dice Rolling Utilities', () => {
 			const result = rollDicePool({
 				pool: 3,
 				threshold: 4,
-				rng: () => values[index++]
+				rng: (): number => values[index++]!
 			});
 
 			expect(result.hits).toBe(2); // Two 4s
@@ -180,7 +178,7 @@ describe('Dice Rolling Utilities', () => {
 			const result = rollDicePool({
 				pool: 3,
 				edge: true,
-				rng: () => values[index++]
+				rng: (): number => values[index++]!
 			});
 
 			expect(result.dice).toEqual([6, 6, 3, 4, 2]);
@@ -197,7 +195,7 @@ describe('Dice Rolling Utilities', () => {
 			const result = rollDicePool({
 				pool: 1,
 				edge: true,
-				rng: () => values[index++]
+				rng: (): number => values[index++]!
 			});
 
 			expect(result.dice).toEqual([6, 6, 3]);
@@ -345,7 +343,7 @@ describe('Dice Rolling Utilities', () => {
 			const result = rollDicePool({
 				pool: 3,
 				threshold: 6,
-				rng: () => values[index++]
+				rng: (): number => values[index++]!
 			});
 
 			expect(result.hits).toBe(1); // Only the 6
@@ -381,7 +379,7 @@ describe('Dice Rolling Utilities', () => {
 			const result = rollInitiative({
 				base: 8,
 				dice: 2,
-				rng: () => values[index++]
+				rng: (): number => values[index++]!
 			});
 
 			expect(result.dice).toHaveLength(2);
@@ -405,7 +403,7 @@ describe('Dice Rolling Utilities', () => {
 			const result = rollInitiative({
 				base: 20,
 				dice: 3,
-				rng: () => values[index++]
+				rng: (): number => values[index++]!
 			});
 			expect(result.total).toBe(38); // 20 + 18
 			expect(result.passes).toBe(4); // Max 4 passes
@@ -549,7 +547,7 @@ describe('Dice Rolling Utilities', () => {
 		it('should parse single mode', () => {
 			const modes = parseFireModes('SA');
 			expect(modes).toHaveLength(1);
-			expect(modes[0].code).toBe('SA');
+			expect(modes[0]!.code).toBe('SA');
 		});
 
 		it('should parse multiple modes', () => {
@@ -564,48 +562,48 @@ describe('Dice Rolling Utilities', () => {
 		});
 
 		it('should have correct ammo consumption', () => {
-			expect(FIRING_MODES.SA.ammoPerShot).toBe(1);
-			expect(FIRING_MODES.BF.ammoPerShot).toBe(3);
-			expect(FIRING_MODES.FA.ammoPerShot).toBe(6);
+			expect(FIRING_MODES.SA!.ammoPerShot).toBe(1);
+			expect(FIRING_MODES.BF!.ammoPerShot).toBe(3);
+			expect(FIRING_MODES.FA!.ammoPerShot).toBe(6);
 		});
 
 		it('should have correct damage modifiers', () => {
-			expect(FIRING_MODES.SA.damageMod).toBe(0);
-			expect(FIRING_MODES.BF.damageMod).toBe(2);
-			expect(FIRING_MODES.FA.damageMod).toBe(5);
+			expect(FIRING_MODES.SA!.damageMod).toBe(0);
+			expect(FIRING_MODES.BF!.damageMod).toBe(2);
+			expect(FIRING_MODES.FA!.damageMod).toBe(5);
 		});
 	});
 
 	describe('calculateRecoilPenalty', () => {
 		it('should return 0 for single shot with any RC', () => {
 			// SS has 0 recoil, so no penalty
-			expect(calculateRecoilPenalty(0, 0, FIRING_MODES.SS)).toBe(0);
+			expect(calculateRecoilPenalty(0, 0, FIRING_MODES.SS!)).toBe(0);
 		});
 
 		it('should return 0 when recoil is compensated', () => {
 			// SA has 1 recoil, RC 2 covers it (2 + 1 = 3 free shots)
 			// Cumulative = 0 + 1 = 1, RC + 1 = 3, uncompensated = max(0, 1-3) = 0
-			expect(calculateRecoilPenalty(2, 0, FIRING_MODES.SA)).toBe(0);
+			expect(calculateRecoilPenalty(2, 0, FIRING_MODES.SA!)).toBe(0);
 		});
 
 		it('should return penalty when recoil exceeds compensation', () => {
 			// RC 0, no previous shots, firing SA (1 recoil)
 			// Cumulative = 0 + 1 = 1, RC + 1 = 1, uncompensated = max(0, 1-1) = 0
-			expect(calculateRecoilPenalty(0, 0, FIRING_MODES.SA)).toBe(0);
+			expect(calculateRecoilPenalty(0, 0, FIRING_MODES.SA!)).toBe(0);
 
 			// RC 0, 1 previous shot, firing SA (1 more recoil)
 			// Cumulative = 1 + 1 = 2, RC + 1 = 1, uncompensated = max(0, 2-1) = 1
-			expect(calculateRecoilPenalty(0, 1, FIRING_MODES.SA)).toBe(-1);
+			expect(calculateRecoilPenalty(0, 1, FIRING_MODES.SA!)).toBe(-1);
 		});
 
 		it('should handle burst fire recoil', () => {
 			// RC 2, no previous shots, firing BF (3 recoil)
 			// Cumulative = 0 + 3 = 3, RC + 1 = 3, uncompensated = max(0, 3-3) = 0
-			expect(calculateRecoilPenalty(2, 0, FIRING_MODES.BF)).toBe(0);
+			expect(calculateRecoilPenalty(2, 0, FIRING_MODES.BF!)).toBe(0);
 
 			// RC 0, no previous shots, firing BF (3 recoil)
 			// Cumulative = 0 + 3 = 3, RC + 1 = 1, uncompensated = max(0, 3-1) = 2
-			expect(calculateRecoilPenalty(0, 0, FIRING_MODES.BF)).toBe(-2);
+			expect(calculateRecoilPenalty(0, 0, FIRING_MODES.BF!)).toBe(-2);
 		});
 	});
 });
@@ -722,47 +720,47 @@ describe('Armor Stacking', () => {
 describe('Combat Modifiers', () => {
 	describe('COMBAT_MODIFIERS', () => {
 		it('should have visibility modifiers', () => {
-			expect(COMBAT_MODIFIERS.light_rain.modifier).toBe(-1);
-			expect(COMBAT_MODIFIERS.moderate_rain.modifier).toBe(-3);
-			expect(COMBAT_MODIFIERS.heavy_rain.modifier).toBe(-6);
-			expect(COMBAT_MODIFIERS.blind_fire.modifier).toBe(-6);
+			expect(COMBAT_MODIFIERS.light_rain!.modifier).toBe(-1);
+			expect(COMBAT_MODIFIERS.moderate_rain!.modifier).toBe(-3);
+			expect(COMBAT_MODIFIERS.heavy_rain!.modifier).toBe(-6);
+			expect(COMBAT_MODIFIERS.blind_fire!.modifier).toBe(-6);
 		});
 
 		it('should have range modifiers', () => {
-			expect(COMBAT_MODIFIERS.short_range.modifier).toBe(0);
-			expect(COMBAT_MODIFIERS.medium_range.modifier).toBe(-1);
-			expect(COMBAT_MODIFIERS.long_range.modifier).toBe(-3);
-			expect(COMBAT_MODIFIERS.extreme_range.modifier).toBe(-6);
+			expect(COMBAT_MODIFIERS.short_range!.modifier).toBe(0);
+			expect(COMBAT_MODIFIERS.medium_range!.modifier).toBe(-1);
+			expect(COMBAT_MODIFIERS.long_range!.modifier).toBe(-3);
+			expect(COMBAT_MODIFIERS.extreme_range!.modifier).toBe(-6);
 		});
 
 		it('should have cover modifiers', () => {
-			expect(COMBAT_MODIFIERS.partial_cover.modifier).toBe(-2);
-			expect(COMBAT_MODIFIERS.good_cover.modifier).toBe(-4);
+			expect(COMBAT_MODIFIERS.partial_cover!.modifier).toBe(-2);
+			expect(COMBAT_MODIFIERS.good_cover!.modifier).toBe(-4);
 		});
 
 		it('should have position modifiers', () => {
-			expect(COMBAT_MODIFIERS.attacker_running.modifier).toBe(-2);
-			expect(COMBAT_MODIFIERS.superior_position.modifier).toBe(2);
-			expect(COMBAT_MODIFIERS.touch_attack.modifier).toBe(2);
+			expect(COMBAT_MODIFIERS.attacker_running!.modifier).toBe(-2);
+			expect(COMBAT_MODIFIERS.superior_position!.modifier).toBe(2);
+			expect(COMBAT_MODIFIERS.touch_attack!.modifier).toBe(2);
 		});
 	});
 
 	describe('CALLED_SHOTS', () => {
 		it('should have standard called shots', () => {
-			expect(CALLED_SHOTS.vitals.modifier).toBe(-4);
-			expect(CALLED_SHOTS.head.modifier).toBe(-4);
-			expect(CALLED_SHOTS.weak_point.modifier).toBe(-6);
-			expect(CALLED_SHOTS.called_shot_simple.modifier).toBe(-2);
+			expect(CALLED_SHOTS.vitals!.modifier).toBe(-4);
+			expect(CALLED_SHOTS.head!.modifier).toBe(-4);
+			expect(CALLED_SHOTS.weak_point!.modifier).toBe(-6);
+			expect(CALLED_SHOTS.called_shot_simple!.modifier).toBe(-2);
 		});
 
 		it('should have melee-specific called shots', () => {
-			expect(CALLED_SHOTS.disarm.requiresMelee).toBe(true);
-			expect(CALLED_SHOTS.knock_down.requiresMelee).toBe(true);
+			expect(CALLED_SHOTS.disarm!.requiresMelee).toBe(true);
+			expect(CALLED_SHOTS.knock_down!.requiresMelee).toBe(true);
 		});
 
 		it('should have ranged-specific called shots', () => {
-			expect(CALLED_SHOTS.shooting_hand.requiresRanged).toBe(true);
-			expect(CALLED_SHOTS.engine_block.requiresRanged).toBe(true);
+			expect(CALLED_SHOTS.shooting_hand!.requiresRanged).toBe(true);
+			expect(CALLED_SHOTS.engine_block!.requiresRanged).toBe(true);
 		});
 	});
 
@@ -795,23 +793,23 @@ describe('Combat Modifiers', () => {
 describe('Suppressive Fire', () => {
 	describe('canSuppressiveFire', () => {
 		it('should allow with FA mode and enough ammo', () => {
-			const modes = [FIRING_MODES.SA, FIRING_MODES.FA];
+			const modes = [FIRING_MODES.SA!, FIRING_MODES.FA!];
 			expect(canSuppressiveFire(modes, 20)).toBe(true);
 			expect(canSuppressiveFire(modes, 30)).toBe(true);
 		});
 
 		it('should allow with BF mode and enough ammo', () => {
-			const modes = [FIRING_MODES.SA, FIRING_MODES.BF];
+			const modes = [FIRING_MODES.SA!, FIRING_MODES.BF!];
 			expect(canSuppressiveFire(modes, 20)).toBe(true);
 		});
 
 		it('should not allow with insufficient ammo', () => {
-			const modes = [FIRING_MODES.SA, FIRING_MODES.FA];
+			const modes = [FIRING_MODES.SA!, FIRING_MODES.FA!];
 			expect(canSuppressiveFire(modes, 19)).toBe(false);
 		});
 
 		it('should not allow with only SS/SA modes', () => {
-			const modes = [FIRING_MODES.SS, FIRING_MODES.SA];
+			const modes = [FIRING_MODES.SS!, FIRING_MODES.SA!];
 			expect(canSuppressiveFire(modes, 100)).toBe(false);
 		});
 
@@ -950,7 +948,7 @@ describe('Technomancer Actions', () => {
 
 		it('should have abilities for each type', () => {
 			expect(SPRITE_TYPES.Crack.abilities.length).toBeGreaterThan(0);
-			expect(SPRITE_TYPES.Crack.abilities[0].name).toBe('Suppress Alert');
+			expect(SPRITE_TYPES.Crack.abilities[0]!.name).toBe('Suppress Alert');
 		});
 	});
 
@@ -1077,19 +1075,19 @@ describe('Vehicle Combat', () => {
 
 	describe('VEHICLE_SPEED_MODIFIERS', () => {
 		it('should have speed categories', () => {
-			expect(VEHICLE_SPEED_MODIFIERS.idle.modifier).toBe(0);
-			expect(VEHICLE_SPEED_MODIFIERS.cruising.modifier).toBe(-1);
-			expect(VEHICLE_SPEED_MODIFIERS.fast.modifier).toBe(-3);
-			expect(VEHICLE_SPEED_MODIFIERS.very_fast.modifier).toBe(-6);
+			expect(VEHICLE_SPEED_MODIFIERS.idle!.modifier).toBe(0);
+			expect(VEHICLE_SPEED_MODIFIERS.cruising!.modifier).toBe(-1);
+			expect(VEHICLE_SPEED_MODIFIERS.fast!.modifier).toBe(-3);
+			expect(VEHICLE_SPEED_MODIFIERS.very_fast!.modifier).toBe(-6);
 		});
 	});
 
 	describe('VEHICLE_TERRAIN_MODIFIERS', () => {
 		it('should have terrain modifiers', () => {
-			expect(VEHICLE_TERRAIN_MODIFIERS.paved.modifier).toBe(0);
-			expect(VEHICLE_TERRAIN_MODIFIERS.gravel.modifier).toBe(-1);
-			expect(VEHICLE_TERRAIN_MODIFIERS.ice.modifier).toBe(-4);
-			expect(VEHICLE_TERRAIN_MODIFIERS.off_road.modifier).toBe(-3);
+			expect(VEHICLE_TERRAIN_MODIFIERS.paved!.modifier).toBe(0);
+			expect(VEHICLE_TERRAIN_MODIFIERS.gravel!.modifier).toBe(-1);
+			expect(VEHICLE_TERRAIN_MODIFIERS.ice!.modifier).toBe(-4);
+			expect(VEHICLE_TERRAIN_MODIFIERS.off_road!.modifier).toBe(-3);
 		});
 	});
 
@@ -1250,11 +1248,11 @@ describe('Astral Combat & Magic', () => {
 
 	describe('MAGIC_TRADITIONS', () => {
 		it('should have hermetic tradition', () => {
-			expect(MAGIC_TRADITIONS.hermetic.drainAttribute).toBe('log');
+			expect(MAGIC_TRADITIONS.hermetic!.drainAttribute).toBe('log');
 		});
 
 		it('should have shamanic tradition', () => {
-			expect(MAGIC_TRADITIONS.shamanic.drainAttribute).toBe('cha');
+			expect(MAGIC_TRADITIONS.shamanic!.drainAttribute).toBe('cha');
 		});
 
 		it('should have multiple traditions', () => {

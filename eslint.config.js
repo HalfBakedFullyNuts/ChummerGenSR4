@@ -45,13 +45,53 @@ export default [
 			parser: svelteParser,
 			parserOptions: {
 				parser: tsParser
+			},
+			globals: {
+				window: 'readonly',
+				document: 'readonly',
+				console: 'readonly',
+				CustomEvent: 'readonly',
+				HTMLInputElement: 'readonly',
+				HTMLTextAreaElement: 'readonly',
+				HTMLElement: 'readonly',
+				Event: 'readonly',
+				KeyboardEvent: 'readonly',
+				MouseEvent: 'readonly',
+				setTimeout: 'readonly',
+				clearTimeout: 'readonly',
+				setInterval: 'readonly',
+				clearInterval: 'readonly',
+				requestAnimationFrame: 'readonly',
+				cancelAnimationFrame: 'readonly',
+				fetch: 'readonly',
+				localStorage: 'readonly',
+				sessionStorage: 'readonly',
+				navigator: 'readonly',
+				location: 'readonly',
+				history: 'readonly',
+				URL: 'readonly',
+				URLSearchParams: 'readonly',
+				FormData: 'readonly',
+				File: 'readonly',
+				FileReader: 'readonly',
+				Blob: 'readonly',
+				DOMParser: 'readonly',
+				Element: 'readonly',
+				Node: 'readonly',
+				NodeList: 'readonly',
+				MutationObserver: 'readonly',
+				ResizeObserver: 'readonly',
+				IntersectionObserver: 'readonly',
+				confirm: 'readonly',
+				alert: 'readonly'
 			}
 		},
 		plugins: {
 			svelte
 		},
 		rules: {
-			...svelte.configs.recommended.rules
+			...svelte.configs.recommended.rules,
+			'no-inner-declarations': 'off'
 		}
 	}
 ];

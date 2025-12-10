@@ -1,0 +1,32 @@
+# Docker Compose for ChummerWeb Development
+# Usage: docker compose up
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source code for hot reload
+      - .:/app
+      # Use named volume for node_modules to avoid overwriting container's modules
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+    # Enable file watching for hot reload in Docker
+    command: npm run dev -- --host 0.0.0.0
+
+  # Production build service (optional)
+  prod:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8080:80"
+    profiles:
+      - production
+
+volumes:
+  node_modules:

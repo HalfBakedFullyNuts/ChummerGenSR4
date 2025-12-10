@@ -9,8 +9,7 @@
 		streams,
 		type GameSpell,
 		type GamePower,
-		type GameProgram,
-		type GameStream
+		type GameProgram
 	} from '$stores/gamedata';
 	import {
 		character,

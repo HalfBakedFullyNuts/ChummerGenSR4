@@ -54,7 +54,9 @@
 			'Hacking': 'Hacking',
 			'Cybercombat': 'Cybercombat'
 		};
-		return skills[skillMap[skillName]] || 0;
+		const mappedSkill = skillMap[skillName];
+		if (!mappedSkill) return 0;
+		return skills[mappedSkill] || 0;
 	}
 
 	/** Get program rating by name. */

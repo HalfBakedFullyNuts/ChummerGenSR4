@@ -43,7 +43,8 @@ export {
 	MAX_SKILL_GROUP_RATING,
 	calculateSkillPool,
 	calculateDefaultPool,
-	calculateSkillBpCost
+	calculateSkillBpCost,
+	getKnowledgeSkillAttribute
 } from './skills';
 
 /* Character types */

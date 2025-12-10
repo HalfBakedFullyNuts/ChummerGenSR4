@@ -5,7 +5,7 @@
  * Returns detailed validation results with errors and warnings.
  */
 
-import type { Character, CharacterQuality } from '$types';
+import type { Character } from '$types';
 import { getAttributeTotal, getMagicTotal, getResonanceTotal } from './calculations';
 
 /* ============================================
@@ -426,9 +426,8 @@ function validateEquipment(char: Character): ValidationIssue[] {
 		});
 	}
 
-	// Check availability (12 max at creation)
-	const maxAvail = char.settings.maxAvailability;
-	// Note: We'd need availability data on items to validate this fully
+	// Note: Availability validation (12 max at creation) would require
+	// availability data on items to validate fully.
 
 	// Check for negative nuyen
 	if (char.nuyen < 0) {

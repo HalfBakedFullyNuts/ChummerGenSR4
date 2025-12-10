@@ -11,6 +11,10 @@ import {
 	type BuildMethod,
 	type CharacterQuality,
 	type CharacterSkill,
+	type CharacterSkillGroup,
+	type SkillGroupName,
+	type KnowledgeSkill,
+	type KnowledgeSkillCategory,
 	type CharacterMagic,
 	type CharacterSpell,
 	type CharacterPower,
@@ -33,10 +37,14 @@ import {
 	type BiowareGrade,
 	type ExpenseEntry,
 	bpToNuyen,
-	createEmptyCharacter
+	createEmptyCharacter,
+	MAX_SKILL_GROUP_RATING,
+	getKnowledgeSkillAttribute,
+	calculateAttributeTotal
 } from '$types';
 import {
 	findMetatype,
+	skills as skillsStore,
 	type GameData,
 	type GameBioware,
 	type GameVehicle,
@@ -84,6 +92,7 @@ export type WizardStep =
 	| 'attributes'
 	| 'qualities'
 	| 'skills'
+	| 'knowledge'
 	| 'magic'
 	| 'equipment'
 	| 'contacts'
@@ -103,7 +112,8 @@ export const WIZARD_STEPS: readonly WizardStepConfig[] = [
 	{ id: 'metatype', label: 'Metatype', description: 'Select your race', required: true },
 	{ id: 'attributes', label: 'Attributes', description: 'Allocate attribute points', required: true },
 	{ id: 'qualities', label: 'Qualities', description: 'Select positive and negative qualities', required: true },
-	{ id: 'skills', label: 'Skills', description: 'Choose and rate your skills', required: true },
+	{ id: 'skills', label: 'Action Skills', description: 'Choose and rate your active skills', required: true },
+	{ id: 'knowledge', label: 'Knowledge Skills', description: 'Define your knowledge and languages', required: true },
 	{ id: 'magic', label: 'Magic/Resonance', description: 'Configure magical abilities', required: false },
 	{ id: 'equipment', label: 'Equipment', description: 'Purchase gear and cyberware', required: true },
 	{ id: 'contacts', label: 'Contacts', description: 'Define your network', required: true },
@@ -170,18 +180,34 @@ export function setWizardStep(step: WizardStep): void {
 }
 
 /**
+ * Get visible wizard steps for the current character.
+ * Filters out magic step for mundane characters.
+ */
+function getVisibleWizardSteps(): readonly WizardStepConfig[] {
+	const char = get(characterStore);
+	const type = getMagicType(char);
+
+	if (type === 'mundane') {
+		return WIZARD_STEPS.filter(s => s.id !== 'magic');
+	}
+	return WIZARD_STEPS;
+}
+
+/**
  * Go to the next wizard step.
  * Returns false if already at last step.
+ * Skips magic step for mundane characters.
  */
 export function nextWizardStep(): boolean {
 	const current = get(currentStepStore);
-	const currentIndex = WIZARD_STEPS.findIndex((s) => s.id === current);
+	const visibleSteps = getVisibleWizardSteps();
+	const currentIndex = visibleSteps.findIndex((s) => s.id === current);
 
-	if (currentIndex < 0 || currentIndex >= WIZARD_STEPS.length - 1) {
+	if (currentIndex < 0 || currentIndex >= visibleSteps.length - 1) {
 		return false;
 	}
 
-	const nextStep = WIZARD_STEPS[currentIndex + 1];
+	const nextStep = visibleSteps[currentIndex + 1];
 	if (nextStep) {
 		currentStepStore.set(nextStep.id);
 	}
@@ -191,16 +217,18 @@ export function nextWizardStep(): boolean {
 /**
  * Go to the previous wizard step.
  * Returns false if already at first step.
+ * Skips magic step for mundane characters.
  */
 export function prevWizardStep(): boolean {
 	const current = get(currentStepStore);
-	const currentIndex = WIZARD_STEPS.findIndex((s) => s.id === current);
+	const visibleSteps = getVisibleWizardSteps();
+	const currentIndex = visibleSteps.findIndex((s) => s.id === current);
 
 	if (currentIndex <= 0) {
 		return false;
 	}
 
-	const prevStep = WIZARD_STEPS[currentIndex - 1];
+	const prevStep = visibleSteps[currentIndex - 1];
 	if (prevStep) {
 		currentStepStore.set(prevStep.id);
 	}
@@ -605,6 +633,217 @@ export function removeSkill(name: string): void {
 }
 
 /**
+ * Get all skill names that belong to a skill group.
+ */
+export function getSkillsInGroup(groupName: SkillGroupName): string[] {
+	const allSkills = get(skillsStore);
+	return allSkills
+		.filter(s => s.skillgroup === groupName)
+		.map(s => s.name);
+}
+
+/**
+ * Check if a skill group is broken (individual skills have different ratings).
+ * A group is broken if any skill in it has been raised above the group rating.
+ */
+export function isSkillGroupBroken(groupName: SkillGroupName): boolean {
+	const char = get(characterStore);
+	if (!char) return false;
+
+	const group = char.skillGroups.find(g => g.name === groupName);
+	if (!group) return false;
+
+	// If explicitly marked as broken, return true
+	if (group.broken) return true;
+
+	// Check if any individual skill has been modified above group rating
+	const skillNames = getSkillsInGroup(groupName);
+	for (const skillName of skillNames) {
+		const skill = char.skills.find(s => s.name === skillName);
+		if (skill && skill.rating > group.rating) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Get the effective rating for a skill, considering both individual and group ratings.
+ * Returns the higher of the two.
+ */
+export function getEffectiveSkillRating(skillName: string): number {
+	const char = get(characterStore);
+	if (!char) return 0;
+
+	// Get individual skill rating
+	const skill = char.skills.find(s => s.name === skillName);
+	const individualRating = skill?.rating ?? 0;
+
+	// Get skill group rating if applicable
+	const allSkills = get(skillsStore);
+	const skillDef = allSkills.find(s => s.name === skillName);
+	if (!skillDef?.skillgroup) {
+		return individualRating;
+	}
+
+	const group = char.skillGroups.find(g => g.name === skillDef.skillgroup);
+	const groupRating = group?.rating ?? 0;
+
+	// Return the higher of individual or group rating
+	return Math.max(individualRating, groupRating);
+}
+
+/**
+ * Set a skill group rating.
+ * This sets all skills in the group to this rating.
+ * Cannot be used if the group is broken.
+ */
+export function setSkillGroup(
+	groupName: SkillGroupName,
+	rating: number
+): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) return { success: false, error: 'No character loaded' };
+
+	// Validate rating
+	if (rating < 0 || rating > MAX_SKILL_GROUP_RATING) {
+		return { success: false, error: `Rating must be between 0 and ${MAX_SKILL_GROUP_RATING}` };
+	}
+
+	// Check if group is broken
+	const existingGroup = char.skillGroups.find(g => g.name === groupName);
+	if (existingGroup?.broken) {
+		return { success: false, error: 'Cannot modify a broken skill group' };
+	}
+
+	// Check if any individual skill in the group has a higher rating
+	const skillNames = getSkillsInGroup(groupName);
+	for (const skillName of skillNames) {
+		const skill = char.skills.find(s => s.name === skillName);
+		if (skill && skill.rating > rating && rating > 0) {
+			return {
+				success: false,
+				error: `Cannot set group below individual skill rating (${skillName} is at ${skill.rating})`
+			};
+		}
+	}
+
+	// Update or create skill group
+	let newSkillGroups: CharacterSkillGroup[];
+	if (rating === 0) {
+		// Remove the group if setting to 0
+		newSkillGroups = char.skillGroups.filter(g => g.name !== groupName);
+	} else if (existingGroup) {
+		// Update existing group
+		newSkillGroups = char.skillGroups.map(g =>
+			g.name === groupName ? { ...g, rating } : g
+		);
+	} else {
+		// Add new group
+		const newGroup: CharacterSkillGroup = {
+			name: groupName,
+			rating,
+			broken: false
+		};
+		newSkillGroups = [...char.skillGroups, newGroup];
+	}
+
+	const updated: Character = {
+		...char,
+		skillGroups: newSkillGroups,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+	return { success: true };
+}
+
+/**
+ * Increment a skill group rating by 1.
+ */
+export function incrementSkillGroup(groupName: SkillGroupName): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) return { success: false, error: 'No character loaded' };
+
+	const group = char.skillGroups.find(g => g.name === groupName);
+	const currentRating = group?.rating ?? 0;
+
+	return setSkillGroup(groupName, currentRating + 1);
+}
+
+/**
+ * Decrement a skill group rating by 1.
+ */
+export function decrementSkillGroup(groupName: SkillGroupName): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) return { success: false, error: 'No character loaded' };
+
+	const group = char.skillGroups.find(g => g.name === groupName);
+	const currentRating = group?.rating ?? 0;
+
+	if (currentRating <= 0) {
+		return { success: false, error: 'Group rating is already 0' };
+	}
+
+	return setSkillGroup(groupName, currentRating - 1);
+}
+
+/**
+ * Break a skill group (mark it as broken so it can no longer be raised as a unit).
+ * This happens automatically when an individual skill is raised above the group rating.
+ */
+export function breakSkillGroup(groupName: SkillGroupName): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const existingGroup = char.skillGroups.find(g => g.name === groupName);
+	if (!existingGroup) return;
+
+	const newSkillGroups = char.skillGroups.map(g =>
+		g.name === groupName ? { ...g, broken: true } : g
+	);
+
+	const updated: Character = {
+		...char,
+		skillGroups: newSkillGroups,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Modified setSkill that handles skill group breaking.
+ * When raising a skill above its group rating, the group becomes broken.
+ */
+export function setSkillWithGroupCheck(
+	name: string,
+	rating: number,
+	specialization: string | null = null
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	// Check if this skill belongs to a group
+	const allSkills = get(skillsStore);
+	const skillDef = allSkills.find(s => s.name === name);
+
+	if (skillDef?.skillgroup) {
+		const groupName = skillDef.skillgroup as SkillGroupName;
+		const group = char.skillGroups.find(g => g.name === groupName);
+
+		// If raising above group rating, mark group as broken
+		if (group && rating > group.rating && !group.broken) {
+			breakSkillGroup(groupName);
+		}
+	}
+
+	// Now set the skill
+	setSkill(name, rating, specialization);
+}
+
+/**
  * Add a contact to the character.
  */
 export function addContact(
@@ -672,6 +911,240 @@ export function updateIdentity(
 	characterStore.set(updated);
 }
 
+// ============================================================================
+// KNOWLEDGE SKILL FUNCTIONS
+// ============================================================================
+
+/** BP cost per knowledge skill point. */
+const KNOWLEDGE_SKILL_BP_COST = 2;
+
+/** Karma cost multiplier for knowledge skills (new rating × 2). */
+const KNOWLEDGE_SKILL_KARMA_MULTIPLIER = 2;
+
+/**
+ * Calculate free knowledge skill points based on INT + LOG.
+ */
+export function calculateFreeKnowledgePoints(char: Character | null): number {
+	if (!char) return 0;
+	const int = calculateAttributeTotal(char.attributes.int);
+	const log = calculateAttributeTotal(char.attributes.log);
+	return (int + log) * 3; // Free points = (INT + LOG) × 3
+}
+
+/**
+ * Calculate total knowledge skill points spent.
+ */
+export function calculateKnowledgePointsSpent(char: Character | null): number {
+	if (!char) return 0;
+	return char.knowledgeSkills.reduce((total, skill) => total + skill.rating, 0);
+}
+
+/**
+ * Calculate BP cost for knowledge skills beyond free points.
+ */
+export function calculateKnowledgeSkillBPCost(char: Character | null): number {
+	if (!char) return 0;
+	const freePoints = calculateFreeKnowledgePoints(char);
+	const spent = calculateKnowledgePointsSpent(char);
+	const excess = Math.max(0, spent - freePoints);
+	return excess * KNOWLEDGE_SKILL_BP_COST;
+}
+
+/**
+ * Calculate Karma cost for knowledge skills beyond free points.
+ * Uses (new rating × 2) formula for karma build.
+ */
+export function calculateKnowledgeSkillKarmaCost(char: Character | null): number {
+	if (!char) return 0;
+	const freePoints = calculateFreeKnowledgePoints(char);
+	let spent = 0;
+	let karmaCost = 0;
+
+	// Sort skills by rating to calculate incremental karma costs
+	const sortedSkills = [...char.knowledgeSkills].sort((a, b) => a.rating - b.rating);
+
+	for (const skill of sortedSkills) {
+		for (let r = 1; r <= skill.rating; r++) {
+			spent++;
+			if (spent > freePoints) {
+				// Each point beyond free costs (rating × 2) karma
+				karmaCost += r * KNOWLEDGE_SKILL_KARMA_MULTIPLIER;
+			}
+		}
+	}
+
+	return karmaCost;
+}
+
+/**
+ * Add a new knowledge skill.
+ */
+export function addKnowledgeSkill(
+	name: string,
+	category: KnowledgeSkillCategory,
+	rating: number = 1
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	// Check if skill with same name already exists
+	if (char.knowledgeSkills.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+		return;
+	}
+
+	const attribute = getKnowledgeSkillAttribute(category);
+
+	const newSkill: KnowledgeSkill = {
+		id: generateId(),
+		name,
+		category,
+		attribute,
+		rating: Math.max(1, Math.min(6, rating)),
+		specialization: null
+	};
+
+	const updated: Character = {
+		...char,
+		knowledgeSkills: [...char.knowledgeSkills, newSkill],
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+	updateKnowledgeSkillBP();
+}
+
+/**
+ * Remove a knowledge skill by ID.
+ */
+export function removeKnowledgeSkill(skillId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const updated: Character = {
+		...char,
+		knowledgeSkills: char.knowledgeSkills.filter(s => s.id !== skillId),
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+	updateKnowledgeSkillBP();
+}
+
+/**
+ * Update a knowledge skill's rating.
+ */
+export function setKnowledgeSkillRating(skillId: string, rating: number): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const clampedRating = Math.max(1, Math.min(6, rating));
+
+	const updated: Character = {
+		...char,
+		knowledgeSkills: char.knowledgeSkills.map(s =>
+			s.id === skillId ? { ...s, rating: clampedRating } : s
+		),
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+	updateKnowledgeSkillBP();
+}
+
+/**
+ * Update a knowledge skill's category (and recalculate attribute).
+ */
+export function setKnowledgeSkillCategory(
+	skillId: string,
+	category: KnowledgeSkillCategory
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const attribute = getKnowledgeSkillAttribute(category);
+
+	const updated: Character = {
+		...char,
+		knowledgeSkills: char.knowledgeSkills.map(s =>
+			s.id === skillId ? { ...s, category, attribute } : s
+		),
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Update a knowledge skill's specialization.
+ */
+export function setKnowledgeSkillSpecialization(
+	skillId: string,
+	specialization: string | null
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const updated: Character = {
+		...char,
+		knowledgeSkills: char.knowledgeSkills.map(s =>
+			s.id === skillId ? { ...s, specialization } : s
+		),
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/**
+ * Increment a knowledge skill's rating.
+ */
+export function incrementKnowledgeSkill(skillId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const skill = char.knowledgeSkills.find(s => s.id === skillId);
+	if (!skill || skill.rating >= 6) return;
+
+	setKnowledgeSkillRating(skillId, skill.rating + 1);
+}
+
+/**
+ * Decrement a knowledge skill's rating.
+ */
+export function decrementKnowledgeSkill(skillId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const skill = char.knowledgeSkills.find(s => s.id === skillId);
+	if (!skill || skill.rating <= 1) return;
+
+	setKnowledgeSkillRating(skillId, skill.rating - 1);
+}
+
+/**
+ * Update the BP spent on knowledge skills.
+ */
+function updateKnowledgeSkillBP(): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const isKarmaBuild = char.buildMethod === 'karma';
+	const cost = isKarmaBuild
+		? calculateKnowledgeSkillKarmaCost(char)
+		: calculateKnowledgeSkillBPCost(char);
+
+	const updated: Character = {
+		...char,
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			knowledgeSkills: cost
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
 /* Exported readable stores */
 export const character: Readable<Character | null> = { subscribe: characterStore.subscribe };
 export const currentStep: Readable<WizardStep> = { subscribe: currentStepStore.subscribe };
@@ -692,10 +1165,22 @@ export const bpBreakdown: Readable<Character['buildPointsSpent'] | null> = deriv
 	($char) => $char?.buildPointsSpent ?? null
 );
 
-/** Derived store for current step index. */
+/** Derived store for visible wizard steps (filters magic for mundane). */
+export const visibleWizardSteps: Readable<readonly WizardStepConfig[]> = derived(
+	character,
+	($char) => {
+		const type = getMagicType($char);
+		if (type === 'mundane') {
+			return WIZARD_STEPS.filter(s => s.id !== 'magic');
+		}
+		return WIZARD_STEPS;
+	}
+);
+
+/** Derived store for current step index (within visible steps). */
 export const currentStepIndex: Readable<number> = derived(
-	currentStep,
-	($step) => WIZARD_STEPS.findIndex((s) => s.id === $step)
+	[currentStep, visibleWizardSteps],
+	([$step, $visibleSteps]) => $visibleSteps.findIndex((s) => s.id === $step)
 );
 
 /** Check if character has a metatype selected. */
@@ -2705,6 +3190,7 @@ export function learnKnowledgeSkill(
 					id: generateId(),
 					name,
 					category,
+					attribute: getKnowledgeSkillAttribute(category),
 					rating: 1,
 					specialization: null
 				}

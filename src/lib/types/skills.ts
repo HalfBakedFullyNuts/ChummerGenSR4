@@ -93,8 +93,26 @@ export interface KnowledgeSkill {
 	readonly id: string;
 	readonly name: string;
 	readonly category: KnowledgeSkillCategory;
+	readonly attribute: 'INT' | 'LOG';
 	readonly rating: number;
 	readonly specialization: string | null;
+}
+
+/**
+ * Get the default attribute for a knowledge skill category.
+ * Academic/Professional use Logic, others use Intuition.
+ */
+export function getKnowledgeSkillAttribute(category: KnowledgeSkillCategory): 'INT' | 'LOG' {
+	switch (category) {
+		case 'Academic':
+		case 'Professional':
+			return 'LOG';
+		case 'Street':
+		case 'Interest':
+		case 'Language':
+		default:
+			return 'INT';
+	}
 }
 
 /** Maximum skill rating during character creation. */

@@ -97,6 +97,7 @@ export interface BuildPointAllocation {
 	readonly attributes: number;
 	readonly skills: number;
 	readonly skillGroups: number;
+	readonly knowledgeSkills: number;
 	readonly qualities: number;
 	readonly spells: number;
 	readonly complexForms: number;
@@ -306,6 +307,8 @@ export interface ComplexForm {
 	readonly id: string;
 	readonly name: string;
 	readonly rating: number;
+	readonly target: string;
+	readonly duration: string;
 	readonly notes: string;
 }
 
@@ -347,6 +350,7 @@ export const DEFAULT_BP_ALLOCATION: BuildPointAllocation = {
 	attributes: 0,
 	skills: 0,
 	skillGroups: 0,
+	knowledgeSkills: 0,
 	qualities: 0,
 	spells: 0,
 	complexForms: 0,

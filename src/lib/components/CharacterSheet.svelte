@@ -692,7 +692,7 @@
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
 				{#each char.qualities as quality}
 					{@const qualityData = getQualityData(quality.name)}
-					{@const hasTooltip = qualityData?.effect || (qualityData?.bonuses?.length ?? 0) > 0}
+					{@const hasTooltip = Boolean(qualityData?.effect) || (qualityData?.bonuses?.length ?? 0) > 0}
 					<div class="flex justify-between py-1 border-b border-border group relative">
 						<span class:text-success-dark={quality.category === 'Positive'}
 							  class:text-error-dark={quality.category === 'Negative'}
@@ -1042,7 +1042,7 @@
 						<div class="flex flex-wrap gap-2">
 							{#each char.resonance.echoes as echo}
 								<span class="px-2 py-1 bg-primary-main/20 text-primary-dark text-sm rounded">
-									{echo.name}
+									{echo}
 								</span>
 							{/each}
 						</div>

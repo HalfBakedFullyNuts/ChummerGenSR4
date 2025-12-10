@@ -36,9 +36,6 @@
 	/** Current initiative pass (1-4). */
 	let currentPass = 1;
 
-	/** Index of current combatant. */
-	let currentCombatantIndex = 0;
-
 	/** New combatant form. */
 	let newName = '';
 	let newBaseInit = 10;
@@ -106,7 +103,6 @@
 
 		combatTurn = 1;
 		currentPass = 1;
-		currentCombatantIndex = 0;
 		combatActive = true;
 
 		// Emit player's initiative

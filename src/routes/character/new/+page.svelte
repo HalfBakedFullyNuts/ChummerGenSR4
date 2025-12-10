@@ -6,6 +6,7 @@
 		currentStep,
 		currentStepIndex,
 		remainingBP,
+		remainingNuyen,
 		startNewCharacter,
 		setBuildMethod,
 		setCustomBuildPoints,
@@ -15,7 +16,7 @@
 		saveCurrentCharacter,
 		markAsSaved,
 		isDirty,
-		WIZARD_STEPS,
+		visibleWizardSteps,
 		type WizardStep
 	} from '$stores';
 	import { user } from '$stores/user';
@@ -24,6 +25,7 @@
 	import AttributeAllocator from '$lib/components/wizard/AttributeAllocator.svelte';
 	import QualitySelector from '$lib/components/wizard/QualitySelector.svelte';
 	import SkillAllocator from '$lib/components/wizard/SkillAllocator.svelte';
+	import KnowledgeSkillAllocator from '$lib/components/wizard/KnowledgeSkillAllocator.svelte';
 	import MagicSelector from '$lib/components/wizard/MagicSelector.svelte';
 	import EquipmentSelector from '$lib/components/wizard/EquipmentSelector.svelte';
 	import ContactsEditor from '$lib/components/wizard/ContactsEditor.svelte';
@@ -125,11 +127,13 @@
 			case 'qualities':
 				return true; // Qualities are optional
 			case 'skills':
-				return char.skills.length > 0;
+				return true; // Skills are technically optional during creation
+			case 'knowledge':
+				return true; // Knowledge skills are optional (free points from INT+LOG)
 			case 'magic':
 				return true; // Optional step
 			case 'equipment':
-				return true; // Equipment is optional but BP must be allocated
+				return $remainingNuyen >= 0; // Cannot proceed with negative nuyen balance
 			case 'contacts':
 				return true; // Contacts are optional
 			case 'finalize':
@@ -141,7 +145,7 @@
 
 	$: canGoNext = canProceed($currentStep, $character);
 	$: canGoBack = $currentStepIndex > 0;
-	$: isLastStep = $currentStepIndex === WIZARD_STEPS.length - 1;
+	$: isLastStep = $currentStepIndex === $visibleWizardSteps.length - 1;
 
 	/** Handle keyboard navigation. */
 	function handleKeydown(event: KeyboardEvent): void {
@@ -191,7 +195,7 @@
 				New Character
 			</h1>
 			<p class="cw-page-subheader">
-				{WIZARD_STEPS[$currentStepIndex]?.description ?? ''}
+				{$visibleWizardSteps[$currentStepIndex]?.description ?? ''}
 			</p>
 		</div>
 		<div class="flex items-center gap-4">
@@ -225,7 +229,7 @@
 	<!-- Step Progress -->
 	<nav class="mb-8">
 		<div class="flex items-center justify-between gap-1 overflow-x-auto pb-2">
-			{#each WIZARD_STEPS as step, idx}
+			{#each $visibleWizardSteps as step, idx}
 				<button
 					class="flex-1 min-w-0 px-2 py-2 rounded text-xs transition-colors
 						{idx === $currentStepIndex
@@ -381,6 +385,8 @@
 			<QualitySelector />
 		{:else if $currentStep === 'skills'}
 			<SkillAllocator />
+		{:else if $currentStep === 'knowledge'}
+			<KnowledgeSkillAllocator />
 		{:else if $currentStep === 'magic'}
 			<MagicSelector />
 		{:else if $currentStep === 'equipment'}
@@ -395,7 +401,7 @@
 	<!-- Step Indicator (centered) -->
 	<div class="mt-8 text-center">
 		<span class="text-text-muted text-sm">
-			Step {$currentStepIndex + 1} of {WIZARD_STEPS.length}
+			Step {$currentStepIndex + 1} of {$visibleWizardSteps.length}
 			{#if isLastStep}
 				<span class="text-primary-main ml-2">• Press → to save</span>
 			{/if}

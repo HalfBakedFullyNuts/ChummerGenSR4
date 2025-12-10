@@ -137,6 +137,7 @@ function mergeWithDefaults(
 			attributes: getNum(buildPointsSpent, 'attributes', 0),
 			skills: getNum(buildPointsSpent, 'skills', 0),
 			skillGroups: getNum(buildPointsSpent, 'skillGroups', 0),
+			knowledgeSkills: getNum(buildPointsSpent, 'knowledgeSkills', 0),
 			qualities: getNum(buildPointsSpent, 'qualities', 0),
 			spells: getNum(buildPointsSpent, 'spells', 0),
 			complexForms: getNum(buildPointsSpent, 'complexForms', 0),

@@ -6,14 +6,16 @@
  */
 
 import type {
-	GameQuality,
-	GameSpell,
-	GamePower,
 	GameWeapon,
 	GameArmor,
 	GameCyberware,
 	GameGear
 } from '$types';
+import type {
+	GameQuality,
+	GameSpell,
+	GamePower
+} from '$stores/gamedata';
 
 /** Custom content manifest. */
 export interface CustomContentManifest {
@@ -49,12 +51,6 @@ export interface ParseResult {
 	readonly warnings: readonly string[];
 }
 
-/** Validation result for a single item. */
-interface ItemValidation {
-	readonly valid: boolean;
-	readonly errors: readonly string[];
-}
-
 /* ============================================
  * XML Parsing Helpers
  * ============================================ */
@@ -86,11 +82,13 @@ function parseQuality(element: Element): GameQuality | null {
 	const name = getElementText(element, 'name');
 	if (!name) return null;
 
+	const category = getElementText(element, 'category') || 'Positive';
 	return {
 		name,
-		category: getElementText(element, 'category') || 'Positive',
+		category: category as 'Positive' | 'Negative',
 		bp: getElementInt(element, 'bp'),
-		metagenetic: getElementText(element, 'metagenetic') === 'True',
+		mutant: getElementText(element, 'metagenetic') === 'True' || getElementText(element, 'mutant') === 'True',
+		limit: getElementText(element, 'limit') === 'True',
 		source: getElementText(element, 'source') || 'Custom',
 		page: getElementInt(element, 'page')
 	};
@@ -108,11 +106,10 @@ function parseSpell(element: Element): GameSpell | null {
 		range: getElementText(element, 'range') || 'LOS',
 		damage: getElementText(element, 'damage') || '',
 		duration: getElementText(element, 'duration') || 'I',
-		drain: getElementText(element, 'dv') || 'F/2',
+		dv: getElementText(element, 'dv') || 'F/2',
 		descriptor: getElementText(element, 'descriptor') || '',
 		source: getElementText(element, 'source') || 'Custom',
-		page: getElementInt(element, 'page'),
-		limited: getElementText(element, 'limited') === 'True'
+		page: getElementInt(element, 'page')
 	};
 }
 
@@ -123,12 +120,12 @@ function parsePower(element: Element): GamePower | null {
 
 	return {
 		name,
-		category: getElementText(element, 'category') || 'Physical',
 		points: getElementNumber(element, 'points', 0.5),
-		source: getElementText(element, 'source') || 'Custom',
-		page: getElementInt(element, 'page'),
 		levels: getElementText(element, 'levels') === 'True',
-		maxlevels: getElementInt(element, 'maxlevels', 6)
+		maxlevels: getElementInt(element, 'maxlevels', 6),
+		action: getElementText(element, 'action') || 'Free',
+		source: getElementText(element, 'source') || 'Custom',
+		page: getElementInt(element, 'page')
 	};
 }
 

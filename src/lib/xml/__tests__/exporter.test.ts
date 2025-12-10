@@ -21,12 +21,7 @@ describe('XML Exporter', () => {
 
 		it('should export identity information', () => {
 			const character = createEmptyCharacter('test-id', 'user-123', 'bp');
-			character.identity.name = 'Test Runner';
-			character.identity.alias = 'Shadow';
-			character.identity.metatype = 'Elf';
-			character.identity.sex = 'Female';
-
-			const xml = exportToChummer({
+			const modifiedCharacter = {
 				...character,
 				identity: {
 					...character.identity,
@@ -35,7 +30,9 @@ describe('XML Exporter', () => {
 					metatype: 'Elf',
 					sex: 'Female'
 				}
-			});
+			};
+
+			const xml = exportToChummer(modifiedCharacter);
 
 			expect(xml).toContain('<name>Test Runner</name>');
 			expect(xml).toContain('<alias>Shadow</alias>');
@@ -87,8 +84,8 @@ describe('XML Exporter', () => {
 			const modified = {
 				...character,
 				knowledgeSkills: [
-					{ id: 'ks1', name: 'History', category: 'Academic' as const, rating: 3, specialization: null },
-					{ id: 'ks2', name: 'Urban Brawl', category: 'Interest' as const, rating: 2, specialization: null }
+					{ id: 'ks1', name: 'History', category: 'Academic' as const, attribute: 'LOG' as const, rating: 3, specialization: null },
+					{ id: 'ks2', name: 'Urban Brawl', category: 'Interest' as const, attribute: 'INT' as const, rating: 2, specialization: null }
 				]
 			};
 

@@ -43,9 +43,6 @@
 		? [...new Set($spells.map((s) => s.category))].sort()
 		: [];
 
-	/** Get unique gear categories. */
-	$: gearCategories = $gameData.gearCategories ?? [];
-
 	/** Get unique weapon categories. */
 	$: weaponCategories = $gameData.weapons
 		? [...new Set($gameData.weapons.map((w) => w.category))].sort()
@@ -212,18 +209,18 @@
 							<span class="text-primary-dark text-sm font-mono">{meta.bp} BP</span>
 						</div>
 						<div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-xs text-text-muted mt-2">
-							<span>BOD: <span class="text-text-secondary">{meta.bodmin}-{meta.bodmax}</span></span>
-							<span>AGI: <span class="text-text-secondary">{meta.agimin}-{meta.agimax}</span></span>
-							<span>REA: <span class="text-text-secondary">{meta.reamin}-{meta.reamax}</span></span>
-							<span>STR: <span class="text-text-secondary">{meta.strmin}-{meta.strmax}</span></span>
-							<span>CHA: <span class="text-text-secondary">{meta.chamin}-{meta.chamax}</span></span>
-							<span>INT: <span class="text-text-secondary">{meta.intmin}-{meta.intmax}</span></span>
-							<span>LOG: <span class="text-text-secondary">{meta.logmin}-{meta.logmax}</span></span>
-							<span>WIL: <span class="text-text-secondary">{meta.wilmin}-{meta.wilmax}</span></span>
+							<span>BOD: <span class="text-text-secondary">{meta.attributes.bod.min}-{meta.attributes.bod.max}</span></span>
+							<span>AGI: <span class="text-text-secondary">{meta.attributes.agi.min}-{meta.attributes.agi.max}</span></span>
+							<span>REA: <span class="text-text-secondary">{meta.attributes.rea.min}-{meta.attributes.rea.max}</span></span>
+							<span>STR: <span class="text-text-secondary">{meta.attributes.str.min}-{meta.attributes.str.max}</span></span>
+							<span>CHA: <span class="text-text-secondary">{meta.attributes.cha.min}-{meta.attributes.cha.max}</span></span>
+							<span>INT: <span class="text-text-secondary">{meta.attributes.int.min}-{meta.attributes.int.max}</span></span>
+							<span>LOG: <span class="text-text-secondary">{meta.attributes.log.min}-{meta.attributes.log.max}</span></span>
+							<span>WIL: <span class="text-text-secondary">{meta.attributes.wil.min}-{meta.attributes.wil.max}</span></span>
 						</div>
 						<div class="flex gap-4 text-xs text-text-muted mt-1">
-							<span>EDG: <span class="text-primary-dark">{meta.edgmin}-{meta.edgmax}</span></span>
-							<span>ESS: <span class="text-primary-dark">{meta.essmax}</span></span>
+							<span>EDG: <span class="text-primary-dark">{meta.attributes.edg.min}-{meta.attributes.edg.max}</span></span>
+							<span>ESS: <span class="text-primary-dark">{meta.attributes.ess.max}</span></span>
 						</div>
 						<p class="text-text-muted text-xs mt-1">{meta.source} p.{meta.page}</p>
 					</div>
@@ -245,22 +242,22 @@
 						</div>
 						<div class="flex flex-wrap gap-2 text-xs text-text-muted mt-1">
 							<span>Category: <span class="text-text-secondary">{skill.category}</span></span>
-							{#if skill.group}
-								<span>Group: <span class="text-primary-dark">{skill.group}</span></span>
+							{#if skill.skillgroup}
+								<span>Group: <span class="text-primary-dark">{skill.skillgroup}</span></span>
 							{/if}
 							{#if skill.default}
 								<span class="text-success-dark">Defaultable</span>
 							{/if}
 						</div>
-						{#if skill.specs && skill.specs.length > 0}
+						{#if skill.specializations && skill.specializations.length > 0}
 							<div class="flex flex-wrap gap-1 mt-2">
-								{#each skill.specs.slice(0, 5) as spec}
+								{#each skill.specializations.slice(0, 5) as spec}
 									<span class="px-1.5 py-0.5 bg-surface-variant text-text-muted text-xs rounded">
 										{spec}
 									</span>
 								{/each}
-								{#if skill.specs.length > 5}
-									<span class="text-text-muted text-xs">+{skill.specs.length - 5} more</span>
+								{#if skill.specializations.length > 5}
+									<span class="text-text-muted text-xs">+{skill.specializations.length - 5} more</span>
 								{/if}
 							</div>
 						{/if}
@@ -290,8 +287,8 @@
 								<span class="font-medium {quality.category === 'Positive' ? 'text-success-dark' : 'text-error-dark'}">
 									{quality.name}
 								</span>
-								{#if quality.rating}
-									<span class="text-text-muted text-xs ml-1">(Rating)</span>
+								{#if quality.limit}
+									<span class="text-text-muted text-xs ml-1">(Limited)</span>
 								{/if}
 							</div>
 							<span class="text-sm font-mono {quality.bp > 0 ? 'text-error-dark' : 'text-success-dark'}">

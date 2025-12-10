@@ -65,9 +65,6 @@ export function calculateOverflow(char: Character): number {
 
 /** Get wound modifier from damage. */
 export function getWoundModifier(char: Character): number {
-	const physicalBoxes = calculatePhysicalCM(char);
-	const stunBoxes = calculateStunCM(char);
-
 	// Every 3 boxes of damage = -1 modifier
 	const physicalMod = Math.floor(char.condition.physicalCurrent / 3);
 	const stunMod = Math.floor(char.condition.stunCurrent / 3);

@@ -7,6 +7,7 @@
 		currentStep,
 		currentStepIndex,
 		remainingBP,
+		remainingNuyen,
 		isCareerMode,
 		loadSavedCharacter,
 		nextWizardStep,
@@ -126,7 +127,7 @@
 			case 'magic':
 				return true;
 			case 'equipment':
-				return true;
+				return $remainingNuyen >= 0; // Cannot proceed with negative nuyen balance
 			case 'contacts':
 				return true;
 			case 'finalize':

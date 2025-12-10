@@ -12,7 +12,6 @@
 	 * - Sprite roster
 	 */
 
-	import { createEventDispatcher } from 'svelte';
 	import {
 		character,
 		KARMA_COSTS,
