@@ -18,6 +18,11 @@
   --cw-surface: #FFFFFF;
   --cw-surface-variant: #FAFAFA;
 
+  /* Panel Colors - for dropdown menus, cards, overlays */
+  --cw-panel: #FFFFFF;
+  --cw-panel-solid: #FFFFFF;
+  --cw-panel-elevated: #FFFFFF;
+
   /* Border Colors */
   --cw-border: #E0E0E0;
   --cw-border-light: #EEEEEE;
@@ -30,10 +35,12 @@
   --cw-text-disabled: #BDBDBD;
 
   /* Primary - Cyan */
+  --cw-primary: #00e5ff;
   --cw-primary-main: #00e5ff;
   --cw-primary-light: #33EAFF;
   --cw-primary-dark: #00A0B2;
   --cw-primary-contrast: #000000;
+  --cw-primary-glow: rgba(0, 229, 255, 0.12);
 
   /* Secondary - Blue */
   --cw-secondary-main: #58A6FF;
@@ -42,6 +49,7 @@
   --cw-secondary-contrast: #FFFFFF;
 
   /* Error - Red */
+  --cw-error: #F85149;
   --cw-error-main: #F85149;
   --cw-error-light: #F9736D;
   --cw-error-dark: #AD3833;
@@ -366,9 +374,8 @@ button.cw-btn-inc-dec:disabled {
 }
 
 .cw-card-selected {
-  background-color: rgba(0, 229, 255, 0.08);
-  border: 2px solid var(--cw-primary-main);
-  box-shadow: var(--cw-shadow-primary);
+  border: 2px solid var(--cw-secondary-main) !important;
+  box-shadow: 0 0 0 1px var(--cw-secondary-main);
 }
 
 .cw-card-header {

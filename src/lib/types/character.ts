@@ -61,6 +61,10 @@ export interface CharacterQuality {
 	readonly bp: number;
 	readonly rating: number;
 	readonly notes: string;
+	/** Selected skill for qualities with selectskill bonus (e.g., Aptitude, Incompetent). */
+	readonly selectedSkill?: string;
+	/** Selected attribute for qualities with selectattribute bonus (e.g., Exceptional Attribute). */
+	readonly selectedAttribute?: string;
 }
 
 /**

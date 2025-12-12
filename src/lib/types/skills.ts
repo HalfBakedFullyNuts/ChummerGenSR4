@@ -96,6 +96,8 @@ export interface KnowledgeSkill {
 	readonly attribute: 'INT' | 'LOG';
 	readonly rating: number;
 	readonly specialization: string | null;
+	/** True if this is the character's native language (mother tongue). Native languages have infinite proficiency. */
+	readonly isNative?: boolean;
 }
 
 /**

@@ -47,9 +47,26 @@
 
 	/** Modal filters. */
 	let modalCategory = '';
+	let modalSubcategory = '';
 	let modalSearch = '';
 	let selectedGrade: CyberwareGrade = 'Standard';
 	let selectedBioGrade: BiowareGrade = 'Standard';
+
+	/** Top-level category groups for weapons. */
+	const WEAPON_TYPE_GROUPS: { type: string; label: string; categories: string[] }[] = [
+		{ type: 'Melee', label: 'Melee Weapons', categories: ['Blades', 'Clubs', 'Exotic Melee Weapons', 'Unarmed'] },
+		{ type: 'Ranged', label: 'Ranged Weapons', categories: ['Bows', 'Crossbows', 'Throwing Weapons'] },
+		{ type: 'Pistols', label: 'Pistols', categories: ['Tasers', 'Holdouts', 'Light Pistols', 'Heavy Pistols', 'Machine Pistols'] },
+		{ type: 'Rifles', label: 'Rifles', categories: ['Submachine Guns', 'Assault Rifles', 'Battle Rifles', 'Sports Rifles', 'Sniper Rifles'] },
+		{ type: 'Heavy', label: 'Heavy Weapons', categories: ['Shotguns', 'Special Weapons', 'Light Machine Guns', 'Medium Machine Guns', 'Heavy Machine Guns', 'Assault Cannons'] },
+		{ type: 'Explosive', label: 'Explosive/Special', categories: ['Flamethrowers', 'Laser Weapons', 'Grenade Launchers', 'Mortar Launchers', 'Missile Launchers', 'Vehicle Weapons', 'Exotic Ranged Weapons'] }
+	];
+
+	/** Get subcategories for current top-level category. */
+	function getWeaponSubcategories(topCategory: string): string[] {
+		const group = WEAPON_TYPE_GROUPS.find(g => g.type === topCategory);
+		return group?.categories ?? [];
+	}
 
 	/** Grade multipliers. */
 	const gradeInfo: Record<CyberwareGrade, { ess: number; cost: number; label: string }> = {
@@ -128,6 +145,7 @@
 	function openModal(type: ModalType): void {
 		activeModal = type;
 		modalCategory = '';
+		modalSubcategory = '';
 		modalSearch = '';
 	}
 
@@ -135,6 +153,7 @@
 	function closeModal(): void {
 		activeModal = null;
 		modalCategory = '';
+		modalSubcategory = '';
 		modalSearch = '';
 	}
 
@@ -177,9 +196,21 @@
 		selectedItem = null;
 	}
 
+	/** Get available subcategories for selected weapon type. */
+	$: weaponSubcategories = modalCategory ? getWeaponSubcategories(modalCategory) : [];
+
 	/** Filtered modal items. */
 	$: filteredWeapons = $gameData.weapons
-		.filter(w => !modalCategory || w.category === modalCategory)
+		.filter(w => {
+			// Filter by top-level category (weapon type group)
+			if (modalCategory) {
+				const subcats = getWeaponSubcategories(modalCategory);
+				if (!subcats.includes(w.category)) return false;
+			}
+			// Filter by subcategory (specific weapon category)
+			if (modalSubcategory && w.category !== modalSubcategory) return false;
+			return true;
+		})
 		.filter(w => !modalSearch || w.name.toLowerCase().includes(modalSearch.toLowerCase()))
 		.filter(w => w.cost > 0)
 		.slice(0, 100);
@@ -692,10 +723,12 @@
 
 <!-- Modal Overlay -->
 {#if activeModal}
-	<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" on:click={closeModal} role="dialog">
-		<div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col" on:click|stopPropagation role="document">
+	<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+	<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" on:click={closeModal}>
+		<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+		<div class="bg-white rounded-lg shadow-xl w-full max-w-6xl h-[85vh] flex flex-col mx-4" on:click|stopPropagation>
 			<!-- Modal Header -->
-			<div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+			<div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between shrink-0">
 				<h3 class="text-lg font-semibold text-gray-800">
 					{#if activeModal === 'weapon'}Add Weapon
 					{:else if activeModal === 'armor'}Add Armor
@@ -707,288 +740,442 @@
 					{:else if activeModal === 'lifestyle'}Choose Lifestyle
 					{/if}
 				</h3>
-				<button class="text-gray-400 hover:text-gray-600" on:click={closeModal}>
-					<span class="material-icons">close</span>
-				</button>
-			</div>
-
-			<!-- Modal Filters -->
-			<div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
-				<div class="flex gap-2 flex-wrap">
-					{#if activeModal === 'weapon'}
-						<select class="cw-input text-sm flex-1 min-w-[150px]" bind:value={modalCategory}>
-							<option value="">All Categories</option>
-							{#each $gameData.weaponCategories as cat}
-								<option value={cat}>{cat}</option>
-							{/each}
-						</select>
-					{:else if activeModal === 'armor'}
-						<select class="cw-input text-sm flex-1 min-w-[150px]" bind:value={modalCategory}>
-							<option value="">All Categories</option>
-							{#each $gameData.armorCategories as cat}
-								<option value={cat}>{cat}</option>
-							{/each}
-						</select>
-					{:else if activeModal === 'cyberware'}
-						<select class="cw-input text-sm flex-1 min-w-[150px]" bind:value={modalCategory}>
-							<option value="">All Categories</option>
-							{#each $gameData.cyberwareCategories as cat}
-								<option value={cat}>{cat}</option>
-							{/each}
-						</select>
-						<div class="flex gap-1">
-							{#each gradeOptions as grade}
-								<button
-									class="px-2 py-1 rounded text-xs transition-colors
-										{selectedGrade === grade ? 'bg-primary-main text-white' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-100'}"
-									on:click={() => selectedGrade = grade}
-								>
-									{gradeInfo[grade].label}
-								</button>
-							{/each}
-						</div>
-					{:else if activeModal === 'bioware'}
-						<select class="cw-input text-sm flex-1 min-w-[150px]" bind:value={modalCategory}>
-							<option value="">All Categories</option>
-							{#each $gameData.biowareCategories as cat}
-								<option value={cat}>{cat}</option>
-							{/each}
-						</select>
-						<div class="flex gap-1">
-							{#each bioGradeOptions as grade}
-								<button
-									class="px-2 py-1 rounded text-xs transition-colors
-										{selectedBioGrade === grade ? 'bg-primary-main text-white' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-100'}"
-									on:click={() => selectedBioGrade = grade}
-								>
-									{bioGradeInfo[grade].label}
-								</button>
-							{/each}
-						</div>
-					{:else if activeModal === 'vehicle'}
-						<select class="cw-input text-sm flex-1 min-w-[150px]" bind:value={modalCategory}>
-							<option value="">All Categories</option>
-							{#each $gameData.vehicleCategories as cat}
-								<option value={cat}>{cat}</option>
-							{/each}
-						</select>
-					{:else if activeModal === 'gear'}
-						<select class="cw-input text-sm flex-1 min-w-[150px]" bind:value={modalCategory}>
-							<option value="">All Categories</option>
-							{#each $gameData.gearCategories as cat}
-								<option value={cat}>{cat}</option>
-							{/each}
-						</select>
-					{/if}
-
-					{#if activeModal !== 'lifestyle'}
+				<div class="flex items-center gap-4">
+					{#if activeModal !== 'lifestyle' && activeModal !== 'martialart'}
 						<input
 							type="text"
-							class="cw-input text-sm flex-1 min-w-[200px]"
+							class="cw-input text-sm w-64"
 							placeholder="Search..."
 							bind:value={modalSearch}
 						/>
 					{/if}
+					<button class="text-gray-400 hover:text-gray-600" on:click={closeModal}>
+						<span class="material-icons">close</span>
+					</button>
 				</div>
 			</div>
 
-			<!-- Modal Content -->
-			<div class="flex-1 overflow-y-auto p-4">
-				{#if activeModal === 'weapon'}
-					<div class="space-y-2">
-						{#each filteredWeapons as weapon}
-							<div class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm hover:bg-gray-100">
-								<div class="flex-1 min-w-0">
-									<span class="text-gray-800 block truncate">{weapon.name}</span>
-									<span class="text-gray-500 text-xs">{weapon.category} | DMG: {weapon.damage} | AP: {weapon.ap}</span>
-								</div>
-								<div class="flex items-center gap-2 ml-2">
-									<span class="font-mono text-primary-dark text-xs">{formatNuyen(weapon.cost)}</span>
+			<!-- 3-Column Layout for Weapons -->
+			{#if activeModal === 'weapon'}
+				<div class="flex-1 flex overflow-hidden">
+					<!-- Column 1: Type Groups -->
+					<div class="w-48 border-r border-gray-200 bg-gray-50 overflow-y-auto shrink-0">
+						<div class="p-2 space-y-1">
+							<button
+								class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+									{!modalCategory ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+								on:click={() => { modalCategory = ''; modalSubcategory = ''; }}
+							>
+								All Weapons
+							</button>
+							{#each WEAPON_TYPE_GROUPS as group}
+								<button
+									class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+										{modalCategory === group.type ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+									on:click={() => { modalCategory = group.type; modalSubcategory = ''; }}
+								>
+									{group.label}
+								</button>
+							{/each}
+						</div>
+					</div>
+
+					<!-- Column 2: Subcategories -->
+					<div class="w-48 border-r border-gray-200 bg-white overflow-y-auto shrink-0">
+						{#if modalCategory && weaponSubcategories.length > 0}
+							<div class="p-2 space-y-1">
+								<button
+									class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+										{!modalSubcategory ? 'bg-primary-main/20 text-primary-dark font-medium' : 'hover:bg-gray-100 text-gray-700'}"
+									on:click={() => { modalSubcategory = ''; }}
+								>
+									All {WEAPON_TYPE_GROUPS.find(g => g.type === modalCategory)?.label ?? ''}
+								</button>
+								{#each weaponSubcategories as subcat}
 									<button
-										class="cw-btn cw-btn-primary text-xs py-1 px-3"
+										class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+											{modalSubcategory === subcat ? 'bg-primary-main/20 text-primary-dark font-medium' : 'hover:bg-gray-100 text-gray-700'}"
+										on:click={() => { modalSubcategory = subcat; }}
+									>
+										{subcat}
+									</button>
+								{/each}
+							</div>
+						{:else}
+							<div class="p-4 text-center text-gray-400 text-sm">
+								Select a category
+							</div>
+						{/if}
+					</div>
+
+					<!-- Column 3: Items List -->
+					<div class="flex-1 overflow-hidden flex flex-col">
+						<!-- Header row -->
+						<div class="flex items-center p-2 border-b border-gray-300 text-xs text-gray-500 font-semibold uppercase tracking-wide bg-white shrink-0">
+							<span class="flex-1 min-w-0">Name</span>
+							<span class="w-16 text-right">Damage</span>
+							<span class="w-10 text-right">AP</span>
+							<span class="w-14 text-right">Mode</span>
+							<span class="w-16 text-right">Ammo</span>
+							<span class="w-20 text-right">Cost</span>
+							<span class="w-12 ml-2"></span>
+						</div>
+						<div class="flex-1 overflow-y-auto p-2 space-y-1">
+							{#each filteredWeapons as weapon}
+								<div class="flex items-center p-2 bg-gray-50 rounded text-xs hover:bg-gray-100 transition-colors">
+									<span class="text-gray-800 truncate flex-1 min-w-0">{weapon.name}</span>
+									<span class="text-gray-600 w-16 text-right shrink-0">{weapon.damage}</span>
+									<span class="text-gray-600 w-10 text-right shrink-0">{weapon.ap}</span>
+									<span class="text-gray-600 w-14 text-right shrink-0">{weapon.mode !== '0' ? weapon.mode : '-'}</span>
+									<span class="text-gray-600 w-16 text-right shrink-0">{weapon.ammo !== '0' ? weapon.ammo : '-'}</span>
+									<span class="font-mono text-primary-dark w-20 text-right shrink-0">{formatNuyen(weapon.cost)}</span>
+									<button
+										class="cw-btn cw-btn-primary text-xs py-1 px-2 shrink-0 ml-2"
 										on:click={() => { addWeapon(weapon); closeModal(); }}
 									>
-										Buy
+										Add
 									</button>
 								</div>
+							{/each}
+							{#if filteredWeapons.length === 0}
+								<p class="text-gray-400 text-center py-8">No weapons found</p>
+							{/if}
+						</div>
+					</div>
+				</div>
+
+			<!-- Other equipment types use simpler 2-column layout -->
+			{:else}
+				<div class="flex-1 flex overflow-hidden">
+					<!-- Categories Column -->
+					<div class="w-56 border-r border-gray-200 bg-gray-50 overflow-y-auto shrink-0">
+						<div class="p-2 space-y-1">
+							{#if activeModal === 'armor'}
+								<button
+									class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+										{!modalCategory ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+									on:click={() => { modalCategory = ''; }}
+								>
+									All Armor
+								</button>
+								{#each $gameData.armorCategories as cat}
+									<button
+										class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+											{modalCategory === cat ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+										on:click={() => { modalCategory = cat; }}
+									>
+										{cat}
+									</button>
+								{/each}
+							{:else if activeModal === 'cyberware'}
+								<button
+									class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+										{!modalCategory ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+									on:click={() => { modalCategory = ''; }}
+								>
+									All Cyberware
+								</button>
+								{#each $gameData.cyberwareCategories as cat}
+									<button
+										class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+											{modalCategory === cat ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+										on:click={() => { modalCategory = cat; }}
+									>
+										{cat}
+									</button>
+								{/each}
+								<!-- Grade selector -->
+								<div class="mt-4 pt-4 border-t border-gray-300">
+									<span class="text-xs font-semibold text-gray-500 uppercase px-3">Grade</span>
+									<div class="mt-2 space-y-1">
+										{#each gradeOptions as grade}
+											<button
+												class="w-full text-left px-3 py-1.5 rounded text-xs transition-colors
+													{selectedGrade === grade ? 'bg-info-main/20 text-info-dark font-medium' : 'hover:bg-gray-200 text-gray-600'}"
+												on:click={() => selectedGrade = grade}
+											>
+												{gradeInfo[grade].label} ({gradeInfo[grade].ess}x ESS, {gradeInfo[grade].cost}x cost)
+											</button>
+										{/each}
+									</div>
+								</div>
+							{:else if activeModal === 'bioware'}
+								<button
+									class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+										{!modalCategory ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+									on:click={() => { modalCategory = ''; }}
+								>
+									All Bioware
+								</button>
+								{#each $gameData.biowareCategories as cat}
+									<button
+										class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+											{modalCategory === cat ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+										on:click={() => { modalCategory = cat; }}
+									>
+										{cat}
+									</button>
+								{/each}
+								<!-- Grade selector -->
+								<div class="mt-4 pt-4 border-t border-gray-300">
+									<span class="text-xs font-semibold text-gray-500 uppercase px-3">Grade</span>
+									<div class="mt-2 space-y-1">
+										{#each bioGradeOptions as grade}
+											<button
+												class="w-full text-left px-3 py-1.5 rounded text-xs transition-colors
+													{selectedBioGrade === grade ? 'bg-info-main/20 text-info-dark font-medium' : 'hover:bg-gray-200 text-gray-600'}"
+												on:click={() => selectedBioGrade = grade}
+											>
+												{bioGradeInfo[grade].label} ({bioGradeInfo[grade].ess}x ESS, {bioGradeInfo[grade].cost}x cost)
+											</button>
+										{/each}
+									</div>
+								</div>
+							{:else if activeModal === 'vehicle'}
+								<button
+									class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+										{!modalCategory ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+									on:click={() => { modalCategory = ''; }}
+								>
+									All Vehicles
+								</button>
+								{#each $gameData.vehicleCategories as cat}
+									<button
+										class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+											{modalCategory === cat ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+										on:click={() => { modalCategory = cat; }}
+									>
+										{cat}
+									</button>
+								{/each}
+							{:else if activeModal === 'gear'}
+								<button
+									class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+										{!modalCategory ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+									on:click={() => { modalCategory = ''; }}
+								>
+									All Gear
+								</button>
+								{#each $gameData.gearCategories as cat}
+									<button
+										class="w-full text-left px-3 py-2 rounded text-sm transition-colors
+											{modalCategory === cat ? 'bg-primary-main text-white' : 'hover:bg-gray-200 text-gray-700'}"
+										on:click={() => { modalCategory = cat; }}
+									>
+										{cat}
+									</button>
+								{/each}
+							{/if}
+						</div>
+					</div>
+
+					<!-- Items Column -->
+					<div class="flex-1 overflow-hidden flex flex-col">
+						{#if activeModal === 'armor'}
+							<!-- Header row -->
+							<div class="flex items-center p-2 border-b border-gray-300 text-xs text-gray-500 font-semibold uppercase tracking-wide bg-white shrink-0">
+								<span class="flex-1 min-w-0">Name</span>
+								<span class="w-12 text-right">Ballistic</span>
+								<span class="w-12 text-right">Impact</span>
+								<span class="w-20 text-right">Cost</span>
+								<span class="w-12 ml-2"></span>
 							</div>
-						{/each}
-						{#if filteredWeapons.length === 0}
-							<p class="text-gray-400 text-center py-8">No weapons found</p>
+							<div class="flex-1 overflow-y-auto p-2 space-y-1">
+								{#each filteredArmor as armor}
+									<div class="flex items-center p-2 bg-gray-50 rounded text-xs hover:bg-gray-100 transition-colors">
+										<span class="text-gray-800 truncate flex-1 min-w-0">{armor.name}</span>
+										<span class="text-gray-600 w-12 text-right shrink-0">{armor.ballistic}</span>
+										<span class="text-gray-600 w-12 text-right shrink-0">{armor.impact}</span>
+										<span class="font-mono text-primary-dark w-20 text-right shrink-0">{formatNuyen(armor.cost)}</span>
+										<button
+											class="cw-btn cw-btn-primary text-xs py-1 px-2 shrink-0 ml-2"
+											on:click={() => { addArmor(armor); closeModal(); }}
+										>
+											Add
+										</button>
+									</div>
+								{/each}
+								{#if filteredArmor.length === 0}
+									<p class="text-gray-400 text-center py-8">No armor found</p>
+								{/if}
+							</div>
+						{:else if activeModal === 'cyberware'}
+							<!-- Header row -->
+							<div class="flex items-center p-2 border-b border-gray-300 text-xs text-gray-500 font-semibold uppercase tracking-wide bg-white shrink-0">
+								<span class="flex-1 min-w-0">Name</span>
+								<span class="w-14 text-right">Essence</span>
+								<span class="w-12 text-right">Cap</span>
+								<span class="w-20 text-right">Cost</span>
+								<span class="w-14 ml-2"></span>
+							</div>
+							<div class="flex-1 overflow-y-auto p-2 space-y-1">
+								{#each filteredCyberware as cyber}
+									{@const costMult = gradeInfo[selectedGrade].cost}
+									{@const essMult = gradeInfo[selectedGrade].ess}
+									{@const adjustedCost = Math.floor(cyber.cost * costMult)}
+									{@const adjustedEss = cyber.ess * essMult}
+									<div class="flex items-center p-2 bg-gray-50 rounded text-xs hover:bg-gray-100 transition-colors">
+										<span class="text-gray-800 truncate flex-1 min-w-0">{cyber.name}</span>
+										<span class="text-info-dark w-14 text-right shrink-0">{adjustedEss.toFixed(2)}</span>
+										<span class="text-gray-600 w-12 text-right shrink-0">{cyber.capacity ?? '-'}</span>
+										<span class="font-mono text-primary-dark w-20 text-right shrink-0">{formatNuyen(adjustedCost)}</span>
+										<button
+											class="cw-btn cw-btn-primary text-xs py-1 px-2 shrink-0 ml-2"
+											disabled={$currentEssence < adjustedEss}
+											on:click={() => { addCyberware(cyber, selectedGrade); closeModal(); }}
+										>
+											Install
+										</button>
+									</div>
+								{/each}
+								{#if filteredCyberware.length === 0}
+									<p class="text-gray-400 text-center py-8">No cyberware found</p>
+								{/if}
+							</div>
+						{:else if activeModal === 'bioware'}
+							<!-- Header row -->
+							<div class="flex items-center p-2 border-b border-gray-300 text-xs text-gray-500 font-semibold uppercase tracking-wide bg-white shrink-0">
+								<span class="flex-1 min-w-0">Name</span>
+								<span class="w-14 text-right">Essence</span>
+								<span class="w-20 text-right">Cost</span>
+								<span class="w-14 ml-2"></span>
+							</div>
+							<div class="flex-1 overflow-y-auto p-2 space-y-1">
+								{#each filteredBioware as bio}
+									{@const costMult = bioGradeInfo[selectedBioGrade].cost}
+									{@const essMult = bioGradeInfo[selectedBioGrade].ess}
+									{@const adjustedCost = Math.floor(bio.cost * costMult)}
+									{@const adjustedEss = bio.ess * essMult}
+									<div class="flex items-center p-2 bg-gray-50 rounded text-xs hover:bg-gray-100 transition-colors">
+										<span class="text-gray-800 truncate flex-1 min-w-0">{bio.name}</span>
+										<span class="text-info-dark w-14 text-right shrink-0">{adjustedEss.toFixed(2)}</span>
+										<span class="font-mono text-primary-dark w-20 text-right shrink-0">{formatNuyen(adjustedCost)}</span>
+										<button
+											class="cw-btn cw-btn-primary text-xs py-1 px-2 shrink-0 ml-2"
+											disabled={$currentEssence < adjustedEss}
+											on:click={() => { addBioware(bio, selectedBioGrade); closeModal(); }}
+										>
+											Install
+										</button>
+									</div>
+								{/each}
+								{#if filteredBioware.length === 0}
+									<p class="text-gray-400 text-center py-8">No bioware found</p>
+								{/if}
+							</div>
+						{:else if activeModal === 'vehicle'}
+							<!-- Header row -->
+							<div class="flex items-center p-2 border-b border-gray-300 text-xs text-gray-500 font-semibold uppercase tracking-wide bg-white shrink-0">
+								<span class="flex-1 min-w-0">Name</span>
+								<span class="w-10 text-right">Hand</span>
+								<span class="w-12 text-right">Speed</span>
+								<span class="w-10 text-right">Pilot</span>
+								<span class="w-10 text-right">Body</span>
+								<span class="w-20 text-right">Cost</span>
+								<span class="w-12 ml-2"></span>
+							</div>
+							<div class="flex-1 overflow-y-auto p-2 space-y-1">
+								{#each filteredVehicles as vehicle}
+									<div class="flex items-center p-2 bg-gray-50 rounded text-xs hover:bg-gray-100 transition-colors">
+										<span class="text-gray-800 truncate flex-1 min-w-0">{vehicle.name}</span>
+										<span class="text-gray-600 w-10 text-right shrink-0">{vehicle.handling}</span>
+										<span class="text-gray-600 w-12 text-right shrink-0">{vehicle.speed}</span>
+										<span class="text-gray-600 w-10 text-right shrink-0">{vehicle.pilot}</span>
+										<span class="text-gray-600 w-10 text-right shrink-0">{vehicle.body}</span>
+										<span class="font-mono text-primary-dark w-20 text-right shrink-0">{formatNuyen(vehicle.cost)}</span>
+										<button
+											class="cw-btn cw-btn-primary text-xs py-1 px-2 shrink-0 ml-2"
+											on:click={() => { addVehicle(vehicle); closeModal(); }}
+										>
+											Add
+										</button>
+									</div>
+								{/each}
+								{#if filteredVehicles.length === 0}
+									<p class="text-gray-400 text-center py-8">No vehicles found</p>
+								{/if}
+							</div>
+						{:else if activeModal === 'gear'}
+							<!-- Header row -->
+							<div class="flex items-center p-2 border-b border-gray-300 text-xs text-gray-500 font-semibold uppercase tracking-wide bg-white shrink-0">
+								<span class="flex-1 min-w-0">Name</span>
+								<span class="w-12 text-right">Rating</span>
+								<span class="w-16 text-right">Avail</span>
+								<span class="w-20 text-right">Cost</span>
+								<span class="w-12 ml-2"></span>
+							</div>
+							<div class="flex-1 overflow-y-auto p-2 space-y-1">
+								{#each filteredGear as gear}
+									<div class="flex items-center p-2 bg-gray-50 rounded text-xs hover:bg-gray-100 transition-colors">
+										<span class="text-gray-800 truncate flex-1 min-w-0">{gear.name}</span>
+										<span class="text-gray-600 w-12 text-right shrink-0">{gear.rating > 0 ? gear.rating : '-'}</span>
+										<span class="text-gray-600 w-16 text-right shrink-0">{gear.avail && gear.avail !== '0' ? gear.avail : '-'}</span>
+										<span class="font-mono text-primary-dark w-20 text-right shrink-0">{formatNuyen(gear.cost)}</span>
+										<button
+											class="cw-btn cw-btn-primary text-xs py-1 px-2 shrink-0 ml-2"
+											on:click={() => { addGear(gear); closeModal(); }}
+										>
+											Add
+										</button>
+									</div>
+								{/each}
+								{#if filteredGear.length === 0}
+									<p class="text-gray-400 text-center py-8">No gear found</p>
+								{/if}
+							</div>
+						{:else if activeModal === 'martialart'}
+							<!-- Header row -->
+							<div class="flex items-center p-2 border-b border-gray-300 text-xs text-gray-500 font-semibold uppercase tracking-wide bg-white shrink-0">
+								<span class="flex-1 min-w-0">Name</span>
+								<span class="w-20 text-right">Source</span>
+								<span class="w-14 text-right">Cost</span>
+								<span class="w-14 ml-2"></span>
+							</div>
+							<div class="flex-1 overflow-y-auto p-2 space-y-1">
+								{#each filteredMartialArts as style}
+									{@const alreadyKnown = ownedMartialArts.some(m => m.name === style.name)}
+									<div class="flex items-center p-2 bg-gray-50 rounded text-xs hover:bg-gray-100 transition-colors">
+										<span class="text-gray-800 truncate flex-1 min-w-0">{style.name}</span>
+										<span class="text-gray-600 w-20 text-right shrink-0">{style.source} p.{style.page}</span>
+										<span class="font-mono text-info-dark w-14 text-right shrink-0">{MARTIAL_ARTS_COSTS.STYLE} BP</span>
+										<button
+											class="cw-btn cw-btn-primary text-xs py-1 px-2 shrink-0 ml-2"
+											disabled={alreadyKnown}
+											on:click={() => { addMartialArt(style); closeModal(); }}
+										>
+											{alreadyKnown ? 'Known' : 'Learn'}
+										</button>
+									</div>
+								{/each}
+								{#if filteredMartialArts.length === 0}
+									<p class="text-gray-400 text-center py-8">No martial arts found</p>
+								{/if}
+							</div>
+						{:else if activeModal === 'lifestyle'}
+							<!-- Header row -->
+							<div class="flex items-center p-2 border-b border-gray-300 text-xs text-gray-500 font-semibold uppercase tracking-wide bg-white shrink-0">
+								<span class="flex-1 min-w-0">Name</span>
+								<span class="w-24 text-right">Monthly Cost</span>
+								<span class="w-16 ml-2"></span>
+							</div>
+							<div class="flex-1 overflow-y-auto p-2 space-y-1">
+								{#each filteredLifestyles as lifestyle}
+									<div class="flex items-center p-2 bg-gray-50 rounded text-xs hover:bg-gray-100 transition-colors">
+										<span class="text-gray-800 truncate flex-1 min-w-0">{lifestyle.name}</span>
+										<span class="font-mono text-primary-dark w-24 text-right shrink-0">{formatNuyen(lifestyle.cost)}/mo</span>
+										<button
+											class="cw-btn cw-btn-primary text-xs py-1 px-2 shrink-0 ml-2"
+											on:click={() => { setLifestyle(lifestyle.name, lifestyle.name, lifestyle.cost, 1); closeModal(); }}
+										>
+											Choose
+										</button>
+									</div>
+								{/each}
+							</div>
 						{/if}
 					</div>
-				{:else if activeModal === 'armor'}
-					<div class="space-y-2">
-						{#each filteredArmor as armor}
-							<div class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm hover:bg-gray-100">
-								<div class="flex-1 min-w-0">
-									<span class="text-gray-800 block truncate">{armor.name}</span>
-									<span class="text-gray-500 text-xs">{armor.category} | B/I: {armor.ballistic}/{armor.impact}</span>
-								</div>
-								<div class="flex items-center gap-2 ml-2">
-									<span class="font-mono text-primary-dark text-xs">{formatNuyen(armor.cost)}</span>
-									<button
-										class="cw-btn cw-btn-primary text-xs py-1 px-3"
-										on:click={() => { addArmor(armor); closeModal(); }}
-									>
-										Buy
-									</button>
-								</div>
-							</div>
-						{/each}
-						{#if filteredArmor.length === 0}
-							<p class="text-gray-400 text-center py-8">No armor found</p>
-						{/if}
-					</div>
-				{:else if activeModal === 'cyberware'}
-					<div class="space-y-2">
-						{#each filteredCyberware as cyber}
-							{@const costMult = gradeInfo[selectedGrade].cost}
-							{@const essMult = gradeInfo[selectedGrade].ess}
-							{@const adjustedCost = Math.floor(cyber.cost * costMult)}
-							{@const adjustedEss = cyber.ess * essMult}
-							<div class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm hover:bg-gray-100">
-								<div class="flex-1 min-w-0">
-									<span class="text-gray-800 block truncate">{cyber.name}</span>
-									<span class="text-gray-500 text-xs">{cyber.category} | ESS: {adjustedEss.toFixed(2)}</span>
-								</div>
-								<div class="flex items-center gap-2 ml-2">
-									<span class="font-mono text-primary-dark text-xs">{formatNuyen(adjustedCost)}</span>
-									<button
-										class="cw-btn cw-btn-primary text-xs py-1 px-3"
-										disabled={$currentEssence < adjustedEss}
-										on:click={() => { addCyberware(cyber, selectedGrade); closeModal(); }}
-									>
-										Install
-									</button>
-								</div>
-							</div>
-						{/each}
-						{#if filteredCyberware.length === 0}
-							<p class="text-gray-400 text-center py-8">No cyberware found</p>
-						{/if}
-					</div>
-				{:else if activeModal === 'bioware'}
-					<div class="space-y-2">
-						{#each filteredBioware as bio}
-							{@const costMult = bioGradeInfo[selectedBioGrade].cost}
-							{@const essMult = bioGradeInfo[selectedBioGrade].ess}
-							{@const adjustedCost = Math.floor(bio.cost * costMult)}
-							{@const adjustedEss = bio.ess * essMult}
-							<div class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm hover:bg-gray-100">
-								<div class="flex-1 min-w-0">
-									<span class="text-gray-800 block truncate">{bio.name}</span>
-									<span class="text-gray-500 text-xs">{bio.category} | ESS: {adjustedEss.toFixed(2)}</span>
-								</div>
-								<div class="flex items-center gap-2 ml-2">
-									<span class="font-mono text-primary-dark text-xs">{formatNuyen(adjustedCost)}</span>
-									<button
-										class="cw-btn cw-btn-primary text-xs py-1 px-3"
-										disabled={$currentEssence < adjustedEss}
-										on:click={() => { addBioware(bio, selectedBioGrade); closeModal(); }}
-									>
-										Install
-									</button>
-								</div>
-							</div>
-						{/each}
-						{#if filteredBioware.length === 0}
-							<p class="text-gray-400 text-center py-8">No bioware found</p>
-						{/if}
-					</div>
-				{:else if activeModal === 'vehicle'}
-					<div class="space-y-2">
-						{#each filteredVehicles as vehicle}
-							<div class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm hover:bg-gray-100">
-								<div class="flex-1 min-w-0">
-									<span class="text-gray-800 block truncate">{vehicle.name}</span>
-									<span class="text-gray-500 text-xs">{vehicle.category} | Handling: {vehicle.handling} | Speed: {vehicle.speed}</span>
-								</div>
-								<div class="flex items-center gap-2 ml-2">
-									<span class="font-mono text-primary-dark text-xs">{formatNuyen(vehicle.cost)}</span>
-									<button
-										class="cw-btn cw-btn-primary text-xs py-1 px-3"
-										on:click={() => { addVehicle(vehicle); closeModal(); }}
-									>
-										Buy
-									</button>
-								</div>
-							</div>
-						{/each}
-						{#if filteredVehicles.length === 0}
-							<p class="text-gray-400 text-center py-8">No vehicles found</p>
-						{/if}
-					</div>
-				{:else if activeModal === 'martialart'}
-					<div class="space-y-2">
-						{#each filteredMartialArts as style}
-							{@const alreadyKnown = ownedMartialArts.some(m => m.name === style.name)}
-							<div class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm hover:bg-gray-100">
-								<div class="flex-1 min-w-0">
-									<span class="text-gray-800 block truncate">{style.name}</span>
-									<span class="text-gray-500 text-xs">Source: {style.source} p.{style.page}</span>
-								</div>
-								<div class="flex items-center gap-2 ml-2">
-									<span class="font-mono text-info-dark text-xs">{MARTIAL_ARTS_COSTS.STYLE} BP</span>
-									<button
-										class="cw-btn cw-btn-primary text-xs py-1 px-3"
-										disabled={alreadyKnown}
-										on:click={() => { addMartialArt(style); closeModal(); }}
-									>
-										{alreadyKnown ? 'Known' : 'Learn'}
-									</button>
-								</div>
-							</div>
-						{/each}
-						{#if filteredMartialArts.length === 0}
-							<p class="text-gray-400 text-center py-8">No martial arts found</p>
-						{/if}
-					</div>
-				{:else if activeModal === 'gear'}
-					<div class="space-y-2">
-						{#each filteredGear as gear}
-							<div class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm hover:bg-gray-100">
-								<div class="flex-1 min-w-0">
-									<span class="text-gray-800 block truncate">{gear.name}</span>
-									<span class="text-gray-500 text-xs">{gear.category}{gear.rating > 0 ? ` | Rating: ${gear.rating}` : ''}</span>
-								</div>
-								<div class="flex items-center gap-2 ml-2">
-									<span class="font-mono text-primary-dark text-xs">{formatNuyen(gear.cost)}</span>
-									<button
-										class="cw-btn cw-btn-primary text-xs py-1 px-3"
-										on:click={() => { addGear(gear); closeModal(); }}
-									>
-										Buy
-									</button>
-								</div>
-							</div>
-						{/each}
-						{#if filteredGear.length === 0}
-							<p class="text-gray-400 text-center py-8">No gear found</p>
-						{/if}
-					</div>
-				{:else if activeModal === 'lifestyle'}
-					<div class="space-y-2">
-						{#each filteredLifestyles as lifestyle}
-							<div class="flex items-center justify-between p-3 bg-gray-50 rounded text-sm hover:bg-gray-100">
-								<div class="flex-1 min-w-0">
-									<span class="text-gray-800 block">{lifestyle.name}</span>
-									<span class="text-gray-500 text-xs">Standard lifestyle tier</span>
-								</div>
-								<div class="flex items-center gap-2 ml-2">
-									<span class="font-mono text-primary-dark text-xs">{formatNuyen(lifestyle.cost)}/mo</span>
-									<button
-										class="cw-btn cw-btn-primary text-xs py-1 px-3"
-										on:click={() => { setLifestyle(lifestyle.name, lifestyle.name, lifestyle.cost, 1); closeModal(); }}
-									>
-										Choose
-									</button>
-								</div>
-							</div>
-						{/each}
-					</div>
-				{/if}
-			</div>
+				</div>
+			{/if}
 		</div>
 	</div>
 {/if}

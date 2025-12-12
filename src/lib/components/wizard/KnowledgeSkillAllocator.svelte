@@ -122,12 +122,16 @@
 
 	// Reactive skill data for UI
 	$: knowledgeSkills = $character?.knowledgeSkills ?? [];
+
+	// Check if character has a native language (mother tongue)
+	$: hasNativeLanguage = knowledgeSkills.some(s => s.category === 'Language' && s.isNative);
 </script>
 
 <div class="space-y-4">
-	<!-- Points Summary (centered, matching other allocators) -->
-	<div class="flex justify-center">
-		<div class="bg-white border border-gray-200 rounded-lg shadow-md p-4 inline-block min-w-[400px]">
+	<!-- Points Summary and Native Language Warning (side by side) -->
+	<div class="flex justify-center gap-4 flex-wrap">
+		<!-- Points Summary -->
+		<div class="bg-white border border-gray-200 rounded-lg shadow-md p-4 min-w-[350px]">
 			<div class="flex items-center justify-center gap-4">
 				<span class="text-sm text-gray-600">Knowledge Skills:</span>
 				<span class="text-xl font-bold {remainingFreePoints > 0 ? 'text-green-600' : excessPoints > 0 ? 'text-amber-600' : 'text-gray-600'}">
@@ -148,6 +152,19 @@
 				Excess costs: {isKarmaBuild ? 'Rating × 2 Karma per point' : '2 BP per point'}
 			</p>
 		</div>
+
+		<!-- Native Language Warning -->
+		{#if !hasNativeLanguage}
+			<div class="bg-amber-50 border border-amber-300 rounded-lg shadow-md p-4 min-w-[300px] max-w-[400px] flex items-start gap-3">
+				<span class="material-icons text-amber-500 text-xl shrink-0">warning</span>
+				<div>
+					<h4 class="font-semibold text-amber-800 text-sm">Mother Tongue Required</h4>
+					<p class="text-amber-700 text-xs">
+						Add a language skill to designate your mother tongue. The first language added becomes your native language (Rating "N").
+					</p>
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Add New Skill -->
@@ -238,33 +255,43 @@
 								<div class="flex-1 min-w-0">
 									<span class="text-sm font-medium text-black truncate block">
 										{skill.name}
+										{#if skill.isNative}
+											<span class="text-xs text-amber-600 ml-1">(Native)</span>
+										{/if}
 									</span>
 								</div>
 								<div class="flex items-center gap-1">
-									<button
-										class="cw-btn-inc-dec"
-										on:click={() => decrementKnowledgeSkill(skill.id)}
-										disabled={skill.rating <= 1}
-									>
-										<span class="material-icons text-xs">remove</span>
-									</button>
-									<span class="w-8 text-center font-mono text-lg text-primary-dark font-bold">
-										{skill.rating}
-									</span>
-									<button
-										class="cw-btn-inc-dec"
-										on:click={() => incrementKnowledgeSkill(skill.id)}
-										disabled={skill.rating >= MAX_RATING}
-									>
-										<span class="material-icons text-xs">add</span>
-									</button>
-									<button
-										class="ml-2 p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
-										on:click={() => removeKnowledgeSkill(skill.id)}
-										title="Remove skill"
-									>
-										<span class="material-icons text-sm">close</span>
-									</button>
+									{#if skill.isNative}
+										<!-- Native languages show "N" and cannot be modified -->
+										<span class="w-16 text-center font-mono text-lg text-amber-600 font-bold" title="Native language - infinite proficiency">
+											N
+										</span>
+									{:else}
+										<button
+											class="cw-btn-inc-dec"
+											on:click={() => decrementKnowledgeSkill(skill.id)}
+											disabled={skill.rating <= 1}
+										>
+											<span class="material-icons text-xs">remove</span>
+										</button>
+										<span class="w-8 text-center font-mono text-lg text-primary-dark font-bold">
+											{skill.rating}
+										</span>
+										<button
+											class="cw-btn-inc-dec"
+											on:click={() => incrementKnowledgeSkill(skill.id)}
+											disabled={skill.rating >= MAX_RATING}
+										>
+											<span class="material-icons text-xs">add</span>
+										</button>
+										<button
+											class="ml-2 p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+											on:click={() => removeKnowledgeSkill(skill.id)}
+											title="Remove skill"
+										>
+											<span class="material-icons text-sm">close</span>
+										</button>
+									{/if}
 								</div>
 							</div>
 						{/each}

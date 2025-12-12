@@ -80,6 +80,7 @@ export {
 	remainingBP,
 	bpBreakdown,
 	hasMetatype,
+	hasNativeLanguage,
 	magicType,
 	remainingNuyen,
 	startingNuyen,
@@ -213,5 +214,17 @@ export {
 	type WizardStepConfig,
 	type AttributeValueKey,
 	type MagicType,
-	type CharacterSummary
+	type CharacterSummary,
+	type AddQualityOptions
 } from './character';
+
+export {
+	qualityBonuses,
+	getEffectiveSkillMax,
+	getSkillBonus,
+	getAttributeMaxAdjustment,
+	getAttributeBonus,
+	type QualityBonuses,
+	type AttributeModifiers,
+	type SkillModifier
+} from './qualityBonuses';

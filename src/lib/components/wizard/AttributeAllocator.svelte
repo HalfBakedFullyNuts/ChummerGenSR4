@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { character, setAttribute, KARMA_BUILD_COSTS, type AttributeValueKey, attributeValidation } from '$stores/character';
+	import { qualityBonuses, getAttributeMaxAdjustment } from '$stores/qualityBonuses';
 	import type { AttributeValue } from '$types';
 	import { ATTRIBUTE_NAMES } from '$types';
 
@@ -24,12 +25,31 @@
 		return attr;
 	}
 
-	function getAttrLimits(
+	/** Get base attribute limits without quality adjustments (for BP calculations). */
+	function getBaseAttrLimits(
 		char: typeof $character,
 		code: AttributeValueKey
 	): { min: number; max: number } | null {
 		if (!char) return null;
 		return char.attributeLimits[code] ?? null;
+	}
+
+	/** Get attribute limits including quality bonus adjustments (for display and validation). */
+	function getAttrLimits(
+		char: typeof $character,
+		code: AttributeValueKey,
+		bonuses: typeof $qualityBonuses
+	): { min: number; max: number } | null {
+		if (!char) return null;
+		const baseLimits = char.attributeLimits[code];
+		if (!baseLimits) return null;
+
+		// Apply quality bonus adjustments to max
+		const maxAdjustment = getAttributeMaxAdjustment(code, bonuses);
+		return {
+			min: baseLimits.min,
+			max: baseLimits.max + maxAdjustment
+		};
 	}
 
 	function getAugmentedLimit(naturalMax: number): number {
@@ -41,7 +61,7 @@
 	 */
 	function wouldViolateMaxRule(code: AttributeValueKey, validation: typeof $attributeValidation): boolean {
 		const attr = getAttrValue($character, code);
-		const limits = getAttrLimits($character, code);
+		const limits = getAttrLimits($character, code, $qualityBonuses);
 		if (!attr || !limits) return false;
 
 		// If this attribute is already at max, it's fine (can't increment anyway)
@@ -62,7 +82,7 @@
 	 */
 	function getMaxMessage(code: AttributeValueKey, validation: typeof $attributeValidation): { text: string; isError: boolean } | null {
 		const attr = getAttrValue($character, code);
-		const limits = getAttrLimits($character, code);
+		const limits = getAttrLimits($character, code, $qualityBonuses);
 		if (!attr || !limits) return null;
 
 		const isThisAtMax = attr.base === limits.max;
@@ -95,7 +115,7 @@
 
 	function incrementAttr(code: AttributeValueKey): void {
 		const attr = getAttrValue($character, code);
-		const limits = getAttrLimits($character, code);
+		const limits = getAttrLimits($character, code, $qualityBonuses);
 		if (!attr || !limits) return;
 		const newValue = Math.min(attr.base + 1, limits.max);
 		setAttribute(code, newValue);
@@ -103,7 +123,7 @@
 
 	function decrementAttr(code: AttributeValueKey): void {
 		const attr = getAttrValue($character, code);
-		const limits = getAttrLimits($character, code);
+		const limits = getAttrLimits($character, code, $qualityBonuses);
 		if (!attr || !limits) return;
 		const newValue = Math.max(attr.base - 1, limits.min);
 		setAttribute(code, newValue);
@@ -114,7 +134,7 @@
 		let total = 0;
 		for (const code of ALL_ATTRS) {
 			const attr = getAttrValue(char, code);
-			const limits = getAttrLimits(char, code);
+			const limits = getBaseAttrLimits(char, code);
 			if (!attr || !limits) continue;
 			const pointsAboveMin = attr.base - limits.min;
 			const isAtMaximum = attr.base === limits.max;
@@ -136,7 +156,7 @@
 		let total = 0;
 		for (const code of ALL_ATTRS) {
 			const attr = getAttrValue(char, code);
-			const limits = getAttrLimits(char, code);
+			const limits = getBaseAttrLimits(char, code);
 			if (!attr || !limits) continue;
 			for (let r = limits.min + 1; r <= attr.base; r++) {
 				total += r * KARMA_BUILD_COSTS.ATTRIBUTE_MULTIPLIER;
@@ -154,15 +174,15 @@
 	$: logValue = getAttrValue($character, 'log')?.base ?? 0;
 	$: wilValue = getAttrValue($character, 'wil')?.base ?? 0;
 
-	// Condition Monitors
-	$: physicalCM = 8 + Math.ceil(bodValue / 2);
+	// Condition Monitors (include quality bonuses)
+	$: physicalCM = 8 + Math.ceil(bodValue / 2) + $qualityBonuses.conditionMonitor;
 	$: stunCM = 8 + Math.ceil(wilValue / 2);
-	$: initiative = reaValue + intValue;
-	$: initiativePasses = 1; // Base passes, can be modified by augmentations
+	$: initiative = reaValue + intValue + $qualityBonuses.initiative;
+	$: initiativePasses = 1 + $qualityBonuses.initiativePasses; // Base passes + quality bonuses
 
-	// Compound tests
-	$: composure = chaValue + wilValue;
-	$: judgeIntentions = chaValue + intValue;
+	// Compound tests (include quality bonuses)
+	$: composure = chaValue + wilValue + $qualityBonuses.composure;
+	$: judgeIntentions = chaValue + intValue + $qualityBonuses.judgeIntentions;
 	$: memory = logValue + wilValue;
 	$: liftCarry = bodValue + strValue;
 
@@ -231,7 +251,7 @@
 
 				{#each PHYSICAL_ATTRS as code, idx}
 					{@const attr = getAttrValue($character, code)}
-					{@const limits = getAttrLimits($character, code)}
+					{@const limits = getAttrLimits($character, code, $qualityBonuses)}
 					{@const augmented = limits ? getAugmentedLimit(limits.max) : 0}
 					{@const maxMsg = !isKarmaBuild ? getMaxMessage(code, $attributeValidation) : null}
 					{@const blockedByMaxRule = !isKarmaBuild && wouldViolateMaxRule(code, $attributeValidation)}
@@ -281,7 +301,7 @@
 
 				{#each MENTAL_ATTRS as code, idx}
 					{@const attr = getAttrValue($character, code)}
-					{@const limits = getAttrLimits($character, code)}
+					{@const limits = getAttrLimits($character, code, $qualityBonuses)}
 					{@const augmented = limits ? getAugmentedLimit(limits.max) : 0}
 					{@const maxMsg = !isKarmaBuild ? getMaxMessage(code, $attributeValidation) : null}
 					{@const blockedByMaxRule = !isKarmaBuild && wouldViolateMaxRule(code, $attributeValidation)}
@@ -331,7 +351,7 @@
 
 				{#each SPECIAL_ATTRS as code, idx}
 					{@const attr = getAttrValue($character, code)}
-					{@const limits = getAttrLimits($character, code)}
+					{@const limits = getAttrLimits($character, code, $qualityBonuses)}
 					{@const augmented = limits ? getAugmentedLimit(limits.max) : 0}
 					{@const maxMsg = !isKarmaBuild ? getMaxMessage(code, $attributeValidation) : null}
 					{@const blockedByMaxRule = !isKarmaBuild && wouldViolateMaxRule(code, $attributeValidation)}

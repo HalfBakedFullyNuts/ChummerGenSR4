@@ -2,12 +2,14 @@
 	import {
 		positiveQualities,
 		negativeQualities,
+		skills,
 		type GameQuality
 	} from '$stores/gamedata';
 	import { character, addQuality, removeQuality, addQualityAgain } from '$stores/character';
 	import Tooltip from '$lib/components/ui/Tooltip.svelte';
-	import { formatQualityBonus, type FormattedBonus } from '$lib/utils/qualities';
+	import { formatQualityBonus, qualityMatchesSearch, type FormattedBonus } from '$lib/utils/qualities';
 	import { groupQualities, formatBPRange, type GroupedQuality } from '$lib/utils/qualityGrouping';
+	import { ATTRIBUTE_NAMES, type AttributeCode } from '$lib/types/attributes';
 
 	/** Current tab - positive or negative qualities. */
 	let activeTab: 'positive' | 'negative' = 'positive';
@@ -18,37 +20,144 @@
 	/** Currently open variant selector group (null if none open). */
 	let openVariantGroup: GroupedQuality | null = null;
 
+	/** Quality pending skill/attribute selection before being added. */
+	let pendingSelectionQuality: {
+		quality: GameQuality;
+		category: 'Positive' | 'Negative';
+		requiresSkill: boolean;
+		requiresAttribute: boolean;
+		skillBonus?: number;
+		skillMax?: number;
+		attributeBonus?: number;
+		attributeMin?: number;
+		attributeMax?: number;
+	} | null = null;
+
+	/** Selected skill for pending quality. */
+	let selectedSkillForQuality: string = '';
+
+	/** Selected attribute for pending quality. */
+	let selectedAttributeForQuality: string = '';
+
+	/** Selectable attributes for quality bonuses (excludes special attributes). */
+	const SELECTABLE_ATTRIBUTES: { code: AttributeCode; name: string }[] = [
+		{ code: 'bod', name: 'Body' },
+		{ code: 'agi', name: 'Agility' },
+		{ code: 'rea', name: 'Reaction' },
+		{ code: 'str', name: 'Strength' },
+		{ code: 'cha', name: 'Charisma' },
+		{ code: 'int', name: 'Intuition' },
+		{ code: 'log', name: 'Logic' },
+		{ code: 'wil', name: 'Willpower' },
+		{ code: 'edg', name: 'Edge' }
+	];
+
+	/** Check if a quality requires skill selection. */
+	function requiresSkillSelection(quality: GameQuality): boolean {
+		return quality.bonus?.selectskill !== undefined;
+	}
+
+	/** Check if a quality requires attribute selection. */
+	function requiresAttributeSelection(quality: GameQuality): boolean {
+		return quality.bonus?.selectattribute !== undefined;
+	}
+
+	/** Open the selection modal for a quality that requires choices. */
+	function openSelectionModal(quality: GameQuality): void {
+		const category = quality.bp >= 0 ? 'Positive' : 'Negative';
+		const skillBonus = quality.bonus?.selectskill?.bonus;
+		const skillMax = quality.bonus?.selectskill?.max;
+		const attributeBonus = quality.bonus?.selectattribute?.val;
+		const attributeMin = quality.bonus?.selectattribute?.min;
+		const attributeMax = quality.bonus?.selectattribute?.max;
+
+		pendingSelectionQuality = {
+			quality,
+			category,
+			requiresSkill: requiresSkillSelection(quality),
+			requiresAttribute: requiresAttributeSelection(quality),
+			...(skillBonus !== undefined ? { skillBonus } : {}),
+			...(skillMax !== undefined ? { skillMax } : {}),
+			...(attributeBonus !== undefined ? { attributeBonus } : {}),
+			...(attributeMin !== undefined ? { attributeMin } : {}),
+			...(attributeMax !== undefined ? { attributeMax } : {})
+		};
+		selectedSkillForQuality = '';
+		selectedAttributeForQuality = '';
+	}
+
+	/** Close the selection modal without adding the quality. */
+	function closeSelectionModal(): void {
+		pendingSelectionQuality = null;
+		selectedSkillForQuality = '';
+		selectedAttributeForQuality = '';
+	}
+
+	/** Confirm the selection and add the quality. */
+	function confirmSelection(): void {
+		if (!pendingSelectionQuality) return;
+
+		const { quality, category, requiresSkill, requiresAttribute } = pendingSelectionQuality;
+
+		// Validate selections
+		if (requiresSkill && !selectedSkillForQuality) return;
+		if (requiresAttribute && !selectedAttributeForQuality) return;
+
+		// Build options object, only including properties that have values
+		const options: { selectedSkill?: string; selectedAttribute?: string } = {};
+		if (requiresSkill && selectedSkillForQuality) {
+			options.selectedSkill = selectedSkillForQuality;
+		}
+		if (requiresAttribute && selectedAttributeForQuality) {
+			options.selectedAttribute = selectedAttributeForQuality;
+		}
+
+		// Add the quality with selections
+		addQuality(quality.name, category, quality.bp, options);
+
+		closeSelectionModal();
+	}
+
+	/** Check if selection is valid for confirming. */
+	function isSelectionValid(): boolean {
+		if (!pendingSelectionQuality) return false;
+		const { requiresSkill, requiresAttribute } = pendingSelectionQuality;
+		if (requiresSkill && !selectedSkillForQuality) return false;
+		if (requiresAttribute && !selectedAttributeForQuality) return false;
+		return true;
+	}
+
+	/** Get attribute name from code (helper for templates). */
+	function getAttributeName(code: string | undefined): string {
+		if (!code) return '';
+		return ATTRIBUTE_NAMES[code as AttributeCode] ?? code;
+	}
+
 	/** Maximum BP from positive qualities. */
 	const MAX_POSITIVE_BP = 35;
 
 	/** Maximum BP from negative qualities. */
 	const MAX_NEGATIVE_BP = 35;
 
-	/** Filter grouped qualities by search query. */
+	/** Filter grouped qualities by search query.
+	 * Searches name, effect description, bonus text, and tags.
+	 */
 	function filterGroupedQualities(groups: GroupedQuality[], search: string): GroupedQuality[] {
 		if (!search) return groups;
-		const lower = search.toLowerCase();
 		return groups.filter((g) => {
-			// Match base name
-			if (g.baseName.toLowerCase().includes(lower)) return true;
-			// Match any variant name
-			return g.variants.some(v => v.name.toLowerCase().includes(lower));
+			// Check if any variant matches the search (searches name, effect, bonuses, tags)
+			return g.variants.some(v => qualityMatchesSearch(v, search));
 		});
 	}
 
-	/** Check if quality is already selected. */
-	function isSelected(name: string): boolean {
-		return $character?.qualities.some((q) => q.name === name) ?? false;
+	/** Check if quality is already selected. Pass character explicitly for reactivity. */
+	function isSelected(name: string, char: typeof $character): boolean {
+		return char?.qualities.some((q) => q.name === name) ?? false;
 	}
 
-	/** Check if any variant in a group is selected. */
-	function isGroupSelected(group: GroupedQuality): boolean {
-		return group.variants.some(v => isSelected(v.name));
-	}
-
-	/** Get the selected variant(s) from a group. */
-	function getSelectedVariants(group: GroupedQuality): GameQuality[] {
-		return group.variants.filter(v => isSelected(v.name));
+	/** Check if any variant in a group is selected. Pass character explicitly for reactivity. */
+	function isGroupSelected(group: GroupedQuality, char: typeof $character): boolean {
+		return group.variants.some(v => isSelected(v.name, char));
 	}
 
 	/** Get selected quality ID by name. */
@@ -101,12 +210,19 @@
 
 	/** Handle quality selection (for ungrouped qualities). */
 	function toggleQuality(quality: GameQuality): void {
-		if (isSelected(quality.name)) {
+		if (isSelected(quality.name, $character)) {
 			const id = getSelectedId(quality.name);
 			if (id) removeQuality(id);
 		} else {
 			// Check BP limit before adding
 			if (wouldExceedLimit(quality)) return;
+
+			// Check if quality requires skill/attribute selection
+			if (requiresSkillSelection(quality) || requiresAttributeSelection(quality)) {
+				openSelectionModal(quality);
+				return;
+			}
+
 			const category = quality.bp >= 0 ? 'Positive' : 'Negative';
 			addQuality(quality.name, category, quality.bp);
 		}
@@ -126,12 +242,20 @@
 
 	/** Select a specific variant from the popover. */
 	function selectVariant(quality: GameQuality): void {
-		if (isSelected(quality.name)) {
+		if (isSelected(quality.name, $character)) {
 			const id = getSelectedId(quality.name);
 			if (id) removeQuality(id);
 		} else {
 			// Check BP limit before adding
 			if (wouldExceedLimit(quality)) return;
+
+			// Check if quality requires skill/attribute selection
+			if (requiresSkillSelection(quality) || requiresAttributeSelection(quality)) {
+				openVariantGroup = null; // Close variant modal first
+				openSelectionModal(quality);
+				return;
+			}
+
 			const category = quality.bp >= 0 ? 'Positive' : 'Negative';
 			addQuality(quality.name, category, quality.bp);
 		}
@@ -234,7 +358,7 @@
 
 		<input
 			type="text"
-			placeholder="Search qualities..."
+			placeholder="Search name, description, effects..."
 			class="cw-input flex-1 min-w-[200px]"
 			bind:value={searchQuery}
 		/>
@@ -243,18 +367,20 @@
 	<!-- Selected Qualities (always visible, split positive/negative) -->
 	<div class="grid grid-cols-2 gap-4">
 		<!-- Positive Qualities (Left) -->
-		<div class="cw-panel p-3 min-h-[84px] max-h-[200px] overflow-y-auto">
+		<div class="cw-panel p-3 max-h-[600px] overflow-y-auto">
 			<h4 class="text-xs font-semibold text-success-main uppercase tracking-wide mb-2 flex items-center gap-1">
 				<span class="material-icons text-xs">add_circle</span>
 				Positive ({positiveBP}/{MAX_POSITIVE_BP} BP)
 			</h4>
-			<div class="flex flex-wrap gap-y-px gap-x-[5%]">
+			<div class="flex flex-wrap content-start gap-y-px gap-x-[5%] min-h-[4.5rem]">
 				{#each ($character?.qualities ?? []).filter(q => q.category === 'Positive') as quality}
 					{@const baseQualName = quality.name.replace(/\s+#\d+$/, '')}
 					{@const gameQual = getGameQuality(baseQualName)}
 					{@const bonuses = gameQual ? getQualityBonuses(gameQual) : []}
 					{@const hasTooltip = !!gameQual?.effect || bonuses.length > 0}
 					{@const repeatable = canTakeAgain(quality.name)}
+					{@const hasSelection = quality.selectedSkill || quality.selectedAttribute}
+					{@const selectionLabel = quality.selectedSkill || getAttributeName(quality.selectedAttribute)}
 					<button
 						class="flex items-center gap-0.5 px-1.5 py-0 rounded text-xs w-[45%] text-left
 							bg-success-main/20 text-success-main border border-success-main/30
@@ -262,11 +388,16 @@
 						on:click={() => removeQuality(quality.id)}
 						title="Click to remove">
 						<span class="flex-1 truncate {hasTooltip ? 'cursor-help' : ''}">
-							{quality.name}
+							{quality.name}{#if hasSelection}: {selectionLabel}{/if}
 							<Tooltip show={hasTooltip} maxWidth="20rem">
 								<div slot="content" class="text-left">
 									{#if gameQual?.effect}
 										<div class="mb-1">{gameQual.effect}</div>
+									{/if}
+									{#if hasSelection}
+										<div class="text-green-400 text-xs mb-1">
+											Selected: {selectionLabel}
+										</div>
 									{/if}
 									{#if bonuses.length > 0}
 										<div class="border-t border-gray-700 pt-1 mt-1 space-y-0.5">
@@ -302,18 +433,20 @@
 		</div>
 
 		<!-- Negative Qualities (Right) -->
-		<div class="cw-panel p-3 min-h-[84px] max-h-[200px] overflow-y-auto">
+		<div class="cw-panel p-3 max-h-[600px] overflow-y-auto">
 			<h4 class="text-xs font-semibold text-warning-main uppercase tracking-wide mb-2 flex items-center gap-1">
 				<span class="material-icons text-xs">remove_circle</span>
 				Negative ({negativeBP}/{MAX_NEGATIVE_BP} BP)
 			</h4>
-			<div class="flex flex-wrap gap-y-px gap-x-[5%]">
+			<div class="flex flex-wrap content-start gap-y-px gap-x-[5%] min-h-[4.5rem]">
 				{#each ($character?.qualities ?? []).filter(q => q.category === 'Negative') as quality}
 					{@const baseQualName = quality.name.replace(/\s+#\d+$/, '')}
 					{@const gameQual = getGameQuality(baseQualName)}
 					{@const bonuses = gameQual ? getQualityBonuses(gameQual) : []}
 					{@const hasTooltip = !!gameQual?.effect || bonuses.length > 0}
 					{@const repeatable = canTakeAgain(quality.name)}
+					{@const hasSelection = quality.selectedSkill || quality.selectedAttribute}
+					{@const selectionLabel = quality.selectedSkill || getAttributeName(quality.selectedAttribute)}
 					<button
 						class="flex items-center gap-0.5 px-1.5 py-0 rounded text-xs w-[45%] text-left
 							bg-warning-main/20 text-warning-main border border-warning-main/30
@@ -321,11 +454,16 @@
 						on:click={() => removeQuality(quality.id)}
 						title="Click to remove">
 						<span class="flex-1 truncate {hasTooltip ? 'cursor-help' : ''}">
-							{quality.name}
+							{quality.name}{#if hasSelection}: {selectionLabel}{/if}
 							<Tooltip show={hasTooltip} maxWidth="20rem">
 								<div slot="content" class="text-left">
 									{#if gameQual?.effect}
 										<div class="mb-1">{gameQual.effect}</div>
+									{/if}
+									{#if hasSelection}
+										<div class="text-red-400 text-xs mb-1">
+											Selected: {selectionLabel}
+										</div>
 									{/if}
 									{#if bonuses.length > 0}
 										<div class="border-t border-gray-700 pt-1 mt-1 space-y-0.5">
@@ -362,44 +500,27 @@
 	</div>
 
 	<!-- Quality List (Grouped) -->
-	<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+	<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
 		{#each displayGroups as group}
-			{@const selected = isGroupSelected(group)}
-			{@const selectedVariants = getSelectedVariants(group)}
+			{@const selected = isGroupSelected(group, $character)}
 			{@const bonuses = getQualityBonuses(group.representative)}
 			{@const hasTooltip = !!group.representative.effect || bonuses.length > 0}
 			<button
-				class="cw-card text-left p-3 transition-all group relative
-					{selected
-						? activeTab === 'positive'
-							? 'border-success-main bg-success-main/10'
-							: 'border-warning-main bg-warning-main/10'
-						: 'hover:border-primary-main/50'}"
+				class="cw-card text-left p-2 transition-all group relative
+					{selected ? 'cw-card-selected' : 'hover:border-primary-main/50'}"
 				on:click={() => handleGroupClick(group)}
 			>
-				<div class="flex items-start justify-between gap-2">
-					<div class="flex-1">
-						<h4
-							class="font-medium
-								{selected
-									? activeTab === 'positive'
-										? 'text-success-main'
-										: 'text-warning-main'
-									: 'text-text-primary'}"
-						>
+				<div class="flex items-start justify-between gap-1">
+					<div class="flex-1 min-w-0">
+						<h4 class="font-medium text-sm text-text-primary truncate">
 							{group.displayName}
 							{#if group.isGroup}
-								<span class="text-text-muted text-xs ml-1">({group.variants.length} options)</span>
+								<span class="text-text-muted text-xs">({group.variants.length})</span>
 							{/if}
 						</h4>
-						{#if selectedVariants.length > 0}
-							<span class="text-xs text-success-main">
-								Selected: {selectedVariants.map(v => v.name.replace(group.baseName, '').trim().replace(/^\(|\)$/g, '')).join(', ')}
-							</span>
-						{/if}
 					</div>
 					<span
-						class="cw-badge text-xs
+						class="cw-badge text-xs shrink-0
 							{activeTab === 'positive' ? 'cw-badge-success' : 'cw-badge-warning'}"
 					>
 						{formatBPRange(group)}
@@ -407,10 +528,10 @@
 				</div>
 
 				{#if group.representative.effect}
-					<p class="text-text-secondary text-xs mt-2 line-clamp-2">{group.representative.effect}</p>
+					<p class="text-text-secondary text-xs mt-1 line-clamp-2">{group.representative.effect}</p>
 				{/if}
 
-				<div class="text-text-muted text-xs mt-2">
+				<div class="text-text-muted text-xs mt-1">
 					{group.source} p.{group.page}
 				</div>
 
@@ -467,25 +588,26 @@
 				<div class="p-4 space-y-2">
 					<p class="text-text-secondary text-sm mb-4">Select a variant:</p>
 					{#each openVariantGroup.variants as variant}
-						{@const variantSelected = isSelected(variant.name)}
+						{@const variantSelected = isSelected(variant.name, $character)}
 						{@const variantBonuses = getQualityBonuses(variant)}
 						<button
+							type="button"
 							class="w-full text-left p-3 rounded border transition-all
-								{variantSelected 
-									? 'border-success-main bg-success-main/10' 
+								{variantSelected
+									? 'cw-card-selected'
 									: 'border-gray-200 hover:border-primary-main/50 hover:bg-gray-50'}"
-							on:click={() => selectVariant(variant)}
+							on:click|stopPropagation={() => selectVariant(variant)}
 						>
 							<div class="flex justify-between items-start">
 								<div class="flex-1">
-									<div class="font-medium {variantSelected ? 'text-success-main' : 'text-text-primary'}">
+									<div class="font-medium {variantSelected ? 'text-secondary-main' : 'text-text-primary'}">
 										{variant.name}
 									</div>
 									{#if variant.effect}
 										<div class="text-text-secondary text-xs mt-1">{variant.effect}</div>
 									{/if}
 								</div>
-								<span class="cw-badge cw-badge-success text-xs ml-2">
+								<span class="cw-badge text-xs ml-2 {activeTab === 'positive' ? 'cw-badge-success' : 'cw-badge-warning'}">
 									{Math.abs(variant.bp)} BP
 								</span>
 							</div>
@@ -500,6 +622,116 @@
 							{/if}
 						</button>
 					{/each}
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Skill/Attribute Selection Modal -->
+	{#if pendingSelectionQuality !== null}
+		<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+		<div
+			class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+			on:click={closeSelectionModal}
+		>
+			<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+			<div
+				class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto"
+				on:click|stopPropagation
+			>
+				<div class="p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
+					<h3 class="text-lg font-semibold text-text-primary">{pendingSelectionQuality.quality.name}</h3>
+					<button
+						type="button"
+						class="p-1 hover:bg-gray-100 rounded"
+						on:click={closeSelectionModal}
+					>
+						<span class="material-icons text-text-muted">close</span>
+					</button>
+				</div>
+				<div class="p-4 space-y-4">
+					<!-- Quality description -->
+					{#if pendingSelectionQuality.quality.effect}
+						<p class="text-text-secondary text-sm">{pendingSelectionQuality.quality.effect}</p>
+					{/if}
+
+					<!-- Skill Selection -->
+					{#if pendingSelectionQuality.requiresSkill}
+						<div class="space-y-2">
+							<label class="block text-sm font-medium text-text-primary">
+								Select Skill
+								{#if pendingSelectionQuality.skillMax !== undefined}
+									<span class="text-xs text-green-600 ml-1">
+										(+{pendingSelectionQuality.skillMax} to max rating)
+									</span>
+								{:else if pendingSelectionQuality.skillBonus !== undefined}
+									<span class="text-xs text-text-muted ml-1">
+										({pendingSelectionQuality.skillBonus >= 0 ? '+' : ''}{pendingSelectionQuality.skillBonus} bonus)
+									</span>
+								{/if}
+							</label>
+							<select
+								class="cw-input w-full"
+								bind:value={selectedSkillForQuality}
+							>
+								<option value="">-- Choose a skill --</option>
+								{#each ($skills ?? []).sort((a, b) => a.name.localeCompare(b.name)) as skill}
+									<option value={skill.name}>{skill.name}</option>
+								{/each}
+							</select>
+						</div>
+					{/if}
+
+					<!-- Attribute Selection -->
+					{#if pendingSelectionQuality.requiresAttribute}
+						<div class="space-y-2">
+							<label class="block text-sm font-medium text-text-primary">
+								Select Attribute
+								{#if pendingSelectionQuality.attributeMax !== undefined}
+									<span class="text-xs text-text-muted ml-1">
+										(+{pendingSelectionQuality.attributeMax} to max)
+									</span>
+								{:else if pendingSelectionQuality.attributeMin !== undefined}
+									<span class="text-xs text-red-600 ml-1">
+										(-{pendingSelectionQuality.attributeMin} to max)
+									</span>
+								{/if}
+							</label>
+							<select
+								class="cw-input w-full"
+								bind:value={selectedAttributeForQuality}
+							>
+								<option value="">-- Choose an attribute --</option>
+								{#each SELECTABLE_ATTRIBUTES as attr}
+									<option value={attr.code}>{attr.name}</option>
+								{/each}
+							</select>
+						</div>
+					{/if}
+
+					<!-- Action Buttons -->
+					<div class="flex gap-3 pt-2">
+						<button
+							type="button"
+							class="flex-1 px-4 py-2 rounded border border-gray-300 text-text-secondary hover:bg-gray-50 transition-colors"
+							on:click={closeSelectionModal}
+						>
+							Cancel
+						</button>
+						<button
+							type="button"
+							class="flex-1 px-4 py-2 rounded transition-colors
+								{isSelectionValid()
+									? pendingSelectionQuality.category === 'Positive'
+										? 'bg-success-main text-white hover:bg-success-main/90'
+										: 'bg-warning-main text-black hover:bg-warning-main/90'
+									: 'bg-gray-200 text-gray-400 cursor-not-allowed'}"
+							disabled={!isSelectionValid()}
+							on:click={confirmSelection}
+						>
+							Add Quality
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>

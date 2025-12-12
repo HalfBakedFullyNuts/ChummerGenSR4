@@ -471,6 +471,14 @@ export function setAttribute(
 	characterStore.set(updated);
 }
 
+/** Options for adding a quality that requires selection. */
+export interface AddQualityOptions {
+	/** Selected skill for qualities with selectskill bonus. */
+	selectedSkill?: string;
+	/** Selected attribute for qualities with selectattribute bonus. */
+	selectedAttribute?: string;
+}
+
 /**
  * Add a quality to the character.
  * Validates BP limits and restrictions.
@@ -478,7 +486,8 @@ export function setAttribute(
 export function addQuality(
 	name: string,
 	category: 'Positive' | 'Negative',
-	bp: number
+	bp: number,
+	options?: AddQualityOptions
 ): void {
 	const char = get(characterStore);
 	if (!char) return;
@@ -493,7 +502,9 @@ export function addQuality(
 		category,
 		bp,
 		rating: 1,
-		notes: ''
+		notes: '',
+		...(options?.selectedSkill ? { selectedSkill: options.selectedSkill } : {}),
+		...(options?.selectedAttribute ? { selectedAttribute: options.selectedAttribute } : {})
 	};
 
 	const updated: Character = {
@@ -575,6 +586,26 @@ export function removeQuality(qualityId: string): void {
 	characterStore.set(updated);
 }
 
+/** BP cost per skill point. */
+const SKILL_BP_PER_POINT = 4;
+
+/** BP cost per skill group point. */
+const SKILL_GROUP_BP_PER_POINT = 10;
+
+/**
+ * Calculate total BP spent on individual skills.
+ */
+function calculateSkillsBP(skills: readonly CharacterSkill[]): number {
+	return skills.reduce((sum, s) => sum + s.rating * SKILL_BP_PER_POINT, 0);
+}
+
+/**
+ * Calculate total BP spent on skill groups.
+ */
+function calculateSkillGroupsBP(skillGroups: readonly CharacterSkillGroup[]): number {
+	return skillGroups.reduce((sum, g) => sum + g.rating * SKILL_GROUP_BP_PER_POINT, 0);
+}
+
 /**
  * Add or update a skill.
  * Creates new skill or updates existing rating.
@@ -607,9 +638,16 @@ export function setSkill(
 		newSkills = [...char.skills, newSkill];
 	}
 
+	// Filter out skills with 0 rating
+	newSkills = newSkills.filter(s => s.rating > 0);
+
 	const updated: Character = {
 		...char,
 		skills: newSkills,
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			skills: calculateSkillsBP(newSkills)
+		},
 		updatedAt: new Date().toISOString()
 	};
 
@@ -623,9 +661,15 @@ export function removeSkill(name: string): void {
 	const char = get(characterStore);
 	if (!char) return;
 
+	const newSkills = char.skills.filter((s) => s.name !== name);
+
 	const updated: Character = {
 		...char,
-		skills: char.skills.filter((s) => s.name !== name),
+		skills: newSkills,
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			skills: calculateSkillsBP(newSkills)
+		},
 		updatedAt: new Date().toISOString()
 	};
 
@@ -752,6 +796,10 @@ export function setSkillGroup(
 	const updated: Character = {
 		...char,
 		skillGroups: newSkillGroups,
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			skillGroups: calculateSkillGroupsBP(newSkillGroups)
+		},
 		updatedAt: new Date().toISOString()
 	};
 
@@ -982,7 +1030,8 @@ export function calculateKnowledgeSkillKarmaCost(char: Character | null): number
 export function addKnowledgeSkill(
 	name: string,
 	category: KnowledgeSkillCategory,
-	rating: number = 1
+	rating: number = 1,
+	isNative: boolean = false
 ): void {
 	const char = get(characterStore);
 	if (!char) return;
@@ -994,13 +1043,19 @@ export function addKnowledgeSkill(
 
 	const attribute = getKnowledgeSkillAttribute(category);
 
+	// If this is the first language and no native language exists, make it native
+	const hasNativeLanguage = char.knowledgeSkills.some(s => s.category === 'Language' && s.isNative);
+	const shouldBeNative = category === 'Language' && !hasNativeLanguage;
+
 	const newSkill: KnowledgeSkill = {
 		id: generateId(),
 		name,
 		category,
 		attribute,
-		rating: Math.max(1, Math.min(6, rating)),
-		specialization: null
+		// Native languages have effectively infinite rating (display as "N")
+		rating: shouldBeNative || isNative ? 0 : Math.max(1, Math.min(6, rating)),
+		specialization: null,
+		isNative: shouldBeNative || isNative
 	};
 
 	const updated: Character = {
@@ -1015,10 +1070,17 @@ export function addKnowledgeSkill(
 
 /**
  * Remove a knowledge skill by ID.
+ * Note: Native languages cannot be removed.
  */
 export function removeKnowledgeSkill(skillId: string): void {
 	const char = get(characterStore);
 	if (!char) return;
+
+	// Prevent removal of native languages
+	const skill = char.knowledgeSkills.find(s => s.id === skillId);
+	if (skill?.isNative) {
+		return; // Cannot remove native language
+	}
 
 	const updated: Character = {
 		...char,
@@ -1187,6 +1249,12 @@ export const currentStepIndex: Readable<number> = derived(
 export const hasMetatype: Readable<boolean> = derived(
 	character,
 	($char) => !!$char?.identity.metatype
+);
+
+/** Check if character has a native language (mother tongue). */
+export const hasNativeLanguage: Readable<boolean> = derived(
+	character,
+	($char) => $char?.knowledgeSkills.some(s => s.category === 'Language' && s.isNative) ?? false
 );
 
 /** Attribute validation state for BP build limits. */
