@@ -21,6 +21,7 @@
 	} from '$stores';
 	import { user } from '$stores/user';
 	import { gameData } from '$stores/gamedata';
+	import type { BuildMethod } from '$types';
 	import MetatypeSelector from '$lib/components/wizard/MetatypeSelector.svelte';
 	import AttributeAllocator from '$lib/components/wizard/AttributeAllocator.svelte';
 	import QualitySelector from '$lib/components/wizard/QualitySelector.svelte';
@@ -30,6 +31,7 @@
 	import EquipmentSelector from '$lib/components/wizard/EquipmentSelector.svelte';
 	import ContactsEditor from '$lib/components/wizard/ContactsEditor.svelte';
 	import FinalizeCharacter from '$lib/components/wizard/FinalizeCharacter.svelte';
+	import BuildMethodModal from '$lib/components/wizard/BuildMethodModal.svelte';
 
 	/** Saving state. */
 	let saving = false;
@@ -38,6 +40,29 @@
 	/** Custom build points editing state. */
 	let isEditingBP = false;
 	let customBPInput = '';
+
+	/** Build method modal state. */
+	let showBuildMethodModal = false;
+	let pendingBuildMethod: BuildMethod = 'bp';
+
+	/** Open build method confirmation modal. */
+	function openBuildMethodModal(method: BuildMethod): void {
+		pendingBuildMethod = method;
+		showBuildMethodModal = true;
+	}
+
+	/** Handle build method confirmation from modal. */
+	function handleBuildMethodConfirm(event: CustomEvent<{ method: BuildMethod; points: number }>): void {
+		const { method, points } = event.detail;
+		setBuildMethod(method);
+		setCustomBuildPoints(points);
+		showBuildMethodModal = false;
+	}
+
+	/** Handle build method modal cancel. */
+	function handleBuildMethodCancel(): void {
+		showBuildMethodModal = false;
+	}
 
 	/** Initialize new character on mount. */
 	onMount(() => {
@@ -266,7 +291,7 @@
 							{$character?.buildMethod === 'bp'
 								? 'bg-primary-main/10 border-2 border-primary-main shadow-lg shadow-primary-main/20'
 								: 'bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-primary-main/50'}"
-						on:click={() => setBuildMethod('bp')}
+						on:click={() => openBuildMethodModal('bp')}
 					>
 						<div class="flex items-center gap-3 mb-3">
 							<div class="w-12 h-12 rounded-full bg-primary-main/30 flex items-center justify-center">
@@ -295,7 +320,7 @@
 							{$character?.buildMethod === 'karma'
 								? 'bg-primary-main/10 border-2 border-primary-main shadow-lg shadow-primary-main/20'
 								: 'bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-primary-main/50'}"
-						on:click={() => setBuildMethod('karma')}
+						on:click={() => openBuildMethodModal('karma')}
 					>
 						<div class="flex items-center gap-3 mb-3">
 							<div class="w-12 h-12 rounded-full bg-secondary-main/30 flex items-center justify-center">
@@ -408,6 +433,14 @@
 		</span>
 	</div>
 </main>
+
+<!-- Build Method Confirmation Modal -->
+<BuildMethodModal
+	bind:open={showBuildMethodModal}
+	method={pendingBuildMethod}
+	on:confirm={handleBuildMethodConfirm}
+	on:cancel={handleBuildMethodCancel}
+/>
 
 <style>
 	/* Fixed side navigation buttons */

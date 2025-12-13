@@ -2,7 +2,7 @@
  * Quality Grouping Utilities
  * ==========================
  * Groups related qualities (variants and grades) into single selectable items.
- * 
+ *
  * Patterns detected:
  * - Parentheses variants: "Animal Pelage (Quills)", "Animal Pelage (Camo Fur)"
  * - Grade variants: "Changeling (Class I SURGE)", "Changeling (Class II SURGE)"
@@ -11,6 +11,124 @@
  */
 
 import type { GameQuality } from '$stores/gamedata';
+
+/**
+ * Metatype restrictions for Infected qualities.
+ * Based on HMHVV strain compatibility from SR4 Runner's Companion.
+ *
+ * HMHVV-I (Vampire strain): Metatype-specific variants
+ * HMHVV-II (Ghoul strain): Any metatype
+ * HMHVV-III (Loup-Garou strain): Typically Human/Elf
+ * Krieger strain (Wendigo): Human only
+ */
+export const INFECTED_METATYPE_RESTRICTIONS: Record<string, string[]> = {
+    // HMHVV-I variants (Vampire strain) - metatype specific
+    'Infected: Vampire': ['Human'],
+    'Infected: Nosferatu': ['Human'],
+    'Infected: Banshee': ['Elf'],
+    'Infected: Goblin': ['Dwarf', 'Ork'],
+    'Infected: Dzoo-Noo-Qua': ['Troll'],
+    'Infected: Fomóraig': ['Troll'],
+
+    // HMHVV-II variants (Ghoul strain) - any metatype
+    'Infected: Ghoul': [], // Empty = any metatype
+    'Infected: Gaki': [], // Regional ghoul variant
+    'Infected: Penanggalan': [], // Regional ghoul variant
+    'Infected: Sasobonsam': [], // Regional ghoul variant
+    'Infected: Busaw': [], // Regional ghoul variant
+    'Infected: Abat': [], // Regional ghoul variant
+
+    // HMHVV-III variants (Loup-Garou strain)
+    'Infected: Loup-Garou': ['Human'],
+    'Infected: Amalanhig': ['Human'], // Regional variant
+    'Infected: Sukuyan': ['Human'], // Regional variant
+
+    // Krieger strain
+    'Infected: Wendigo': ['Human'],
+
+    // Bandersnatch - Elf only (from Running Wild)
+    'Infected: Bandersnatch': ['Elf']
+};
+
+/**
+ * Base metatype mapping for metavariants.
+ * Maps metavariant names to their base metatype.
+ */
+const METAVARIANT_BASE_MAP: Record<string, string> = {
+    // Dwarf metavariants
+    'Gnome': 'Dwarf',
+    'Haruman': 'Dwarf',
+    'Koborokuru': 'Dwarf',
+    'Menehune': 'Dwarf',
+
+    // Elf metavariants
+    'Dryad': 'Elf',
+    'Night One': 'Elf',
+    'Wakyambi': 'Elf',
+    'Xapiri Thëpë': 'Elf',
+
+    // Ork metavariants
+    'Hobgoblin': 'Ork',
+    'Ogre': 'Ork',
+    'Oni': 'Ork',
+    'Satyr': 'Ork',
+
+    // Troll metavariants
+    'Cyclops': 'Troll',
+    'Fomori': 'Troll',
+    'Giant': 'Troll',
+    'Minotaur': 'Troll',
+
+    // Human metavariants
+    'Nartaki': 'Human'
+};
+
+/**
+ * Get the base metatype for a given metatype/metavariant.
+ * Returns the metatype itself if it's already a base type.
+ */
+export function getBaseMetatype(metatype: string): string {
+    return METAVARIANT_BASE_MAP[metatype] ?? metatype;
+}
+
+/**
+ * Check if a quality is available for a given metatype.
+ * Returns true if:
+ * - The quality has no metatype restrictions
+ * - The quality's restrictions include the character's base metatype
+ */
+export function isQualityAvailableForMetatype(qualityName: string, metatype: string): boolean {
+    const restrictions = INFECTED_METATYPE_RESTRICTIONS[qualityName];
+
+    // Not an infected quality or no restrictions defined = available
+    if (restrictions === undefined) {
+        return true;
+    }
+
+    // Empty array = any metatype allowed
+    if (restrictions.length === 0) {
+        return true;
+    }
+
+    // Check if character's base metatype is in allowed list
+    const baseMetatype = getBaseMetatype(metatype);
+    return restrictions.includes(baseMetatype);
+}
+
+/**
+ * Filter qualities based on metatype restrictions.
+ * Removes qualities that are not available for the given metatype.
+ */
+export function filterQualitiesByMetatype(
+    qualities: readonly GameQuality[],
+    metatype: string | undefined
+): GameQuality[] {
+    if (!metatype) {
+        return [...qualities];
+    }
+
+    return qualities.filter(q => isQualityAvailableForMetatype(q.name, metatype));
+}
 
 /** A grouped quality that may contain variants. */
 export interface GroupedQuality {

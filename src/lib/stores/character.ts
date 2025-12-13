@@ -58,29 +58,50 @@ const MAX_BP = 400;
 const KARMA_BUILD_STARTING = 750;
 
 /**
- * Karma Build costs per Runner's Companion.
- * Different from career mode advancement costs.
+ * Karma Build costs for CHARACTER CREATION per Runner's Companion.
+ * These are used when creating a character with the Karma Build method.
+ * Different from career mode advancement costs (see KARMA_COSTS).
  */
 export const KARMA_BUILD_COSTS = {
-	/** Attribute: new rating × 5 */
-	ATTRIBUTE_MULTIPLIER: 5,
+	/* Attributes */
+	/** Attribute: new rating × 3 */
+	ATTRIBUTE_MULTIPLIER: 3,
+
+	/* Skills */
 	/** Active Skill (new): 4 karma */
 	NEW_SKILL: 4,
 	/** Active Skill (improve): new rating × 2 */
 	SKILL_MULTIPLIER: 2,
+	/** Specialization: 2 karma */
+	SPECIALIZATION: 2,
 	/** Skill Group (new): 10 karma */
 	NEW_SKILL_GROUP: 10,
 	/** Skill Group (improve): new rating × 5 */
 	SKILL_GROUP_MULTIPLIER: 5,
+	/** Knowledge Skill (new): 2 karma */
+	NEW_KNOWLEDGE_SKILL: 2,
+	/** Knowledge Skill (improve): new rating × 1 */
+	KNOWLEDGE_SKILL_MULTIPLIER: 1,
+
+	/* Magic */
+	/** Spell: 5 karma */
+	SPELL: 5,
+	/** Complex Form (new): 2 karma */
+	COMPLEX_FORM: 2,
+	/** Complex Form (improve): new rating × 1 */
+	COMPLEX_FORM_MULTIPLIER: 1,
+
+	/* Qualities & Contacts */
 	/** Quality: BP cost × 2 */
 	QUALITY_MULTIPLIER: 2,
-	/** Spell/Complex Form: 5 karma */
-	SPELL: 5,
-	COMPLEX_FORM: 5,
-	/** Contact: (Loyalty + Connection) karma */
-	CONTACT_MULTIPLIER: 1,
-	/** Resources: 1 karma = 2,500¥ (lower rate than BP) */
+	/** Contact: (Loyalty + Connection) × 2 */
+	CONTACT_MULTIPLIER: 2,
+
+	/* Resources */
+	/** Resources: 1 karma = 2,500¥ */
 	NUYEN_PER_KARMA: 2500,
+
+	/* Metatype */
 	/** Metatype costs in karma (BP × 2) */
 	METATYPE_MULTIPLIER: 2
 } as const;
@@ -2799,23 +2820,73 @@ export function disableAutoSave(): void {
  * ======================================== */
 
 /**
- * Karma costs for various improvements in SR4.
+ * Karma costs for CAREER MODE advancement in SR4.
+ * These are the standard advancement costs for improving a character post-creation.
+ * Different from creation costs (see KARMA_BUILD_COSTS).
  */
 export const KARMA_COSTS = {
+	/* Skills */
 	NEW_SKILL: 4,
 	IMPROVE_SKILL_MULTIPLIER: 2, /* New rating × 2 */
+	NEW_SPECIALIZATION: 2,
 	NEW_SKILL_GROUP: 10,
 	IMPROVE_SKILL_GROUP_MULTIPLIER: 5, /* New rating × 5 */
 	NEW_KNOWLEDGE_SKILL: 2,
 	IMPROVE_KNOWLEDGE_SKILL_MULTIPLIER: 1, /* New rating × 1 */
-	IMPROVE_ATTRIBUTE_MULTIPLIER: 5, /* New rating × 5 */
+
+	/* Attributes */
+	IMPROVE_ATTRIBUTE_MULTIPLIER: 5, /* New rating × 5 (standard SR4) */
+
+	/* Magic */
 	NEW_SPELL: 5,
 	NEW_COMPLEX_FORM: 5,
+	IMPROVE_COMPLEX_FORM_MULTIPLIER: 1, /* New rating × 1 */
 	INITIATION_BASE: 10,
 	INITIATION_MULTIPLIER: 3, /* 10 + (grade × 3) */
 	SUBMERSION_BASE: 10,
 	SUBMERSION_MULTIPLIER: 3, /* 10 + (grade × 3) */
-	QUALITY_MULTIPLIER: 2 /* BP × 2 to add/remove */
+
+	/* Qualities & Contacts */
+	QUALITY_MULTIPLIER: 2, /* BP × 2 to add/remove */
+	CONTACT_MULTIPLIER: 2, /* (Connection + Loyalty) × 2 */
+
+	/* Resources */
+	NUYEN_PER_KARMA: 2500 /* 1 karma = 2,500¥ */
+} as const;
+
+/**
+ * Focus bonding karma costs by focus type.
+ * Formula: Force × Multiplier
+ */
+export const FOCUS_BONDING_COSTS = {
+	/* Enchanting Foci */
+	ANCHORING: 3,
+	COUNTERSPELLING: 2,
+	BANISHING: 2,
+	DISENCHANTING: 3,
+
+	/* Magical Foci */
+	POWER: 6,
+	SHIELDING: 4,
+	SPELL: 3,
+	SPELL_CATEGORY: 4,
+	SPELLCASTING: 2,
+	SUSTAINING: 2,
+
+	/* Metamagic Foci */
+	CENTERING: 3,
+	CENTERING_FLEXIBLE_SIGNATURE: 4,
+	MASKING: 5,
+
+	/* Qi Foci */
+	POWER_QI: 2, /* Per power point */
+
+	/* Spirit Foci */
+	SUMMONING: 3,
+	BINDING: 2,
+
+	/* Weapon Foci */
+	WEAPON: 3
 } as const;
 
 /**

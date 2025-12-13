@@ -8,7 +8,7 @@
 	import { character, addQuality, removeQuality, addQualityAgain } from '$stores/character';
 	import Tooltip from '$lib/components/ui/Tooltip.svelte';
 	import { formatQualityBonus, qualityMatchesSearch, type FormattedBonus } from '$lib/utils/qualities';
-	import { groupQualities, formatBPRange, type GroupedQuality } from '$lib/utils/qualityGrouping';
+	import { groupQualities, formatBPRange, filterQualitiesByMetatype, type GroupedQuality } from '$lib/utils/qualityGrouping';
 	import { ATTRIBUTE_NAMES, type AttributeCode } from '$lib/types/attributes';
 
 	/** Current tab - positive or negative qualities. */
@@ -298,11 +298,18 @@
 		addQualityAgain(baseName, quality.category, quality.bp);
 	}
 
+	// Get character's metatype for filtering
+	$: characterMetatype = $character?.identity.metatype;
+
+	// Filter qualities by metatype restrictions (e.g., Infected qualities)
+	$: metatypeFilteredPositive = filterQualitiesByMetatype($positiveQualities ?? [], characterMetatype);
+	$: metatypeFilteredNegative = filterQualitiesByMetatype($negativeQualities ?? [], characterMetatype);
+
 	// Group qualities
-	$: groupedPositive = groupQualities($positiveQualities ?? []);
-	$: groupedNegative = groupQualities($negativeQualities ?? []);
-	
-	// Filter grouped qualities
+	$: groupedPositive = groupQualities(metatypeFilteredPositive);
+	$: groupedNegative = groupQualities(metatypeFilteredNegative);
+
+	// Filter grouped qualities by search query
 	$: filteredPositive = filterGroupedQualities(groupedPositive, searchQuery);
 	$: filteredNegative = filterGroupedQualities(groupedNegative, searchQuery);
 	$: displayGroups = activeTab === 'positive' ? filteredPositive : filteredNegative;
@@ -572,8 +579,8 @@
 			on:click={closeVariantSelector}
 		>
 			<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-			<div 
-				class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto"
+			<div
+				class="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[80vh] overflow-y-auto"
 				on:click|stopPropagation
 			>
 				<div class="p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white">
@@ -585,8 +592,9 @@
 						<span class="material-icons text-text-muted">close</span>
 					</button>
 				</div>
-				<div class="p-4 space-y-2">
+				<div class="p-4">
 					<p class="text-text-secondary text-sm mb-4">Select a variant:</p>
+					<div class="grid grid-cols-2 gap-2">
 					{#each openVariantGroup.variants as variant}
 						{@const variantSelected = isSelected(variant.name, $character)}
 						{@const variantBonuses = getQualityBonuses(variant)}
@@ -622,6 +630,7 @@
 							{/if}
 						</button>
 					{/each}
+					</div>
 				</div>
 			</div>
 		</div>
