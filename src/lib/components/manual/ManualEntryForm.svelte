@@ -42,7 +42,10 @@
 					<p class="text-text-muted text-xs">Name, metatype, and personal details</p>
 				</div>
 			</div>
-			<span class="material-icons text-text-muted transition-transform" class:rotate-180={expandedSections.identity}>
+			<span
+				class="material-icons text-text-muted transition-transform"
+				class:rotate-180={expandedSections.identity}
+			>
 				expand_more
 			</span>
 		</button>
@@ -66,7 +69,10 @@
 					<p class="text-text-muted text-xs">BOD, AGI, REA, STR, CHA, INT, LOG, WIL, Edge</p>
 				</div>
 			</div>
-			<span class="material-icons text-text-muted transition-transform" class:rotate-180={expandedSections.attributes}>
+			<span
+				class="material-icons text-text-muted transition-transform"
+				class:rotate-180={expandedSections.attributes}
+			>
 				expand_more
 			</span>
 		</button>
@@ -90,7 +96,10 @@
 					<p class="text-text-muted text-xs">Active skills with ratings and specializations</p>
 				</div>
 			</div>
-			<span class="material-icons text-text-muted transition-transform" class:rotate-180={expandedSections.skills}>
+			<span
+				class="material-icons text-text-muted transition-transform"
+				class:rotate-180={expandedSections.skills}
+			>
 				expand_more
 			</span>
 		</button>
@@ -114,7 +123,10 @@
 					<p class="text-text-muted text-xs">Positive and negative qualities</p>
 				</div>
 			</div>
-			<span class="material-icons text-text-muted transition-transform" class:rotate-180={expandedSections.qualities}>
+			<span
+				class="material-icons text-text-muted transition-transform"
+				class:rotate-180={expandedSections.qualities}
+			>
 				expand_more
 			</span>
 		</button>
@@ -138,7 +150,10 @@
 					<p class="text-text-muted text-xs">NPCs with loyalty and connection ratings</p>
 				</div>
 			</div>
-			<span class="material-icons text-text-muted transition-transform" class:rotate-180={expandedSections.contacts}>
+			<span
+				class="material-icons text-text-muted transition-transform"
+				class:rotate-180={expandedSections.contacts}
+			>
 				expand_more
 			</span>
 		</button>

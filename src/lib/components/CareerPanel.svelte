@@ -1,5 +1,13 @@
 <script lang="ts">
-	import { character, isCareerMode, getExpenseLog, awardKarma, awardNuyen, spendNuyen, KARMA_COSTS } from '$stores/character';
+	import {
+		character,
+		isCareerMode,
+		getExpenseLog,
+		awardKarma,
+		awardNuyen,
+		spendNuyen,
+		KARMA_COSTS
+	} from '$stores/character';
 	import type { ExpenseEntry } from '$types';
 
 	/** Whether the panel is expanded. */
@@ -168,7 +176,9 @@
 			<div class="p-4">
 				<!-- Error Message -->
 				{#if error}
-					<div class="mb-4 p-3 bg-error-main/20 border border-error-main rounded text-error-main text-sm">
+					<div
+						class="mb-4 p-3 bg-error-main/20 border border-error-main rounded text-error-main text-sm"
+					>
 						{error}
 					</div>
 				{/if}
@@ -187,11 +197,15 @@
 								<div class="text-xs text-text-muted">Total Earned</div>
 							</div>
 							<div class="cw-panel p-3 text-center">
-								<div class="text-2xl font-bold text-secondary-dark">{formatNuyen($character.nuyen)}</div>
+								<div class="text-2xl font-bold text-secondary-dark">
+									{formatNuyen($character.nuyen)}
+								</div>
 								<div class="text-xs text-text-muted">Nuyen</div>
 							</div>
 							<div class="cw-panel p-3 text-center">
-								<div class="text-2xl font-bold text-text-secondary">{$character.reputation.streetCred}</div>
+								<div class="text-2xl font-bold text-text-secondary">
+									{$character.reputation.streetCred}
+								</div>
 								<div class="text-xs text-text-muted">Street Cred</div>
 							</div>
 						</div>
@@ -213,9 +227,7 @@
 									placeholder="Reason (e.g., Session 5)"
 									bind:value={karmaReason}
 								/>
-								<button class="cw-btn cw-btn-primary" on:click={handleAwardKarma}>
-									Award
-								</button>
+								<button class="cw-btn cw-btn-primary" on:click={handleAwardKarma}> Award </button>
 							</div>
 						</div>
 
@@ -239,9 +251,7 @@
 								<button class="cw-btn text-success-main" on:click={handleAwardNuyen}>
 									+Award
 								</button>
-								<button class="cw-btn text-error-main" on:click={handleSpendNuyen}>
-									-Spend
-								</button>
+								<button class="cw-btn text-error-main" on:click={handleSpendNuyen}> -Spend </button>
 							</div>
 						</div>
 					</div>
@@ -250,9 +260,7 @@
 				<!-- Karma Costs Tab -->
 				{#if activeTab === 'skills'}
 					<div class="space-y-4">
-						<p class="text-sm text-text-secondary">
-							Reference table for karma costs in SR4.
-						</p>
+						<p class="text-sm text-text-secondary">Reference table for karma costs in SR4.</p>
 						<div class="grid gap-2 text-sm">
 							<div class="flex justify-between py-1 border-b border-border">
 								<span class="text-text-secondary">New Active Skill (rating 1)</span>
@@ -260,27 +268,39 @@
 							</div>
 							<div class="flex justify-between py-1 border-b border-border">
 								<span class="text-text-secondary">Improve Active Skill</span>
-								<span class="text-text-primary font-medium">New Rating x {KARMA_COSTS.IMPROVE_SKILL_MULTIPLIER} karma</span>
+								<span class="text-text-primary font-medium"
+									>New Rating x {KARMA_COSTS.IMPROVE_SKILL_MULTIPLIER} karma</span
+								>
 							</div>
 							<div class="flex justify-between py-1 border-b border-border">
 								<span class="text-text-secondary">New Skill Group (rating 1)</span>
-								<span class="text-text-primary font-medium">{KARMA_COSTS.NEW_SKILL_GROUP} karma</span>
+								<span class="text-text-primary font-medium"
+									>{KARMA_COSTS.NEW_SKILL_GROUP} karma</span
+								>
 							</div>
 							<div class="flex justify-between py-1 border-b border-border">
 								<span class="text-text-secondary">Improve Skill Group</span>
-								<span class="text-text-primary font-medium">New Rating x {KARMA_COSTS.IMPROVE_SKILL_GROUP_MULTIPLIER} karma</span>
+								<span class="text-text-primary font-medium"
+									>New Rating x {KARMA_COSTS.IMPROVE_SKILL_GROUP_MULTIPLIER} karma</span
+								>
 							</div>
 							<div class="flex justify-between py-1 border-b border-border">
 								<span class="text-text-secondary">New Knowledge Skill</span>
-								<span class="text-text-primary font-medium">{KARMA_COSTS.NEW_KNOWLEDGE_SKILL} karma</span>
+								<span class="text-text-primary font-medium"
+									>{KARMA_COSTS.NEW_KNOWLEDGE_SKILL} karma</span
+								>
 							</div>
 							<div class="flex justify-between py-1 border-b border-border">
 								<span class="text-text-secondary">Improve Knowledge Skill</span>
-								<span class="text-text-primary font-medium">New Rating x {KARMA_COSTS.IMPROVE_KNOWLEDGE_SKILL_MULTIPLIER} karma</span>
+								<span class="text-text-primary font-medium"
+									>New Rating x {KARMA_COSTS.IMPROVE_KNOWLEDGE_SKILL_MULTIPLIER} karma</span
+								>
 							</div>
 							<div class="flex justify-between py-1 border-b border-border">
 								<span class="text-text-secondary">Improve Attribute</span>
-								<span class="text-text-primary font-medium">New Rating x {KARMA_COSTS.IMPROVE_ATTRIBUTE_MULTIPLIER} karma</span>
+								<span class="text-text-primary font-medium"
+									>New Rating x {KARMA_COSTS.IMPROVE_ATTRIBUTE_MULTIPLIER} karma</span
+								>
 							</div>
 							<div class="flex justify-between py-1 border-b border-border">
 								<span class="text-text-secondary">Learn Spell</span>
@@ -288,15 +308,22 @@
 							</div>
 							<div class="flex justify-between py-1 border-b border-border">
 								<span class="text-text-secondary">Learn Complex Form</span>
-								<span class="text-text-primary font-medium">{KARMA_COSTS.NEW_COMPLEX_FORM} karma</span>
+								<span class="text-text-primary font-medium"
+									>{KARMA_COSTS.NEW_COMPLEX_FORM} karma</span
+								>
 							</div>
 							<div class="flex justify-between py-1 border-b border-border">
 								<span class="text-text-secondary">Initiation</span>
-								<span class="text-text-primary font-medium">{KARMA_COSTS.INITIATION_BASE} + (Grade x {KARMA_COSTS.INITIATION_MULTIPLIER}) karma</span>
+								<span class="text-text-primary font-medium"
+									>{KARMA_COSTS.INITIATION_BASE} + (Grade x {KARMA_COSTS.INITIATION_MULTIPLIER})
+									karma</span
+								>
 							</div>
 							<div class="flex justify-between py-1">
 								<span class="text-text-secondary">Add/Remove Quality</span>
-								<span class="text-text-primary font-medium">BP x {KARMA_COSTS.QUALITY_MULTIPLIER} karma</span>
+								<span class="text-text-primary font-medium"
+									>BP x {KARMA_COSTS.QUALITY_MULTIPLIER} karma</span
+								>
 							</div>
 						</div>
 					</div>
@@ -310,7 +337,9 @@
 						{:else}
 							<div class="max-h-64 overflow-y-auto">
 								{#each [...expenseLog].reverse() as entry (entry.id)}
-									<div class="flex items-center justify-between py-2 border-b border-border text-sm">
+									<div
+										class="flex items-center justify-between py-2 border-b border-border text-sm"
+									>
 										<div>
 											<span class="text-text-muted">{formatDate(entry.date)}</span>
 											<span class="mx-2 text-border">|</span>

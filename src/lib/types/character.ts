@@ -65,6 +65,8 @@ export interface CharacterQuality {
 	readonly selectedSkill?: string;
 	/** Selected attribute for qualities with selectattribute bonus (e.g., Exceptional Attribute). */
 	readonly selectedAttribute?: string;
+	/** Custom description for qualities that require user input (e.g., "gluten" for Allergy). */
+	readonly customDescription?: string;
 }
 
 /**
@@ -101,6 +103,7 @@ export interface BuildPointAllocation {
 	readonly attributes: number;
 	readonly skills: number;
 	readonly skillGroups: number;
+	readonly specializations: number;
 	readonly knowledgeSkills: number;
 	readonly qualities: number;
 	readonly spells: number;
@@ -354,6 +357,7 @@ export const DEFAULT_BP_ALLOCATION: BuildPointAllocation = {
 	attributes: 0,
 	skills: 0,
 	skillGroups: 0,
+	specializations: 0,
 	knowledgeSkills: 0,
 	qualities: 0,
 	spells: 0,

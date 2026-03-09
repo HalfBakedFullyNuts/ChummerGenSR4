@@ -6,8 +6,9 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import {
-	getFirestore,
-	enableIndexedDbPersistence,
+	initializeFirestore,
+	persistentLocalCache,
+	persistentMultipleTabManager,
 	type Firestore
 } from 'firebase/firestore';
 
@@ -60,12 +61,12 @@ export function initializeFirebase(): InitResult {
 	try {
 		app = initializeApp(firebaseConfig);
 		auth = getAuth(app);
-		db = getFirestore(app);
 
-		/* Enable offline persistence for Firestore */
-		enableIndexedDbPersistence(db).catch((err: Error) => {
-			/* Ignore persistence errors - app still works without it */
-			console.warn('Firestore persistence unavailable:', err.message);
+		/* Initialize Firestore with persistent local cache for offline support */
+		db = initializeFirestore(app, {
+			localCache: persistentLocalCache({
+				tabManager: persistentMultipleTabManager()
+			})
 		});
 
 		initialized = true;

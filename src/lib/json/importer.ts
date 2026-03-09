@@ -55,10 +55,7 @@ function validateCharacter(data: unknown): string | null {
  * Deep merge character data with defaults.
  * Ensures all required fields exist even if not in import.
  */
-function mergeWithDefaults(
-	data: Record<string, unknown>,
-	userId: string
-): Character {
+function mergeWithDefaults(data: Record<string, unknown>, userId: string): Character {
 	const id = generateId();
 	const base = createEmptyCharacter(id, userId, 'bp');
 	const now = new Date().toISOString();
@@ -98,13 +95,13 @@ function mergeWithDefaults(
 		return defaultVal;
 	};
 
-	const identity = data.identity as Record<string, unknown> ?? {};
-	const background = data.background as Record<string, unknown> ?? {};
-	const settings = data.settings as Record<string, unknown> ?? {};
-	const buildPointsSpent = data.buildPointsSpent as Record<string, unknown> ?? {};
-	const reputation = data.reputation as Record<string, unknown> ?? {};
-	const condition = data.condition as Record<string, unknown> ?? {};
-	const equipment = data.equipment as Record<string, unknown> ?? {};
+	const identity = (data.identity as Record<string, unknown>) ?? {};
+	const background = (data.background as Record<string, unknown>) ?? {};
+	const settings = (data.settings as Record<string, unknown>) ?? {};
+	const buildPointsSpent = (data.buildPointsSpent as Record<string, unknown>) ?? {};
+	const reputation = (data.reputation as Record<string, unknown>) ?? {};
+	const condition = (data.condition as Record<string, unknown>) ?? {};
+	const equipment = (data.equipment as Record<string, unknown>) ?? {};
 
 	return {
 		id,
@@ -114,7 +111,7 @@ function mergeWithDefaults(
 			alias: getStr(identity, 'alias', ''),
 			playerName: getStr(identity, 'playerName', ''),
 			metatype: getStr(identity, 'metatype', ''),
-			metavariant: identity.metavariant as string | null ?? null,
+			metavariant: (identity.metavariant as string | null) ?? null,
 			sex: getStr(identity, 'sex', ''),
 			age: getStr(identity, 'age', ''),
 			height: getStr(identity, 'height', ''),
@@ -137,6 +134,7 @@ function mergeWithDefaults(
 			attributes: getNum(buildPointsSpent, 'attributes', 0),
 			skills: getNum(buildPointsSpent, 'skills', 0),
 			skillGroups: getNum(buildPointsSpent, 'skillGroups', 0),
+			specializations: getNum(buildPointsSpent, 'specializations', 0),
 			knowledgeSkills: getNum(buildPointsSpent, 'knowledgeSkills', 0),
 			qualities: getNum(buildPointsSpent, 'qualities', 0),
 			spells: getNum(buildPointsSpent, 'spells', 0),
@@ -153,8 +151,8 @@ function mergeWithDefaults(
 		knowledgeSkills: getArr(data, 'knowledgeSkills'),
 		knowledgeSkillPoints: getNum(data, 'knowledgeSkillPoints', 0),
 		qualities: getArr(data, 'qualities'),
-		magic: data.magic as Character['magic'] ?? null,
-		resonance: data.resonance as Character['resonance'] ?? null,
+		magic: (data.magic as Character['magic']) ?? null,
+		resonance: (data.resonance as Character['resonance']) ?? null,
 		contacts: getArr(data, 'contacts'),
 		equipment: {
 			weapons: getArr(equipment, 'weapons'),
@@ -163,7 +161,7 @@ function mergeWithDefaults(
 			bioware: getArr(equipment, 'bioware'),
 			gear: getArr(equipment, 'gear'),
 			vehicles: getArr(equipment, 'vehicles'),
-			lifestyle: equipment.lifestyle as Character['equipment']['lifestyle'] ?? null,
+			lifestyle: (equipment.lifestyle as Character['equipment']['lifestyle']) ?? null,
 			martialArts: getArr(equipment, 'martialArts')
 		},
 		nuyen: getNum(data, 'nuyen', 0),

@@ -58,6 +58,7 @@ npm run test:coverage  # With coverage report
 ## SR4 Rules Reference
 
 ### Build Points (Standard)
+
 - Starting BP: 400
 - Metatype: 0 (Human) to 40+ (other metatypes)
 - Attributes: 10 BP per point above racial minimum
@@ -72,24 +73,26 @@ npm run test:coverage  # With coverage report
 - Resources: 0-50 BP (see conversion table)
 
 ### BP to Nuyen Conversion
-| BP | Nuyen |
-|----|-------|
-| 0 | 0 |
-| 5 | 20,000 |
-| 10 | 50,000 |
-| 20 | 90,000 |
-| 30 | 150,000 |
-| 40 | 225,000 |
-| 50 | 275,000 |
+
+| BP  | Nuyen   |
+| --- | ------- |
+| 0   | 0       |
+| 5   | 20,000  |
+| 10  | 50,000  |
+| 20  | 90,000  |
+| 30  | 150,000 |
+| 40  | 225,000 |
+| 50  | 275,000 |
 
 ### Cyberware Grades
-| Grade | Essence | Cost | Avail |
-|-------|---------|------|-------|
-| Standard | 1.0x | 1x | +0 |
-| Alphaware | 0.8x | 2x | +0 |
-| Betaware | 0.7x | 4x | +0 |
-| Deltaware | 0.5x | 10x | +0 |
-| Used | 1.2x | 0.5x | -1 |
+
+| Grade     | Essence | Cost | Avail |
+| --------- | ------- | ---- | ----- |
+| Standard  | 1.0x    | 1x   | +0    |
+| Alphaware | 0.8x    | 2x   | +0    |
+| Betaware  | 0.7x    | 4x   | +0    |
+| Deltaware | 0.5x    | 10x  | +0    |
+| Used      | 1.2x    | 0.5x | -1    |
 
 ## Code Style
 

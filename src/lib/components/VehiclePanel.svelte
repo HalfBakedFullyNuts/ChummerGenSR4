@@ -99,7 +99,7 @@
 	/** Toggle terrain modifier. */
 	function toggleTerrain(key: string): void {
 		if (selectedTerrain.includes(key)) {
-			selectedTerrain = selectedTerrain.filter(t => t !== key);
+			selectedTerrain = selectedTerrain.filter((t) => t !== key);
 		} else {
 			selectedTerrain = [...selectedTerrain, key];
 		}
@@ -175,9 +175,9 @@
 					type="button"
 					class="text-xs py-1 px-2 rounded transition-colors
 						{selectedSpeed === key
-							? 'bg-primary-main/20 text-primary-dark border border-primary-main/50'
-							: 'bg-surface-variant text-text-secondary hover:bg-surface'}"
-					on:click={() => selectedSpeed = key}
+						? 'bg-primary-main/20 text-primary-dark border border-primary-main/50'
+						: 'bg-surface-variant text-text-secondary hover:bg-surface'}"
+					on:click={() => (selectedSpeed = key)}
 					title={speed.description}
 				>
 					{speed.name}
@@ -198,8 +198,8 @@
 					type="button"
 					class="text-xs py-1 px-2 rounded transition-colors
 						{selectedTerrain.includes(key)
-							? 'bg-warning-main/20 text-warning-main border border-warning-main/50'
-							: 'bg-surface-variant text-text-secondary hover:bg-surface'}"
+						? 'bg-warning-main/20 text-warning-main border border-warning-main/50'
+						: 'bg-surface-variant text-text-secondary hover:bg-surface'}"
 					on:click={() => toggleTerrain(key)}
 				>
 					{terrain.name}
@@ -264,11 +264,7 @@
 					/>
 					<span class="text-text-muted">Sensor Targeting</span>
 				</label>
-				<button
-					type="button"
-					class="cw-btn text-xs w-full"
-					on:click={handleGunneryRoll}
-				>
+				<button type="button" class="cw-btn text-xs w-full" on:click={handleGunneryRoll}>
 					Fire Weapon
 				</button>
 			</div>
@@ -279,14 +275,8 @@
 					<span class="text-sm text-text-secondary">Ram</span>
 					<span class="font-mono text-error-main">{rammingDamage}P</span>
 				</div>
-				<div class="text-xs text-text-muted mb-2">
-					Both vehicles take damage
-				</div>
-				<button
-					type="button"
-					class="cw-btn text-xs w-full"
-					on:click={handleRamRoll}
-				>
+				<div class="text-xs text-text-muted mb-2">Both vehicles take damage</div>
+				<button type="button" class="cw-btn text-xs w-full" on:click={handleRamRoll}>
 					Ram Target
 				</button>
 			</div>
@@ -294,7 +284,9 @@
 
 		<!-- Crash Info -->
 		<div class="mt-3 p-2 bg-error-main/10 rounded text-sm">
-			<span class="text-error-main">Crash Damage at {VEHICLE_SPEED_MODIFIERS[selectedSpeed]?.name || 'current'} speed:</span>
+			<span class="text-error-main"
+				>Crash Damage at {VEHICLE_SPEED_MODIFIERS[selectedSpeed]?.name || 'current'} speed:</span
+			>
 			<span class="font-mono ml-2">{crashDamage}P</span>
 		</div>
 	</div>

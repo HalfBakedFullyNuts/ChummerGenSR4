@@ -29,14 +29,11 @@
 <div class="container mx-auto px-4 py-8 max-w-5xl">
 	<!-- Hero Section -->
 	<section class="text-center mb-10">
-		<h1 class="text-3xl text-primary-dark font-bold mb-3 tracking-wider">
-			SHADOWRUN 4E
-		</h1>
-		<p class="text-text-secondary text-base mb-6">
-			Character Generator
-		</p>
+		<h1 class="text-3xl text-primary-dark font-bold mb-3 tracking-wider">SHADOWRUN 4E</h1>
+		<p class="text-text-secondary text-base mb-6">Character Generator</p>
 		<p class="text-text-muted text-sm max-w-xl mx-auto">
-			Create, manage, and share your Shadowrun 4th Edition characters with a modern web-based tool inspired by the classic Chummer desktop application.
+			Create, manage, and share your Shadowrun 4th Edition characters with a modern web-based tool
+			inspired by the classic Chummer desktop application.
 		</p>
 	</section>
 
@@ -96,9 +93,7 @@
 					My Characters
 				</h3>
 			</div>
-			<p class="text-text-muted text-sm">
-				View and manage your saved characters.
-			</p>
+			<p class="text-text-muted text-sm">View and manage your saved characters.</p>
 		</a>
 
 		<a href="/browse" class="cw-card p-4 group hover:border-info-dark transition-colors">

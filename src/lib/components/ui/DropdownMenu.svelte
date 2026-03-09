@@ -80,8 +80,12 @@
 	}
 
 	function handleClickOutside(event: MouseEvent): void {
-		if (menuRef && !menuRef.contains(event.target as Node) &&
-		    triggerRef && !triggerRef.contains(event.target as Node)) {
+		if (
+			menuRef &&
+			!menuRef.contains(event.target as Node) &&
+			triggerRef &&
+			!triggerRef.contains(event.target as Node)
+		) {
 			close();
 		}
 	}
@@ -194,7 +198,9 @@
 		min-width: 200px;
 		background: var(--cw-panel);
 		border: 1px solid var(--cw-border);
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 		z-index: 50;
 		border-radius: 0.25rem;
 		overflow: hidden;

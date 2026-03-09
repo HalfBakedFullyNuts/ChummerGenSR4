@@ -94,12 +94,33 @@
 	}
 
 	/** Sprite types list. */
-	const spriteTypesList: SpriteType[] = ['Courier', 'Crack', 'Data', 'Fault', 'Machine', 'Paladin', 'Probe'];
+	const spriteTypesList: SpriteType[] = [
+		'Courier',
+		'Crack',
+		'Data',
+		'Fault',
+		'Machine',
+		'Paladin',
+		'Probe'
+	];
 
 	/** Common complex forms. */
 	const complexForms = [
-		'Analyze', 'Armor', 'Attack', 'Browse', 'Command', 'Decrypt', 'Defuse',
-		'Edit', 'Encrypt', 'Exploit', 'Scan', 'Sniffer', 'Spoof', 'Stealth', 'Track'
+		'Analyze',
+		'Armor',
+		'Attack',
+		'Browse',
+		'Command',
+		'Decrypt',
+		'Defuse',
+		'Edit',
+		'Encrypt',
+		'Exploit',
+		'Scan',
+		'Sniffer',
+		'Spoof',
+		'Stealth',
+		'Track'
 	];
 </script>
 
@@ -138,11 +159,7 @@
 		<div class="grid grid-cols-2 gap-3 mb-3">
 			<div>
 				<label for="sprite-type" class="text-xs text-text-muted block mb-1">Sprite Type</label>
-				<select
-					id="sprite-type"
-					class="cw-input text-sm w-full"
-					bind:value={selectedSpriteType}
-				>
+				<select id="sprite-type" class="cw-input text-sm w-full" bind:value={selectedSpriteType}>
 					{#each spriteTypesList as spriteType}
 						<option value={spriteType}>{SPRITE_TYPES[spriteType].name}</option>
 					{/each}
@@ -167,7 +184,10 @@
 			<div class="text-xs text-text-muted mt-1">
 				Abilities:
 				{#each SPRITE_TYPES[selectedSpriteType].abilities as ability, i}
-					<span class="text-secondary-dark">{ability.name}</span>{i < SPRITE_TYPES[selectedSpriteType].abilities.length - 1 ? ', ' : ''}
+					<span class="text-secondary-dark">{ability.name}</span>{i <
+					SPRITE_TYPES[selectedSpriteType].abilities.length - 1
+						? ', '
+						: ''}
 				{/each}
 			</div>
 		</div>
@@ -179,23 +199,17 @@
 			</div>
 			<div>
 				<span class="text-xs text-text-muted">Sprite Resists</span>
-				<span class="font-mono text-warning-main ml-1">{calculateSpriteResistance(spriteRating)}d6</span>
+				<span class="font-mono text-warning-main ml-1"
+					>{calculateSpriteResistance(spriteRating)}d6</span
+				>
 			</div>
 		</div>
 
 		<div class="grid grid-cols-2 gap-2">
-			<button
-				type="button"
-				class="cw-btn text-xs"
-				on:click={handleCompiling}
-			>
+			<button type="button" class="cw-btn text-xs" on:click={handleCompiling}>
 				Compile Sprite
 			</button>
-			<button
-				type="button"
-				class="cw-btn text-xs"
-				on:click={handleRegistering}
-			>
+			<button type="button" class="cw-btn text-xs" on:click={handleRegistering}>
 				Register Sprite
 			</button>
 		</div>
@@ -217,11 +231,7 @@
 		<div class="grid grid-cols-2 gap-3 mb-3">
 			<div>
 				<label for="complex-form" class="text-xs text-text-muted block mb-1">Complex Form</label>
-				<select
-					id="complex-form"
-					class="cw-input text-sm w-full"
-					bind:value={formName}
-				>
+				<select id="complex-form" class="cw-input text-sm w-full" bind:value={formName}>
 					{#each complexForms as form}
 						<option value={form}>{form}</option>
 					{/each}
@@ -248,16 +258,13 @@
 			<div>
 				<span class="text-xs text-text-muted">Fading Value</span>
 				<span class="font-mono {fadingIsPhysical ? 'text-error-main' : 'text-warning-main'} ml-1">
-					{currentFading} {fadingIsPhysical ? '(P)' : '(S)'}
+					{currentFading}
+					{fadingIsPhysical ? '(P)' : '(S)'}
 				</span>
 			</div>
 		</div>
 
-		<button
-			type="button"
-			class="cw-btn text-xs w-full"
-			on:click={handleThreading}
-		>
+		<button type="button" class="cw-btn text-xs w-full" on:click={handleThreading}>
 			Thread {formName}
 		</button>
 
@@ -315,7 +322,9 @@
 		<div class="text-xs text-text-muted space-y-1">
 			<p><span class="text-text-secondary">Tasks from Compiling:</span> Net hits</p>
 			<p><span class="text-text-secondary">Services from Registering:</span> Net hits</p>
-			<p><span class="text-text-secondary">Threading Duration:</span> Sustaining penalty (-2 per form)</p>
+			<p>
+				<span class="text-text-secondary">Threading Duration:</span> Sustaining penalty (-2 per form)
+			</p>
 		</div>
 	</div>
 </div>

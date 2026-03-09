@@ -157,8 +157,8 @@ describe('Character Store - Quality BP Costs', () => {
 			addQuality('Quality2', 'Positive', 10);
 			addQuality('Quality3', 'Positive', 10);
 
-			const totalPositive = get(character)?.qualities
-				.filter(q => q.category === 'Positive')
+			const totalPositive = get(character)
+				?.qualities.filter((q) => q.category === 'Positive')
 				.reduce((sum, q) => sum + q.bp, 0);
 
 			expect(totalPositive).toBe(35);
@@ -168,8 +168,8 @@ describe('Character Store - Quality BP Costs', () => {
 			addQuality('Quality1', 'Positive', 20);
 			addQuality('Quality2', 'Positive', 20);
 
-			const totalPositive = get(character)?.qualities
-				.filter(q => q.category === 'Positive')
+			const totalPositive = get(character)
+				?.qualities.filter((q) => q.category === 'Positive')
 				.reduce((sum, q) => sum + q.bp, 0);
 
 			// System allows it but tracks it (validation happens in UI)
@@ -193,7 +193,7 @@ describe('Character Store - Skill BP Costs', () => {
 			setSkill('Pistols', 4, null);
 
 			const char = get(character);
-			const skill = char?.skills.find(s => s.name === 'Pistols');
+			const skill = char?.skills.find((s) => s.name === 'Pistols');
 
 			expect(skill).toBeDefined();
 			expect(skill?.rating).toBe(4);
@@ -212,7 +212,7 @@ describe('Character Store - Skill BP Costs', () => {
 			setSkill('Pistols', 4, 'Semi-Automatics');
 
 			const char = get(character);
-			const skill = char?.skills.find(s => s.name === 'Pistols');
+			const skill = char?.skills.find((s) => s.name === 'Pistols');
 
 			expect(skill?.specialization).toBe('Semi-Automatics');
 		});
@@ -232,7 +232,7 @@ describe('Character Store - Skill BP Costs', () => {
 		it('should allow skills up to rating 6', () => {
 			setSkill('Pistols', 6, null);
 
-			const skill = get(character)?.skills.find(s => s.name === 'Pistols');
+			const skill = get(character)?.skills.find((s) => s.name === 'Pistols');
 			expect(skill?.rating).toBe(6);
 		});
 

@@ -19,6 +19,7 @@ import {
 } from 'firebase/firestore';
 import { getDbInstance } from './config';
 import type { Character } from '$types';
+import { CharacterSchema } from '$types/schemas';
 
 /** Collection name for characters. */
 const CHARACTERS_COLLECTION = 'characters';
@@ -78,7 +79,18 @@ export async function loadCharacter(characterId: string): Promise<DbResult<Chara
 			return { success: true, data: null };
 		}
 
-		const data = charSnap.data() as Character;
+		const rawData = charSnap.data();
+
+		/* Validate with Zod schema */
+		const parseResult = CharacterSchema.safeParse(rawData);
+		if (!parseResult.success) {
+			console.warn(`Character ${characterId} failed schema validation:`, parseResult.error.issues);
+			/* Fall back to unvalidated cast for backwards compat */
+			const data = rawData as Character;
+			return { success: true, data };
+		}
+
+		const data = parseResult.data as unknown as Character;
 		return { success: true, data };
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'Failed to load character';

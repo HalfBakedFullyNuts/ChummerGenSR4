@@ -16,15 +16,34 @@ import type { Character, CharacterCyberware, CharacterQuality, CharacterPower } 
  * ============================================ */
 
 export type ImprovementTarget =
-	| 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil' | 'edg'
-	| 'mag' | 'res' | 'ess'
-	| 'initiative' | 'initiative_dice'
-	| 'armor_ballistic' | 'armor_impact'
-	| 'physical_cm' | 'stun_cm'
-	| 'skill' | 'skill_group'
-	| 'physical_limit' | 'mental_limit' | 'social_limit'
-	| 'damage_resistance' | 'spell_resistance'
-	| 'memory' | 'composure' | 'judge_intentions';
+	| 'bod'
+	| 'agi'
+	| 'rea'
+	| 'str'
+	| 'cha'
+	| 'int'
+	| 'log'
+	| 'wil'
+	| 'edg'
+	| 'mag'
+	| 'res'
+	| 'ess'
+	| 'initiative'
+	| 'initiative_dice'
+	| 'armor_ballistic'
+	| 'armor_impact'
+	| 'physical_cm'
+	| 'stun_cm'
+	| 'skill'
+	| 'skill_group'
+	| 'physical_limit'
+	| 'mental_limit'
+	| 'social_limit'
+	| 'damage_resistance'
+	| 'spell_resistance'
+	| 'memory'
+	| 'composure'
+	| 'judge_intentions';
 
 export type ImprovementSource =
 	| 'cyberware'
@@ -481,9 +500,7 @@ export function getAllImprovements(char: Character): Improvement[] {
 export function getTotalImprovement(char: Character, target: ImprovementTarget): number {
 	const improvements = getAllImprovements(char);
 
-	return improvements
-		.filter((i) => i.target === target)
-		.reduce((sum, i) => sum + i.value, 0);
+	return improvements.filter((i) => i.target === target).reduce((sum, i) => sum + i.value, 0);
 }
 
 /** Get all improvements for a specific target with sources. */
@@ -495,9 +512,7 @@ export function getImprovementsForTarget(
 }
 
 /** Get improvements grouped by source type. */
-export function getImprovementsBySource(
-	char: Character
-): Record<ImprovementSource, Improvement[]> {
+export function getImprovementsBySource(char: Character): Record<ImprovementSource, Improvement[]> {
 	const all = getAllImprovements(char);
 
 	return {

@@ -15,8 +15,5 @@
 </script>
 
 <main class="container mx-auto px-4 py-8 max-w-4xl">
-	<CharacterList
-		on:characterLoaded={handleCharacterLoaded}
-		on:newCharacter={handleNewCharacter}
-	/>
+	<CharacterList on:characterLoaded={handleCharacterLoaded} on:newCharacter={handleNewCharacter} />
 </main>

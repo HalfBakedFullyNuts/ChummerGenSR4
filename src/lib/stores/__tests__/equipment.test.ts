@@ -364,7 +364,7 @@ describe('Equipment Store - Cyberware Essence', () => {
 			const cyber1: GameCyberware = { ...mockCyberware, name: 'Standard Cyber', ess: 1.0 };
 			const cyber2: GameCyberware = { ...mockCyberware, name: 'Alpha Cyber', ess: 1.0 };
 
-			addCyberware(cyber1, 'Standard');  // 1.0 essence
+			addCyberware(cyber1, 'Standard'); // 1.0 essence
 			addCyberware(cyber2, 'Alphaware'); // 0.8 essence
 
 			// 6.0 - 1.0 - 0.8 = 4.2
@@ -486,10 +486,10 @@ describe('Equipment Store - Combined Purchases', () => {
 	it('should track total equipment cost correctly', () => {
 		const initialNuyen = get(remainingNuyen);
 
-		addWeapon(mockWeapon);           // 350
-		addArmor(mockArmor);              // 900
+		addWeapon(mockWeapon); // 350
+		addArmor(mockArmor); // 900
 		addCyberware(mockCyberware, 'Standard'); // 11000
-		addGear(mockGear, 2);             // 1400
+		addGear(mockGear, 2); // 1400
 		setLifestyle('Middle', 'Middle', 5000, 1); // 5000
 
 		// Total: 350 + 900 + 11000 + 1400 + 5000 = 18650

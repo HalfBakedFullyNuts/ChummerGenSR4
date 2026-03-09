@@ -24,7 +24,6 @@
 	import type { BuildMethod } from '$types';
 	import MetatypeSelector from '$lib/components/wizard/MetatypeSelector.svelte';
 	import AttributeAllocator from '$lib/components/wizard/AttributeAllocator.svelte';
-	import QualitySelector from '$lib/components/wizard/QualitySelector.svelte';
 	import SkillAllocator from '$lib/components/wizard/SkillAllocator.svelte';
 	import KnowledgeSkillAllocator from '$lib/components/wizard/KnowledgeSkillAllocator.svelte';
 	import MagicSelector from '$lib/components/wizard/MagicSelector.svelte';
@@ -52,7 +51,9 @@
 	}
 
 	/** Handle build method confirmation from modal. */
-	function handleBuildMethodConfirm(event: CustomEvent<{ method: BuildMethod; points: number }>): void {
+	function handleBuildMethodConfirm(
+		event: CustomEvent<{ method: BuildMethod; points: number }>
+	): void {
 		const { method, points } = event.detail;
 		setBuildMethod(method);
 		setCustomBuildPoints(points);
@@ -149,8 +150,6 @@
 				return !!char.identity.metatype;
 			case 'attributes':
 				return true; // Hard limit enforced in store
-			case 'qualities':
-				return true; // Qualities are optional
 			case 'skills':
 				return true; // Skills are technically optional during creation
 			case 'knowledge':
@@ -216,9 +215,7 @@
 	<!-- Header with BP Counter -->
 	<header class="flex items-center justify-between mb-6">
 		<div>
-			<h1 class="cw-page-header">
-				New Character
-			</h1>
+			<h1 class="cw-page-header">New Character</h1>
 			<p class="cw-page-subheader">
 				{$visibleWizardSteps[$currentStepIndex]?.description ?? ''}
 			</p>
@@ -258,10 +255,10 @@
 				<button
 					class="flex-1 min-w-0 px-2 py-2 rounded text-xs transition-colors
 						{idx === $currentStepIndex
-							? 'bg-primary-main/20 text-primary-dark border border-primary-main/50'
-							: idx < $currentStepIndex
-								? 'bg-surface-variant text-text-primary'
-								: 'bg-surface text-text-muted'}"
+						? 'bg-primary-main/20 text-primary-dark border border-primary-main/50'
+						: idx < $currentStepIndex
+							? 'bg-surface-variant text-text-primary'
+							: 'bg-surface text-text-muted'}"
 					on:click={() => setWizardStep(step.id)}
 					disabled={idx > $currentStepIndex + 1}
 				>
@@ -280,21 +277,21 @@
 		{:else if $currentStep === 'method'}
 			<div class="cw-card p-6">
 				<h2 class="cw-card-header">Build Method</h2>
-				<p class="text-text-secondary mb-6">
-					Choose how you want to create your character.
-				</p>
+				<p class="text-text-secondary mb-6">Choose how you want to create your character.</p>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<!-- BP Method -->
 					<button
 						class="text-left transition-all rounded-lg p-6
 							{$character?.buildMethod === 'bp'
-								? 'bg-primary-main/10 border-2 border-primary-main shadow-lg shadow-primary-main/20'
-								: 'bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-primary-main/50'}"
+							? 'bg-primary-main/10 border-2 border-primary-main shadow-lg shadow-primary-main/20'
+							: 'bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-primary-main/50'}"
 						on:click={() => openBuildMethodModal('bp')}
 					>
 						<div class="flex items-center gap-3 mb-3">
-							<div class="w-12 h-12 rounded-full bg-primary-main/30 flex items-center justify-center">
+							<div
+								class="w-12 h-12 rounded-full bg-primary-main/30 flex items-center justify-center"
+							>
 								<span class="text-primary-dark text-xl font-bold">BP</span>
 							</div>
 							<div>
@@ -303,8 +300,8 @@
 							</div>
 						</div>
 						<p class="text-text-secondary text-sm">
-							The standard SR4 creation method. Allocate Build Points across all aspects
-							of your character with straightforward costs.
+							The standard SR4 creation method. Allocate Build Points across all aspects of your
+							character with straightforward costs.
 						</p>
 						<ul class="text-text-muted text-xs mt-3 space-y-1">
 							<li>• Attributes: 10 BP per point above minimum</li>
@@ -318,12 +315,14 @@
 					<button
 						class="text-left transition-all rounded-lg p-6
 							{$character?.buildMethod === 'karma'
-								? 'bg-primary-main/10 border-2 border-primary-main shadow-lg shadow-primary-main/20'
-								: 'bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-primary-main/50'}"
+							? 'bg-primary-main/10 border-2 border-primary-main shadow-lg shadow-primary-main/20'
+							: 'bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-primary-main/50'}"
 						on:click={() => openBuildMethodModal('karma')}
 					>
 						<div class="flex items-center gap-3 mb-3">
-							<div class="w-12 h-12 rounded-full bg-secondary-main/30 flex items-center justify-center">
+							<div
+								class="w-12 h-12 rounded-full bg-secondary-main/30 flex items-center justify-center"
+							>
 								<span class="text-secondary-dark text-xl font-bold">K</span>
 							</div>
 							<div>
@@ -332,8 +331,8 @@
 							</div>
 						</div>
 						<p class="text-text-secondary text-sm">
-							Runner's Companion alternate method. Uses karma for everything,
-							matching career advancement costs for easier tracking.
+							Runner's Companion alternate method. Uses karma for everything, matching career
+							advancement costs for easier tracking.
 						</p>
 						<ul class="text-text-muted text-xs mt-3 space-y-1">
 							<li>• Attributes: (new rating) × 5 karma</li>
@@ -344,10 +343,14 @@
 					</button>
 				</div>
 
-					<div class="mt-6 p-4 bg-surface-variant rounded-lg border border-border">
+				<div class="mt-6 p-4 bg-surface-variant rounded-lg border border-border">
 					<div class="flex items-center justify-between">
 						<span class="text-text-secondary">Selected Method:</span>
-						<span class="font-medium {$character?.buildMethod === 'karma' ? 'text-secondary-dark' : 'text-primary-dark'}">
+						<span
+							class="font-medium {$character?.buildMethod === 'karma'
+								? 'text-secondary-dark'
+								: 'text-primary-dark'}"
+						>
 							{$character?.buildMethod === 'karma' ? 'Karma Build' : 'Build Points'}
 						</span>
 					</div>
@@ -363,7 +366,9 @@
 									max={$character?.buildMethod === 'karma' ? 1200 : 800}
 									on:keydown={(e) => e.key === 'Enter' && applyCustomBP()}
 								/>
-								<span class="text-text-muted text-sm">{$character?.buildMethod === 'karma' ? 'Karma' : 'BP'}</span>
+								<span class="text-text-muted text-sm"
+									>{$character?.buildMethod === 'karma' ? 'Karma' : 'BP'}</span
+								>
 								<button
 									class="p-1 text-success-main hover:bg-success-main/10 rounded"
 									on:click={applyCustomBP}
@@ -381,7 +386,11 @@
 							</div>
 						{:else}
 							<div class="flex items-center gap-2">
-								<span class="font-mono text-lg {$character?.buildMethod === 'karma' ? 'text-secondary-dark' : 'text-primary-dark'}">
+								<span
+									class="font-mono text-lg {$character?.buildMethod === 'karma'
+										? 'text-secondary-dark'
+										: 'text-primary-dark'}"
+								>
 									{$character?.buildPoints ?? 400}
 									{$character?.buildMethod === 'karma' ? ' Karma' : ' BP'}
 								</span>
@@ -397,7 +406,9 @@
 					</div>
 					{#if !isEditingBP}
 						<p class="text-text-muted text-xs mt-2">
-							Click the edit button to customize your starting {$character?.buildMethod === 'karma' ? 'karma' : 'build points'}.
+							Click the edit button to customize your starting {$character?.buildMethod === 'karma'
+								? 'karma'
+								: 'build points'}.
 						</p>
 					{/if}
 				</div>
@@ -406,8 +417,6 @@
 			<MetatypeSelector />
 		{:else if $currentStep === 'attributes'}
 			<AttributeAllocator />
-		{:else if $currentStep === 'qualities'}
-			<QualitySelector />
 		{:else if $currentStep === 'skills'}
 			<SkillAllocator />
 		{:else if $currentStep === 'knowledge'}
@@ -451,8 +460,8 @@
 		z-index: 50;
 
 		/* Base size increased by 20% */
-		width: 3rem;      /* 2.5rem * 1.2 */
-		height: 3.6rem;   /* 3rem * 1.2 */
+		width: 3rem; /* 2.5rem * 1.2 */
+		height: 3.6rem; /* 3rem * 1.2 */
 
 		display: flex;
 		align-items: center;
@@ -464,13 +473,17 @@
 		border-radius: 0.5rem;
 		cursor: pointer;
 
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 		transition: all 0.2s ease;
 	}
 
 	:global(.nav-btn:hover:not(:disabled)) {
 		background: var(--color-primary-dark, #1565c0);
-		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+		box-shadow:
+			0 10px 15px -3px rgba(0, 0, 0, 0.1),
+			0 4px 6px -2px rgba(0, 0, 0, 0.05);
 	}
 
 	:global(.nav-btn:disabled) {
@@ -481,7 +494,7 @@
 	}
 
 	:global(.nav-btn .material-icons) {
-		font-size: 2rem;  /* Larger icons */
+		font-size: 2rem; /* Larger icons */
 	}
 
 	:global(.nav-btn-prev) {
@@ -498,7 +511,11 @@
 	}
 
 	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 </style>

@@ -84,8 +84,22 @@ describe('XML Exporter', () => {
 			const modified = {
 				...character,
 				knowledgeSkills: [
-					{ id: 'ks1', name: 'History', category: 'Academic' as const, attribute: 'LOG' as const, rating: 3, specialization: null },
-					{ id: 'ks2', name: 'Urban Brawl', category: 'Interest' as const, attribute: 'INT' as const, rating: 2, specialization: null }
+					{
+						id: 'ks1',
+						name: 'History',
+						category: 'Academic' as const,
+						attribute: 'LOG' as const,
+						rating: 3,
+						specialization: null
+					},
+					{
+						id: 'ks2',
+						name: 'Urban Brawl',
+						category: 'Interest' as const,
+						attribute: 'INT' as const,
+						rating: 2,
+						specialization: null
+					}
 				]
 			};
 
@@ -104,7 +118,14 @@ describe('XML Exporter', () => {
 			const modified = {
 				...character,
 				contacts: [
-					{ id: 'c1', name: 'Fixer Mike', type: 'Fixer', loyalty: 4, connection: 3, notes: 'Reliable' }
+					{
+						id: 'c1',
+						name: 'Fixer Mike',
+						type: 'Fixer',
+						loyalty: 4,
+						connection: 3,
+						notes: 'Reliable'
+					}
 				]
 			};
 

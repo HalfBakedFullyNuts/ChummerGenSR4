@@ -84,9 +84,7 @@ function validateBPLimits(char: Character): ValidationIssue[] {
 
 	// Negative qualities cap
 	const negativeQualityBP = Math.abs(
-		char.qualities
-			.filter((q) => q.category === 'Negative')
-			.reduce((sum, q) => sum + q.bp, 0)
+		char.qualities.filter((q) => q.category === 'Negative').reduce((sum, q) => sum + q.bp, 0)
 	);
 
 	if (negativeQualityBP > BP_LIMITS.NEGATIVE_QUALITIES) {
@@ -241,9 +239,7 @@ function validateSkills(char: Character): ValidationIssue[] {
 	}
 
 	// Check for required skills (warning only)
-	const hasPerception = char.skills.some(
-		(s) => s.name.toLowerCase() === 'perception'
-	);
+	const hasPerception = char.skills.some((s) => s.name.toLowerCase() === 'perception');
 	if (!hasPerception) {
 		issues.push({
 			code: 'NO_PERCEPTION',
@@ -284,9 +280,8 @@ function validateQualities(char: Character): ValidationIssue[] {
 	}
 
 	// Check awakened quality requirements
-	const isMagical = qualityNames.some((n) =>
-		['magician', 'adept', 'mystic adept'].includes(n) ||
-		n.startsWith('aspected magician')
+	const isMagical = qualityNames.some(
+		(n) => ['magician', 'adept', 'mystic adept'].includes(n) || n.startsWith('aspected magician')
 	);
 
 	if (isMagical && !char.attributes.mag) {
@@ -300,9 +295,7 @@ function validateQualities(char: Character): ValidationIssue[] {
 	}
 
 	// Check technomancer requirements
-	const isTechnomancer = qualityNames.some((n) =>
-		n.includes('technomancer')
-	);
+	const isTechnomancer = qualityNames.some((n) => n.includes('technomancer'));
 
 	if (isTechnomancer && !char.attributes.res) {
 		issues.push({
@@ -594,7 +587,7 @@ function validateGearCapacity(char: Character): ValidationIssue[] {
 
 		/* Check for orphaned items (containerId points to non-existent container) */
 		if (gear.containerId) {
-			const container = char.equipment.gear.find(g => g.id === gear.containerId);
+			const container = char.equipment.gear.find((g) => g.id === gear.containerId);
 			if (!container) {
 				issues.push({
 					code: 'ORPHANED_GEAR',
@@ -618,7 +611,7 @@ function validateSpirits(char: Character): ValidationIssue[] {
 
 	/* Max spirits bound based on Charisma */
 	const charisma = getAttributeTotal(char, 'cha');
-	const boundSpirits = char.magic.spirits.filter(s => s.bound).length;
+	const boundSpirits = char.magic.spirits.filter((s) => s.bound).length;
 
 	if (boundSpirits > charisma) {
 		issues.push({
@@ -631,7 +624,7 @@ function validateSpirits(char: Character): ValidationIssue[] {
 	}
 
 	/* Check for spirits with no services */
-	const noServiceSpirits = char.magic.spirits.filter(s => s.services <= 0);
+	const noServiceSpirits = char.magic.spirits.filter((s) => s.services <= 0);
 	if (noServiceSpirits.length > 0) {
 		issues.push({
 			code: 'SPIRITS_NO_SERVICES',
@@ -653,7 +646,7 @@ function validateSprites(char: Character): ValidationIssue[] {
 
 	/* Max registered sprites based on Charisma (same as spirits) */
 	const charisma = getAttributeTotal(char, 'cha');
-	const registeredSprites = char.resonance.sprites.filter(s => s.registered).length;
+	const registeredSprites = char.resonance.sprites.filter((s) => s.registered).length;
 
 	if (registeredSprites > charisma) {
 		issues.push({
@@ -666,7 +659,7 @@ function validateSprites(char: Character): ValidationIssue[] {
 	}
 
 	/* Check for sprites with no tasks */
-	const noTaskSprites = char.resonance.sprites.filter(s => s.tasks <= 0);
+	const noTaskSprites = char.resonance.sprites.filter((s) => s.tasks <= 0);
 	if (noTaskSprites.length > 0) {
 		issues.push({
 			code: 'SPRITES_NO_TASKS',

@@ -147,10 +147,7 @@ export function calculateSkillPool(
  * Check if skill can default (use without training).
  * Returns attribute - 1 if defaultable, 0 otherwise.
  */
-export function calculateDefaultPool(
-	canDefault: boolean,
-	attributeValue: number
-): number {
+export function calculateDefaultPool(canDefault: boolean, attributeValue: number): number {
 	if (!canDefault) {
 		return 0;
 	}

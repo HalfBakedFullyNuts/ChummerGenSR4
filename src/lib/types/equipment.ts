@@ -160,12 +160,7 @@ export type CyberwareCategory =
 	| 'Nanocybernetics';
 
 /** Cyberware grade affecting essence and cost. */
-export type CyberwareGrade =
-	| 'Standard'
-	| 'Alphaware'
-	| 'Betaware'
-	| 'Deltaware'
-	| 'Used';
+export type CyberwareGrade = 'Standard' | 'Alphaware' | 'Betaware' | 'Deltaware' | 'Used';
 
 /** Grade multiplier definition. */
 export interface CyberwareGradeMultiplier {
@@ -242,6 +237,17 @@ export const BIOWARE_GRADES = [
 	{ name: 'Cultured', essMultiplier: 0.75, costMultiplier: 4 }
 ] as const;
 
+/** Game data bioware definition. */
+export interface GameBioware {
+	readonly name: string;
+	readonly category: string;
+	readonly ess: number;
+	readonly avail: string;
+	readonly cost: number;
+	readonly source: string;
+	readonly page: number;
+}
+
 /** Bioware installed on a character. */
 export interface CharacterBioware {
 	readonly id: string;
@@ -257,6 +263,23 @@ export interface CharacterBioware {
 /* ============================================
  * Vehicle Types
  * ============================================ */
+
+/** Game data vehicle definition. */
+export interface GameVehicle {
+	readonly name: string;
+	readonly category: string;
+	readonly handling: string;
+	readonly accel: string;
+	readonly speed: string;
+	readonly pilot: number;
+	readonly body: number;
+	readonly armor: number;
+	readonly sensor: number;
+	readonly avail: string;
+	readonly cost: number;
+	readonly source: string;
+	readonly page: number;
+}
 
 /** Vehicle category from game data. */
 export type VehicleCategory =
@@ -309,6 +332,14 @@ export interface VehicleMod {
 /* ============================================
  * Martial Arts Types
  * ============================================ */
+
+/** Game data martial art definition. */
+export interface GameMartialArt {
+	readonly name: string;
+	readonly cost: number;
+	readonly source: string;
+	readonly page: number;
+}
 
 /** Martial art style owned by a character. */
 export interface CharacterMartialArt {
@@ -402,13 +433,7 @@ export function canFitInContainer(container: CharacterGear, item: CharacterGear)
  * ============================================ */
 
 /** Lifestyle level from game data. */
-export type LifestyleLevel =
-	| 'Street'
-	| 'Squatter'
-	| 'Low'
-	| 'Middle'
-	| 'High'
-	| 'Luxury';
+export type LifestyleLevel = 'Street' | 'Squatter' | 'Low' | 'Middle' | 'High' | 'Luxury';
 
 /** Game data lifestyle definition. */
 export interface GameLifestyle {

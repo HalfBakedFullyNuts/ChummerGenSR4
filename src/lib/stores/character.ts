@@ -111,7 +111,6 @@ export type WizardStep =
 	| 'method'
 	| 'metatype'
 	| 'attributes'
-	| 'qualities'
 	| 'skills'
 	| 'knowledge'
 	| 'magic'
@@ -131,25 +130,49 @@ export interface WizardStepConfig {
 export const WIZARD_STEPS: readonly WizardStepConfig[] = [
 	{ id: 'method', label: 'Build Method', description: 'Choose BP or Karma', required: true },
 	{ id: 'metatype', label: 'Metatype', description: 'Select your race', required: true },
-	{ id: 'attributes', label: 'Attributes', description: 'Allocate attribute points', required: true },
-	{ id: 'qualities', label: 'Qualities', description: 'Select positive and negative qualities', required: true },
-	{ id: 'skills', label: 'Action Skills', description: 'Choose and rate your active skills', required: true },
-	{ id: 'knowledge', label: 'Knowledge Skills', description: 'Define your knowledge and languages', required: true },
-	{ id: 'magic', label: 'Magic/Resonance', description: 'Configure magical abilities', required: false },
-	{ id: 'equipment', label: 'Equipment', description: 'Purchase gear and cyberware', required: true },
+	{
+		id: 'attributes',
+		label: 'Attributes & Qualities',
+		description: 'Set attributes and select qualities',
+		required: true
+	},
+	{
+		id: 'skills',
+		label: 'Action Skills',
+		description: 'Choose and rate your active skills',
+		required: true
+	},
+	{
+		id: 'knowledge',
+		label: 'Knowledge Skills',
+		description: 'Define your knowledge and languages',
+		required: true
+	},
+	{
+		id: 'magic',
+		label: 'Magic/Resonance',
+		description: 'Configure magical abilities',
+		required: false
+	},
+	{
+		id: 'equipment',
+		label: 'Equipment',
+		description: 'Purchase gear and cyberware',
+		required: true
+	},
 	{ id: 'contacts', label: 'Contacts', description: 'Define your network', required: true },
 	{ id: 'finalize', label: 'Finalize', description: 'Review and complete', required: true }
 ] as const;
 
-/* Internal writable store */
-const characterStore: Writable<Character | null> = writable(null);
-const currentStepStore: Writable<WizardStep> = writable('method');
+/* Internal writable stores — exported for sub-modules (do NOT use from components) */
+export const characterStore: Writable<Character | null> = writable(null);
+export const currentStepStore: Writable<WizardStep> = writable('method');
 
 /**
  * Generate unique ID for new entities.
  * Uses timestamp + random suffix for uniqueness.
  */
-function generateId(): string {
+export function generateId(): string {
 	const timestamp = Date.now().toString(36);
 	const random = Math.random().toString(36).substring(2, 8);
 	return `${timestamp}-${random}`;
@@ -159,10 +182,7 @@ function generateId(): string {
  * Start creating a new character.
  * Initializes empty character with given build method.
  */
-export function startNewCharacter(
-	userId: string,
-	buildMethod: BuildMethod = 'bp'
-): void {
+export function startNewCharacter(userId: string, buildMethod: BuildMethod = 'bp'): void {
 	const id = generateId();
 	const char = createEmptyCharacter(id, userId, buildMethod);
 	characterStore.set(char);
@@ -209,7 +229,7 @@ function getVisibleWizardSteps(): readonly WizardStepConfig[] {
 	const type = getMagicType(char);
 
 	if (type === 'mundane') {
-		return WIZARD_STEPS.filter(s => s.id !== 'magic');
+		return WIZARD_STEPS.filter((s) => s.id !== 'magic');
 	}
 	return WIZARD_STEPS;
 }
@@ -315,13 +335,46 @@ export function setMetatype(
 }
 
 /** Attribute keys that have AttributeValue (not number or null). */
-export type AttributeValueKey = 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil' | 'edg';
+export type AttributeValueKey =
+	| 'bod'
+	| 'agi'
+	| 'rea'
+	| 'str'
+	| 'cha'
+	| 'int'
+	| 'log'
+	| 'wil'
+	| 'edg'
+	| 'mag'
+	| 'res';
 
-/** All attribute keys for iteration. */
-const ALL_ATTR_KEYS: readonly AttributeValueKey[] = ['bod', 'agi', 'rea', 'str', 'cha', 'int', 'log', 'wil', 'edg'];
+/** All attribute keys for iteration (excludes mag/res which are handled specially). */
+const ALL_ATTR_KEYS: readonly AttributeValueKey[] = [
+	'bod',
+	'agi',
+	'rea',
+	'str',
+	'cha',
+	'int',
+	'log',
+	'wil',
+	'edg'
+];
+
+/** Special attribute keys that require quality unlock (Magic, Resonance). */
+export const AWAKENED_ATTR_KEYS: readonly AttributeValueKey[] = ['mag', 'res'];
 
 /** Non-special attribute keys (excludes Edge for BP limit calculations). */
-const NON_SPECIAL_ATTR_KEYS: readonly AttributeValueKey[] = ['bod', 'agi', 'rea', 'str', 'cha', 'int', 'log', 'wil'];
+const NON_SPECIAL_ATTR_KEYS: readonly AttributeValueKey[] = [
+	'bod',
+	'agi',
+	'rea',
+	'str',
+	'cha',
+	'int',
+	'log',
+	'wil'
+];
 
 /** BP cost per attribute point above minimum. */
 const BP_PER_ATTRIBUTE_POINT = 10;
@@ -338,6 +391,7 @@ function calculateTotalAttributeCost(char: Character): number {
 	let total = 0;
 	const isKarma = char.buildMethod === 'karma';
 
+	// Calculate costs for standard attributes
 	for (const code of ALL_ATTR_KEYS) {
 		const attr = char.attributes[code];
 		const limits = char.attributeLimits[code];
@@ -359,6 +413,32 @@ function calculateTotalAttributeCost(char: Character): number {
 				total += BP_FOR_MAX_ATTRIBUTE;
 			} else {
 				/* Not at max, all points cost 10 */
+				total += pointsAboveMin * BP_PER_ATTRIBUTE_POINT;
+			}
+		}
+	}
+
+	// Also include Magic/Resonance if unlocked (same cost structure as other attributes)
+	for (const code of AWAKENED_ATTR_KEYS) {
+		const attr = char.attributes[code];
+		const limits = char.attributeLimits[code];
+		// Skip if attribute is not unlocked (null) or not valid
+		if (!attr || typeof attr === 'number' || attr === null || !limits) continue;
+
+		if (isKarma) {
+			/* Karma: sum of (new rating × multiplier) for each point above min */
+			for (let r = limits.min + 1; r <= attr.base; r++) {
+				total += r * KARMA_BUILD_COSTS.ATTRIBUTE_MULTIPLIER;
+			}
+		} else {
+			/* BP: 10 per point, but 25 for the final point to natural max */
+			const pointsAboveMin = attr.base - limits.min;
+			const isAtMax = attr.base === limits.max;
+
+			if (isAtMax && pointsAboveMin > 0) {
+				total += (pointsAboveMin - 1) * BP_PER_ATTRIBUTE_POINT;
+				total += BP_FOR_MAX_ATTRIBUTE;
+			} else {
 				total += pointsAboveMin * BP_PER_ATTRIBUTE_POINT;
 			}
 		}
@@ -395,8 +475,17 @@ function calculateNonSpecialAttributeBP(char: Character): number {
 }
 
 /**
+ * Check if an attribute is not applicable (e.g., physical attrs for AI).
+ * An attribute is N/A if both min and max are 0.
+ */
+function isAttributeNA(limits: { min: number; max: number }): boolean {
+	return limits.min === 0 && limits.max === 0;
+}
+
+/**
  * Count how many attributes are currently at their natural maximum.
  * Per SR4 rules, only one attribute may be raised to natural max during creation.
+ * Excludes N/A attributes (like physical attributes for AI characters).
  */
 function countMaxedAttributes(char: Character): number {
 	let count = 0;
@@ -404,6 +493,9 @@ function countMaxedAttributes(char: Character): number {
 		const attr = char.attributes[code];
 		const limits = char.attributeLimits[code];
 		if (!attr || typeof attr === 'number' || !limits) continue;
+
+		// Skip N/A attributes (like physical for AI)
+		if (isAttributeNA(limits)) continue;
 
 		if (attr.base === limits.max) {
 			count++;
@@ -415,12 +507,16 @@ function countMaxedAttributes(char: Character): number {
 /**
  * Get the name of the attribute currently at max, if any.
  * Returns null if no attribute is at max.
+ * Excludes N/A attributes (like physical attributes for AI characters).
  */
 function getMaxedAttributeName(char: Character): AttributeValueKey | null {
 	for (const code of NON_SPECIAL_ATTR_KEYS) {
 		const attr = char.attributes[code];
 		const limits = char.attributeLimits[code];
 		if (!attr || typeof attr === 'number' || !limits) continue;
+
+		// Skip N/A attributes (like physical for AI)
+		if (isAttributeNA(limits)) continue;
 
 		if (attr.base === limits.max) {
 			return code;
@@ -433,10 +529,7 @@ function getMaxedAttributeName(char: Character): AttributeValueKey | null {
  * Set a single attribute value.
  * Validates against metatype limits and updates BP spent.
  */
-export function setAttribute(
-	attrCode: AttributeValueKey,
-	value: number
-): void {
+export function setAttribute(attrCode: AttributeValueKey, value: number): void {
 	const char = get(characterStore);
 	if (!char) return;
 
@@ -466,7 +559,7 @@ export function setAttribute(
 
 	/* For BP build, enforce 50% limit on non-special attributes */
 	if (char.buildMethod === 'bp') {
-		const isNonSpecial = attrCode !== 'edg'; // Edge is the only special attribute
+		const isNonSpecial = attrCode !== 'edg' && attrCode !== 'mag' && attrCode !== 'res';
 		if (isNonSpecial) {
 			const projectedNonSpecialBP = calculateNonSpecialAttributeBP(updatedWithAttr);
 			const maxNonSpecialBP = Math.floor(char.buildPoints * 0.5);
@@ -498,6 +591,8 @@ export interface AddQualityOptions {
 	selectedSkill?: string;
 	/** Selected attribute for qualities with selectattribute bonus. */
 	selectedAttribute?: string;
+	/** Custom description for qualities requiring user input (e.g., "gluten" for Allergy). */
+	customDescription?: string;
 }
 
 /**
@@ -525,12 +620,36 @@ export function addQuality(
 		rating: 1,
 		notes: '',
 		...(options?.selectedSkill ? { selectedSkill: options.selectedSkill } : {}),
-		...(options?.selectedAttribute ? { selectedAttribute: options.selectedAttribute } : {})
+		...(options?.selectedAttribute ? { selectedAttribute: options.selectedAttribute } : {}),
+		...(options?.customDescription ? { customDescription: options.customDescription } : {})
 	};
+
+	/* Check if this quality grants Magic or Resonance */
+	const MAGIC_QUALITIES = ['Adept', 'Magician', 'Mystic Adept', 'Aspected Magician'];
+	const RESONANCE_QUALITIES = ['Technomancer'];
+
+	const grantsMagic = MAGIC_QUALITIES.includes(name);
+	const grantsResonance = RESONANCE_QUALITIES.includes(name);
+
+	/* Initialize attributes if not already set */
+	let attributes = char.attributes;
+	if (grantsMagic && (!attributes.mag || attributes.mag === null)) {
+		attributes = {
+			...attributes,
+			mag: { base: 1, bonus: 0, karma: 0 }
+		};
+	}
+	if (grantsResonance && (!attributes.res || attributes.res === null)) {
+		attributes = {
+			...attributes,
+			res: { base: 1, bonus: 0, karma: 0 }
+		};
+	}
 
 	const updated: Character = {
 		...char,
 		qualities: [...char.qualities, newQuality],
+		attributes,
 		buildPointsSpent: {
 			...char.buildPointsSpent,
 			qualities: char.buildPointsSpent.qualities + bp
@@ -554,8 +673,8 @@ export function addQualityAgain(
 	if (!char) return;
 
 	/* Count existing instances of this quality */
-	const instanceCount = char.qualities.filter((q) =>
-		q.name === baseName || q.name.startsWith(`${baseName} #`)
+	const instanceCount = char.qualities.filter(
+		(q) => q.name === baseName || q.name.startsWith(`${baseName} #`)
 	).length;
 
 	/* Create unique name with instance number */
@@ -594,9 +713,39 @@ export function removeQuality(qualityId: string): void {
 	const quality = char.qualities.find((q) => q.id === qualityId);
 	if (!quality) return;
 
+	/* Check if this quality grants Magic or Resonance */
+	const MAGIC_QUALITIES = ['Adept', 'Magician', 'Mystic Adept', 'Aspected Magician'];
+	const RESONANCE_QUALITIES = ['Technomancer'];
+
+	const grantsMagic = MAGIC_QUALITIES.includes(quality.name);
+	const grantsResonance = RESONANCE_QUALITIES.includes(quality.name);
+
+	/* Check if any other magic/resonance quality remains after removal */
+	const remainingQualities = char.qualities.filter((q) => q.id !== qualityId);
+	const hasOtherMagicQuality = remainingQualities.some((q) => MAGIC_QUALITIES.includes(q.name));
+	const hasOtherResonanceQuality = remainingQualities.some((q) =>
+		RESONANCE_QUALITIES.includes(q.name)
+	);
+
+	/* Reset attributes if no other granting quality remains */
+	let attributes = char.attributes;
+	if (grantsMagic && !hasOtherMagicQuality && attributes.mag !== null) {
+		attributes = {
+			...attributes,
+			mag: null
+		};
+	}
+	if (grantsResonance && !hasOtherResonanceQuality && attributes.res !== null) {
+		attributes = {
+			...attributes,
+			res: null
+		};
+	}
+
 	const updated: Character = {
 		...char,
-		qualities: char.qualities.filter((q) => q.id !== qualityId),
+		qualities: remainingQualities,
+		attributes,
 		buildPointsSpent: {
 			...char.buildPointsSpent,
 			qualities: char.buildPointsSpent.qualities - quality.bp
@@ -627,15 +776,21 @@ function calculateSkillGroupsBP(skillGroups: readonly CharacterSkillGroup[]): nu
 	return skillGroups.reduce((sum, g) => sum + g.rating * SKILL_GROUP_BP_PER_POINT, 0);
 }
 
+/** BP/Karma cost per skill specialization. */
+const SPECIALIZATION_BP_COST = 2;
+
+/**
+ * Calculate total BP/karma spent on skill specializations.
+ */
+function calculateSpecializationsBP(skills: readonly CharacterSkill[]): number {
+	return skills.filter((s) => s.specialization !== null).length * SPECIALIZATION_BP_COST;
+}
+
 /**
  * Add or update a skill.
  * Creates new skill or updates existing rating.
  */
-export function setSkill(
-	name: string,
-	rating: number,
-	specialization: string | null = null
-): void {
+export function setSkill(name: string, rating: number, specialization: string | null = null): void {
 	const char = get(characterStore);
 	if (!char) return;
 
@@ -660,14 +815,15 @@ export function setSkill(
 	}
 
 	// Filter out skills with 0 rating
-	newSkills = newSkills.filter(s => s.rating > 0);
+	newSkills = newSkills.filter((s) => s.rating > 0);
 
 	const updated: Character = {
 		...char,
 		skills: newSkills,
 		buildPointsSpent: {
 			...char.buildPointsSpent,
-			skills: calculateSkillsBP(newSkills)
+			skills: calculateSkillsBP(newSkills),
+			specializations: calculateSpecializationsBP(newSkills)
 		},
 		updatedAt: new Date().toISOString()
 	};
@@ -689,7 +845,8 @@ export function removeSkill(name: string): void {
 		skills: newSkills,
 		buildPointsSpent: {
 			...char.buildPointsSpent,
-			skills: calculateSkillsBP(newSkills)
+			skills: calculateSkillsBP(newSkills),
+			specializations: calculateSpecializationsBP(newSkills)
 		},
 		updatedAt: new Date().toISOString()
 	};
@@ -698,13 +855,58 @@ export function removeSkill(name: string): void {
 }
 
 /**
+ * Set or update a skill's specialization.
+ * Skill must exist and have rating > 0.
+ * Costs 2 BP/karma.
+ */
+export function setSkillSpecialization(
+	skillName: string,
+	specialization: string | null
+): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) return { success: false, error: 'No character loaded' };
+
+	const skillIndex = char.skills.findIndex((s) => s.name === skillName);
+	if (skillIndex < 0) {
+		return { success: false, error: 'Skill not found' };
+	}
+
+	const skill = char.skills[skillIndex]!;
+	if (skill.rating <= 0) {
+		return { success: false, error: 'Cannot specialize a skill with 0 rating' };
+	}
+
+	// Update the skill with new specialization
+	const newSkills = char.skills.map((s, i) => (i === skillIndex ? { ...s, specialization } : s));
+
+	const updated: Character = {
+		...char,
+		skills: newSkills,
+		buildPointsSpent: {
+			...char.buildPointsSpent,
+			specializations: calculateSpecializationsBP(newSkills)
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+	return { success: true };
+}
+
+/**
+ * Remove a skill's specialization.
+ * Refunds the 2 BP/karma cost.
+ */
+export function removeSkillSpecialization(skillName: string): { success: boolean; error?: string } {
+	return setSkillSpecialization(skillName, null);
+}
+
+/**
  * Get all skill names that belong to a skill group.
  */
 export function getSkillsInGroup(groupName: SkillGroupName): string[] {
 	const allSkills = get(skillsStore);
-	return allSkills
-		.filter(s => s.skillgroup === groupName)
-		.map(s => s.name);
+	return allSkills.filter((s) => s.skillgroup === groupName).map((s) => s.name);
 }
 
 /**
@@ -715,7 +917,7 @@ export function isSkillGroupBroken(groupName: SkillGroupName): boolean {
 	const char = get(characterStore);
 	if (!char) return false;
 
-	const group = char.skillGroups.find(g => g.name === groupName);
+	const group = char.skillGroups.find((g) => g.name === groupName);
 	if (!group) return false;
 
 	// If explicitly marked as broken, return true
@@ -724,7 +926,7 @@ export function isSkillGroupBroken(groupName: SkillGroupName): boolean {
 	// Check if any individual skill has been modified above group rating
 	const skillNames = getSkillsInGroup(groupName);
 	for (const skillName of skillNames) {
-		const skill = char.skills.find(s => s.name === skillName);
+		const skill = char.skills.find((s) => s.name === skillName);
 		if (skill && skill.rating > group.rating) {
 			return true;
 		}
@@ -742,17 +944,17 @@ export function getEffectiveSkillRating(skillName: string): number {
 	if (!char) return 0;
 
 	// Get individual skill rating
-	const skill = char.skills.find(s => s.name === skillName);
+	const skill = char.skills.find((s) => s.name === skillName);
 	const individualRating = skill?.rating ?? 0;
 
 	// Get skill group rating if applicable
 	const allSkills = get(skillsStore);
-	const skillDef = allSkills.find(s => s.name === skillName);
+	const skillDef = allSkills.find((s) => s.name === skillName);
 	if (!skillDef?.skillgroup) {
 		return individualRating;
 	}
 
-	const group = char.skillGroups.find(g => g.name === skillDef.skillgroup);
+	const group = char.skillGroups.find((g) => g.name === skillDef.skillgroup);
 	const groupRating = group?.rating ?? 0;
 
 	// Return the higher of individual or group rating
@@ -777,7 +979,7 @@ export function setSkillGroup(
 	}
 
 	// Check if group is broken
-	const existingGroup = char.skillGroups.find(g => g.name === groupName);
+	const existingGroup = char.skillGroups.find((g) => g.name === groupName);
 	if (existingGroup?.broken) {
 		return { success: false, error: 'Cannot modify a broken skill group' };
 	}
@@ -785,7 +987,7 @@ export function setSkillGroup(
 	// Check if any individual skill in the group has a higher rating
 	const skillNames = getSkillsInGroup(groupName);
 	for (const skillName of skillNames) {
-		const skill = char.skills.find(s => s.name === skillName);
+		const skill = char.skills.find((s) => s.name === skillName);
 		if (skill && skill.rating > rating && rating > 0) {
 			return {
 				success: false,
@@ -798,12 +1000,10 @@ export function setSkillGroup(
 	let newSkillGroups: CharacterSkillGroup[];
 	if (rating === 0) {
 		// Remove the group if setting to 0
-		newSkillGroups = char.skillGroups.filter(g => g.name !== groupName);
+		newSkillGroups = char.skillGroups.filter((g) => g.name !== groupName);
 	} else if (existingGroup) {
 		// Update existing group
-		newSkillGroups = char.skillGroups.map(g =>
-			g.name === groupName ? { ...g, rating } : g
-		);
+		newSkillGroups = char.skillGroups.map((g) => (g.name === groupName ? { ...g, rating } : g));
 	} else {
 		// Add new group
 		const newGroup: CharacterSkillGroup = {
@@ -831,11 +1031,14 @@ export function setSkillGroup(
 /**
  * Increment a skill group rating by 1.
  */
-export function incrementSkillGroup(groupName: SkillGroupName): { success: boolean; error?: string } {
+export function incrementSkillGroup(groupName: SkillGroupName): {
+	success: boolean;
+	error?: string;
+} {
 	const char = get(characterStore);
 	if (!char) return { success: false, error: 'No character loaded' };
 
-	const group = char.skillGroups.find(g => g.name === groupName);
+	const group = char.skillGroups.find((g) => g.name === groupName);
 	const currentRating = group?.rating ?? 0;
 
 	return setSkillGroup(groupName, currentRating + 1);
@@ -844,11 +1047,14 @@ export function incrementSkillGroup(groupName: SkillGroupName): { success: boole
 /**
  * Decrement a skill group rating by 1.
  */
-export function decrementSkillGroup(groupName: SkillGroupName): { success: boolean; error?: string } {
+export function decrementSkillGroup(groupName: SkillGroupName): {
+	success: boolean;
+	error?: string;
+} {
 	const char = get(characterStore);
 	if (!char) return { success: false, error: 'No character loaded' };
 
-	const group = char.skillGroups.find(g => g.name === groupName);
+	const group = char.skillGroups.find((g) => g.name === groupName);
 	const currentRating = group?.rating ?? 0;
 
 	if (currentRating <= 0) {
@@ -866,10 +1072,10 @@ export function breakSkillGroup(groupName: SkillGroupName): void {
 	const char = get(characterStore);
 	if (!char) return;
 
-	const existingGroup = char.skillGroups.find(g => g.name === groupName);
+	const existingGroup = char.skillGroups.find((g) => g.name === groupName);
 	if (!existingGroup) return;
 
-	const newSkillGroups = char.skillGroups.map(g =>
+	const newSkillGroups = char.skillGroups.map((g) =>
 		g.name === groupName ? { ...g, broken: true } : g
 	);
 
@@ -896,11 +1102,11 @@ export function setSkillWithGroupCheck(
 
 	// Check if this skill belongs to a group
 	const allSkills = get(skillsStore);
-	const skillDef = allSkills.find(s => s.name === name);
+	const skillDef = allSkills.find((s) => s.name === name);
 
 	if (skillDef?.skillgroup) {
 		const groupName = skillDef.skillgroup as SkillGroupName;
-		const group = char.skillGroups.find(g => g.name === groupName);
+		const group = char.skillGroups.find((g) => g.name === groupName);
 
 		// If raising above group rating, mark group as broken
 		if (group && rating > group.rating && !group.broken) {
@@ -915,12 +1121,7 @@ export function setSkillWithGroupCheck(
 /**
  * Add a contact to the character.
  */
-export function addContact(
-	name: string,
-	type: string,
-	loyalty: number,
-	connection: number
-): void {
+export function addContact(name: string, type: string, loyalty: number, connection: number): void {
 	const char = get(characterStore);
 	if (!char) return;
 
@@ -961,10 +1162,7 @@ export function removeContact(contactId: string): void {
 /**
  * Update character identity fields.
  */
-export function updateIdentity(
-	field: keyof Character['identity'],
-	value: string
-): void {
+export function updateIdentity(field: keyof Character['identity'], value: string): void {
 	const char = get(characterStore);
 	if (!char) return;
 
@@ -1058,14 +1256,16 @@ export function addKnowledgeSkill(
 	if (!char) return;
 
 	// Check if skill with same name already exists
-	if (char.knowledgeSkills.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+	if (char.knowledgeSkills.some((s) => s.name.toLowerCase() === name.toLowerCase())) {
 		return;
 	}
 
 	const attribute = getKnowledgeSkillAttribute(category);
 
 	// If this is the first language and no native language exists, make it native
-	const hasNativeLanguage = char.knowledgeSkills.some(s => s.category === 'Language' && s.isNative);
+	const hasNativeLanguage = char.knowledgeSkills.some(
+		(s) => s.category === 'Language' && s.isNative
+	);
 	const shouldBeNative = category === 'Language' && !hasNativeLanguage;
 
 	const newSkill: KnowledgeSkill = {
@@ -1098,14 +1298,14 @@ export function removeKnowledgeSkill(skillId: string): void {
 	if (!char) return;
 
 	// Prevent removal of native languages
-	const skill = char.knowledgeSkills.find(s => s.id === skillId);
+	const skill = char.knowledgeSkills.find((s) => s.id === skillId);
 	if (skill?.isNative) {
 		return; // Cannot remove native language
 	}
 
 	const updated: Character = {
 		...char,
-		knowledgeSkills: char.knowledgeSkills.filter(s => s.id !== skillId),
+		knowledgeSkills: char.knowledgeSkills.filter((s) => s.id !== skillId),
 		updatedAt: new Date().toISOString()
 	};
 
@@ -1124,7 +1324,7 @@ export function setKnowledgeSkillRating(skillId: string, rating: number): void {
 
 	const updated: Character = {
 		...char,
-		knowledgeSkills: char.knowledgeSkills.map(s =>
+		knowledgeSkills: char.knowledgeSkills.map((s) =>
 			s.id === skillId ? { ...s, rating: clampedRating } : s
 		),
 		updatedAt: new Date().toISOString()
@@ -1137,10 +1337,7 @@ export function setKnowledgeSkillRating(skillId: string, rating: number): void {
 /**
  * Update a knowledge skill's category (and recalculate attribute).
  */
-export function setKnowledgeSkillCategory(
-	skillId: string,
-	category: KnowledgeSkillCategory
-): void {
+export function setKnowledgeSkillCategory(skillId: string, category: KnowledgeSkillCategory): void {
 	const char = get(characterStore);
 	if (!char) return;
 
@@ -1148,7 +1345,7 @@ export function setKnowledgeSkillCategory(
 
 	const updated: Character = {
 		...char,
-		knowledgeSkills: char.knowledgeSkills.map(s =>
+		knowledgeSkills: char.knowledgeSkills.map((s) =>
 			s.id === skillId ? { ...s, category, attribute } : s
 		),
 		updatedAt: new Date().toISOString()
@@ -1169,7 +1366,7 @@ export function setKnowledgeSkillSpecialization(
 
 	const updated: Character = {
 		...char,
-		knowledgeSkills: char.knowledgeSkills.map(s =>
+		knowledgeSkills: char.knowledgeSkills.map((s) =>
 			s.id === skillId ? { ...s, specialization } : s
 		),
 		updatedAt: new Date().toISOString()
@@ -1185,7 +1382,7 @@ export function incrementKnowledgeSkill(skillId: string): void {
 	const char = get(characterStore);
 	if (!char) return;
 
-	const skill = char.knowledgeSkills.find(s => s.id === skillId);
+	const skill = char.knowledgeSkills.find((s) => s.id === skillId);
 	if (!skill || skill.rating >= 6) return;
 
 	setKnowledgeSkillRating(skillId, skill.rating + 1);
@@ -1198,7 +1395,7 @@ export function decrementKnowledgeSkill(skillId: string): void {
 	const char = get(characterStore);
 	if (!char) return;
 
-	const skill = char.knowledgeSkills.find(s => s.id === skillId);
+	const skill = char.knowledgeSkills.find((s) => s.id === skillId);
 	if (!skill || skill.rating <= 1) return;
 
 	setKnowledgeSkillRating(skillId, skill.rating - 1);
@@ -1233,14 +1430,11 @@ export const character: Readable<Character | null> = { subscribe: characterStore
 export const currentStep: Readable<WizardStep> = { subscribe: currentStepStore.subscribe };
 
 /** Derived store for remaining BP. */
-export const remainingBP: Readable<number> = derived(
-	character,
-	($char) => {
-		if (!$char) return MAX_BP;
-		const spent = Object.values($char.buildPointsSpent).reduce((a, b) => a + b, 0);
-		return $char.buildPoints - spent;
-	}
-);
+export const remainingBP: Readable<number> = derived(character, ($char) => {
+	if (!$char) return MAX_BP;
+	const spent = Object.values($char.buildPointsSpent).reduce((a, b) => a + b, 0);
+	return $char.buildPoints - spent;
+});
 
 /** Derived store for BP spent breakdown. */
 export const bpBreakdown: Readable<Character['buildPointsSpent'] | null> = derived(
@@ -1254,7 +1448,7 @@ export const visibleWizardSteps: Readable<readonly WizardStepConfig[]> = derived
 	($char) => {
 		const type = getMagicType($char);
 		if (type === 'mundane') {
-			return WIZARD_STEPS.filter(s => s.id !== 'magic');
+			return WIZARD_STEPS.filter((s) => s.id !== 'magic');
 		}
 		return WIZARD_STEPS;
 	}
@@ -1275,7 +1469,7 @@ export const hasMetatype: Readable<boolean> = derived(
 /** Check if character has a native language (mother tongue). */
 export const hasNativeLanguage: Readable<boolean> = derived(
 	character,
-	($char) => $char?.knowledgeSkills.some(s => s.category === 'Language' && s.isNative) ?? false
+	($char) => $char?.knowledgeSkills.some((s) => s.category === 'Language' && s.isNative) ?? false
 );
 
 /** Attribute validation state for BP build limits. */
@@ -1359,7 +1553,13 @@ export function setCustomBuildPoints(amount: number): void {
 const TECHNOMANCER_QUALITIES = ['Technomancer', 'Latent Technomancer'] as const;
 
 /** Magic type based on qualities. */
-export type MagicType = 'mundane' | 'magician' | 'adept' | 'mystic_adept' | 'aspected' | 'technomancer';
+export type MagicType =
+	| 'mundane'
+	| 'magician'
+	| 'adept'
+	| 'mystic_adept'
+	| 'aspected'
+	| 'technomancer';
 
 /**
  * Determine character's magic type from qualities.
@@ -1373,7 +1573,11 @@ export function getMagicType(char: Character | null): MagicType {
 	if (qualityNames.includes('Mystic Adept')) return 'mystic_adept';
 	if (qualityNames.includes('Adept')) return 'adept';
 	if (qualityNames.some((n) => n.startsWith('Aspected Magician'))) return 'aspected';
-	if (qualityNames.some((n) => TECHNOMANCER_QUALITIES.includes(n as typeof TECHNOMANCER_QUALITIES[number]))) {
+	if (
+		qualityNames.some((n) =>
+			TECHNOMANCER_QUALITIES.includes(n as (typeof TECHNOMANCER_QUALITIES)[number])
+		)
+	) {
 		return 'technomancer';
 	}
 
@@ -1381,10 +1585,7 @@ export function getMagicType(char: Character | null): MagicType {
 }
 
 /** Derived store for character's magic type. */
-export const magicType: Readable<MagicType> = derived(
-	character,
-	($char) => getMagicType($char)
-);
+export const magicType: Readable<MagicType> = derived(character, ($char) => getMagicType($char));
 
 /**
  * Initialize magic for a character.
@@ -1929,20 +2130,17 @@ export function removeArmor(armorId: string): void {
  * Add cyberware to the character.
  * Reduces essence based on grade.
  */
-export function addCyberware(
-	cyber: GameCyberware,
-	grade: CyberwareGrade = 'Standard'
-): void {
+export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Standard'): void {
 	const char = get(characterStore);
 	if (!char) return;
 
 	/* Get grade multipliers */
 	const gradeMultipliers: Record<CyberwareGrade, { ess: number; cost: number }> = {
-		'Standard': { ess: 1.0, cost: 1 },
-		'Alphaware': { ess: 0.8, cost: 2 },
-		'Betaware': { ess: 0.7, cost: 4 },
-		'Deltaware': { ess: 0.5, cost: 10 },
-		'Used': { ess: 1.2, cost: 0.5 }
+		Standard: { ess: 1.0, cost: 1 },
+		Alphaware: { ess: 0.8, cost: 2 },
+		Betaware: { ess: 0.7, cost: 4 },
+		Deltaware: { ess: 0.5, cost: 10 },
+		Used: { ess: 1.2, cost: 0.5 }
 	};
 
 	const multiplier = gradeMultipliers[grade];
@@ -2030,8 +2228,8 @@ export function addBioware(
 
 	/* Get grade multipliers */
 	const gradeMultipliers: Record<BiowareGrade, { ess: number; cost: number }> = {
-		'Standard': { ess: 1.0, cost: 1 },
-		'Cultured': { ess: 0.75, cost: 4 }
+		Standard: { ess: 1.0, cost: 1 },
+		Cultured: { ess: 0.75, cost: 4 }
 	};
 
 	const multiplier = gradeMultipliers[grade];
@@ -2226,7 +2424,7 @@ export function removeMartialArt(artId: string): void {
 	if (!art) return;
 
 	/* Refund BP for style + techniques */
-	const bpRefund = MARTIAL_ARTS_COSTS.STYLE + (art.techniques.length * MARTIAL_ARTS_COSTS.TECHNIQUE);
+	const bpRefund = MARTIAL_ARTS_COSTS.STYLE + art.techniques.length * MARTIAL_ARTS_COSTS.TECHNIQUE;
 
 	const updated: Character = {
 		...char,
@@ -2315,7 +2513,11 @@ export function removeMartialArtTechnique(artId: string, technique: string): voi
 /**
  * Add gear to the character's equipment.
  */
-export function addGear(gear: GameGear, quantity: number = 1, containerId: string | null = null): void {
+export function addGear(
+	gear: GameGear,
+	quantity: number = 1,
+	containerId: string | null = null
+): void {
 	const char = get(characterStore);
 	if (!char) return;
 
@@ -2331,9 +2533,10 @@ export function addGear(gear: GameGear, quantity: number = 1, containerId: strin
 	}
 
 	/* Check if gear already exists and stack (only if not in a container) */
-	const existingIndex = containerId === null
-		? char.equipment.gear.findIndex((g) => g.name === gear.name && g.containerId === null)
-		: -1;
+	const existingIndex =
+		containerId === null
+			? char.equipment.gear.findIndex((g) => g.name === gear.name && g.containerId === null)
+			: -1;
 
 	let newGear: readonly CharacterGear[];
 	if (existingIndex >= 0) {
@@ -2366,10 +2569,10 @@ export function addGear(gear: GameGear, quantity: number = 1, containerId: strin
 				newGear = newGear.map((g, i) =>
 					i === containerIndex
 						? {
-							...g,
-							capacityUsed: container.capacityUsed + (gear.capacityCost ?? 1),
-							containedItems: [...container.containedItems, newItem.id]
-						}
+								...g,
+								capacityUsed: container.capacityUsed + (gear.capacityCost ?? 1),
+								containedItems: [...container.containedItems, newItem.id]
+							}
 						: g
 				);
 			}
@@ -2427,10 +2630,10 @@ export function removeGear(gearId: string): void {
 			newGear = newGear.map((g, i) =>
 				i === containerIndex
 					? {
-						...g,
-						capacityUsed: Math.max(0, container.capacityUsed - gear.capacityCost),
-						containedItems: container.containedItems.filter((id) => id !== gearId)
-					}
+							...g,
+							capacityUsed: Math.max(0, container.capacityUsed - gear.capacityCost),
+							containedItems: container.containedItems.filter((id) => id !== gearId)
+						}
 					: g
 			);
 		}
@@ -2452,7 +2655,10 @@ export function removeGear(gearId: string): void {
 /**
  * Move gear to a different container (or out of a container).
  */
-export function moveGearToContainer(gearId: string, newContainerId: string | null): { success: boolean; error?: string } {
+export function moveGearToContainer(
+	gearId: string,
+	newContainerId: string | null
+): { success: boolean; error?: string } {
 	const char = get(characterStore);
 	if (!char) {
 		return { success: false, error: 'No character loaded' };
@@ -2600,10 +2806,7 @@ export function removeLifestyle(): void {
 }
 
 /** Derived store for remaining nuyen. */
-export const remainingNuyen: Readable<number> = derived(
-	character,
-	($char) => $char?.nuyen ?? 0
-);
+export const remainingNuyen: Readable<number> = derived(character, ($char) => $char?.nuyen ?? 0);
 
 /** Derived store for starting nuyen. */
 export const startingNuyen: Readable<number> = derived(
@@ -2655,7 +2858,9 @@ export async function saveCurrentCharacter(): Promise<AsyncResult> {
  * Load a character from Firebase by ID.
  * Sets the loaded character as current.
  */
-export async function loadSavedCharacter(characterId: string): Promise<AsyncResult<Character | null>> {
+export async function loadSavedCharacter(
+	characterId: string
+): Promise<AsyncResult<Character | null>> {
 	const result = await firebaseLoad(characterId);
 
 	if (result.success && result.data) {
@@ -2686,10 +2891,7 @@ export function loadImportedCharacter(importedChar: Character): void {
  * Creates a character with ignoreRules: true for unrestricted editing.
  * Used for quick data entry without validation.
  */
-export function startManualCharacter(
-	userId: string,
-	buildMethod: BuildMethod = 'bp'
-): void {
+export function startManualCharacter(userId: string, buildMethod: BuildMethod = 'bp'): void {
 	const id = generateId();
 	const char = createEmptyCharacter(id, userId, buildMethod);
 
@@ -2773,14 +2975,11 @@ export function hasUnsavedChanges(): boolean {
 }
 
 /** Derived store for unsaved changes indicator. */
-export const isDirty: Readable<boolean> = derived(
-	character,
-	($char) => {
-		if (!$char) return false;
-		const currentVersion = JSON.stringify($char);
-		return currentVersion !== lastSavedVersion;
-	}
-);
+export const isDirty: Readable<boolean> = derived(character, ($char) => {
+	if (!$char) return false;
+	const currentVersion = JSON.stringify($char);
+	return currentVersion !== lastSavedVersion;
+});
 
 /**
  * Auto-save interval (in milliseconds).
@@ -2827,28 +3026,28 @@ export function disableAutoSave(): void {
 export const KARMA_COSTS = {
 	/* Skills */
 	NEW_SKILL: 4,
-	IMPROVE_SKILL_MULTIPLIER: 2, /* New rating × 2 */
+	IMPROVE_SKILL_MULTIPLIER: 2 /* New rating × 2 */,
 	NEW_SPECIALIZATION: 2,
 	NEW_SKILL_GROUP: 10,
-	IMPROVE_SKILL_GROUP_MULTIPLIER: 5, /* New rating × 5 */
+	IMPROVE_SKILL_GROUP_MULTIPLIER: 5 /* New rating × 5 */,
 	NEW_KNOWLEDGE_SKILL: 2,
-	IMPROVE_KNOWLEDGE_SKILL_MULTIPLIER: 1, /* New rating × 1 */
+	IMPROVE_KNOWLEDGE_SKILL_MULTIPLIER: 1 /* New rating × 1 */,
 
 	/* Attributes */
-	IMPROVE_ATTRIBUTE_MULTIPLIER: 5, /* New rating × 5 (standard SR4) */
+	IMPROVE_ATTRIBUTE_MULTIPLIER: 5 /* New rating × 5 (standard SR4) */,
 
 	/* Magic */
 	NEW_SPELL: 5,
 	NEW_COMPLEX_FORM: 5,
-	IMPROVE_COMPLEX_FORM_MULTIPLIER: 1, /* New rating × 1 */
+	IMPROVE_COMPLEX_FORM_MULTIPLIER: 1 /* New rating × 1 */,
 	INITIATION_BASE: 10,
-	INITIATION_MULTIPLIER: 3, /* 10 + (grade × 3) */
+	INITIATION_MULTIPLIER: 3 /* 10 + (grade × 3) */,
 	SUBMERSION_BASE: 10,
-	SUBMERSION_MULTIPLIER: 3, /* 10 + (grade × 3) */
+	SUBMERSION_MULTIPLIER: 3 /* 10 + (grade × 3) */,
 
 	/* Qualities & Contacts */
-	QUALITY_MULTIPLIER: 2, /* BP × 2 to add/remove */
-	CONTACT_MULTIPLIER: 2, /* (Connection + Loyalty) × 2 */
+	QUALITY_MULTIPLIER: 2 /* BP × 2 to add/remove */,
+	CONTACT_MULTIPLIER: 2 /* (Connection + Loyalty) × 2 */,
 
 	/* Resources */
 	NUYEN_PER_KARMA: 2500 /* 1 karma = 2,500¥ */
@@ -2879,7 +3078,7 @@ export const FOCUS_BONDING_COSTS = {
 	MASKING: 5,
 
 	/* Qi Foci */
-	POWER_QI: 2, /* Per power point */
+	POWER_QI: 2 /* Per power point */,
 
 	/* Spirit Foci */
 	SUMMONING: 3,
@@ -3096,7 +3295,10 @@ export function improveAttribute(attributeKey: string): { success: boolean; erro
 	}
 
 	/* Spend karma */
-	const spendResult = spendKarmaInternal(cost, `Improved ${attributeKey.toUpperCase()} to ${newRating}`);
+	const spendResult = spendKarmaInternal(
+		cost,
+		`Improved ${attributeKey.toUpperCase()} to ${newRating}`
+	);
 	if (!spendResult.success) return spendResult;
 
 	/* Update attribute */
@@ -3242,7 +3444,10 @@ export function learnNewSkill(skillName: string): { success: boolean; error?: st
 /**
  * Add a specialization to a skill with karma.
  */
-export function addSpecialization(skillName: string, specialization: string): { success: boolean; error?: string } {
+export function addSpecialization(
+	skillName: string,
+	specialization: string
+): { success: boolean; error?: string } {
 	const char = get(characterStore);
 	if (!char) {
 		return { success: false, error: 'No character loaded' };
@@ -3267,7 +3472,10 @@ export function addSpecialization(skillName: string, specialization: string): { 
 	}
 
 	/* Spend karma */
-	const spendResult = spendKarmaInternal(cost, `Added specialization "${specialization}" to ${skillName}`);
+	const spendResult = spendKarmaInternal(
+		cost,
+		`Added specialization "${specialization}" to ${skillName}`
+	);
 	if (!spendResult.success) return spendResult;
 
 	/* Update skill */
@@ -3460,7 +3668,7 @@ export function getInitiationCost(): number | null {
 	if (!char || !char.magic) return null;
 
 	const newGrade = char.magic.initiateGrade + 1;
-	return KARMA_COSTS.INITIATION_BASE + (newGrade * KARMA_COSTS.INITIATION_MULTIPLIER);
+	return KARMA_COSTS.INITIATION_BASE + newGrade * KARMA_COSTS.INITIATION_MULTIPLIER;
 }
 
 /**
@@ -3479,7 +3687,7 @@ export function initiate(): { success: boolean; error?: string } {
 	}
 
 	const newGrade = char.magic.initiateGrade + 1;
-	const cost = KARMA_COSTS.INITIATION_BASE + (newGrade * KARMA_COSTS.INITIATION_MULTIPLIER);
+	const cost = KARMA_COSTS.INITIATION_BASE + newGrade * KARMA_COSTS.INITIATION_MULTIPLIER;
 
 	if (char.karma < cost) {
 		return { success: false, error: `Not enough karma (need ${cost}, have ${char.karma})` };
@@ -3514,7 +3722,7 @@ export function initiate(): { success: boolean; error?: string } {
  */
 export function getSubmersionCost(currentGrade: number): number {
 	const newGrade = currentGrade + 1;
-	return KARMA_COSTS.SUBMERSION_BASE + (newGrade * KARMA_COSTS.SUBMERSION_MULTIPLIER);
+	return KARMA_COSTS.SUBMERSION_BASE + newGrade * KARMA_COSTS.SUBMERSION_MULTIPLIER;
 }
 
 /**
@@ -3534,7 +3742,7 @@ export function submerge(): { success: boolean; error?: string } {
 	}
 
 	const newGrade = char.resonance.submersionGrade + 1;
-	const cost = KARMA_COSTS.SUBMERSION_BASE + (newGrade * KARMA_COSTS.SUBMERSION_MULTIPLIER);
+	const cost = KARMA_COSTS.SUBMERSION_BASE + newGrade * KARMA_COSTS.SUBMERSION_MULTIPLIER;
 
 	if (char.karma < cost) {
 		return { success: false, error: `Not enough karma (need ${cost}, have ${char.karma})` };
@@ -3998,9 +4206,10 @@ export function updateCondition(type: 'physical' | 'stun', value: number): void 
 	characterStore.update((c) => {
 		if (!c) return c;
 
-		const maxValue = type === 'physical'
-			? Math.ceil((c.attributes.bod.base + c.attributes.bod.bonus) / 2) + 8
-			: Math.ceil((c.attributes.wil.base + c.attributes.wil.bonus) / 2) + 8;
+		const maxValue =
+			type === 'physical'
+				? Math.ceil((c.attributes.bod.base + c.attributes.bod.bonus) / 2) + 8
+				: Math.ceil((c.attributes.wil.base + c.attributes.wil.bonus) / 2) + 8;
 
 		const clampedValue = Math.max(0, Math.min(value, maxValue));
 

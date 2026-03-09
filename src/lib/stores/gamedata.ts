@@ -139,6 +139,8 @@ export interface GameQuality {
 	bonus?: QualityBonus;
 	/** Human-readable effect description */
 	effect?: string;
+	/** Prompt label for qualities requiring custom description (e.g., "What are you allergic to?") */
+	descriptionLabel?: string;
 }
 
 /** Spell from game data. */
@@ -384,9 +386,7 @@ function limitArray<T>(arr: T[] | undefined): T[] {
  */
 function filterCyberwareCategories(categories: unknown[] | undefined): string[] {
 	if (!categories) return [];
-	return categories
-		.filter((cat): cat is string => typeof cat === 'string')
-		.slice(0, MAX_ITEMS);
+	return categories.filter((cat): cat is string => typeof cat === 'string').slice(0, MAX_ITEMS);
 }
 
 /**
@@ -423,7 +423,11 @@ export async function loadGameData(): Promise<void> {
 			streamsData
 		] = await Promise.all([
 			fetchDataFile<{ categories: string[]; metatypes: Metatype[] }>('metatypes.json'),
-			fetchDataFile<{ skillGroups: string[]; categories: SkillCategoryDef[]; skills: SkillDefinition[] }>('skills.json'),
+			fetchDataFile<{
+				skillGroups: string[];
+				categories: SkillCategoryDef[];
+				skills: SkillDefinition[];
+			}>('skills.json'),
 			fetchDataFile<{ categories: string[]; qualities: GameQuality[] }>('qualities.json'),
 			fetchDataFile<{ categories: string[]; spells: GameSpell[] }>('spells.json'),
 			fetchDataFile<{ powers: GamePower[] }>('powers.json'),
@@ -433,7 +437,11 @@ export async function loadGameData(): Promise<void> {
 			fetchDataFile<{ categories: string[]; programs: GameProgram[] }>('programs.json'),
 			fetchDataFile<{ categories: string[]; weapons: GameWeapon[] }>('weapons.json'),
 			fetchDataFile<{ categories: string[]; armor: GameArmor[] }>('armor.json'),
-			fetchDataFile<{ categories: string[]; grades: CyberwareGradeMultiplier[]; cyberware: GameCyberware[] }>('cyberware.json'),
+			fetchDataFile<{
+				categories: string[];
+				grades: CyberwareGradeMultiplier[];
+				cyberware: GameCyberware[];
+			}>('cyberware.json'),
 			fetchDataFile<{ categories: string[]; gear: GameGear[] }>('gear.json'),
 			fetchDataFile<{ categories: string[]; biowares: GameBioware[] }>('bioware.json'),
 			fetchDataFile<{ categories: string[]; vehicles: GameVehicle[] }>('vehicles.json'),
@@ -498,64 +506,38 @@ export const gameData: Readable<GameData> = { subscribe: gameDataStore.subscribe
 export const gameDataLoading: Readable<LoadingState> = { subscribe: loadingStore.subscribe };
 
 /** Derived store for metatypes only. */
-export const metatypes: Readable<Metatype[]> = derived(
-	gameData,
-	($data) => $data.metatypes
-);
+export const metatypes: Readable<Metatype[]> = derived(gameData, ($data) => $data.metatypes);
 
 /** Derived store for skills only. */
-export const skills: Readable<SkillDefinition[]> = derived(
-	gameData,
-	($data) => $data.skills
-);
+export const skills: Readable<SkillDefinition[]> = derived(gameData, ($data) => $data.skills);
 
 /** Derived store for qualities only. */
-export const qualities: Readable<GameQuality[]> = derived(
-	gameData,
-	($data) => $data.qualities
-);
+export const qualities: Readable<GameQuality[]> = derived(gameData, ($data) => $data.qualities);
 
 /** Derived store for positive qualities. */
-export const positiveQualities: Readable<GameQuality[]> = derived(
-	gameData,
-	($data) => $data.qualities.filter((q) => q.category === 'Positive')
+export const positiveQualities: Readable<GameQuality[]> = derived(gameData, ($data) =>
+	$data.qualities.filter((q) => q.category === 'Positive')
 );
 
 /** Derived store for negative qualities. */
-export const negativeQualities: Readable<GameQuality[]> = derived(
-	gameData,
-	($data) => $data.qualities.filter((q) => q.category === 'Negative')
+export const negativeQualities: Readable<GameQuality[]> = derived(gameData, ($data) =>
+	$data.qualities.filter((q) => q.category === 'Negative')
 );
 
 /** Derived store for spells only. */
-export const spells: Readable<GameSpell[]> = derived(
-	gameData,
-	($data) => $data.spells
-);
+export const spells: Readable<GameSpell[]> = derived(gameData, ($data) => $data.spells);
 
 /** Derived store for powers only. */
-export const powers: Readable<GamePower[]> = derived(
-	gameData,
-	($data) => $data.powers
-);
+export const powers: Readable<GamePower[]> = derived(gameData, ($data) => $data.powers);
 
 /** Derived store for traditions only. */
-export const traditions: Readable<GameTradition[]> = derived(
-	gameData,
-	($data) => $data.traditions
-);
+export const traditions: Readable<GameTradition[]> = derived(gameData, ($data) => $data.traditions);
 
 /** Derived store for mentor spirits. */
-export const mentors: Readable<GameMentor[]> = derived(
-	gameData,
-	($data) => $data.mentors
-);
+export const mentors: Readable<GameMentor[]> = derived(gameData, ($data) => $data.mentors);
 
 /** Derived store for programs (complex forms for technomancers). */
-export const programs: Readable<GameProgram[]> = derived(
-	gameData,
-	($data) => $data.programs
-);
+export const programs: Readable<GameProgram[]> = derived(gameData, ($data) => $data.programs);
 
 /** Derived store for program categories. */
 export const programCategories: Readable<string[]> = derived(
@@ -567,10 +549,7 @@ export const programCategories: Readable<string[]> = derived(
  * Find metatype by name.
  * Returns undefined if not found.
  */
-export function findMetatype(
-	data: GameData,
-	name: string
-): Metatype | undefined {
+export function findMetatype(data: GameData, name: string): Metatype | undefined {
 	/* Assert: name should not be empty */
 	if (!name) {
 		return undefined;
@@ -582,10 +561,7 @@ export function findMetatype(
  * Find skill by name.
  * Returns undefined if not found.
  */
-export function findSkill(
-	data: GameData,
-	name: string
-): SkillDefinition | undefined {
+export function findSkill(data: GameData, name: string): SkillDefinition | undefined {
 	/* Assert: name should not be empty */
 	if (!name) {
 		return undefined;
@@ -597,10 +573,7 @@ export function findSkill(
  * Find quality by name.
  * Returns undefined if not found.
  */
-export function findQuality(
-	data: GameData,
-	name: string
-): GameQuality | undefined {
+export function findQuality(data: GameData, name: string): GameQuality | undefined {
 	/* Assert: name should not be empty */
 	if (!name) {
 		return undefined;
@@ -612,10 +585,7 @@ export function findQuality(
  * Filter skills by category.
  * Returns skills matching the given category.
  */
-export function filterSkillsByCategory(
-	data: GameData,
-	category: string
-): SkillDefinition[] {
+export function filterSkillsByCategory(data: GameData, category: string): SkillDefinition[] {
 	return data.skills.filter((s) => s.category === category);
 }
 
@@ -623,10 +593,7 @@ export function filterSkillsByCategory(
  * Filter skills by skill group.
  * Returns skills belonging to the given group.
  */
-export function filterSkillsByGroup(
-	data: GameData,
-	group: string
-): SkillDefinition[] {
+export function filterSkillsByGroup(data: GameData, group: string): SkillDefinition[] {
 	return data.skills.filter((s) => s.skillgroup === group);
 }
 
@@ -635,34 +602,19 @@ export function filterSkillsByGroup(
  * ============================================ */
 
 /** Derived store for weapons. */
-export const weapons: Readable<GameWeapon[]> = derived(
-	gameData,
-	($data) => $data.weapons
-);
+export const weapons: Readable<GameWeapon[]> = derived(gameData, ($data) => $data.weapons);
 
 /** Derived store for armor. */
-export const armor: Readable<GameArmor[]> = derived(
-	gameData,
-	($data) => $data.armor
-);
+export const armor: Readable<GameArmor[]> = derived(gameData, ($data) => $data.armor);
 
 /** Derived store for cyberware. */
-export const cyberware: Readable<GameCyberware[]> = derived(
-	gameData,
-	($data) => $data.cyberware
-);
+export const cyberware: Readable<GameCyberware[]> = derived(gameData, ($data) => $data.cyberware);
 
 /** Derived store for gear. */
-export const gear: Readable<GameGear[]> = derived(
-	gameData,
-	($data) => $data.gear
-);
+export const gear: Readable<GameGear[]> = derived(gameData, ($data) => $data.gear);
 
 /** Derived store for lifestyles. */
-export const lifestyles: Readable<GameLifestyle[]> = derived(
-	gameData,
-	($data) => $data.lifestyles
-);
+export const lifestyles: Readable<GameLifestyle[]> = derived(gameData, ($data) => $data.lifestyles);
 
 /* ============================================
  * Equipment Lookup Functions
@@ -671,10 +623,7 @@ export const lifestyles: Readable<GameLifestyle[]> = derived(
 /**
  * Find weapon by name.
  */
-export function findWeapon(
-	data: GameData,
-	name: string
-): GameWeapon | undefined {
+export function findWeapon(data: GameData, name: string): GameWeapon | undefined {
 	if (!name) return undefined;
 	return data.weapons.find((w) => w.name === name);
 }
@@ -682,10 +631,7 @@ export function findWeapon(
 /**
  * Find armor by name.
  */
-export function findArmor(
-	data: GameData,
-	name: string
-): GameArmor | undefined {
+export function findArmor(data: GameData, name: string): GameArmor | undefined {
 	if (!name) return undefined;
 	return data.armor.find((a) => a.name === name);
 }
@@ -693,10 +639,7 @@ export function findArmor(
 /**
  * Find cyberware by name.
  */
-export function findCyberware(
-	data: GameData,
-	name: string
-): GameCyberware | undefined {
+export function findCyberware(data: GameData, name: string): GameCyberware | undefined {
 	if (!name) return undefined;
 	return data.cyberware.find((c) => c.name === name);
 }
@@ -704,10 +647,7 @@ export function findCyberware(
 /**
  * Find gear by name.
  */
-export function findGear(
-	data: GameData,
-	name: string
-): GameGear | undefined {
+export function findGear(data: GameData, name: string): GameGear | undefined {
 	if (!name) return undefined;
 	return data.gear.find((g) => g.name === name);
 }
@@ -715,40 +655,28 @@ export function findGear(
 /**
  * Filter weapons by category.
  */
-export function filterWeaponsByCategory(
-	data: GameData,
-	category: string
-): GameWeapon[] {
+export function filterWeaponsByCategory(data: GameData, category: string): GameWeapon[] {
 	return data.weapons.filter((w) => w.category === category);
 }
 
 /**
  * Filter armor by category.
  */
-export function filterArmorByCategory(
-	data: GameData,
-	category: string
-): GameArmor[] {
+export function filterArmorByCategory(data: GameData, category: string): GameArmor[] {
 	return data.armor.filter((a) => a.category === category);
 }
 
 /**
  * Filter cyberware by category.
  */
-export function filterCyberwareByCategory(
-	data: GameData,
-	category: string
-): GameCyberware[] {
+export function filterCyberwareByCategory(data: GameData, category: string): GameCyberware[] {
 	return data.cyberware.filter((c) => c.category === category);
 }
 
 /**
  * Filter gear by category.
  */
-export function filterGearByCategory(
-	data: GameData,
-	category: string
-): GameGear[] {
+export function filterGearByCategory(data: GameData, category: string): GameGear[] {
 	return data.gear.filter((g) => g.category === category);
 }
 
@@ -757,10 +685,7 @@ export function filterGearByCategory(
  * ============================================ */
 
 /** Derived store for bioware. */
-export const bioware: Readable<GameBioware[]> = derived(
-	gameData,
-	($data) => $data.bioware
-);
+export const bioware: Readable<GameBioware[]> = derived(gameData, ($data) => $data.bioware);
 
 /** Derived store for bioware categories. */
 export const biowareCategories: Readable<string[]> = derived(
@@ -771,10 +696,7 @@ export const biowareCategories: Readable<string[]> = derived(
 /**
  * Find bioware by name.
  */
-export function findBioware(
-	data: GameData,
-	name: string
-): GameBioware | undefined {
+export function findBioware(data: GameData, name: string): GameBioware | undefined {
 	if (!name) return undefined;
 	return data.bioware.find((b) => b.name === name);
 }
@@ -782,10 +704,7 @@ export function findBioware(
 /**
  * Filter bioware by category.
  */
-export function filterBiowareByCategory(
-	data: GameData,
-	category: string
-): GameBioware[] {
+export function filterBiowareByCategory(data: GameData, category: string): GameBioware[] {
 	return data.bioware.filter((b) => b.category === category);
 }
 
@@ -794,10 +713,7 @@ export function filterBiowareByCategory(
  * ============================================ */
 
 /** Derived store for vehicles. */
-export const vehicles: Readable<GameVehicle[]> = derived(
-	gameData,
-	($data) => $data.vehicles
-);
+export const vehicles: Readable<GameVehicle[]> = derived(gameData, ($data) => $data.vehicles);
 
 /** Derived store for vehicle categories. */
 export const vehicleCategories: Readable<string[]> = derived(
@@ -806,18 +722,14 @@ export const vehicleCategories: Readable<string[]> = derived(
 );
 
 /** Derived store for drones only (categories that start with "Drones:"). */
-export const drones: Readable<GameVehicle[]> = derived(
-	gameData,
-	($data) => $data.vehicles.filter((v) => v.category.startsWith('Drones:'))
+export const drones: Readable<GameVehicle[]> = derived(gameData, ($data) =>
+	$data.vehicles.filter((v) => v.category.startsWith('Drones:'))
 );
 
 /**
  * Find vehicle by name.
  */
-export function findVehicle(
-	data: GameData,
-	name: string
-): GameVehicle | undefined {
+export function findVehicle(data: GameData, name: string): GameVehicle | undefined {
 	if (!name) return undefined;
 	return data.vehicles.find((v) => v.name === name);
 }
@@ -825,10 +737,7 @@ export function findVehicle(
 /**
  * Filter vehicles by category.
  */
-export function filterVehiclesByCategory(
-	data: GameData,
-	category: string
-): GameVehicle[] {
+export function filterVehiclesByCategory(data: GameData, category: string): GameVehicle[] {
 	return data.vehicles.filter((v) => v.category === category);
 }
 
@@ -845,10 +754,7 @@ export const martialArts: Readable<GameMartialArt[]> = derived(
 /**
  * Find martial art by name.
  */
-export function findMartialArt(
-	data: GameData,
-	name: string
-): GameMartialArt | undefined {
+export function findMartialArt(data: GameData, name: string): GameMartialArt | undefined {
 	if (!name) return undefined;
 	return data.martialArts.find((m) => m.name === name);
 }
@@ -858,24 +764,15 @@ export function findMartialArt(
  * ============================================ */
 
 /** Derived store for technomancer echoes. */
-export const echoes: Readable<GameEcho[]> = derived(
-	gameData,
-	($data) => $data.echoes
-);
+export const echoes: Readable<GameEcho[]> = derived(gameData, ($data) => $data.echoes);
 
 /** Derived store for technomancer streams. */
-export const streams: Readable<GameStream[]> = derived(
-	gameData,
-	($data) => $data.streams
-);
+export const streams: Readable<GameStream[]> = derived(gameData, ($data) => $data.streams);
 
 /**
  * Find echo by name.
  */
-export function findEcho(
-	data: GameData,
-	name: string
-): GameEcho | undefined {
+export function findEcho(data: GameData, name: string): GameEcho | undefined {
 	if (!name) return undefined;
 	return data.echoes.find((e) => e.name === name);
 }
@@ -883,10 +780,7 @@ export function findEcho(
 /**
  * Find stream by name.
  */
-export function findStream(
-	data: GameData,
-	name: string
-): GameStream | undefined {
+export function findStream(data: GameData, name: string): GameStream | undefined {
 	if (!name) return undefined;
 	return data.streams.find((s) => s.name === name);
 }

@@ -26,17 +26,20 @@ A modern web-based Shadowrun 4th Edition character generator and career manager.
 ### Setup
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/HalfBakedFullyNuts/ChummerGenSR4.git
    cd ChummerGenSR4/chummer-web
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Create your environment file:
+
    ```bash
    cp .env.example .env
    ```

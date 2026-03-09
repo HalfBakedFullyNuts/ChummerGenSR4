@@ -22,10 +22,7 @@
 		});
 	}
 
-	function filterMetatypes(
-		types: readonly Metatype[],
-		category: string
-	): Metatype[] {
+	function filterMetatypes(types: readonly Metatype[], category: string): Metatype[] {
 		return types.filter((m) => m.category === category);
 	}
 
@@ -44,9 +41,7 @@
 	}
 
 	$: categories = $metatypes ? getCategories($metatypes) : [];
-	$: filteredMetatypes = $metatypes
-		? filterMetatypes($metatypes, selectedCategory)
-		: [];
+	$: filteredMetatypes = $metatypes ? filterMetatypes($metatypes, selectedCategory) : [];
 	$: selectedMetatype = $character?.identity.metatype ?? null;
 	$: selectedVariant = $character?.identity.metavariant ?? null;
 </script>
@@ -58,9 +53,7 @@
 			{#each categories as cat}
 				<button
 					class="cw-btn px-4 py-2 text-xs uppercase tracking-wide transition-all
-						{selectedCategory === cat
-							? 'cw-btn-primary'
-							: 'cw-btn-secondary'}"
+						{selectedCategory === cat ? 'cw-btn-primary' : 'cw-btn-secondary'}"
 					on:click={() => (selectedCategory = cat)}
 				>
 					{cat}
@@ -74,16 +67,17 @@
 		{#each filteredMetatypes as metatype}
 			{@const isSelected = selectedMetatype === metatype.name && !selectedVariant}
 			{@const isThisMetatypeSelected = selectedMetatype === metatype.name}
-			{@const activeVariant = isThisMetatypeSelected && selectedVariant
-				? metatype.metavariants.find(v => v.name === selectedVariant)
-				: null}
+			{@const activeVariant =
+				isThisMetatypeSelected && selectedVariant
+					? metatype.metavariants.find((v) => v.name === selectedVariant)
+					: null}
 			{@const isHighlighted = isSelected || activeVariant}
 			{@const displayBP = activeVariant ? activeVariant.bp : metatype.bp}
 			<button
 				class="text-left transition-all flex flex-col rounded-lg p-4
 					{isHighlighted
-						? 'bg-primary-main/10 border-2 border-primary-main shadow-lg shadow-primary-main/20'
-						: 'bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-primary-main/50'}"
+					? 'bg-primary-main/10 border-2 border-primary-main shadow-lg shadow-primary-main/20'
+					: 'bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-primary-main/50'}"
 				on:click={() => selectMetatype(metatype.name)}
 			>
 				<!-- Fixed Top Section: Header + Attributes -->
@@ -96,7 +90,9 @@
 								<span class="text-sm font-normal text-gray-700 ml-1">({selectedVariant})</span>
 							{/if}
 						</h3>
-						<span class="cw-bp-cost {isHighlighted ? 'bg-primary-main text-black' : ''}">{displayBP} BP</span>
+						<span class="cw-bp-cost {isHighlighted ? 'bg-primary-main text-black' : ''}"
+							>{displayBP} BP</span
+						>
 					</div>
 
 					<!-- Attributes Grid -->
@@ -190,15 +186,13 @@
 							<div class="flex flex-wrap gap-1">
 								{#each metatype.metavariants as variant}
 									{@const isVariantSelected =
-										selectedMetatype === metatype.name &&
-										selectedVariant === variant.name}
+										selectedMetatype === metatype.name && selectedVariant === variant.name}
 									<button
 										class="px-2 py-0.5 text-xs transition-all border rounded
 											{isVariantSelected
-												? 'bg-primary-main/20 border-primary-main text-black'
-												: 'bg-gray-100 border-gray-300 text-gray-700 hover:border-primary-main/50'}"
-										on:click|stopPropagation={() =>
-											selectMetavariant(metatype.name, variant.name)}
+											? 'bg-primary-main/20 border-primary-main text-black'
+											: 'bg-gray-100 border-gray-300 text-gray-700 hover:border-primary-main/50'}"
+										on:click|stopPropagation={() => selectMetavariant(metatype.name, variant.name)}
 									>
 										{variant.name}
 									</button>

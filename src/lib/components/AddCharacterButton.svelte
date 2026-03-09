@@ -4,10 +4,7 @@
 	import type { DropdownItem } from './ui/DropdownMenu.svelte';
 	import { importFromFile as importXmlFromFile } from '$lib/xml';
 	import { importFromFile as importJsonFromFile } from '$lib/json/importer';
-	import {
-		loadImportedCharacter,
-		saveCurrentCharacter
-	} from '$stores/character';
+	import { loadImportedCharacter, saveCurrentCharacter } from '$stores/character';
 
 	/** Visual variant of the button. */
 	export let variant: 'card' | 'button' | 'icon' = 'button';
@@ -91,8 +88,8 @@
 		try {
 			/* Determine file type by extension */
 			const isJson = file.name.toLowerCase().endsWith('.json');
-			const isXml = file.name.toLowerCase().endsWith('.xml') ||
-			              file.name.toLowerCase().endsWith('.chum');
+			const isXml =
+				file.name.toLowerCase().endsWith('.xml') || file.name.toLowerCase().endsWith('.chum');
 
 			let result;
 			if (isJson) {
@@ -143,13 +140,18 @@
 	<div class="cw-add-character-error" role="alert">
 		<span class="material-icons text-sm">error</span>
 		{error}
-		<button class="ml-2 hover:text-white" on:click={() => error = null}>
+		<button class="ml-2 hover:text-white" on:click={() => (error = null)}>
 			<span class="material-icons text-sm">close</span>
 		</button>
 	</div>
 {/if}
 
-<DropdownMenu items={menuItems} {position} disabled={disabled || importing} on:select={handleSelect}>
+<DropdownMenu
+	items={menuItems}
+	{position}
+	disabled={disabled || importing}
+	on:select={handleSelect}
+>
 	<svelte:fragment slot="trigger">
 		{#if variant === 'card'}
 			<!-- Card variant - large clickable card -->
@@ -309,8 +311,12 @@
 	}
 
 	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	:global(.animate-spin) {

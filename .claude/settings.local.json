@@ -1,20 +1,33 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(npm run check:*)",
-      "Bash(npm run build:*)",
-      "Bash(findstr:*)",
-      "Bash(tasklist /FI \"IMAGENAME eq node.exe\")",
-      "Bash(find:*)",
-      "WebSearch",
-      "Bash(git push:*)",
-      "Bash(git fetch:*)",
-      "Bash(git checkout:*)",
-      "Bash(npx svelte-check:*)",
-      "Bash(git add:*)",
-      "Bash(docker compose logs:*)"
-    ],
-    "deny": [],
-    "ask": []
-  }
+	"permissions": {
+		"allow": [
+			"Bash(npm run check:*)",
+			"Bash(npm run build:*)",
+			"Bash(findstr:*)",
+			"Bash(tasklist /FI \"IMAGENAME eq node.exe\")",
+			"Bash(find:*)",
+			"WebSearch",
+			"Bash(git push:*)",
+			"Bash(git fetch:*)",
+			"Bash(git checkout:*)",
+			"Bash(npx svelte-check:*)",
+			"Bash(git add:*)",
+			"Bash(docker compose logs:*)",
+			"mcp__chrome-devtools__list_pages",
+			"mcp__chrome-devtools__take_screenshot",
+			"mcp__chrome-devtools__list_console_messages",
+			"mcp__chrome-devtools__navigate_page",
+			"Bash(npm run dev:*)",
+			"mcp__chrome-devtools__take_snapshot",
+			"mcp__chrome-devtools__click",
+			"mcp__chrome-devtools__fill",
+			"Bash(git commit -m \"$(cat <<''EOF''\nfeat: Add infected quality metatype filtering and two-column variant layout\n\n- Add HMHVV strain-based metatype restrictions for Infected qualities\n- Filter infected variants by character''s metatype (e.g., Vampire for Human, Banshee for Elf)\n- Add metavariant-to-base-metatype mapping for proper restriction checks\n- Update variant selector modal to display in two parallel columns\n- Fix karma build costs to use correct creation values (not career mode)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+			"Bash(docker compose:*)",
+			"Bash(cat:*)",
+			"mcp__chrome-devtools__press_key",
+			"mcp__chrome-devtools__evaluate_script"
+		],
+		"deny": [],
+		"ask": []
+	}
 }

@@ -156,15 +156,13 @@ function applyQualityBonus(
 			}
 			if (attr.min !== undefined) {
 				const current = bonuses.attributes.min[code];
-				bonuses.attributes.min[code] = current !== undefined
-					? Math.max(current, attr.min)
-					: attr.min;
+				bonuses.attributes.min[code] =
+					current !== undefined ? Math.max(current, attr.min) : attr.min;
 			}
 			if (attr.max !== undefined) {
 				const current = bonuses.attributes.max[code];
-				bonuses.attributes.max[code] = current !== undefined
-					? Math.min(current, attr.max)
-					: attr.max;
+				bonuses.attributes.max[code] =
+					current !== undefined ? Math.min(current, attr.max) : attr.max;
 			}
 		}
 	}
@@ -183,7 +181,8 @@ function applyQualityBonus(
 			bonuses.attributes.max[code] = (current ?? 0) - bonus.selectattribute.min;
 		}
 		if (bonus.selectattribute.val !== undefined) {
-			bonuses.attributes.bonus[code] = (bonuses.attributes.bonus[code] ?? 0) + bonus.selectattribute.val;
+			bonuses.attributes.bonus[code] =
+				(bonuses.attributes.bonus[code] ?? 0) + bonus.selectattribute.val;
 		}
 	}
 
@@ -382,7 +381,7 @@ export const qualityBonuses: Readable<QualityBonuses> = derived(
 		for (const charQuality of $character.qualities) {
 			// Find the game data for this quality
 			const baseName = charQuality.name.replace(/\s+#\d+$/, '');
-			const gameQuality = $gameData.qualities.find(q => q.name === baseName);
+			const gameQuality = $gameData.qualities.find((q) => q.name === baseName);
 
 			if (gameQuality?.bonus) {
 				applyQualityBonus(
@@ -435,9 +434,6 @@ export function getAttributeMaxAdjustment(
 /**
  * Get the effective attribute bonus from qualities.
  */
-export function getAttributeBonus(
-	attrCode: AttributeCode,
-	bonuses: QualityBonuses
-): number {
+export function getAttributeBonus(attrCode: AttributeCode, bonuses: QualityBonuses): number {
 	return bonuses.attributes.bonus[attrCode] ?? 0;
 }

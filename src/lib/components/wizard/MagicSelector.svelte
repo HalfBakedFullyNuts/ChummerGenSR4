@@ -61,8 +61,7 @@
 	): GameSpell[] {
 		return allSpells.filter((s) => {
 			const matchesCat = s.category === category;
-			const matchesSearch =
-				search === '' || s.name.toLowerCase().includes(search.toLowerCase());
+			const matchesSearch = search === '' || s.name.toLowerCase().includes(search.toLowerCase());
 			return matchesCat && matchesSearch;
 		});
 	}
@@ -141,8 +140,7 @@
 	): GameProgram[] {
 		return allPrograms.filter((p) => {
 			const matchesCat = category === 'All' || p.category === category;
-			const matchesSearch =
-				search === '' || p.name.toLowerCase().includes(search.toLowerCase());
+			const matchesSearch = search === '' || p.name.toLowerCase().includes(search.toLowerCase());
 			return matchesCat && matchesSearch;
 		});
 	}
@@ -161,8 +159,8 @@
 			/* Convert program to complex form with default values */
 			addComplexForm({
 				name: program.name,
-				target: 'Self', /* Default - most forms target self or device */
-				duration: 'Sustained', /* Default for most complex forms */
+				target: 'Self' /* Default - most forms target self or device */,
+				duration: 'Sustained' /* Default for most complex forms */,
 				fv: 'Rating' /* Default fading value */
 			});
 		}
@@ -173,12 +171,15 @@
 	$: filteredPowers = $powers ? filterPowers($powers, powerSearch) : [];
 	$: selectedTradition = $character?.magic?.tradition ?? null;
 	$: selectedMentor = $character?.magic?.mentor ?? null;
-	$: selectedMentorData = selectedMentor ? $mentors?.find((m) => m.name === selectedMentor) ?? null : null;
+	$: selectedMentorData = selectedMentor
+		? ($mentors?.find((m) => m.name === selectedMentor) ?? null)
+		: null;
 	$: spellCount = $character?.magic?.spells.length ?? 0;
 	$: spellBP = spellCount * 5;
 	$: powerPointsUsed = $character?.magic?.powerPointsUsed ?? 0;
 	$: powerPointsTotal = $character?.magic?.powerPoints ?? 0;
-	$: canHaveSpells = $magicType === 'magician' || $magicType === 'mystic_adept' || $magicType === 'aspected';
+	$: canHaveSpells =
+		$magicType === 'magician' || $magicType === 'mystic_adept' || $magicType === 'aspected';
 	$: canHavePowers = $magicType === 'adept' || $magicType === 'mystic_adept';
 
 	/** Mentor spirit search. */
@@ -206,12 +207,10 @@
 				You haven't selected any magical or technomancer qualities.
 			</p>
 			<p class="text-text-muted text-sm">
-				Go back to the Qualities step to add Magician, Adept, Mystic Adept, or Technomancer
-				if you want magical abilities.
+				Go back to the Qualities step to add Magician, Adept, Mystic Adept, or Technomancer if you
+				want magical abilities.
 			</p>
-			<p class="text-primary-dark mt-4">
-				You can skip this step.
-			</p>
+			<p class="text-primary-dark mt-4">You can skip this step.</p>
 		</div>
 	{:else if $magicType === 'technomancer'}
 		<!-- Technomancer -->
@@ -237,8 +236,8 @@
 			<button
 				class="px-4 py-2 rounded transition-colors
 					{techTab === 'stream'
-						? 'bg-primary-main text-white'
-						: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+					? 'bg-primary-main text-white'
+					: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
 				on:click={() => (techTab = 'stream')}
 			>
 				Stream
@@ -246,8 +245,8 @@
 			<button
 				class="px-4 py-2 rounded transition-colors
 					{techTab === 'forms'
-						? 'bg-primary-main text-white'
-						: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+					? 'bg-primary-main text-white'
+					: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
 				on:click={() => (techTab = 'forms')}
 			>
 				Complex Forms ({formCount})
@@ -267,8 +266,8 @@
 						<button
 							class="p-3 rounded text-left transition-all
 								{isSelected
-									? 'bg-primary-main/20 border border-primary-dark'
-									: 'bg-surface hover:bg-surface-variant border border-transparent'}"
+								? 'bg-primary-main/20 border border-primary-dark'
+								: 'bg-surface hover:bg-surface-variant border border-transparent'}"
 							on:click={() => selectStream(stream.name)}
 						>
 							<div class="font-medium text-text-primary">
@@ -278,7 +277,9 @@
 								Drain: {stream.drain}
 							</div>
 							<div class="text-text-secondary text-xs mt-1 line-clamp-1">
-								Sprites: {stream.sprites.slice(0, 3).join(', ')}{stream.sprites.length > 3 ? '...' : ''}
+								Sprites: {stream.sprites.slice(0, 3).join(', ')}{stream.sprites.length > 3
+									? '...'
+									: ''}
 							</div>
 							<div class="text-text-muted text-xs mt-1">
 								{stream.source} p.{stream.page}
@@ -287,9 +288,7 @@
 					{/each}
 				</div>
 				{#if !$streams?.length}
-					<div class="text-center text-text-muted py-4">
-						Loading streams data...
-					</div>
+					<div class="text-center text-text-muted py-4">Loading streams data...</div>
 				{/if}
 			</div>
 		{/if}
@@ -322,8 +321,8 @@
 						<button
 							class="px-3 py-1 rounded text-sm whitespace-nowrap transition-colors
 								{formCategory === 'All'
-									? 'bg-primary-main text-white'
-									: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+								? 'bg-primary-main text-white'
+								: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
 							on:click={() => (formCategory = 'All')}
 						>
 							All
@@ -332,8 +331,8 @@
 							<button
 								class="px-3 py-1 rounded text-sm whitespace-nowrap transition-colors
 									{formCategory === cat
-										? 'bg-primary-main text-white'
-										: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+									? 'bg-primary-main text-white'
+									: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
 								on:click={() => (formCategory = cat)}
 							>
 								{cat}
@@ -355,8 +354,8 @@
 						<button
 							class="p-3 rounded text-left transition-all
 								{selected
-									? 'bg-primary-main/20 border border-primary-dark'
-									: 'bg-surface hover:bg-surface-variant border border-transparent'}"
+								? 'bg-primary-main/20 border border-primary-dark'
+								: 'bg-surface hover:bg-surface-variant border border-transparent'}"
 							on:click={() => toggleComplexForm(program)}
 						>
 							<div class="flex items-center justify-between">
@@ -373,9 +372,7 @@
 				</div>
 
 				{#if filteredForms.length === 0}
-					<div class="text-center text-text-muted py-8">
-						No complex forms match your filter.
-					</div>
+					<div class="text-center text-text-muted py-8">No complex forms match your filter.</div>
 				{/if}
 			</div>
 		{/if}
@@ -413,8 +410,8 @@
 			<button
 				class="px-4 py-2 rounded transition-colors
 					{activeTab === 'tradition'
-						? 'bg-primary-main text-white'
-						: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+					? 'bg-primary-main text-white'
+					: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
 				on:click={() => (activeTab = 'tradition')}
 			>
 				Tradition
@@ -423,8 +420,8 @@
 				<button
 					class="px-4 py-2 rounded transition-colors
 						{activeTab === 'spells'
-							? 'bg-primary-main text-white'
-							: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+						? 'bg-primary-main text-white'
+						: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
 					on:click={() => (activeTab = 'spells')}
 				>
 					Spells ({spellCount})
@@ -434,8 +431,8 @@
 				<button
 					class="px-4 py-2 rounded transition-colors
 						{activeTab === 'powers'
-							? 'bg-primary-main text-white'
-							: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+						? 'bg-primary-main text-white'
+						: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
 					on:click={() => (activeTab = 'powers')}
 				>
 					Powers
@@ -453,8 +450,8 @@
 						<button
 							class="p-3 rounded text-left transition-all
 								{isSelected
-									? 'bg-primary-main/20 border border-primary-dark'
-									: 'bg-surface hover:bg-surface-variant border border-transparent'}"
+								? 'bg-primary-main/20 border border-primary-dark'
+								: 'bg-surface hover:bg-surface-variant border border-transparent'}"
 							on:click={() => selectTradition(tradition.name)}
 						>
 							<div class="font-medium text-text-primary">
@@ -478,7 +475,8 @@
 					<span class="text-text-muted font-normal text-sm ml-2">(Optional, 5 BP)</span>
 				</h3>
 				<p class="text-text-secondary text-sm mb-4">
-					A mentor spirit provides bonuses and disadvantages based on your relationship with a spiritual guide.
+					A mentor spirit provides bonuses and disadvantages based on your relationship with a
+					spiritual guide.
 				</p>
 
 				{#if selectedMentor}
@@ -488,17 +486,16 @@
 								<span class="text-info-dark font-medium">{selectedMentor}</span>
 								{#if selectedMentorData}
 									<div class="text-text-secondary text-xs mt-1">
-										<span class="text-primary-dark">Advantage:</span> {selectedMentorData.advantage}
+										<span class="text-primary-dark">Advantage:</span>
+										{selectedMentorData.advantage}
 									</div>
 									<div class="text-text-secondary text-xs mt-1">
-										<span class="text-error-dark">Disadvantage:</span> {selectedMentorData.disadvantage}
+										<span class="text-error-dark">Disadvantage:</span>
+										{selectedMentorData.disadvantage}
 									</div>
 								{/if}
 							</div>
-							<button
-								class="cw-btn cw-btn-danger text-xs"
-								on:click={() => setMentor(null)}
-							>
+							<button class="cw-btn cw-btn-danger text-xs" on:click={() => setMentor(null)}>
 								Remove
 							</button>
 						</div>
@@ -520,8 +517,8 @@
 						<button
 							class="p-3 rounded text-left transition-all
 								{isSelected
-									? 'bg-info-main/20 border border-info-dark'
-									: 'bg-surface hover:bg-surface-variant border border-transparent'}"
+								? 'bg-info-main/20 border border-info-dark'
+								: 'bg-surface hover:bg-surface-variant border border-transparent'}"
 							on:click={() => setMentor(isSelected ? null : mentor.name)}
 						>
 							<div class="font-medium {isSelected ? 'text-info-dark' : 'text-text-primary'}">
@@ -538,9 +535,7 @@
 				</div>
 
 				{#if filteredMentors.length === 0}
-					<div class="text-center text-text-muted py-4">
-						No mentor spirits match your search.
-					</div>
+					<div class="text-center text-text-muted py-4">No mentor spirits match your search.</div>
 				{/if}
 			</div>
 		{/if}
@@ -574,8 +569,8 @@
 							<button
 								class="px-3 py-1 rounded text-sm whitespace-nowrap transition-colors
 									{spellCategory === cat
-										? 'bg-info-main text-white'
-										: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+									? 'bg-info-main text-white'
+									: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
 								on:click={() => (spellCategory = cat)}
 							>
 								{cat}
@@ -597,8 +592,8 @@
 						<button
 							class="p-3 rounded text-left transition-all
 								{selected
-									? 'bg-info-main/20 border border-info-dark'
-									: 'bg-surface hover:bg-surface-variant border border-transparent'}"
+								? 'bg-info-main/20 border border-info-dark'
+								: 'bg-surface hover:bg-surface-variant border border-transparent'}"
 							on:click={() => toggleSpell(spell)}
 						>
 							<div class="flex items-center justify-between">
@@ -671,10 +666,10 @@
 						<button
 							class="p-3 rounded text-left transition-all
 								{selected
-									? 'bg-primary-main/20 border border-primary-dark'
-									: canAfford
-										? 'bg-surface hover:bg-surface-variant border border-transparent'
-										: 'bg-surface opacity-50 border border-transparent cursor-not-allowed'}"
+								? 'bg-primary-main/20 border border-primary-dark'
+								: canAfford
+									? 'bg-surface hover:bg-surface-variant border border-transparent'
+									: 'bg-surface opacity-50 border border-transparent cursor-not-allowed'}"
 							on:click={() => (selected || canAfford) && togglePower(power)}
 							disabled={!selected && !canAfford}
 						>

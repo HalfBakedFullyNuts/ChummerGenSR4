@@ -72,7 +72,7 @@
 	];
 
 	/** Get category metadata. */
-	function getCategoryMeta(category: KnowledgeSkillCategory): typeof CATEGORIES[number] {
+	function getCategoryMeta(category: KnowledgeSkillCategory): (typeof CATEGORIES)[number] {
 		return CATEGORIES.find((c) => c.id === category) ?? CATEGORIES[0]!;
 	}
 
@@ -105,7 +105,9 @@
 		: calculateKnowledgeSkillBPCost($character);
 
 	/** Group skills by category. */
-	function groupSkillsByCategory(skills: readonly KnowledgeSkill[]): Record<KnowledgeSkillCategory, KnowledgeSkill[]> {
+	function groupSkillsByCategory(
+		skills: readonly KnowledgeSkill[]
+	): Record<KnowledgeSkillCategory, KnowledgeSkill[]> {
 		return skills.reduce<Record<KnowledgeSkillCategory, KnowledgeSkill[]>>(
 			(acc, skill) => {
 				const cat = skill.category;
@@ -124,7 +126,7 @@
 	$: knowledgeSkills = $character?.knowledgeSkills ?? [];
 
 	// Check if character has a native language (mother tongue)
-	$: hasNativeLanguage = knowledgeSkills.some(s => s.category === 'Language' && s.isNative);
+	$: hasNativeLanguage = knowledgeSkills.some((s) => s.category === 'Language' && s.isNative);
 </script>
 
 <div class="space-y-4">
@@ -134,7 +136,13 @@
 		<div class="bg-white border border-gray-200 rounded-lg shadow-md p-4 min-w-[350px]">
 			<div class="flex items-center justify-center gap-4">
 				<span class="text-sm text-gray-600">Knowledge Skills:</span>
-				<span class="text-xl font-bold {remainingFreePoints > 0 ? 'text-green-600' : excessPoints > 0 ? 'text-amber-600' : 'text-gray-600'}">
+				<span
+					class="text-xl font-bold {remainingFreePoints > 0
+						? 'text-green-600'
+						: excessPoints > 0
+							? 'text-amber-600'
+							: 'text-gray-600'}"
+				>
 					{spentPoints} / {freePoints}
 				</span>
 				<span class="text-sm text-gray-500">free points</span>
@@ -155,12 +163,15 @@
 
 		<!-- Native Language Warning -->
 		{#if !hasNativeLanguage}
-			<div class="bg-amber-50 border border-amber-300 rounded-lg shadow-md p-4 min-w-[300px] max-w-[400px] flex items-start gap-3">
+			<div
+				class="bg-amber-50 border border-amber-300 rounded-lg shadow-md p-4 min-w-[300px] max-w-[400px] flex items-start gap-3"
+			>
 				<span class="material-icons text-amber-500 text-xl shrink-0">warning</span>
 				<div>
 					<h4 class="font-semibold text-amber-800 text-sm">Mother Tongue Required</h4>
 					<p class="text-amber-700 text-xs">
-						Add a language skill to designate your mother tongue. The first language added becomes your native language (Rating "N").
+						Add a language skill to designate your mother tongue. The first language added becomes
+						your native language (Rating "N").
 					</p>
 				</div>
 			</div>
@@ -170,7 +181,9 @@
 	<!-- Add New Skill -->
 	<div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
 		<div class="bg-indigo-50 px-4 py-2 border-b border-gray-200">
-			<h3 class="text-sm font-semibold text-indigo-800 uppercase tracking-wide flex items-center gap-2">
+			<h3
+				class="text-sm font-semibold text-indigo-800 uppercase tracking-wide flex items-center gap-2"
+			>
 				<span class="material-icons text-sm">add_circle</span>
 				Add Knowledge Skill
 			</h3>
@@ -205,11 +218,7 @@
 				</div>
 
 				<!-- Add Button -->
-				<button
-					class="cw-btn px-4 py-2"
-					on:click={handleAddSkill}
-					disabled={!newSkillName.trim()}
-				>
+				<button class="cw-btn px-4 py-2" on:click={handleAddSkill} disabled={!newSkillName.trim()}>
 					<span class="material-icons text-sm mr-1">add</span>
 					Add
 				</button>
@@ -228,11 +237,17 @@
 			{@const categorySkills = skillsByCategory[category.id] ?? []}
 			{@const hasSkills = categorySkills.length > 0}
 
-			<div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden {!hasSkills ? 'opacity-60' : ''}">
+			<div
+				class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden {!hasSkills
+					? 'opacity-60'
+					: ''}"
+			>
 				<!-- Header -->
 				<div class="bg-{category.color}-50 px-4 py-2 border-b border-gray-200">
 					<div class="flex items-center justify-between">
-						<h3 class="text-sm font-semibold text-{category.color}-800 uppercase tracking-wide flex items-center gap-2">
+						<h3
+							class="text-sm font-semibold text-{category.color}-800 uppercase tracking-wide flex items-center gap-2"
+						>
 							<span class="material-icons text-sm">{category.icon}</span>
 							{category.label}
 							<span class="text-xs font-normal bg-{category.color}-100 px-1.5 py-0.5 rounded">
@@ -251,7 +266,11 @@
 				<div class="max-h-[300px] overflow-y-auto">
 					{#if hasSkills}
 						{#each categorySkills as skill, idx (skill.id)}
-							<div class="flex items-center px-4 py-2 border-b border-gray-100 {idx % 2 === 1 ? 'bg-gray-50' : 'bg-white'}">
+							<div
+								class="flex items-center px-4 py-2 border-b border-gray-100 {idx % 2 === 1
+									? 'bg-gray-50'
+									: 'bg-white'}"
+							>
 								<div class="flex-1 min-w-0">
 									<span class="text-sm font-medium text-black truncate block">
 										{skill.name}
@@ -263,7 +282,10 @@
 								<div class="flex items-center gap-1">
 									{#if skill.isNative}
 										<!-- Native languages show "N" and cannot be modified -->
-										<span class="w-16 text-center font-mono text-lg text-amber-600 font-bold" title="Native language - infinite proficiency">
+										<span
+											class="w-16 text-center font-mono text-lg text-amber-600 font-bold"
+											title="Native language - infinite proficiency"
+										>
 											N
 										</span>
 									{:else}
@@ -309,9 +331,7 @@
 	{#if knowledgeSkills.length === 0}
 		<div class="bg-white border border-gray-200 rounded-lg shadow-md p-8 text-center">
 			<span class="material-icons text-4xl text-gray-300 mb-2">psychology</span>
-			<p class="text-gray-500">
-				No knowledge skills added yet. Use the form above to add skills.
-			</p>
+			<p class="text-gray-500">No knowledge skills added yet. Use the form above to add skills.</p>
 			<p class="text-gray-400 text-sm mt-2">
 				Knowledge skills represent what your character knows about the world.
 			</p>

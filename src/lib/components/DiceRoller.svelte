@@ -71,8 +71,8 @@
 			}
 
 			// Count results
-			const hits = dice.filter(d => d >= threshold).length;
-			const ones = dice.filter(d => d === 1).length;
+			const hits = dice.filter((d) => d >= threshold).length;
+			const ones = dice.filter((d) => d === 1).length;
 
 			// Glitch: more than half are 1s
 			const isGlitch = ones > dice.length / 2;
@@ -145,11 +145,7 @@
 		</div>
 
 		<label class="flex items-center gap-2 cursor-pointer">
-			<input
-				type="checkbox"
-				class="w-4 h-4 accent-primary-main"
-				bind:checked={useEdge}
-			/>
+			<input type="checkbox" class="w-4 h-4 accent-primary-main" bind:checked={useEdge} />
 			<span class="text-text-secondary text-sm">Edge</span>
 		</label>
 

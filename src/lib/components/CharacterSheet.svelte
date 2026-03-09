@@ -1,7 +1,19 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { Character, SkillDefinition, AttributeCode, CharacterWeapon, CharacterSpell } from '$types';
-	import { getWeaponSkill, parseFireModes, calculateArmorStacking, calculateInitiativeModifiers, type FiringMode } from '$lib/utils/dice';
+	import type {
+		Character,
+		SkillDefinition,
+		AttributeCode,
+		CharacterWeapon,
+		CharacterSpell
+	} from '$types';
+	import {
+		getWeaponSkill,
+		parseFireModes,
+		calculateArmorStacking,
+		calculateInitiativeModifiers,
+		type FiringMode
+	} from '$lib/utils/dice';
 	import { positiveQualities, negativeQualities } from '$stores/gamedata';
 	import { formatQualityBonus, type FormattedBonus } from '$lib/utils/qualities';
 	import Tooltip from './ui/Tooltip.svelte';
@@ -20,7 +32,12 @@
 		rollSkill: { name: string; pool: number; attribute: AttributeCode };
 		rollAttribute: { name: string; pool: number };
 		rollInitiative: { base: number; dice: number };
-		rollWeapon: { weapon: CharacterWeapon; pool: number; skillName: string; firingMode?: FiringMode };
+		rollWeapon: {
+			weapon: CharacterWeapon;
+			pool: number;
+			skillName: string;
+			firingMode?: FiringMode;
+		};
 		rollSpell: { spell: CharacterSpell; castPool: number; drainPool: number; drainValue: string };
 		rollDefense: { name: string; pool: number };
 		rollSoak: { name: string; pool: number; armor: number; ap?: number };
@@ -52,7 +69,7 @@
 
 	/** Get skill definition by name. */
 	function getSkillDef(name: string): SkillDefinition | undefined {
-		return skillDefs.find(s => s.name === name);
+		return skillDefs.find((s) => s.name === name);
 	}
 
 	/** Calculate condition monitor boxes. */
@@ -88,7 +105,12 @@
 	}
 
 	/** Handle skill click - emit roll event. */
-	function handleSkillClick(skillName: string, rating: number, bonus: number, specialization: string | null): void {
+	function handleSkillClick(
+		skillName: string,
+		rating: number,
+		bonus: number,
+		specialization: string | null
+	): void {
 		if (!interactive) return;
 
 		const def = getSkillDef(skillName);
@@ -116,8 +138,8 @@
 
 	/** Calculate initiative modifiers from cyberware and adept powers. */
 	$: initMods = calculateInitiativeModifiers(
-		char.equipment.cyberware.map(c => ({ name: c.name, rating: c.rating })),
-		char.magic?.powers?.map(p => ({ name: p.name, rating: p.level })) ?? []
+		char.equipment.cyberware.map((c) => ({ name: c.name, rating: c.rating })),
+		char.magic?.powers?.map((p) => ({ name: p.name, rating: p.level })) ?? []
 	);
 
 	/** Bonus to initiative score from augmentations. */
@@ -129,7 +151,7 @@
 	/** Get weapon attack pool. */
 	function getWeaponPool(weapon: CharacterWeapon): { pool: number; skillName: string } {
 		const skillName = getWeaponSkill(weapon.category);
-		const skill = char.skills.find(s => s.name === skillName);
+		const skill = char.skills.find((s) => s.name === skillName);
 		const skillRating = skill ? skill.rating + skill.bonus : 0;
 
 		// All combat skills use AGI
@@ -163,7 +185,7 @@
 	/** Get spellcasting pool. */
 	function getSpellcastingPool(): number {
 		const mag = getAttrTotal(char.attributes.mag);
-		const spellcasting = char.skills.find(s => s.name === 'Spellcasting');
+		const spellcasting = char.skills.find((s) => s.name === 'Spellcasting');
 		const skillRating = spellcasting ? spellcasting.rating + spellcasting.bonus : 0;
 		return Math.max(0, mag + skillRating - totalWoundMod);
 	}
@@ -186,9 +208,11 @@
 	}
 
 	/** Get quality data from game data including effect and bonus. */
-	function getQualityData(qualityName: string): { effect?: string; bonuses: FormattedBonus[] } | undefined {
+	function getQualityData(
+		qualityName: string
+	): { effect?: string; bonuses: FormattedBonus[] } | undefined {
 		const allQualities = [...($positiveQualities ?? []), ...($negativeQualities ?? [])];
-		const gameQuality = allQualities.find(q => q.name === qualityName);
+		const gameQuality = allQualities.find((q) => q.name === qualityName);
 		if (!gameQuality) return undefined;
 		return {
 			...(gameQuality.effect && { effect: gameQuality.effect }),
@@ -208,10 +232,15 @@
 	}
 
 	/** Handle condition box click. */
-	function handleConditionClick(type: 'physical' | 'stun', boxIndex: number, maxBoxes: number): void {
+	function handleConditionClick(
+		type: 'physical' | 'stun',
+		boxIndex: number,
+		maxBoxes: number
+	): void {
 		if (!interactive) return;
 
-		const currentValue = type === 'physical' ? char.condition.physicalCurrent : char.condition.stunCurrent;
+		const currentValue =
+			type === 'physical' ? char.condition.physicalCurrent : char.condition.stunCurrent;
 
 		// Clicking a marked box clears it and all after, clicking unmarked marks it and all before
 		let newValue: number;
@@ -255,7 +284,8 @@
 	$: maxEdge = getAttrTotal(char.attributes.edg);
 
 	/** Get initiative (REA + INT + augmentation bonuses). */
-	$: initiative = getAttrTotal(char.attributes.rea) + getAttrTotal(char.attributes.int) + initiativeBonus;
+	$: initiative =
+		getAttrTotal(char.attributes.rea) + getAttrTotal(char.attributes.int) + initiativeBonus;
 
 	/** Calculate wound modifier (every 3 boxes filled = -1). */
 	$: physicalWoundMod = Math.floor(char.condition.physicalCurrent / 3);
@@ -281,7 +311,7 @@
 	$: stunBoxes = getStunBoxes(getAttrTotal(char.attributes.wil));
 
 	/** Get Dodge skill rating if character has it. */
-	$: dodgeSkill = char.skills.find(s => s.name === 'Dodge');
+	$: dodgeSkill = char.skills.find((s) => s.name === 'Dodge');
 	$: dodgeRating = dodgeSkill ? dodgeSkill.rating + (dodgeSkill.bonus || 0) : 0;
 
 	/** Defense pool (REA + Dodge) - apply wound modifier. */
@@ -380,12 +410,16 @@
 							type="button"
 							class="w-6 h-6 rounded-full border-2 text-center text-xs font-bold transition-colors
 								{i < char.condition.edgeCurrent
-									? 'bg-primary-main border-primary-dark text-surface'
-									: 'border-primary-dark/50 text-primary-dark/50'}
+								? 'bg-primary-main border-primary-dark text-surface'
+								: 'border-primary-dark/50 text-primary-dark/50'}
 								{interactive ? 'hover:border-primary-dark cursor-pointer' : ''}"
 							on:click={() => handleEdgeClick(i)}
 							disabled={!interactive}
-							title={interactive ? (i < char.condition.edgeCurrent ? 'Spend Edge' : 'Recover Edge') : ''}
+							title={interactive
+								? i < char.condition.edgeCurrent
+									? 'Spend Edge'
+									: 'Recover Edge'
+								: ''}
 						>
 							{i < char.condition.edgeCurrent ? '★' : '☆'}
 						</button>
@@ -465,7 +499,9 @@
 			<div class="space-y-2 text-sm">
 				<button
 					type="button"
-					class="flex justify-between w-full {interactive ? 'hover:bg-surface-variant cursor-pointer rounded px-1 -mx-1' : ''}"
+					class="flex justify-between w-full {interactive
+						? 'hover:bg-surface-variant cursor-pointer rounded px-1 -mx-1'
+						: ''}"
 					on:click={handleInitiativeRoll}
 					disabled={!interactive}
 				>
@@ -474,7 +510,9 @@
 				</button>
 				<button
 					type="button"
-					class="flex justify-between w-full {interactive ? 'hover:bg-surface-variant cursor-pointer rounded px-1 -mx-1' : ''}"
+					class="flex justify-between w-full {interactive
+						? 'hover:bg-surface-variant cursor-pointer rounded px-1 -mx-1'
+						: ''}"
 					on:click={() => handleDerivedRoll('Composure', composure)}
 					disabled={!interactive}
 				>
@@ -483,7 +521,9 @@
 				</button>
 				<button
 					type="button"
-					class="flex justify-between w-full {interactive ? 'hover:bg-surface-variant cursor-pointer rounded px-1 -mx-1' : ''}"
+					class="flex justify-between w-full {interactive
+						? 'hover:bg-surface-variant cursor-pointer rounded px-1 -mx-1'
+						: ''}"
 					on:click={() => handleDerivedRoll('Judge Intentions', judgeIntentions)}
 					disabled={!interactive}
 				>
@@ -492,7 +532,9 @@
 				</button>
 				<button
 					type="button"
-					class="flex justify-between w-full {interactive ? 'hover:bg-surface-variant cursor-pointer rounded px-1 -mx-1' : ''}"
+					class="flex justify-between w-full {interactive
+						? 'hover:bg-surface-variant cursor-pointer rounded px-1 -mx-1'
+						: ''}"
 					on:click={() => handleDerivedRoll('Lift/Carry', liftCarry)}
 					disabled={!interactive}
 				>
@@ -501,7 +543,9 @@
 				</button>
 				<button
 					type="button"
-					class="flex justify-between w-full {interactive ? 'hover:bg-surface-variant cursor-pointer rounded px-1 -mx-1' : ''}"
+					class="flex justify-between w-full {interactive
+						? 'hover:bg-surface-variant cursor-pointer rounded px-1 -mx-1'
+						: ''}"
 					on:click={() => handleDerivedRoll('Memory', memory)}
 					disabled={!interactive}
 				>
@@ -521,7 +565,8 @@
 				<div>
 					<div class="flex justify-between text-sm mb-1">
 						<span class="text-text-secondary">Physical</span>
-						<span class="text-text-primary">{char.condition.physicalCurrent} / {physicalBoxes}</span>
+						<span class="text-text-primary">{char.condition.physicalCurrent} / {physicalBoxes}</span
+						>
 					</div>
 					<div class="flex flex-wrap gap-1">
 						{#each Array(physicalBoxes) as _, i}
@@ -529,12 +574,16 @@
 								type="button"
 								class="w-5 h-5 border rounded text-center text-xs leading-5 transition-colors
 									{i < char.condition.physicalCurrent
-										? 'bg-error-main border-error-dark text-surface'
-										: 'border-border text-text-muted'}
+									? 'bg-error-main border-error-dark text-surface'
+									: 'border-border text-text-muted'}
 									{interactive ? 'hover:border-error-dark cursor-pointer' : ''}"
 								on:click={() => handleConditionClick('physical', i, physicalBoxes)}
 								disabled={!interactive}
-								title={interactive ? (i < char.condition.physicalCurrent ? 'Click to heal' : 'Click to mark damage') : ''}
+								title={interactive
+									? i < char.condition.physicalCurrent
+										? 'Click to heal'
+										: 'Click to mark damage'
+									: ''}
 							>
 								{i < char.condition.physicalCurrent ? 'X' : ''}
 							</button>
@@ -552,12 +601,16 @@
 								type="button"
 								class="w-5 h-5 border rounded text-center text-xs leading-5 transition-colors
 									{i < char.condition.stunCurrent
-										? 'bg-warning-main border-warning-dark text-surface'
-										: 'border-border text-text-muted'}
+									? 'bg-warning-main border-warning-dark text-surface'
+									: 'border-border text-text-muted'}
 									{interactive ? 'hover:border-warning-dark cursor-pointer' : ''}"
 								on:click={() => handleConditionClick('stun', i, stunBoxes)}
 								disabled={!interactive}
-								title={interactive ? (i < char.condition.stunCurrent ? 'Click to heal' : 'Click to mark damage') : ''}
+								title={interactive
+									? i < char.condition.stunCurrent
+										? 'Click to heal'
+										: 'Click to mark damage'
+									: ''}
 							>
 								{i < char.condition.stunCurrent ? 'X' : ''}
 							</button>
@@ -589,7 +642,9 @@
 								type="button"
 								class="cw-btn cw-btn-secondary text-xs"
 								on:click={handleDefenseRoll}
-								title="Roll defense (REA + Dodge{totalWoundMod > 0 ? ` - ${totalWoundMod} wounds` : ''})"
+								title="Roll defense (REA + Dodge{totalWoundMod > 0
+									? ` - ${totalWoundMod} wounds`
+									: ''})"
 							>
 								Defense ({defensePool}d6)
 							</button>
@@ -612,7 +667,7 @@
 						</div>
 						<p class="text-text-muted text-xs mt-1">
 							Armor: B{totalBallistic}/I{totalImpact} | Body: {bodyTotal}
-							{#if char.equipment.armor.filter(a => a.equipped).length > 1}
+							{#if char.equipment.armor.filter((a) => a.equipped).length > 1}
 								<span class="text-primary-dark">(stacked)</span>
 							{/if}
 						</p>
@@ -642,7 +697,8 @@
 						type="button"
 						class="flex justify-between py-1 border-b border-border text-left w-full
 							{interactive ? 'hover:bg-surface-variant cursor-pointer rounded px-1 -mx-1' : ''}"
-						on:click={() => handleSkillClick(skill.name, skill.rating, skill.bonus, skill.specialization)}
+						on:click={() =>
+							handleSkillClick(skill.name, skill.rating, skill.bonus, skill.specialization)}
 						disabled={!interactive}
 					>
 						<span class="text-text-secondary truncate" title={skill.name}>
@@ -653,7 +709,9 @@
 						</span>
 						<span class="font-mono text-text-primary ml-2">
 							{#if interactive && skillDefs.length > 0}
-								{getSkillPool(skill.name, skill.rating, skill.bonus)}{skill.specialization ? '+2' : ''}
+								{getSkillPool(skill.name, skill.rating, skill.bonus)}{skill.specialization
+									? '+2'
+									: ''}
 							{:else}
 								{skill.rating + skill.bonus}
 								{#if skill.specialization}
@@ -692,11 +750,14 @@
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
 				{#each char.qualities as quality}
 					{@const qualityData = getQualityData(quality.name)}
-					{@const hasTooltip = Boolean(qualityData?.effect) || (qualityData?.bonuses?.length ?? 0) > 0}
+					{@const hasTooltip =
+						Boolean(qualityData?.effect) || (qualityData?.bonuses?.length ?? 0) > 0}
 					<div class="flex justify-between py-1 border-b border-border group relative">
-						<span class:text-success-dark={quality.category === 'Positive'}
-							  class:text-error-dark={quality.category === 'Negative'}
-							  class:cursor-help={hasTooltip}>
+						<span
+							class:text-success-dark={quality.category === 'Positive'}
+							class:text-error-dark={quality.category === 'Negative'}
+							class:cursor-help={hasTooltip}
+						>
 							{quality.name}
 						</span>
 						<span class="text-text-muted">{quality.bp} BP</span>
@@ -708,8 +769,10 @@
 								{#if qualityData?.bonuses && qualityData.bonuses.length > 0}
 									<div class="border-t border-gray-700 pt-1 mt-1 space-y-0.5">
 										{#each qualityData.bonuses as bonus}
-											<div class:text-green-400={bonus.positive}
-												 class:text-red-400={!bonus.positive}>
+											<div
+												class:text-green-400={bonus.positive}
+												class:text-red-400={!bonus.positive}
+											>
 												{bonus.text}
 											</div>
 										{/each}
@@ -761,10 +824,14 @@
 										{#each firingModes as mode}
 											<button
 												type="button"
-												class="cw-btn text-xs px-2 py-1 {mode.ammoPerShot > weapon.currentAmmo ? 'opacity-50' : ''}"
+												class="cw-btn text-xs px-2 py-1 {mode.ammoPerShot > weapon.currentAmmo
+													? 'opacity-50'
+													: ''}"
 												on:click|stopPropagation={() => handleWeaponClick(weapon, mode)}
 												disabled={mode.ammoPerShot > weapon.currentAmmo}
-												title="{mode.name}: {mode.ammoPerShot} ammo, {mode.poolMod !== 0 ? (mode.poolMod > 0 ? '+' : '') + mode.poolMod + ' pool' : ''}{mode.damageMod !== 0 ? ', +' + mode.damageMod + ' DV' : ''}"
+												title="{mode.name}: {mode.ammoPerShot} ammo, {mode.poolMod !== 0
+													? (mode.poolMod > 0 ? '+' : '') + mode.poolMod + ' pool'
+													: ''}{mode.damageMod !== 0 ? ', +' + mode.damageMod + ' DV' : ''}"
 											>
 												{mode.code}
 												{#if mode.damageMod > 0}
@@ -791,7 +858,11 @@
 									<div class="flex items-center justify-between">
 										<div class="flex items-center gap-2">
 											<span class="text-text-muted text-xs">Ammo:</span>
-											<span class="font-mono text-sm {weapon.currentAmmo === 0 ? 'text-error-dark' : 'text-text-secondary'}">
+											<span
+												class="font-mono text-sm {weapon.currentAmmo === 0
+													? 'text-error-dark'
+													: 'text-text-secondary'}"
+											>
 												{weapon.currentAmmo} / {maxAmmo}
 											</span>
 										</div>
@@ -800,7 +871,8 @@
 												<button
 													type="button"
 													class="cw-btn text-xs px-2 py-0.5"
-													on:click|stopPropagation={() => handleSpendAmmo(weapon.id, weapon.currentAmmo)}
+													on:click|stopPropagation={() =>
+														handleSpendAmmo(weapon.id, weapon.currentAmmo)}
 													disabled={weapon.currentAmmo === 0}
 													title="Spend 1 ammo"
 												>
@@ -917,7 +989,7 @@
 						</div>
 						{#if vehicle.mods && vehicle.mods.length > 0}
 							<div class="text-xs text-text-muted mt-1">
-								Mods: {vehicle.mods.map(m => m.name).join(', ')}
+								Mods: {vehicle.mods.map((m) => m.name).join(', ')}
 							</div>
 						{/if}
 					</div>
@@ -957,12 +1029,18 @@
 			<h2 class="cw-card-header">Magic</h2>
 			<div class="space-y-4">
 				<div class="flex flex-wrap gap-4 text-sm">
-					<span class="text-text-secondary">Tradition: <span class="text-text-primary">{char.magic.tradition}</span></span>
+					<span class="text-text-secondary"
+						>Tradition: <span class="text-text-primary">{char.magic.tradition}</span></span
+					>
 					{#if char.magic.mentor}
-						<span class="text-text-secondary">Mentor: <span class="text-info-dark">{char.magic.mentor}</span></span>
+						<span class="text-text-secondary"
+							>Mentor: <span class="text-info-dark">{char.magic.mentor}</span></span
+						>
 					{/if}
 					{#if char.magic.initiateGrade > 0}
-						<span class="text-text-secondary">Initiate Grade: <span class="text-info-dark">{char.magic.initiateGrade}</span></span>
+						<span class="text-text-secondary"
+							>Initiate Grade: <span class="text-info-dark">{char.magic.initiateGrade}</span></span
+						>
 					{/if}
 				</div>
 
@@ -970,7 +1048,9 @@
 					<div>
 						<h3 class="text-sm font-medium text-text-secondary mb-2">Spells</h3>
 						{#if interactive}
-							<p class="text-text-muted text-xs mb-2">Click a spell to cast (Pool: {getSpellcastingPool()})</p>
+							<p class="text-text-muted text-xs mb-2">
+								Click a spell to cast (Pool: {getSpellcastingPool()})
+							</p>
 						{/if}
 						<div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
 							{#each char.magic.spells as spell}
@@ -1014,9 +1094,15 @@
 			<h2 class="cw-card-header">Resonance</h2>
 			<div class="space-y-4">
 				<div class="flex flex-wrap gap-4 text-sm">
-					<span class="text-text-secondary">Stream: <span class="text-primary-dark">{char.resonance.stream}</span></span>
+					<span class="text-text-secondary"
+						>Stream: <span class="text-primary-dark">{char.resonance.stream}</span></span
+					>
 					{#if char.resonance.submersionGrade > 0}
-						<span class="text-text-secondary">Submersion Grade: <span class="text-primary-dark">{char.resonance.submersionGrade}</span></span>
+						<span class="text-text-secondary"
+							>Submersion Grade: <span class="text-primary-dark"
+								>{char.resonance.submersionGrade}</span
+							></span
+						>
 					{/if}
 				</div>
 
@@ -1119,17 +1205,23 @@
 					<div>
 						<span class="font-medium text-text-primary">{char.equipment.lifestyle.name}</span>
 						{#if char.equipment.lifestyle.location}
-							<span class="text-text-muted text-sm ml-2">({char.equipment.lifestyle.location})</span>
+							<span class="text-text-muted text-sm ml-2">({char.equipment.lifestyle.location})</span
+							>
 						{/if}
 					</div>
 					<div class="text-right">
-						<span class="text-primary-dark font-mono">{formatNuyen(char.equipment.lifestyle.monthlyCost)}</span>
+						<span class="text-primary-dark font-mono"
+							>{formatNuyen(char.equipment.lifestyle.monthlyCost)}</span
+						>
 						<span class="text-text-muted text-xs">/month</span>
 					</div>
 				</div>
 				{#if char.equipment.lifestyle.monthsPrepaid > 0}
 					<div class="text-xs text-text-secondary mt-1">
-						{char.equipment.lifestyle.monthsPrepaid} month{char.equipment.lifestyle.monthsPrepaid !== 1 ? 's' : ''} prepaid
+						{char.equipment.lifestyle.monthsPrepaid} month{char.equipment.lifestyle
+							.monthsPrepaid !== 1
+							? 's'
+							: ''} prepaid
 					</div>
 				{/if}
 			</div>

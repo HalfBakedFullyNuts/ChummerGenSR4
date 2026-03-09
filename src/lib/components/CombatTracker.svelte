@@ -10,7 +10,7 @@
 		initDice: number;
 		initiative: InitiativeResult | null;
 		isPlayer: boolean;
-		acted: boolean[];  // Track which passes they've acted in
+		acted: boolean[]; // Track which passes they've acted in
 	}
 
 	/** The player character's name. */
@@ -46,24 +46,26 @@
 
 	/** Initialize player character. */
 	$: if (playerName && combatants.length === 0) {
-		combatants = [{
-			id: 'player',
-			name: playerName,
-			baseInit: playerBaseInit,
-			initDice: playerInitDice,
-			initiative: null,
-			isPlayer: true,
-			acted: [false, false, false, false]
-		}];
+		combatants = [
+			{
+				id: 'player',
+				name: playerName,
+				baseInit: playerBaseInit,
+				initDice: playerInitDice,
+				initiative: null,
+				isPlayer: true,
+				acted: [false, false, false, false]
+			}
+		];
 	}
 
 	/** Sorted combatants by initiative (descending). */
 	$: sortedCombatants = [...combatants]
-		.filter(c => c.initiative !== null)
+		.filter((c) => c.initiative !== null)
 		.sort((a, b) => (b.initiative?.total ?? 0) - (a.initiative?.total ?? 0));
 
 	/** Combatants who can act this pass. */
-	$: activeThisPass = sortedCombatants.filter(c => {
+	$: activeThisPass = sortedCombatants.filter((c) => {
 		if (!c.initiative) return false;
 		return getInitiativeForPass(c.initiative.total, currentPass) > 0;
 	});
@@ -90,12 +92,12 @@
 
 	/** Remove a combatant. */
 	function removeCombatant(id: string): void {
-		combatants = combatants.filter(c => c.id !== id);
+		combatants = combatants.filter((c) => c.id !== id);
 	}
 
 	/** Roll initiative for all combatants. */
 	function rollAllInitiative(): void {
-		combatants = combatants.map(c => ({
+		combatants = combatants.map((c) => ({
 			...c,
 			initiative: rollInitiative({ base: c.baseInit, dice: c.initDice }),
 			acted: [false, false, false, false]
@@ -106,7 +108,7 @@
 		combatActive = true;
 
 		// Emit player's initiative
-		const player = combatants.find(c => c.isPlayer);
+		const player = combatants.find((c) => c.isPlayer);
 		if (player?.initiative) {
 			dispatch('initiativeRolled', {
 				total: player.initiative.total,
@@ -118,7 +120,7 @@
 
 	/** Roll initiative for a single combatant. */
 	function rollSingleInitiative(id: string): void {
-		combatants = combatants.map(c => {
+		combatants = combatants.map((c) => {
 			if (c.id !== id) return c;
 			const initiative = rollInitiative({ base: c.baseInit, dice: c.initDice });
 
@@ -140,7 +142,7 @@
 
 	/** Mark a combatant as having acted this pass. */
 	function markActed(id: string): void {
-		combatants = combatants.map(c => {
+		combatants = combatants.map((c) => {
 			if (c.id !== id) return c;
 			const newActed = [...c.acted];
 			newActed[currentPass - 1] = true;
@@ -148,8 +150,8 @@
 		});
 
 		// Check if all combatants have acted this pass
-		const allActed = activeThisPass.every(c => {
-			const combatant = combatants.find(x => x.id === c.id);
+		const allActed = activeThisPass.every((c) => {
+			const combatant = combatants.find((x) => x.id === c.id);
 			return combatant?.acted[currentPass - 1];
 		});
 
@@ -163,7 +165,7 @@
 		if (currentPass < 4) {
 			// Check if anyone can act in the next pass
 			const nextPass = currentPass + 1;
-			const hasActors = combatants.some(c => {
+			const hasActors = combatants.some((c) => {
 				if (!c.initiative) return false;
 				return getInitiativeForPass(c.initiative.total, nextPass) > 0;
 			});
@@ -184,14 +186,14 @@
 		currentPass = 1;
 
 		// Re-roll initiative for new turn
-		combatants = combatants.map(c => ({
+		combatants = combatants.map((c) => ({
 			...c,
 			initiative: rollInitiative({ base: c.baseInit, dice: c.initDice }),
 			acted: [false, false, false, false]
 		}));
 
 		// Emit player's new initiative
-		const player = combatants.find(c => c.isPlayer);
+		const player = combatants.find((c) => c.isPlayer);
 		if (player?.initiative) {
 			dispatch('initiativeRolled', {
 				total: player.initiative.total,
@@ -206,7 +208,7 @@
 		combatActive = false;
 		combatTurn = 0;
 		currentPass = 1;
-		combatants = combatants.map(c => ({
+		combatants = combatants.map((c) => ({
 			...c,
 			initiative: null,
 			acted: [false, false, false, false]
@@ -215,7 +217,7 @@
 
 	/** Reset everything. */
 	function resetCombat(): void {
-		combatants = combatants.filter(c => c.isPlayer);
+		combatants = combatants.filter((c) => c.isPlayer);
 		combatActive = false;
 		combatTurn = 0;
 		currentPass = 1;
@@ -237,14 +239,18 @@
 		{#if combatants.length === 0}
 			<p class="text-text-muted text-sm">No combatants added.</p>
 		{:else}
-			{#each (combatActive ? sortedCombatants : combatants) as combatant (combatant.id)}
-				{@const initForPass = combatant.initiative ? getInitiativeForPass(combatant.initiative.total, currentPass) : 0}
+			{#each combatActive ? sortedCombatants : combatants as combatant (combatant.id)}
+				{@const initForPass = combatant.initiative
+					? getInitiativeForPass(combatant.initiative.total, currentPass)
+					: 0}
 				{@const canActThisPass = initForPass > 0}
 				{@const hasActed = combatant.acted[currentPass - 1]}
-				<div class="flex items-center justify-between p-2 rounded bg-surface-variant
+				<div
+					class="flex items-center justify-between p-2 rounded bg-surface-variant
 					{combatant.isPlayer ? 'border-l-2 border-primary-main' : ''}
 					{combatActive && !canActThisPass ? 'opacity-50' : ''}
-					{combatActive && hasActed ? 'opacity-75' : ''}">
+					{combatActive && hasActed ? 'opacity-75' : ''}"
+				>
 					<div class="flex items-center gap-3">
 						<div class="flex flex-col">
 							<span class="text-text-primary font-medium">
@@ -342,11 +348,7 @@
 						class="cw-input w-14 text-center"
 					/>
 				</div>
-				<button
-					class="cw-btn cw-btn-primary"
-					on:click={addCombatant}
-					disabled={!newName.trim()}
-				>
+				<button class="cw-btn cw-btn-primary" on:click={addCombatant} disabled={!newName.trim()}>
 					Add
 				</button>
 			</div>
@@ -364,32 +366,12 @@
 				Start Combat
 			</button>
 			{#if combatants.length > 1}
-				<button
-					class="cw-btn text-error-main"
-					on:click={resetCombat}
-				>
-					Clear NPCs
-				</button>
+				<button class="cw-btn text-error-main" on:click={resetCombat}> Clear NPCs </button>
 			{/if}
 		{:else}
-			<button
-				class="cw-btn"
-				on:click={advancePass}
-			>
-				Next Pass
-			</button>
-			<button
-				class="cw-btn"
-				on:click={nextTurn}
-			>
-				New Turn
-			</button>
-			<button
-				class="cw-btn text-error-main"
-				on:click={endCombat}
-			>
-				End Combat
-			</button>
+			<button class="cw-btn" on:click={advancePass}> Next Pass </button>
+			<button class="cw-btn" on:click={nextTurn}> New Turn </button>
+			<button class="cw-btn text-error-main" on:click={endCombat}> End Combat </button>
 		{/if}
 	</div>
 </div>

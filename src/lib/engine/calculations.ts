@@ -203,9 +203,7 @@ export function calculateSocialLimit(char: Character): number {
 
 /** Find a skill by name. */
 function findSkill(char: Character, skillName: string): CharacterSkill | undefined {
-	return char.skills.find(
-		(s) => s.name.toLowerCase() === skillName.toLowerCase()
-	);
+	return char.skills.find((s) => s.name.toLowerCase() === skillName.toLowerCase());
 }
 
 /** Calculate dice pool for a skill + attribute test. */

@@ -87,7 +87,7 @@
 
 	/** Remove a content pack. */
 	function handleRemove(manifestId: string): void {
-		const pack = contentPacks.find(p => p.id === manifestId);
+		const pack = contentPacks.find((p) => p.id === manifestId);
 		if (pack && confirm(`Remove "${pack.name}"?`)) {
 			removeCustomContent(manifestId);
 			contentPacks = getStoredCustomContent();
@@ -104,11 +104,7 @@
 <div class="cw-card p-4">
 	<div class="flex items-center justify-between mb-4">
 		<h2 class="text-lg font-medium text-primary-dark">Custom Content</h2>
-		<button
-			class="cw-btn cw-btn-primary text-sm"
-			on:click={triggerFileInput}
-			disabled={importing}
-		>
+		<button class="cw-btn cw-btn-primary text-sm" on:click={triggerFileInput} disabled={importing}>
 			{importing ? 'Importing...' : 'Import XML'}
 		</button>
 		<input
@@ -121,13 +117,17 @@
 	</div>
 
 	{#if error}
-		<div class="p-2 mb-4 bg-error-main/20 border border-error-main/50 rounded text-error-main text-sm">
+		<div
+			class="p-2 mb-4 bg-error-main/20 border border-error-main/50 rounded text-error-main text-sm"
+		>
 			{error}
 		</div>
 	{/if}
 
 	{#if success}
-		<div class="p-2 mb-4 bg-success-main/20 border border-success-main/50 rounded text-success-main text-sm">
+		<div
+			class="p-2 mb-4 bg-success-main/20 border border-success-main/50 rounded text-success-main text-sm"
+		>
 			{success}
 		</div>
 	{/if}
@@ -156,10 +156,7 @@
 							{getContentSummary(pack)}
 						</div>
 					</div>
-					<button
-						class="cw-btn text-xs text-error-main"
-						on:click={() => handleRemove(pack.id)}
-					>
+					<button class="cw-btn text-xs text-error-main" on:click={() => handleRemove(pack.id)}>
 						Remove
 					</button>
 				</div>
@@ -170,8 +167,8 @@
 	<div class="mt-4 p-3 bg-surface-variant rounded text-sm text-text-muted">
 		<h3 class="font-medium text-text-secondary mb-1">XML Format</h3>
 		<p class="text-xs">
-			Custom content files should use the same XML format as Chummer data files.
-			Supported types: qualities, spells, powers, weapons, armor, cyberware, gear.
+			Custom content files should use the same XML format as Chummer data files. Supported types:
+			qualities, spells, powers, weapons, armor, cyberware, gear.
 		</p>
 	</div>
 </div>

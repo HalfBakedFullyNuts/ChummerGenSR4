@@ -207,7 +207,7 @@ describe('Career Mode', () => {
 
 		it('should improve a skill with correct karma cost', () => {
 			const charBefore = get(character);
-			const skill = charBefore?.skills.find(s => s.name === 'Pistols');
+			const skill = charBefore?.skills.find((s) => s.name === 'Pistols');
 			const ratingBefore = skill?.rating ?? 0;
 			const karmaBefore = charBefore?.karma ?? 0;
 			const newRating = ratingBefore + 1;
@@ -217,7 +217,7 @@ describe('Career Mode', () => {
 
 			expect(result.success).toBe(true);
 			const charAfter = get(character);
-			const skillAfter = charAfter?.skills.find(s => s.name === 'Pistols');
+			const skillAfter = charAfter?.skills.find((s) => s.name === 'Pistols');
 			expect(skillAfter?.rating).toBe(ratingBefore + 1);
 			expect(charAfter?.karma).toBe(karmaBefore - expectedCost);
 		});
@@ -250,7 +250,7 @@ describe('Career Mode', () => {
 
 			expect(result.success).toBe(true);
 			const char = get(character);
-			const newSkill = char?.skills.find(s => s.name === 'Automatics');
+			const newSkill = char?.skills.find((s) => s.name === 'Automatics');
 			expect(newSkill).toBeDefined();
 			expect(newSkill?.rating).toBe(1);
 		});
@@ -286,7 +286,7 @@ describe('Career Mode', () => {
 
 			expect(result.success).toBe(true);
 			const char = get(character);
-			const skill = char?.skills.find(s => s.name === 'Pistols');
+			const skill = char?.skills.find((s) => s.name === 'Pistols');
 			expect(skill?.specialization).toBe('Semi-Automatics');
 		});
 
@@ -320,7 +320,7 @@ describe('Career Mode', () => {
 
 			expect(result.success).toBe(true);
 			const char = get(character);
-			const newSkill = char?.knowledgeSkills.find(s => s.name === 'Seattle Gangs');
+			const newSkill = char?.knowledgeSkills.find((s) => s.name === 'Seattle Gangs');
 			expect(newSkill).toBeDefined();
 			expect(newSkill?.rating).toBe(1);
 			expect(newSkill?.category).toBe('Street');
@@ -346,20 +346,20 @@ describe('Career Mode', () => {
 
 		it('should improve a knowledge skill', () => {
 			const char = get(character);
-			const skill = char?.knowledgeSkills.find(s => s.name === 'Seattle History');
+			const skill = char?.knowledgeSkills.find((s) => s.name === 'Seattle History');
 			const skillId = skill?.id;
 
 			const result = improveKnowledgeSkill(skillId!);
 
 			expect(result.success).toBe(true);
 			const charAfter = get(character);
-			const skillAfter = charAfter?.knowledgeSkills.find(s => s.id === skillId);
+			const skillAfter = charAfter?.knowledgeSkills.find((s) => s.id === skillId);
 			expect(skillAfter?.rating).toBe(2);
 		});
 
 		it('should cost new rating × 1 karma', () => {
 			const char = get(character);
-			const skill = char?.knowledgeSkills.find(s => s.name === 'Seattle History');
+			const skill = char?.knowledgeSkills.find((s) => s.name === 'Seattle History');
 			const skillId = skill?.id;
 			const karmaBefore = char?.karma ?? 0;
 
@@ -393,7 +393,7 @@ describe('Career Mode', () => {
 
 			expect(result.success).toBe(true);
 			const char = get(character);
-			const spell = char?.magic?.spells.find(s => s.name === 'Manabolt');
+			const spell = char?.magic?.spells.find((s) => s.name === 'Manabolt');
 			expect(spell).toBeDefined();
 		});
 

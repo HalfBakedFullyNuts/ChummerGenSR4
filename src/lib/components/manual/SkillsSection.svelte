@@ -27,12 +27,12 @@
 
 	/** Filter skills by search query. */
 	$: filteredSkills = searchQuery
-		? skills.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
+		? skills.filter((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
 		: skills.slice(0, 20);
 
 	/** Get current rating for a skill. */
 	function getSkillRating(skillName: string): number {
-		const found = character.skills.find(s => s.name === skillName);
+		const found = character.skills.find((s) => s.name === skillName);
 		return found?.rating ?? 0;
 	}
 
@@ -47,7 +47,7 @@
 
 	/** Add all skills in a group at rating 3. */
 	function addSkillGroup(groupName: string): void {
-		const groupSkills = skills.filter(s => s.skillgroup === groupName);
+		const groupSkills = skills.filter((s) => s.skillgroup === groupName);
 		for (const skill of groupSkills) {
 			const current = getSkillRating(skill.name);
 			if (current === 0) {
@@ -63,10 +63,7 @@
 		<h3 class="text-text-secondary text-sm font-medium mb-2">Quick-Add Skill Groups (Rating 3)</h3>
 		<div class="flex flex-wrap gap-2">
 			{#each skillGroups as group}
-				<button
-					class="cw-btn text-xs px-2 py-1"
-					on:click={() => addSkillGroup(group)}
-				>
+				<button class="cw-btn text-xs px-2 py-1" on:click={() => addSkillGroup(group)}>
 					{group}
 				</button>
 			{/each}
@@ -101,7 +98,8 @@
 								min="0"
 								max="6"
 								value={skill.rating}
-								on:input={(e) => handleSkillChange(skill.name, parseInt(e.currentTarget.value) || 0)}
+								on:input={(e) =>
+									handleSkillChange(skill.name, parseInt(e.currentTarget.value) || 0)}
 								class="cw-input w-12 text-center text-sm"
 							/>
 							<button

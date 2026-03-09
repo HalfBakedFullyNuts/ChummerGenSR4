@@ -24,7 +24,6 @@
 	import { CareerPanel } from '$lib/components';
 	import MetatypeSelector from '$lib/components/wizard/MetatypeSelector.svelte';
 	import AttributeAllocator from '$lib/components/wizard/AttributeAllocator.svelte';
-	import QualitySelector from '$lib/components/wizard/QualitySelector.svelte';
 	import SkillAllocator from '$lib/components/wizard/SkillAllocator.svelte';
 	import MagicSelector from '$lib/components/wizard/MagicSelector.svelte';
 	import EquipmentSelector from '$lib/components/wizard/EquipmentSelector.svelte';
@@ -120,8 +119,6 @@
 				return !!char.identity.metatype;
 			case 'attributes':
 				return true;
-			case 'qualities':
-				return true;
 			case 'skills':
 				return char.skills.length > 0;
 			case 'magic':
@@ -152,9 +149,7 @@
 		<div class="cw-card text-center py-12">
 			<h2 class="text-xl text-error-main mb-4">Error Loading Character</h2>
 			<p class="text-text-secondary mb-6">{loadError}</p>
-			<a href="/characters" class="cw-btn cw-btn-primary">
-				Back to Characters
-			</a>
+			<a href="/characters" class="cw-btn cw-btn-primary"> Back to Characters </a>
 		</div>
 	{:else}
 		<!-- Header with BP Counter -->
@@ -209,10 +204,10 @@
 					<button
 						class="flex-1 min-w-0 px-2 py-2 rounded text-xs transition-colors
 							{idx === $currentStepIndex
-								? 'bg-primary-main/20 text-primary-dark border border-primary-main/50'
-								: idx < $currentStepIndex
-									? 'bg-surface-variant text-text-primary'
-									: 'bg-surface text-text-muted'}"
+							? 'bg-primary-main/20 text-primary-dark border border-primary-main/50'
+							: idx < $currentStepIndex
+								? 'bg-surface-variant text-text-primary'
+								: 'bg-surface text-text-muted'}"
 						on:click={() => setWizardStep(step.id)}
 					>
 						<span class="block truncate">{step.label}</span>
@@ -232,9 +227,15 @@
 					<h2 class="cw-card-header">Build Method</h2>
 					<div class="p-4 bg-surface rounded-lg">
 						<div class="flex items-center gap-4">
-							<div class="w-16 h-16 rounded-full flex items-center justify-center
-								{$character.buildMethod === 'karma' ? 'bg-secondary-main/30' : 'bg-primary-main/30'}">
-								<span class="text-2xl font-bold {$character.buildMethod === 'karma' ? 'text-secondary-dark' : 'text-primary-dark'}">
+							<div
+								class="w-16 h-16 rounded-full flex items-center justify-center
+								{$character.buildMethod === 'karma' ? 'bg-secondary-main/30' : 'bg-primary-main/30'}"
+							>
+								<span
+									class="text-2xl font-bold {$character.buildMethod === 'karma'
+										? 'text-secondary-dark'
+										: 'text-primary-dark'}"
+								>
 									{$character.buildMethod === 'karma' ? 'K' : 'BP'}
 								</span>
 							</div>
@@ -243,7 +244,8 @@
 									{$character.buildMethod === 'karma' ? 'Karma Build' : 'Build Points'}
 								</h3>
 								<p class="text-text-secondary">
-									Started with {$character.buildPoints} {$character.buildMethod === 'karma' ? 'Karma' : 'BP'}
+									Started with {$character.buildPoints}
+									{$character.buildMethod === 'karma' ? 'Karma' : 'BP'}
 								</p>
 							</div>
 						</div>
@@ -256,8 +258,6 @@
 				<MetatypeSelector />
 			{:else if $currentStep === 'attributes'}
 				<AttributeAllocator />
-			{:else if $currentStep === 'qualities'}
-				<QualitySelector />
 			{:else if $currentStep === 'skills'}
 				<SkillAllocator />
 			{:else if $currentStep === 'magic'}
@@ -273,11 +273,7 @@
 
 		<!-- Navigation Footer -->
 		<footer class="mt-8 flex items-center justify-between">
-			<button
-				class="cw-btn cw-btn-secondary"
-				on:click={handlePrev}
-				disabled={!canGoBack}
-			>
+			<button class="cw-btn cw-btn-secondary" on:click={handlePrev} disabled={!canGoBack}>
 				Previous
 			</button>
 
@@ -285,11 +281,7 @@
 				Step {$currentStepIndex + 1} of {WIZARD_STEPS.length}
 			</span>
 
-			<button
-				class="cw-btn cw-btn-primary"
-				on:click={handleNext}
-				disabled={!canGoNext || saving}
-			>
+			<button class="cw-btn cw-btn-primary" on:click={handleNext} disabled={!canGoNext || saving}>
 				{#if saving}
 					Saving...
 				{:else if isLastStep}

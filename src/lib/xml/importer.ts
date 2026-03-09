@@ -157,9 +157,10 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 		buildPoints: getNumber(data, 'bp') || 400,
 		buildPointsSpent: {
 			metatype: metatypeBP,
-			attributes: 0, /* Calculated elsewhere */
+			attributes: 0 /* Calculated elsewhere */,
 			skills: skillBP,
 			skillGroups: skillGroupBP,
+			specializations: 0,
 			knowledgeSkills: 0,
 			qualities: qualityBP,
 			spells: spellBP,
@@ -247,8 +248,12 @@ function parseAttributes(attrs: unknown): Character['attributes'] {
 		log: { base: attrMap.get('LOG')?.value ?? 1, bonus: attrMap.get('LOG')?.aug ?? 0, karma: 0 },
 		wil: { base: attrMap.get('WIL')?.value ?? 1, bonus: attrMap.get('WIL')?.aug ?? 0, karma: 0 },
 		edg: { base: attrMap.get('EDG')?.value ?? 1, bonus: attrMap.get('EDG')?.aug ?? 0, karma: 0 },
-		mag: attrMap.get('MAG')?.value ? { base: attrMap.get('MAG')!.value, bonus: attrMap.get('MAG')!.aug, karma: 0 } : null,
-		res: attrMap.get('RES')?.value ? { base: attrMap.get('RES')!.value, bonus: attrMap.get('RES')!.aug, karma: 0 } : null,
+		mag: attrMap.get('MAG')?.value
+			? { base: attrMap.get('MAG')!.value, bonus: attrMap.get('MAG')!.aug, karma: 0 }
+			: null,
+		res: attrMap.get('RES')?.value
+			? { base: attrMap.get('RES')!.value, bonus: attrMap.get('RES')!.aug, karma: 0 }
+			: null,
 		ess: parseFloat(String(attrMap.get('ESS')?.value ?? 6))
 	};
 }
@@ -293,7 +298,10 @@ function parseAttributeLimits(attrs: unknown): Character['attributeLimits'] {
 /**
  * Parse skills from XML.
  */
-function parseSkills(skills: unknown): { activeSkills: CharacterSkill[]; knowledgeSkills: KnowledgeSkill[] } {
+function parseSkills(skills: unknown): {
+	activeSkills: CharacterSkill[];
+	knowledgeSkills: KnowledgeSkill[];
+} {
 	const activeSkills: CharacterSkill[] = [];
 	const knowledgeSkills: KnowledgeSkill[] = [];
 
@@ -308,7 +316,9 @@ function parseSkills(skills: unknown): { activeSkills: CharacterSkill[]; knowled
 			if (isKnowledge) {
 				const category = getString(skill, 'skillcategory');
 				const validCategories = ['Academic', 'Interest', 'Language', 'Professional', 'Street'];
-				const validCategory = validCategories.includes(category) ? category as KnowledgeSkillCategory : 'Interest';
+				const validCategory = validCategories.includes(category)
+					? (category as KnowledgeSkillCategory)
+					: 'Interest';
 				knowledgeSkills.push({
 					id: generateId(),
 					name: getString(skill, 'name'),
@@ -339,9 +349,20 @@ function parseSkillGroups(groups: unknown): CharacterSkillGroup[] {
 	const result: CharacterSkillGroup[] = [];
 
 	const validGroupNames: SkillGroupName[] = [
-		'Animal Husbandry', 'Athletics', 'Biotech', 'Close Combat', 'Conjuring',
-		'Cracking', 'Electronics', 'Firearms', 'Influence', 'Mechanic',
-		'Outdoors', 'Sorcery', 'Stealth', 'Tasking'
+		'Animal Husbandry',
+		'Athletics',
+		'Biotech',
+		'Close Combat',
+		'Conjuring',
+		'Cracking',
+		'Electronics',
+		'Firearms',
+		'Influence',
+		'Mechanic',
+		'Outdoors',
+		'Sorcery',
+		'Stealth',
+		'Tasking'
 	];
 
 	if (groups && typeof groups === 'object' && 'skillgroup' in groups) {
@@ -484,10 +505,15 @@ function parseCyberware(cyberwares: unknown): CharacterCyberware[] {
 		for (const cyber of cyberList) {
 			const gradeStr = getString(cyber, 'grade');
 			const grade: CyberwareGrade =
-				gradeStr === 'Alphaware' ? 'Alphaware' :
-					gradeStr === 'Betaware' ? 'Betaware' :
-						gradeStr === 'Deltaware' ? 'Deltaware' :
-							gradeStr === 'Used' ? 'Used' : 'Standard';
+				gradeStr === 'Alphaware'
+					? 'Alphaware'
+					: gradeStr === 'Betaware'
+						? 'Betaware'
+						: gradeStr === 'Deltaware'
+							? 'Deltaware'
+							: gradeStr === 'Used'
+								? 'Used'
+								: 'Standard';
 
 			result.push({
 				id: generateId(),

@@ -63,8 +63,12 @@ export function exportToChummer(character: Character): string {
 	/* Magic Flags */
 	const hasMagic = character.magic !== null;
 	const hasResonance = character.resonance !== null;
-	lines.push(`\t<adept>${hasMagic && character.qualities.some((q) => q.name === 'Adept') ? 'True' : 'False'}</adept>`);
-	lines.push(`\t<magician>${hasMagic && character.qualities.some((q) => q.name === 'Magician') ? 'True' : 'False'}</magician>`);
+	lines.push(
+		`\t<adept>${hasMagic && character.qualities.some((q) => q.name === 'Adept') ? 'True' : 'False'}</adept>`
+	);
+	lines.push(
+		`\t<magician>${hasMagic && character.qualities.some((q) => q.name === 'Magician') ? 'True' : 'False'}</magician>`
+	);
 	lines.push(`\t<technomancer>${hasResonance ? 'True' : 'False'}</technomancer>`);
 	lines.push(`\t<initiationoverride>False</initiationoverride>`);
 	lines.push(`\t<critter>False</critter>`);
@@ -137,7 +141,8 @@ export function exportToChummer(character: Character): string {
 	/* Knowledge Skills */
 	for (const skill of character.knowledgeSkills) {
 		/* Derive attribute from category */
-		const attribute = skill.category === 'Academic' || skill.category === 'Professional' ? 'LOG' : 'INT';
+		const attribute =
+			skill.category === 'Academic' || skill.category === 'Professional' ? 'LOG' : 'INT';
 		lines.push(`\t\t<skill>`);
 		lines.push(`\t\t\t<name>${escapeXml(skill.name)}</name>`);
 		lines.push(`\t\t\t<skillgroup />`);

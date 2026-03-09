@@ -22,32 +22,32 @@ import type { GameQuality } from '$stores/gamedata';
  * Krieger strain (Wendigo): Human only
  */
 export const INFECTED_METATYPE_RESTRICTIONS: Record<string, string[]> = {
-    // HMHVV-I variants (Vampire strain) - metatype specific
-    'Infected: Vampire': ['Human'],
-    'Infected: Nosferatu': ['Human'],
-    'Infected: Banshee': ['Elf'],
-    'Infected: Goblin': ['Dwarf', 'Ork'],
-    'Infected: Dzoo-Noo-Qua': ['Troll'],
-    'Infected: Fomóraig': ['Troll'],
+	// HMHVV-I variants (Vampire strain) - metatype specific
+	'Infected: Vampire': ['Human'],
+	'Infected: Nosferatu': ['Human'],
+	'Infected: Banshee': ['Elf'],
+	'Infected: Goblin': ['Dwarf', 'Ork'],
+	'Infected: Dzoo-Noo-Qua': ['Troll'],
+	'Infected: Fomóraig': ['Troll'],
 
-    // HMHVV-II variants (Ghoul strain) - any metatype
-    'Infected: Ghoul': [], // Empty = any metatype
-    'Infected: Gaki': [], // Regional ghoul variant
-    'Infected: Penanggalan': [], // Regional ghoul variant
-    'Infected: Sasobonsam': [], // Regional ghoul variant
-    'Infected: Busaw': [], // Regional ghoul variant
-    'Infected: Abat': [], // Regional ghoul variant
+	// HMHVV-II variants (Ghoul strain) - any metatype
+	'Infected: Ghoul': [], // Empty = any metatype
+	'Infected: Gaki': [], // Regional ghoul variant
+	'Infected: Penanggalan': [], // Regional ghoul variant
+	'Infected: Sasobonsam': [], // Regional ghoul variant
+	'Infected: Busaw': [], // Regional ghoul variant
+	'Infected: Abat': [], // Regional ghoul variant
 
-    // HMHVV-III variants (Loup-Garou strain)
-    'Infected: Loup-Garou': ['Human'],
-    'Infected: Amalanhig': ['Human'], // Regional variant
-    'Infected: Sukuyan': ['Human'], // Regional variant
+	// HMHVV-III variants (Loup-Garou strain)
+	'Infected: Loup-Garou': ['Human'],
+	'Infected: Amalanhig': ['Human'], // Regional variant
+	'Infected: Sukuyan': ['Human'], // Regional variant
 
-    // Krieger strain
-    'Infected: Wendigo': ['Human'],
+	// Krieger strain
+	'Infected: Wendigo': ['Human'],
 
-    // Bandersnatch - Elf only (from Running Wild)
-    'Infected: Bandersnatch': ['Elf']
+	// Bandersnatch - Elf only (from Running Wild)
+	'Infected: Bandersnatch': ['Elf']
 };
 
 /**
@@ -55,32 +55,32 @@ export const INFECTED_METATYPE_RESTRICTIONS: Record<string, string[]> = {
  * Maps metavariant names to their base metatype.
  */
 const METAVARIANT_BASE_MAP: Record<string, string> = {
-    // Dwarf metavariants
-    'Gnome': 'Dwarf',
-    'Haruman': 'Dwarf',
-    'Koborokuru': 'Dwarf',
-    'Menehune': 'Dwarf',
+	// Dwarf metavariants
+	Gnome: 'Dwarf',
+	Haruman: 'Dwarf',
+	Koborokuru: 'Dwarf',
+	Menehune: 'Dwarf',
 
-    // Elf metavariants
-    'Dryad': 'Elf',
-    'Night One': 'Elf',
-    'Wakyambi': 'Elf',
-    'Xapiri Thëpë': 'Elf',
+	// Elf metavariants
+	Dryad: 'Elf',
+	'Night One': 'Elf',
+	Wakyambi: 'Elf',
+	'Xapiri Thëpë': 'Elf',
 
-    // Ork metavariants
-    'Hobgoblin': 'Ork',
-    'Ogre': 'Ork',
-    'Oni': 'Ork',
-    'Satyr': 'Ork',
+	// Ork metavariants
+	Hobgoblin: 'Ork',
+	Ogre: 'Ork',
+	Oni: 'Ork',
+	Satyr: 'Ork',
 
-    // Troll metavariants
-    'Cyclops': 'Troll',
-    'Fomori': 'Troll',
-    'Giant': 'Troll',
-    'Minotaur': 'Troll',
+	// Troll metavariants
+	Cyclops: 'Troll',
+	Fomori: 'Troll',
+	Giant: 'Troll',
+	Minotaur: 'Troll',
 
-    // Human metavariants
-    'Nartaki': 'Human'
+	// Human metavariants
+	Nartaki: 'Human'
 };
 
 /**
@@ -88,7 +88,7 @@ const METAVARIANT_BASE_MAP: Record<string, string> = {
  * Returns the metatype itself if it's already a base type.
  */
 export function getBaseMetatype(metatype: string): string {
-    return METAVARIANT_BASE_MAP[metatype] ?? metatype;
+	return METAVARIANT_BASE_MAP[metatype] ?? metatype;
 }
 
 /**
@@ -98,21 +98,21 @@ export function getBaseMetatype(metatype: string): string {
  * - The quality's restrictions include the character's base metatype
  */
 export function isQualityAvailableForMetatype(qualityName: string, metatype: string): boolean {
-    const restrictions = INFECTED_METATYPE_RESTRICTIONS[qualityName];
+	const restrictions = INFECTED_METATYPE_RESTRICTIONS[qualityName];
 
-    // Not an infected quality or no restrictions defined = available
-    if (restrictions === undefined) {
-        return true;
-    }
+	// Not an infected quality or no restrictions defined = available
+	if (restrictions === undefined) {
+		return true;
+	}
 
-    // Empty array = any metatype allowed
-    if (restrictions.length === 0) {
-        return true;
-    }
+	// Empty array = any metatype allowed
+	if (restrictions.length === 0) {
+		return true;
+	}
 
-    // Check if character's base metatype is in allowed list
-    const baseMetatype = getBaseMetatype(metatype);
-    return restrictions.includes(baseMetatype);
+	// Check if character's base metatype is in allowed list
+	const baseMetatype = getBaseMetatype(metatype);
+	return restrictions.includes(baseMetatype);
 }
 
 /**
@@ -120,44 +120,44 @@ export function isQualityAvailableForMetatype(qualityName: string, metatype: str
  * Removes qualities that are not available for the given metatype.
  */
 export function filterQualitiesByMetatype(
-    qualities: readonly GameQuality[],
-    metatype: string | undefined
+	qualities: readonly GameQuality[],
+	metatype: string | undefined
 ): GameQuality[] {
-    if (!metatype) {
-        return [...qualities];
-    }
+	if (!metatype) {
+		return [...qualities];
+	}
 
-    return qualities.filter(q => isQualityAvailableForMetatype(q.name, metatype));
+	return qualities.filter((q) => isQualityAvailableForMetatype(q.name, metatype));
 }
 
 /** A grouped quality that may contain variants. */
 export interface GroupedQuality {
-    /** The base name of the quality (e.g., "Animal Pelage") */
-    baseName: string;
-    /** Display name - same as baseName for groups, full name for singles */
-    displayName: string;
-    /** Whether this represents a group of variants */
-    isGroup: boolean;
-    /** The individual quality variants in this group */
-    variants: GameQuality[];
-    /** Representative quality data (first variant's data for groups) */
-    representative: GameQuality;
-    /** Category inherited from representative */
-    category: 'Positive' | 'Negative';
-    /** Source/page from representative */
-    source: string;
-    page: number;
+	/** The base name of the quality (e.g., "Animal Pelage") */
+	baseName: string;
+	/** Display name - same as baseName for groups, full name for singles */
+	displayName: string;
+	/** Whether this represents a group of variants */
+	isGroup: boolean;
+	/** The individual quality variants in this group */
+	variants: GameQuality[];
+	/** Representative quality data (first variant's data for groups) */
+	representative: GameQuality;
+	/** Category inherited from representative */
+	category: 'Positive' | 'Negative';
+	/** Source/page from representative */
+	source: string;
+	page: number;
 }
 
 /** Patterns for detecting quality variants. */
 const PARENTHESES_PATTERN = /^(.+?)\s*\(([^)]+)\)$/;
 const COLON_PATTERN = /^(.+?):\s*(.+)$/;
 const GRADE_PATTERNS = [
-    /Class\s+(I{1,3}|IV|V)/i,  // Roman numerals
-    /\((\d+)\s+trigger/i,       // Numbered triggers
-    /Level\s+(\d+)/i,           // Numbered levels
-    /Rating\s+(\d+)/i,          // Numbered ratings
-    /Grade\s+(I{1,3}|IV|V|\d+)/i // Grade variants
+	/Class\s+(I{1,3}|IV|V)/i, // Roman numerals
+	/\((\d+)\s+trigger/i, // Numbered triggers
+	/Level\s+(\d+)/i, // Numbered levels
+	/Rating\s+(\d+)/i, // Numbered ratings
+	/Grade\s+(I{1,3}|IV|V|\d+)/i // Grade variants
 ];
 
 /**
@@ -165,25 +165,25 @@ const GRADE_PATTERNS = [
  * Returns null if no variant pattern is detected.
  */
 export function parseQualityName(name: string): { baseName: string; variant: string } | null {
-    // Check parentheses pattern first (most common)
-    const parenMatch = name.match(PARENTHESES_PATTERN);
-    if (parenMatch && parenMatch[1] && parenMatch[2]) {
-        return {
-            baseName: parenMatch[1].trim(),
-            variant: parenMatch[2].trim()
-        };
-    }
+	// Check parentheses pattern first (most common)
+	const parenMatch = name.match(PARENTHESES_PATTERN);
+	if (parenMatch && parenMatch[1] && parenMatch[2]) {
+		return {
+			baseName: parenMatch[1].trim(),
+			variant: parenMatch[2].trim()
+		};
+	}
 
-    // Check colon pattern (e.g., "Code of Conduct: Bushido")
-    const colonMatch = name.match(COLON_PATTERN);
-    if (colonMatch && colonMatch[1] && colonMatch[2]) {
-        return {
-            baseName: colonMatch[1].trim(),
-            variant: colonMatch[2].trim()
-        };
-    }
+	// Check colon pattern (e.g., "Code of Conduct: Bushido")
+	const colonMatch = name.match(COLON_PATTERN);
+	if (colonMatch && colonMatch[1] && colonMatch[2]) {
+		return {
+			baseName: colonMatch[1].trim(),
+			variant: colonMatch[2].trim()
+		};
+	}
 
-    return null;
+	return null;
 }
 
 /**
@@ -191,7 +191,7 @@ export function parseQualityName(name: string): { baseName: string; variant: str
  * Grade variants typically have Roman numerals or level numbers.
  */
 export function isGradeVariant(variant: string): boolean {
-    return GRADE_PATTERNS.some(pattern => pattern.test(variant));
+	return GRADE_PATTERNS.some((pattern) => pattern.test(variant));
 }
 
 /**
@@ -199,81 +199,81 @@ export function isGradeVariant(variant: string): boolean {
  * Individual qualities without variants are returned as single-item groups.
  */
 export function groupQualities(qualities: readonly GameQuality[]): GroupedQuality[] {
-    const groupMap = new Map<string, GameQuality[]>();
-    const ungrouped: GameQuality[] = [];
+	const groupMap = new Map<string, GameQuality[]>();
+	const ungrouped: GameQuality[] = [];
 
-    // First pass: categorize qualities
-    for (const quality of qualities) {
-        const parsed = parseQualityName(quality.name);
+	// First pass: categorize qualities
+	for (const quality of qualities) {
+		const parsed = parseQualityName(quality.name);
 
-        if (parsed) {
-            const key = parsed.baseName.toLowerCase();
-            if (!groupMap.has(key)) {
-                groupMap.set(key, []);
-            }
-            groupMap.get(key)!.push(quality);
-        } else {
-            ungrouped.push(quality);
-        }
-    }
+		if (parsed) {
+			const key = parsed.baseName.toLowerCase();
+			if (!groupMap.has(key)) {
+				groupMap.set(key, []);
+			}
+			groupMap.get(key)!.push(quality);
+		} else {
+			ungrouped.push(quality);
+		}
+	}
 
-    const result: GroupedQuality[] = [];
+	const result: GroupedQuality[] = [];
 
-    // Process grouped qualities
-    for (const [_key, variants] of groupMap) {
-        if (variants.length === 1) {
-            // Only one variant - treat as ungrouped but keep full name
-            const quality = variants[0]!;
-            result.push({
-                baseName: quality.name,
-                displayName: quality.name,
-                isGroup: false,
-                variants: [quality],
-                representative: quality,
-                category: quality.category as 'Positive' | 'Negative',
-                source: quality.source,
-                page: quality.page
-            });
-        } else {
-            // Multiple variants - create a group
-            const firstVariant = variants[0]!;
-            const parsed = parseQualityName(firstVariant.name);
-            const baseName = parsed?.baseName ?? firstVariant.name;
+	// Process grouped qualities
+	for (const [_key, variants] of groupMap) {
+		if (variants.length === 1) {
+			// Only one variant - treat as ungrouped but keep full name
+			const quality = variants[0]!;
+			result.push({
+				baseName: quality.name,
+				displayName: quality.name,
+				isGroup: false,
+				variants: [quality],
+				representative: quality,
+				category: quality.category as 'Positive' | 'Negative',
+				source: quality.source,
+				page: quality.page
+			});
+		} else {
+			// Multiple variants - create a group
+			const firstVariant = variants[0]!;
+			const parsed = parseQualityName(firstVariant.name);
+			const baseName = parsed?.baseName ?? firstVariant.name;
 
-            // Sort variants by name for consistent ordering
-            variants.sort((a, b) => a.name.localeCompare(b.name));
+			// Sort variants by name for consistent ordering
+			variants.sort((a, b) => a.name.localeCompare(b.name));
 
-            result.push({
-                baseName,
-                displayName: baseName,
-                isGroup: true,
-                variants,
-                representative: firstVariant,
-                category: firstVariant.category as 'Positive' | 'Negative',
-                source: firstVariant.source,
-                page: firstVariant.page
-            });
-        }
-    }
+			result.push({
+				baseName,
+				displayName: baseName,
+				isGroup: true,
+				variants,
+				representative: firstVariant,
+				category: firstVariant.category as 'Positive' | 'Negative',
+				source: firstVariant.source,
+				page: firstVariant.page
+			});
+		}
+	}
 
-    // Add ungrouped qualities
-    for (const quality of ungrouped) {
-        result.push({
-            baseName: quality.name,
-            displayName: quality.name,
-            isGroup: false,
-            variants: [quality],
-            representative: quality,
-            category: quality.category as 'Positive' | 'Negative',
-            source: quality.source,
-            page: quality.page
-        });
-    }
+	// Add ungrouped qualities
+	for (const quality of ungrouped) {
+		result.push({
+			baseName: quality.name,
+			displayName: quality.name,
+			isGroup: false,
+			variants: [quality],
+			representative: quality,
+			category: quality.category as 'Positive' | 'Negative',
+			source: quality.source,
+			page: quality.page
+		});
+	}
 
-    // Sort by display name
-    result.sort((a, b) => a.displayName.localeCompare(b.displayName));
+	// Sort by display name
+	result.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-    return result;
+	return result;
 }
 
 /**
@@ -281,11 +281,11 @@ export function groupQualities(qualities: readonly GameQuality[]): GroupedQualit
  * For single qualities, min and max are the same.
  */
 export function getGroupBPRange(group: GroupedQuality): { min: number; max: number } {
-    const costs = group.variants.map(v => Math.abs(v.bp));
-    return {
-        min: Math.min(...costs),
-        max: Math.max(...costs)
-    };
+	const costs = group.variants.map((v) => Math.abs(v.bp));
+	return {
+		min: Math.min(...costs),
+		max: Math.max(...costs)
+	};
 }
 
 /**
@@ -293,9 +293,9 @@ export function getGroupBPRange(group: GroupedQuality): { min: number; max: numb
  * Shows single value if all variants have same cost.
  */
 export function formatBPRange(group: GroupedQuality): string {
-    const range = getGroupBPRange(group);
-    if (range.min === range.max) {
-        return `${range.min} BP`;
-    }
-    return `${range.min}-${range.max} BP`;
+	const range = getGroupBPRange(group);
+	if (range.min === range.max) {
+		return `${range.min} BP`;
+	}
+	return `${range.min}-${range.max} BP`;
 }

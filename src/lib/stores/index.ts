@@ -213,6 +213,7 @@ export {
 	type WizardStep,
 	type WizardStepConfig,
 	type AttributeValueKey,
+	AWAKENED_ATTR_KEYS,
 	type MagicType,
 	type CharacterSummary,
 	type AddQualityOptions

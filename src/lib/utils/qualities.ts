@@ -360,7 +360,7 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 export function formatQualityBonusSummary(bonus: QualityBonus | undefined): string {
 	const formatted = formatQualityBonus(bonus);
 	if (formatted.length === 0) return '';
-	return formatted.map(f => f.text).join(', ');
+	return formatted.map((f) => f.text).join(', ');
 }
 
 /** Quality tag categories for searchable keywords. */
@@ -409,7 +409,11 @@ export function generateQualityTags(quality: GameQuality): QualityTag[] {
 		}
 
 		// Social
-		if (bonus.composure !== undefined || bonus.judgeintentions !== undefined || bonus.notoriety !== undefined) {
+		if (
+			bonus.composure !== undefined ||
+			bonus.judgeintentions !== undefined ||
+			bonus.notoriety !== undefined
+		) {
 			tags.add('social');
 		}
 		if (bonus.uncouth) {
@@ -417,10 +421,14 @@ export function generateQualityTags(quality: GameQuality): QualityTag[] {
 		}
 
 		// Magic
-		if (bonus.drainresist !== undefined || bonus.enabletab === 'magician' || bonus.enabletab === 'adept') {
+		if (
+			bonus.drainresist !== undefined ||
+			bonus.enabletab === 'magician' ||
+			bonus.enabletab === 'adept'
+		) {
 			tags.add('magic');
 		}
-		if (bonus.addattribute?.some(a => a.name === 'MAG')) {
+		if (bonus.addattribute?.some((a) => a.name === 'MAG')) {
 			tags.add('magic');
 		}
 
@@ -428,7 +436,7 @@ export function generateQualityTags(quality: GameQuality): QualityTag[] {
 		if (bonus.enabletab === 'technomancer') {
 			tags.add('matrix');
 		}
-		if (bonus.addattribute?.some(a => a.name === 'RES')) {
+		if (bonus.addattribute?.some((a) => a.name === 'RES')) {
 			tags.add('matrix');
 		}
 
@@ -502,19 +510,45 @@ export function generateQualityTags(quality: GameQuality): QualityTag[] {
 	if (effect.includes('social') || effect.includes('charisma') || effect.includes('negotiation')) {
 		tags.add('social');
 	}
-	if (effect.includes('magic') || effect.includes('spell') || effect.includes('mana') || effect.includes('astral')) {
+	if (
+		effect.includes('magic') ||
+		effect.includes('spell') ||
+		effect.includes('mana') ||
+		effect.includes('astral')
+	) {
 		tags.add('magic');
 	}
-	if (effect.includes('matrix') || effect.includes('hacking') || effect.includes('technomancer') || effect.includes('sprite')) {
+	if (
+		effect.includes('matrix') ||
+		effect.includes('hacking') ||
+		effect.includes('technomancer') ||
+		effect.includes('sprite')
+	) {
 		tags.add('matrix');
 	}
-	if (effect.includes('physical') || effect.includes('body') || effect.includes('strength') || effect.includes('agility')) {
+	if (
+		effect.includes('physical') ||
+		effect.includes('body') ||
+		effect.includes('strength') ||
+		effect.includes('agility')
+	) {
 		tags.add('physical');
 	}
-	if (effect.includes('mental') || effect.includes('logic') || effect.includes('willpower') || effect.includes('intuition')) {
+	if (
+		effect.includes('mental') ||
+		effect.includes('logic') ||
+		effect.includes('willpower') ||
+		effect.includes('intuition')
+	) {
 		tags.add('mental');
 	}
-	if (effect.includes('metatype') || effect.includes('ork') || effect.includes('elf') || effect.includes('dwarf') || effect.includes('troll')) {
+	if (
+		effect.includes('metatype') ||
+		effect.includes('ork') ||
+		effect.includes('elf') ||
+		effect.includes('dwarf') ||
+		effect.includes('troll')
+	) {
 		tags.add('metatype');
 	}
 	if (effect.includes('karma')) {
@@ -535,7 +569,7 @@ export function qualityMatchesSearch(quality: GameQuality, search: string): bool
 	if (!search) return true;
 
 	const lower = search.toLowerCase();
-	const terms = lower.split(/\s+/).filter(t => t.length > 0);
+	const terms = lower.split(/\s+/).filter((t) => t.length > 0);
 
 	// Get searchable text
 	const name = quality.name.toLowerCase();
@@ -544,18 +578,18 @@ export function qualityMatchesSearch(quality: GameQuality, search: string): bool
 	const bonusSummary = formatQualityBonusSummary(quality.bonus).toLowerCase();
 
 	// All terms must match something
-	return terms.every(term => {
+	return terms.every((term) => {
 		// Check if term is a tag prefix (e.g., "tag:combat" or just "combat" for tags)
 		if (term.startsWith('tag:')) {
 			const tagSearch = term.slice(4);
-			return tags.some(t => t.includes(tagSearch));
+			return tags.some((t) => t.includes(tagSearch));
 		}
 
 		// Normal search - check all fields
 		return (
 			name.includes(term) ||
 			effect.includes(term) ||
-			tags.some(t => t.includes(term)) ||
+			tags.some((t) => t.includes(term)) ||
 			bonusSummary.includes(term)
 		);
 	});

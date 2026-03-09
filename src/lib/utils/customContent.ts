@@ -5,17 +5,8 @@
  * Supports qualities, spells, powers, gear, weapons, etc.
  */
 
-import type {
-	GameWeapon,
-	GameArmor,
-	GameCyberware,
-	GameGear
-} from '$types';
-import type {
-	GameQuality,
-	GameSpell,
-	GamePower
-} from '$stores/gamedata';
+import type { GameWeapon, GameArmor, GameCyberware, GameGear } from '$types';
+import type { GameQuality, GameSpell, GamePower } from '$stores/gamedata';
 
 /** Custom content manifest. */
 export interface CustomContentManifest {
@@ -87,7 +78,9 @@ function parseQuality(element: Element): GameQuality | null {
 		name,
 		category: category as 'Positive' | 'Negative',
 		bp: getElementInt(element, 'bp'),
-		mutant: getElementText(element, 'metagenetic') === 'True' || getElementText(element, 'mutant') === 'True',
+		mutant:
+			getElementText(element, 'metagenetic') === 'True' ||
+			getElementText(element, 'mutant') === 'True',
 		limit: getElementText(element, 'limit') === 'True',
 		source: getElementText(element, 'source') || 'Custom',
 		page: getElementInt(element, 'page')
@@ -393,7 +386,7 @@ export function parseCustomContent(xmlString: string): ParseResult {
 	}
 
 	/* Check if any content was parsed */
-	const hasContent = Object.values(content).some(arr => arr && arr.length > 0);
+	const hasContent = Object.values(content).some((arr) => arr && arr.length > 0);
 	if (!hasContent) {
 		errors.push('No valid content found in file');
 		return { success: false, errors, warnings };
@@ -453,7 +446,7 @@ export function getStoredCustomContent(): CustomContentManifest[] {
 /** Save a custom content manifest to storage. */
 export function saveCustomContent(manifest: CustomContentManifest): void {
 	const existing = getStoredCustomContent();
-	const filtered = existing.filter(m => m.id !== manifest.id);
+	const filtered = existing.filter((m) => m.id !== manifest.id);
 	filtered.push(manifest);
 	localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
 }
@@ -461,7 +454,7 @@ export function saveCustomContent(manifest: CustomContentManifest): void {
 /** Remove custom content from storage. */
 export function removeCustomContent(manifestId: string): void {
 	const existing = getStoredCustomContent();
-	const filtered = existing.filter(m => m.id !== manifestId);
+	const filtered = existing.filter((m) => m.id !== manifestId);
 	localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
 }
 

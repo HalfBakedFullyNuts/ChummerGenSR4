@@ -353,9 +353,9 @@ describe('Character Creation - Cyberware and Essence Interaction', () => {
 		const cyber2: GameCyberware = { ...mockCyberware, name: 'Cyber2', ess: 1.0 };
 		const cyber3: GameCyberware = { ...mockCyberware, name: 'Cyber3', ess: 1.0 };
 
-		addCyberware(cyber1, 'Standard');   // 1.0 essence
-		addCyberware(cyber2, 'Alphaware');  // 0.8 essence
-		addCyberware(cyber3, 'Deltaware');  // 0.5 essence
+		addCyberware(cyber1, 'Standard'); // 1.0 essence
+		addCyberware(cyber2, 'Alphaware'); // 0.8 essence
+		addCyberware(cyber3, 'Deltaware'); // 0.5 essence
 
 		// 6.0 - 1.0 - 0.8 - 0.5 = 3.7
 		expect(get(currentEssence)).toBeCloseTo(3.7);
@@ -482,8 +482,8 @@ describe('Character Creation - Validation Rules', () => {
 			addQuality('Quality1', 'Positive', 20);
 			addQuality('Quality2', 'Positive', 20);
 
-			const positiveTotal = get(character)?.qualities
-				.filter(q => q.category === 'Positive')
+			const positiveTotal = get(character)
+				?.qualities.filter((q) => q.category === 'Positive')
 				.reduce((sum, q) => sum + q.bp, 0);
 
 			expect(positiveTotal).toBe(40);
@@ -495,8 +495,8 @@ describe('Character Creation - Validation Rules', () => {
 			addQuality('Quality2', 'Negative', -20);
 
 			const negativeTotal = Math.abs(
-				get(character)?.qualities
-					.filter(q => q.category === 'Negative')
+				get(character)
+					?.qualities.filter((q) => q.category === 'Negative')
 					.reduce((sum, q) => sum + q.bp, 0) ?? 0
 			);
 

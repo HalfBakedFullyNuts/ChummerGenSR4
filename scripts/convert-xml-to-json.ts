@@ -30,11 +30,34 @@ const parser = new XMLParser({
 	isArray: (tagName: string): boolean => {
 		/* Tags that should always be arrays */
 		const arrayTags = [
-			'metatype', 'metavariant', 'skill', 'quality', 'spell',
-			'power', 'gear', 'weapon', 'armor', 'cyberware', 'bioware',
-			'vehicle', 'mod', 'accessory', 'spec', 'category', 'name',
-			'program', 'critterpower', 'martialart', 'maneuver', 'lifestyle',
-			'tradition', 'mentor', 'metamagic', 'echo', 'positive', 'negative'
+			'metatype',
+			'metavariant',
+			'skill',
+			'quality',
+			'spell',
+			'power',
+			'gear',
+			'weapon',
+			'armor',
+			'cyberware',
+			'bioware',
+			'vehicle',
+			'mod',
+			'accessory',
+			'spec',
+			'category',
+			'name',
+			'program',
+			'critterpower',
+			'martialart',
+			'maneuver',
+			'lifestyle',
+			'tradition',
+			'mentor',
+			'metamagic',
+			'echo',
+			'positive',
+			'negative'
 		];
 		return arrayTags.includes(tagName);
 	}
@@ -99,6 +122,96 @@ function toArray<T>(value: T | T[] | undefined): T[] {
 }
 
 /**
+ * Parse a formula value and extract the base multiplier.
+ * Shadowrun 4E follows "Rating × base" pattern for rated items.
+ *
+ * Handles:
+ * - Simple numbers: "5000" -> 5000
+ * - Rating formulas: "Rating * 3000" -> 3000
+ * - Complex: "(Rating * 0.1) + 0.2" -> { base: 0.1, addon: 0.2 }
+ * - FixedValues: "FixedValues(500,750,1000)" -> [500, 750, 1000]
+ *
+ * Returns number for simple values, null if unparseable.
+ */
+function parseFormulaValue(value: unknown): number | number[] | null {
+	if (value === undefined || value === null || value === '') {
+		return null;
+	}
+
+	/* Already a number */
+	if (typeof value === 'number') {
+		return value;
+	}
+
+	const str = String(value).trim();
+
+	/* Simple number */
+	const simpleNum = Number(str);
+	if (!isNaN(simpleNum)) {
+		return simpleNum;
+	}
+
+	/* FixedValues(a,b,c,d) - return array of values by rating */
+	const fixedMatch = str.match(/^FixedValues\(([^)]+)\)$/i);
+	if (fixedMatch && fixedMatch[1]) {
+		const values = fixedMatch[1].split(',').map((v) => parseFloat(v.trim()));
+		if (values.every((v) => !isNaN(v))) {
+			return values;
+		}
+	}
+
+	/* Rating * X pattern */
+	const ratingMultMatch = str.match(/^Rating\s*\*\s*([\d.]+)$/i);
+	if (ratingMultMatch && ratingMultMatch[1]) {
+		return parseFloat(ratingMultMatch[1]);
+	}
+
+	/* (Rating * X) + Y pattern - return base multiplier X */
+	const complexMatch = str.match(/^\(Rating\s*\*\s*([\d.]+)\)\s*\+\s*([\d.]+)$/i);
+	if (complexMatch && complexMatch[1]) {
+		return parseFloat(complexMatch[1]);
+	}
+
+	/* X + (Rating * Y) pattern - return base multiplier Y */
+	const reverseComplexMatch = str.match(/^([\d.]+)\s*\+\s*\(Rating\s*\*\s*([\d.]+)\)$/i);
+	if (reverseComplexMatch && reverseComplexMatch[2]) {
+		return parseFloat(reverseComplexMatch[2]);
+	}
+
+	/* (Rating * X) pattern (no addon) */
+	const parenMatch = str.match(/^\(Rating\s*\*\s*([\d.]+)\)$/i);
+	if (parenMatch && parenMatch[1]) {
+		return parseFloat(parenMatch[1]);
+	}
+
+	return null;
+}
+
+/**
+ * Parse cost/essence value, returning base number or null.
+ * Uses parseFormulaValue internally, flattens arrays to first value.
+ */
+function parseNumericFormula(value: unknown): number | null {
+	const result = parseFormulaValue(value);
+	if (result === null) return null;
+	if (Array.isArray(result)) {
+		return result.length > 0 ? result[0]! : null;
+	}
+	return result;
+}
+
+/**
+ * Parse a value, returning the numeric result or the original string.
+ * Used for availability and capacity which may contain formulas we want to preserve.
+ */
+function parseOrString(value: unknown): string {
+	if (value === undefined || value === null || value === '') {
+		return '0';
+	}
+	return String(value);
+}
+
+/**
  * Convert metatypes.xml to JSON.
  * Extracts metatypes with attribute limits and metavariants.
  */
@@ -156,24 +269,80 @@ function convertMetatypes(): ConversionResult {
 			category: String(m['category'] ?? ''),
 			bp: Number(m['bp'] ?? 0),
 			attributes: {
-				bod: { min: Number(m['bodmin'] ?? 1), max: Number(m['bodmax'] ?? 6), aug: Number(m['bodaug'] ?? 9) },
-				agi: { min: Number(m['agimin'] ?? 1), max: Number(m['agimax'] ?? 6), aug: Number(m['agiaug'] ?? 9) },
-				rea: { min: Number(m['reamin'] ?? 1), max: Number(m['reamax'] ?? 6), aug: Number(m['reaaug'] ?? 9) },
-				str: { min: Number(m['strmin'] ?? 1), max: Number(m['strmax'] ?? 6), aug: Number(m['straug'] ?? 9) },
-				cha: { min: Number(m['chamin'] ?? 1), max: Number(m['chamax'] ?? 6), aug: Number(m['chaaug'] ?? 9) },
-				int: { min: Number(m['intmin'] ?? 1), max: Number(m['intmax'] ?? 6), aug: Number(m['intaug'] ?? 9) },
-				log: { min: Number(m['logmin'] ?? 1), max: Number(m['logmax'] ?? 6), aug: Number(m['logaug'] ?? 9) },
-				wil: { min: Number(m['wilmin'] ?? 1), max: Number(m['wilmax'] ?? 6), aug: Number(m['wilaug'] ?? 9) },
-				ini: { min: Number(m['inimin'] ?? 2), max: Number(m['inimax'] ?? 12), aug: Number(m['iniaug'] ?? 18) },
-				edg: { min: Number(m['edgmin'] ?? 1), max: Number(m['edgmax'] ?? 6), aug: Number(m['edgaug'] ?? 6) },
-				mag: { min: Number(m['magmin'] ?? 1), max: Number(m['magmax'] ?? 6), aug: Number(m['magaug'] ?? 6) },
-				res: { min: Number(m['resmin'] ?? 1), max: Number(m['resmax'] ?? 6), aug: Number(m['resaug'] ?? 6) },
-				ess: { min: Number(m['essmin'] ?? 0), max: Number(m['essmax'] ?? 6), aug: Number(m['essaug'] ?? 6) }
+				bod: {
+					min: Number(m['bodmin'] ?? 1),
+					max: Number(m['bodmax'] ?? 6),
+					aug: Number(m['bodaug'] ?? 9)
+				},
+				agi: {
+					min: Number(m['agimin'] ?? 1),
+					max: Number(m['agimax'] ?? 6),
+					aug: Number(m['agiaug'] ?? 9)
+				},
+				rea: {
+					min: Number(m['reamin'] ?? 1),
+					max: Number(m['reamax'] ?? 6),
+					aug: Number(m['reaaug'] ?? 9)
+				},
+				str: {
+					min: Number(m['strmin'] ?? 1),
+					max: Number(m['strmax'] ?? 6),
+					aug: Number(m['straug'] ?? 9)
+				},
+				cha: {
+					min: Number(m['chamin'] ?? 1),
+					max: Number(m['chamax'] ?? 6),
+					aug: Number(m['chaaug'] ?? 9)
+				},
+				int: {
+					min: Number(m['intmin'] ?? 1),
+					max: Number(m['intmax'] ?? 6),
+					aug: Number(m['intaug'] ?? 9)
+				},
+				log: {
+					min: Number(m['logmin'] ?? 1),
+					max: Number(m['logmax'] ?? 6),
+					aug: Number(m['logaug'] ?? 9)
+				},
+				wil: {
+					min: Number(m['wilmin'] ?? 1),
+					max: Number(m['wilmax'] ?? 6),
+					aug: Number(m['wilaug'] ?? 9)
+				},
+				ini: {
+					min: Number(m['inimin'] ?? 2),
+					max: Number(m['inimax'] ?? 12),
+					aug: Number(m['iniaug'] ?? 18)
+				},
+				edg: {
+					min: Number(m['edgmin'] ?? 1),
+					max: Number(m['edgmax'] ?? 6),
+					aug: Number(m['edgaug'] ?? 6)
+				},
+				mag: {
+					min: Number(m['magmin'] ?? 1),
+					max: Number(m['magmax'] ?? 6),
+					aug: Number(m['magaug'] ?? 6)
+				},
+				res: {
+					min: Number(m['resmin'] ?? 1),
+					max: Number(m['resmax'] ?? 6),
+					aug: Number(m['resaug'] ?? 6)
+				},
+				ess: {
+					min: Number(m['essmin'] ?? 0),
+					max: Number(m['essmax'] ?? 6),
+					aug: Number(m['essaug'] ?? 6)
+				}
 			},
 			movement: String(m['movement'] ?? ''),
 			qualities: {
-				positive: toArray((m['qualities'] as Record<string, unknown>)?.['positive']?.['quality'] as string[]),
-				negative: toArray((m['qualities'] as Record<string, unknown>)?.['negative']?.['quality'] as string[])
+				positive: toArray(
+					(m['qualities'] as Record<string, unknown>)?.['positive']?.['quality'] as string[]
+				),
+				negative: toArray(
+					(m['qualities'] as Record<string, unknown>)?.['negative']?.['quality'] as string[]
+				)
 			},
 			source: String(m['source'] ?? ''),
 			page: Number(m['page'] ?? 0),
@@ -181,15 +350,21 @@ function convertMetatypes(): ConversionResult {
 		};
 
 		/* Process metavariants */
-		const variants = toArray((m['metavariants'] as Record<string, unknown>)?.['metavariant'] as Record<string, unknown>[]);
+		const variants = toArray(
+			(m['metavariants'] as Record<string, unknown>)?.['metavariant'] as Record<string, unknown>[]
+		);
 		for (const v of variants) {
 			if (!v || typeof v !== 'object') continue;
 			mt.metavariants.push({
 				name: String(v['name'] ?? ''),
 				bp: Number(v['bp'] ?? 0),
 				qualities: {
-					positive: toArray((v['qualities'] as Record<string, unknown>)?.['positive']?.['quality'] as string[]),
-					negative: toArray((v['qualities'] as Record<string, unknown>)?.['negative']?.['quality'] as string[])
+					positive: toArray(
+						(v['qualities'] as Record<string, unknown>)?.['positive']?.['quality'] as string[]
+					),
+					negative: toArray(
+						(v['qualities'] as Record<string, unknown>)?.['negative']?.['quality'] as string[]
+					)
 				},
 				source: String(v['source'] ?? ''),
 				page: Number(v['page'] ?? 0)
@@ -215,16 +390,24 @@ function convertSkills(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const skillGroups = toArray((chummer['skillgroups'] as Record<string, unknown>)?.['name'] as string[]);
-	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as Array<string | Record<string, unknown>>);
-	const skillsRaw = toArray((chummer['skills'] as Record<string, unknown>)?.['skill'] as Record<string, unknown>[]);
+	const skillGroups = toArray(
+		(chummer['skillgroups'] as Record<string, unknown>)?.['name'] as string[]
+	);
+	const categoriesRaw = toArray(
+		(chummer['categories'] as Record<string, unknown>)?.['category'] as Array<
+			string | Record<string, unknown>
+		>
+	);
+	const skillsRaw = toArray(
+		(chummer['skills'] as Record<string, unknown>)?.['skill'] as Record<string, unknown>[]
+	);
 
 	/* Parse categories with type attribute */
 	interface Category {
 		name: string;
 		type: 'active' | 'knowledge';
 	}
-	const categories: Category[] = categoriesRaw.map(c => {
+	const categories: Category[] = categoriesRaw.map((c) => {
 		if (typeof c === 'string') {
 			return { name: c, type: 'active' as const };
 		}
@@ -280,8 +463,12 @@ function convertQualities(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as string[]);
-	const qualitiesRaw = toArray((chummer['qualities'] as Record<string, unknown>)?.['quality'] as Record<string, unknown>[]);
+	const categoriesRaw = toArray(
+		(chummer['categories'] as Record<string, unknown>)?.['category'] as string[]
+	);
+	const qualitiesRaw = toArray(
+		(chummer['qualities'] as Record<string, unknown>)?.['quality'] as Record<string, unknown>[]
+	);
 
 	interface Quality {
 		name: string;
@@ -327,8 +514,12 @@ function convertSpells(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as string[]);
-	const spellsRaw = toArray((chummer['spells'] as Record<string, unknown>)?.['spell'] as Record<string, unknown>[]);
+	const categoriesRaw = toArray(
+		(chummer['categories'] as Record<string, unknown>)?.['category'] as string[]
+	);
+	const spellsRaw = toArray(
+		(chummer['spells'] as Record<string, unknown>)?.['spell'] as Record<string, unknown>[]
+	);
 
 	interface Spell {
 		name: string;
@@ -380,7 +571,9 @@ function convertPowers(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const powersRaw = toArray((chummer['powers'] as Record<string, unknown>)?.['power'] as Record<string, unknown>[]);
+	const powersRaw = toArray(
+		(chummer['powers'] as Record<string, unknown>)?.['power'] as Record<string, unknown>[]
+	);
 
 	interface Power {
 		name: string;
@@ -425,7 +618,9 @@ function convertTraditions(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const traditionsRaw = toArray((chummer['traditions'] as Record<string, unknown>)?.['tradition'] as Record<string, unknown>[]);
+	const traditionsRaw = toArray(
+		(chummer['traditions'] as Record<string, unknown>)?.['tradition'] as Record<string, unknown>[]
+	);
 
 	interface Tradition {
 		name: string;
@@ -466,7 +661,9 @@ function convertMentors(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const mentorsRaw = toArray((chummer['mentors'] as Record<string, unknown>)?.['mentor'] as Record<string, unknown>[]);
+	const mentorsRaw = toArray(
+		(chummer['mentors'] as Record<string, unknown>)?.['mentor'] as Record<string, unknown>[]
+	);
 
 	interface Mentor {
 		name: string;
@@ -507,7 +704,9 @@ function convertLifestyles(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const lifestylesRaw = toArray((chummer['lifestyles'] as Record<string, unknown>)?.['lifestyle'] as Record<string, unknown>[]);
+	const lifestylesRaw = toArray(
+		(chummer['lifestyles'] as Record<string, unknown>)?.['lifestyle'] as Record<string, unknown>[]
+	);
 
 	interface Lifestyle {
 		name: string;
@@ -550,8 +749,12 @@ function convertPrograms(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as string[]);
-	const programsRaw = toArray((chummer['programs'] as Record<string, unknown>)?.['program'] as Record<string, unknown>[]);
+	const categoriesRaw = toArray(
+		(chummer['categories'] as Record<string, unknown>)?.['category'] as string[]
+	);
+	const programsRaw = toArray(
+		(chummer['programs'] as Record<string, unknown>)?.['program'] as Record<string, unknown>[]
+	);
 
 	interface Program {
 		name: string;
@@ -590,8 +793,12 @@ function convertWeapons(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as string[]);
-	const weaponsRaw = toArray((chummer['weapons'] as Record<string, unknown>)?.['weapon'] as Record<string, unknown>[]);
+	const categoriesRaw = toArray(
+		(chummer['categories'] as Record<string, unknown>)?.['category'] as string[]
+	);
+	const weaponsRaw = toArray(
+		(chummer['weapons'] as Record<string, unknown>)?.['weapon'] as Record<string, unknown>[]
+	);
 
 	interface Weapon {
 		name: string;
@@ -650,8 +857,12 @@ function convertArmor(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as string[]);
-	const armorRaw = toArray((chummer['armors'] as Record<string, unknown>)?.['armor'] as Record<string, unknown>[]);
+	const categoriesRaw = toArray(
+		(chummer['categories'] as Record<string, unknown>)?.['category'] as string[]
+	);
+	const armorRaw = toArray(
+		(chummer['armors'] as Record<string, unknown>)?.['armor'] as Record<string, unknown>[]
+	);
 
 	interface Armor {
 		name: string;
@@ -704,9 +915,15 @@ function convertCyberware(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as string[]);
-	const gradesRaw = toArray((chummer['grades'] as Record<string, unknown>)?.['grade'] as Record<string, unknown>[]);
-	const cyberwareRaw = toArray((chummer['cyberwares'] as Record<string, unknown>)?.['cyberware'] as Record<string, unknown>[]);
+	const categoriesRaw = toArray(
+		(chummer['categories'] as Record<string, unknown>)?.['category'] as string[]
+	);
+	const gradesRaw = toArray(
+		(chummer['grades'] as Record<string, unknown>)?.['grade'] as Record<string, unknown>[]
+	);
+	const cyberwareRaw = toArray(
+		(chummer['cyberwares'] as Record<string, unknown>)?.['cyberware'] as Record<string, unknown>[]
+	);
 
 	interface CyberwareGrade {
 		name: string;
@@ -729,10 +946,13 @@ function convertCyberware(): ConversionResult {
 	interface Cyberware {
 		name: string;
 		category: string;
-		ess: number;
+		ess: number | null;
+		essFormula?: string;
 		capacity: string;
 		avail: string;
-		cost: number;
+		cost: number | null;
+		costFormula?: string;
+		costByRating?: number[];
 		rating: number;
 		source: string;
 		page: number;
@@ -745,17 +965,55 @@ function convertCyberware(): ConversionResult {
 		const c = cyberwareRaw[i];
 		if (!c || typeof c !== 'object') continue;
 
-		cyberware.push({
+		/* Parse essence - may be a formula like "Rating * 0.1" or "(Rating * 0.1) + 0.1" */
+		const essRaw = c['ess'];
+		const essParsed = parseFormulaValue(essRaw);
+		let ess: number | null = null;
+		let essFormula: string | undefined;
+		if (typeof essParsed === 'number') {
+			ess = essParsed;
+		} else if (Array.isArray(essParsed)) {
+			ess = essParsed[0] ?? null;
+		} else if (essRaw !== undefined && essRaw !== null && essRaw !== '') {
+			/* Preserve formula string for complex cases */
+			essFormula = String(essRaw);
+		}
+
+		/* Parse cost - may be a formula like "Rating * 3000" or "FixedValues(500,750,1000)" */
+		const costRaw = c['cost'];
+		const costParsed = parseFormulaValue(costRaw);
+		let cost: number | null = null;
+		let costFormula: string | undefined;
+		let costByRating: number[] | undefined;
+		if (typeof costParsed === 'number') {
+			cost = costParsed;
+		} else if (Array.isArray(costParsed)) {
+			/* FixedValues - store as array for rating lookup */
+			costByRating = costParsed;
+			cost = costParsed[0] ?? null;
+		} else if (costRaw !== undefined && costRaw !== null && costRaw !== '') {
+			/* Preserve formula string for complex cases */
+			costFormula = String(costRaw);
+		}
+
+		const item: Cyberware = {
 			name: String(c['name'] ?? ''),
 			category: String(c['category'] ?? ''),
-			ess: Number(c['ess'] ?? 0),
-			capacity: String(c['capacity'] ?? '0'),
-			avail: String(c['avail'] ?? '0'),
-			cost: Number(c['cost'] ?? 0),
+			ess,
+			capacity: parseOrString(c['capacity']),
+			avail: parseOrString(c['avail']),
+			cost,
 			rating: Number(c['rating'] ?? 0),
 			source: String(c['source'] ?? ''),
 			page: Number(c['page'] ?? 0)
-		});
+		};
+
+		/* Add optional formula fields only if present */
+		if (essFormula) item.essFormula = essFormula;
+		if (costFormula) item.costFormula = costFormula;
+		if (costByRating) item.costByRating = costByRating;
+
+		cyberware.push(item);
 	}
 
 	writeJsonFile('cyberware.json', { categories: categoriesRaw, grades, cyberware });
@@ -773,20 +1031,38 @@ function convertGear(): ConversionResult {
 	}
 
 	const chummer = xml['chummer'] as Record<string, unknown>;
-	const categoriesRaw = toArray((chummer['categories'] as Record<string, unknown>)?.['category'] as Array<string | Record<string, unknown>>);
-	const gearRaw = toArray((chummer['gears'] as Record<string, unknown>)?.['gear'] as Record<string, unknown>[]);
+	const categoriesRaw = toArray(
+		(chummer['categories'] as Record<string, unknown>)?.['category'] as Array<
+			string | Record<string, unknown>
+		>
+	);
+	const gearRaw = toArray(
+		(chummer['gears'] as Record<string, unknown>)?.['gear'] as Record<string, unknown>[]
+	);
 
 	/* Filter categories to show only essential ones */
 	const essentialCategories = [
-		'Commlink', 'Commlink Accessories', 'Commlink Operating System',
-		'ID/Credsticks', 'Communications', 'Sensors', 'Security Devices',
-		'B&E Gear', 'Biotech', 'Disguise', 'Survival Gear', 'Foci',
-		'Magical Supplies', 'DocWagon Contract', 'Drugs', 'Slap Patches'
+		'Commlink',
+		'Commlink Accessories',
+		'Commlink Operating System',
+		'ID/Credsticks',
+		'Communications',
+		'Sensors',
+		'Security Devices',
+		'B&E Gear',
+		'Biotech',
+		'Disguise',
+		'Survival Gear',
+		'Foci',
+		'Magical Supplies',
+		'DocWagon Contract',
+		'Drugs',
+		'Slap Patches'
 	];
 
 	const categories = categoriesRaw
-		.map(c => typeof c === 'string' ? c : String(c['#text'] ?? ''))
-		.filter(c => essentialCategories.some(e => c.includes(e) || e.includes(c)));
+		.map((c) => (typeof c === 'string' ? c : String(c['#text'] ?? '')))
+		.filter((c) => essentialCategories.some((e) => c.includes(e) || e.includes(c)));
 
 	interface GearItem {
 		name: string;
@@ -807,7 +1083,7 @@ function convertGear(): ConversionResult {
 
 		const category = String(g['category'] ?? '');
 		/* Only include essential categories */
-		if (!essentialCategories.some(e => category.includes(e) || e.includes(category))) {
+		if (!essentialCategories.some((e) => category.includes(e) || e.includes(category))) {
 			continue;
 		}
 
