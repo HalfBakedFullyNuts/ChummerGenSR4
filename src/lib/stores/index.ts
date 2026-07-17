@@ -91,6 +91,9 @@ export {
     WIZARD_STEPS,
     visibleWizardSteps,
     updateIdentity,
+    addQuality,
+    addQualityAgain,
+    removeQuality,
     type WizardStep,
     type WizardStepConfig,
     type AttributeValueKey,
@@ -112,9 +115,6 @@ export {
 
 export {
     setAttribute,
-    addQuality,
-    addQualityAgain,
-    removeQuality,
     calculateTotalAttributeCost,
     calculateNonSpecialAttributeBP,
     isAttributeNA,

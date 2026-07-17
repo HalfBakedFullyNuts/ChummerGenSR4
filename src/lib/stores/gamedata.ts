@@ -549,6 +549,12 @@ export const gameData: Readable<GameData> = { subscribe: gameDataStore.subscribe
 /** Readable store for loading state. */
 export const gameDataLoading: Readable<LoadingState> = { subscribe: loadingStore.subscribe };
 
+/** Test-only: inject game data directly, bypassing the fetch-based loader. */
+export function setGameDataForTesting(data: Partial<GameData>): void {
+	gameDataStore.set({ ...EMPTY_GAME_DATA, ...data });
+	dataLoaded = true;
+}
+
 /** Derived store for metatypes only. */
 export const metatypes: Readable<Metatype[]> = derived(gameData, ($data) => $data.metatypes);
 
