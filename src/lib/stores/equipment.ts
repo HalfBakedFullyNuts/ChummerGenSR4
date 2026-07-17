@@ -22,12 +22,12 @@ import {
 	type GameCyberware,
 	type GameBioware,
 	type GameVehicle,
-	type GameMartialArt,
 	type GameGear,
 	type CyberwareGrade,
 	type BiowareGrade
 } from '$types';
 import { characterStore, generateId } from './character';
+import { type GameMartialArt } from './gamedata';
 
 /* ============================================
  * Resources

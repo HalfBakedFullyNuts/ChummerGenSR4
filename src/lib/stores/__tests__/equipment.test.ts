@@ -11,6 +11,10 @@ import {
 	character,
 	startNewCharacter,
 	setResourcesBP,
+	remainingNuyen,
+	currentEssence
+} from '../character';
+import {
 	addWeapon,
 	removeWeapon,
 	addArmor,
@@ -21,10 +25,8 @@ import {
 	removeGear,
 	setLifestyle,
 	removeLifestyle,
-	remainingNuyen,
-	currentEssence
-} from '../character';
-import { addChildCyberware } from '../equipment';
+	addChildCyberware
+} from '../equipment';
 import type { GameWeapon, GameArmor, GameCyberware, GameGear } from '$types';
 
 // Mock game data for testing

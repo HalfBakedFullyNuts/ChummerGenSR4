@@ -23,9 +23,9 @@ import {
 	getMaxAmmo,
 	spendAmmo,
 	reloadWeapon,
-	setAmmo,
-	addWeapon
+	setAmmo
 } from '../character';
+import { addWeapon } from '../equipment';
 
 describe('Character Store - BP Management', () => {
 	beforeEach(() => {

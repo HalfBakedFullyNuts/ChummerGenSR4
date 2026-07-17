@@ -17,12 +17,12 @@ import {
 	setSkill,
 	addContact,
 	setResourcesBP,
-	addCyberware,
 	initializeMagic,
 	addSpell,
 	magicType,
 	currentEssence
 } from '../character';
+import { addCyberware } from '../equipment';
 import type { GameData } from '../gamedata';
 import type { GameCyberware } from '$types';
 

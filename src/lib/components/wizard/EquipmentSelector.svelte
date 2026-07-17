@@ -5,6 +5,9 @@
 		startingNuyen,
 		currentEssence,
 		setResourcesBP,
+		KARMA_BUILD_COSTS
+	} from '$stores/character';
+	import {
 		addWeapon,
 		removeWeapon,
 		addArmor,
@@ -22,9 +25,9 @@
 		removeGear,
 		setLifestyle,
 		removeLifestyle,
-		KARMA_BUILD_COSTS
-	} from '$stores/character';
-	import { addChildCyberware, addWeaponToVehicle } from '../../stores/equipment';
+		addChildCyberware,
+		addWeaponToVehicle
+	} from '../../stores/equipment';
 	import { gameData, ranges as rangesStore } from '$stores/gamedata';
 	import { BP_TO_NUYEN_RATES, type CyberwareGrade, type BiowareGrade } from '$types';
 	import { calculateWeaponRange } from '$lib/utils/ranges';
