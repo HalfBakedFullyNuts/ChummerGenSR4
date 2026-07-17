@@ -16,7 +16,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* Constants for file paths */
-const SOURCE_DIR = path.resolve(__dirname, '../../bin/data');
+const SOURCE_DIR = path.resolve(__dirname, '../bin/data');
 const OUTPUT_DIR = path.resolve(__dirname, '../static/data');
 
 /* Maximum items to process per file (safety bound) */
@@ -759,6 +759,7 @@ function convertPrograms(): ConversionResult {
 	interface Program {
 		name: string;
 		category: string;
+		complexform: boolean;
 		source: string;
 		page: number;
 	}
@@ -773,6 +774,7 @@ function convertPrograms(): ConversionResult {
 		programs.push({
 			name: String(p['name'] ?? ''),
 			category: String(p['category'] ?? ''),
+			complexform: String(p['complexform']).toLowerCase() === 'yes',
 			source: String(p['source'] ?? ''),
 			page: Number(p['page'] ?? 0)
 		});
@@ -1103,6 +1105,128 @@ function convertGear(): ConversionResult {
 }
 
 /**
+ * Convert metamagic.xml to JSON.
+ */
+function convertMetamagic(): ConversionResult {
+	const xml = readXmlFile('metamagic.xml');
+	if (!xml) {
+		return { success: false, itemCount: 0, error: 'Failed to read file' };
+	}
+
+	const chummer = xml['chummer'] as Record<string, unknown>;
+	const metamagicsRaw = toArray(
+		(chummer['metamagics'] as Record<string, unknown>)?.['metamagic'] as Record<string, unknown>[]
+	);
+
+	interface Metamagic {
+		name: string;
+		adept: boolean;
+		magician: boolean;
+		source: string;
+		page: number;
+	}
+
+	const metamagics: Metamagic[] = [];
+	const limit = Math.min(metamagicsRaw.length, MAX_ITEMS);
+
+	for (let i = 0; i < limit; i++) {
+		const m = metamagicsRaw[i];
+		if (!m || typeof m !== 'object') continue;
+
+		metamagics.push({
+			name: String(m['name'] ?? ''),
+			adept: String(m['adept']).toLowerCase() === 'yes',
+			magician: String(m['magician']).toLowerCase() === 'yes',
+			source: String(m['source'] ?? ''),
+			page: Number(m['page'] ?? 0)
+		});
+	}
+
+	writeJsonFile('metamagic.json', { metamagics });
+	return { success: true, itemCount: metamagics.length };
+}
+
+/**
+ * Convert books.xml to JSON.
+ */
+function convertBooks(): ConversionResult {
+	const xml = readXmlFile('books.xml');
+	if (!xml) {
+		return { success: false, itemCount: 0, error: 'Failed to read file' };
+	}
+
+	const chummer = xml['chummer'] as Record<string, unknown>;
+	const booksRaw = toArray(
+		(chummer['books'] as Record<string, unknown>)?.['book'] as Record<string, unknown>[]
+	);
+
+	interface Book {
+		name: string;
+		code: string;
+	}
+
+	const books: Book[] = [];
+	const limit = Math.min(booksRaw.length, MAX_ITEMS);
+
+	for (let i = 0; i < limit; i++) {
+		const b = booksRaw[i];
+		if (!b || typeof b !== 'object') continue;
+
+		books.push({
+			name: String(b['name'] ?? ''),
+			code: String(b['code'] ?? '')
+		});
+	}
+
+	writeJsonFile('books.json', { books });
+	return { success: true, itemCount: books.length };
+}
+
+/**
+ * Convert ranges.xml to JSON.
+ */
+function convertRanges(): ConversionResult {
+	const xml = readXmlFile('ranges.xml');
+	if (!xml) {
+		return { success: false, itemCount: 0, error: 'Failed to read file' };
+	}
+
+	const chummer = xml['chummer'] as Record<string, unknown>;
+	const rangesRaw = toArray(
+		(chummer['ranges'] as Record<string, unknown>)?.['range'] as Record<string, unknown>[]
+	);
+
+	interface Range {
+		category: string;
+		min: string;
+		short: string;
+		medium: string;
+		long: string;
+		extreme: string;
+	}
+
+	const ranges: Range[] = [];
+	const limit = Math.min(rangesRaw.length, MAX_ITEMS);
+
+	for (let i = 0; i < limit; i++) {
+		const r = rangesRaw[i];
+		if (!r || typeof r !== 'object') continue;
+
+		ranges.push({
+			category: String(r['category'] ?? ''),
+			min: String(r['min'] ?? '0'),
+			short: String(r['short'] ?? '0'),
+			medium: String(r['medium'] ?? '0'),
+			long: String(r['long'] ?? '0'),
+			extreme: String(r['extreme'] ?? '0')
+		});
+	}
+
+	writeJsonFile('ranges.json', { ranges });
+	return { success: true, itemCount: ranges.length };
+}
+
+/**
  * Main entry point.
  * Runs all converters and reports results.
  */
@@ -1125,7 +1249,10 @@ function main(): void {
 		{ name: 'Weapons', fn: convertWeapons },
 		{ name: 'Armor', fn: convertArmor },
 		{ name: 'Cyberware', fn: convertCyberware },
-		{ name: 'Gear', fn: convertGear }
+		{ name: 'Gear', fn: convertGear },
+		{ name: 'Metamagic', fn: convertMetamagic },
+		{ name: 'Books', fn: convertBooks },
+		{ name: 'Ranges', fn: convertRanges }
 	];
 
 	let totalItems = 0;
