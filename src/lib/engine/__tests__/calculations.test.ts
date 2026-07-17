@@ -115,6 +115,33 @@ describe('calculations engine', () => {
             char.attributes.ess = 4.5;
             expect(calculations.getEssence(char)).toBe(4.5);
         });
+
+        it('getAttributeNaturalMax is metatype max plus Attribute "max" improvements (issue #66)', () => {
+            expect(calculations.getAttributeNaturalMax(char, 'bod')).toBe(6); // human default
+            char.improvements = [{
+                id: 'imp-1', type: 'Attribute', improvedName: 'bod', source: 'Quality', sourceName: 'Exceptional Attribute',
+                val: 0, min: 0, max: 1, aug: 0, augMax: 0, rating: 1,
+                exclude: '', uniqueName: '', addToRating: false, enabled: true
+            }];
+            expect(calculations.getAttributeNaturalMax(char, 'bod')).toBe(7);
+        });
+
+        it('getAttributeAugmentedMax uses the metatype-provided aug cap, not a floor(max*1.5) formula (issue #66)', () => {
+            // Human default: bod aug=9 (does follow 1.5x by coincidence), mag aug=6 (does NOT — no augmentation multiplier for MAG in SR4)
+            expect(calculations.getAttributeAugmentedMax(char, 'bod')).toBe(9);
+            expect(calculations.getAttributeAugmentedMax(char, 'mag')).toBe(6);
+        });
+
+        it('getAttributeTotal clamps to augmented max, not natural max x improvements (issue #66)', () => {
+            char.attributes.bod.base = 6; // at natural max already
+            char.improvements = [{
+                id: 'imp-1', type: 'Attribute', improvedName: 'bod', source: 'Cyberware', sourceName: 'Bone Lacing',
+                val: 5, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                exclude: '', uniqueName: '', addToRating: false, enabled: true
+            }];
+            // 6 base + 5 improvement = 11, but augmented max is 9 -> clamps to 9
+            expect(calculations.getAttributeTotal(char, 'bod')).toBe(9);
+        });
     });
 
     describe('Condition Monitors', () => {

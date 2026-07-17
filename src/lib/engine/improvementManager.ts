@@ -8,12 +8,144 @@
 
 
 
-import type { Improvement, ImprovementType, ImprovementSource } from '$types';
+import type { Improvement, ImprovementType, ImprovementSource, BonusValue } from '$types';
+
+/**
+ * Tokenize an arithmetic expression (post "Rating" substitution) into
+ * numbers, `+ - * /`, and parens. Returns undefined on any unrecognized
+ * character so the caller can warn-and-skip rather than crash.
+ */
+function tokenizeArithmetic(expr: string): string[] | undefined {
+    const tokens: string[] = [];
+    let i = 0;
+    while (i < expr.length) {
+        const ch = expr[i]!;
+        if (ch === ' ') {
+            i++;
+            continue;
+        }
+        if ('+-*/()'.includes(ch)) {
+            tokens.push(ch);
+            i++;
+            continue;
+        }
+        if (/[0-9.]/.test(ch)) {
+            let j = i;
+            while (j < expr.length && /[0-9.]/.test(expr[j]!)) j++;
+            tokens.push(expr.slice(i, j));
+            i = j;
+            continue;
+        }
+        return undefined;
+    }
+    return tokens;
+}
+
+/** Recursive-descent parser over arithmetic tokens. Mutates `pos.i` as it consumes tokens. */
+function parseFactor(tokens: string[], pos: { i: number }): number | undefined {
+    const tok = tokens[pos.i];
+    if (tok === '-') {
+        pos.i++;
+        const inner = parseFactor(tokens, pos);
+        return inner === undefined ? undefined : -inner;
+    }
+    if (tok === '(') {
+        pos.i++;
+        const inner = parseExpr(tokens, pos);
+        if (tokens[pos.i] !== ')') return undefined;
+        pos.i++;
+        return inner;
+    }
+    if (tok !== undefined && /^[0-9.]+$/.test(tok)) {
+        pos.i++;
+        return Number(tok);
+    }
+    return undefined;
+}
+
+/** `term (('*' | '/') term)*` */
+function parseTerm(tokens: string[], pos: { i: number }): number | undefined {
+    let value = parseFactor(tokens, pos);
+    if (value === undefined) return undefined;
+    while (tokens[pos.i] === '*' || tokens[pos.i] === '/') {
+        const op = tokens[pos.i];
+        pos.i++;
+        const rhs = parseFactor(tokens, pos);
+        if (rhs === undefined) return undefined;
+        value = op === '*' ? value * rhs : value / rhs;
+    }
+    return value;
+}
+
+/** `factor (('+' | '-') factor)*` */
+function parseExpr(tokens: string[], pos: { i: number }): number | undefined {
+    let value = parseTerm(tokens, pos);
+    if (value === undefined) return undefined;
+    while (tokens[pos.i] === '+' || tokens[pos.i] === '-') {
+        const op = tokens[pos.i];
+        pos.i++;
+        const rhs = parseTerm(tokens, pos);
+        if (rhs === undefined) return undefined;
+        value = op === '+' ? value + rhs : value - rhs;
+    }
+    return value;
+}
+
+/**
+ * Resolve a bonus value to a number, matching desktop's ValueToInt
+ * (clsImprovement.cs:1058-1101) minus attribute-name substitution:
+ *  - numbers pass through unchanged
+ *  - "Rating"-based arithmetic ("Rating", "-Rating", "Rating x 2", ...):
+ *    substitute the numeric rating for "Rating", evaluate the arithmetic
+ *    expression (add, subtract, multiply, divide, parens), then floor it
+ *  - "FixedValues(a,b,c,...)": pick entry [rating-1] (clamped to the last
+ *    entry; rating <= 0 clamps to the first, both cases warn)
+ *  - anything else (e.g. an attribute-name substitution the parser doesn't
+ *    support) warns and returns undefined — callers must skip, never NaN
+ */
+export function resolveBonusValue(raw: BonusValue | undefined, rating: number): number | undefined {
+    if (raw === undefined) return undefined;
+    if (typeof raw === 'number') return raw;
+
+    const fixedMatch = raw.match(/^FixedValues\(([^)]+)\)$/i);
+    if (fixedMatch) {
+        const values = fixedMatch[1]!.split(',').map((v) => Number(v.trim()));
+        if (values.some((v) => Number.isNaN(v))) {
+            console.warn(`resolveBonusValue: malformed FixedValues "${raw}"`);
+            return undefined;
+        }
+        if (rating < 1) {
+            console.warn(`resolveBonusValue: FixedValues rating ${rating} < 1, clamping to first entry`);
+            return values[0];
+        }
+        const index = Math.min(rating, values.length) - 1;
+        if (rating > values.length) {
+            console.warn(`resolveBonusValue: FixedValues rating ${rating} exceeds ${values.length} entries, clamping`);
+        }
+        return values[index];
+    }
+
+    const substituted = raw.replace(/Rating/g, String(rating));
+    const tokens = tokenizeArithmetic(substituted);
+    if (!tokens) {
+        console.warn(`resolveBonusValue: cannot resolve bonus expression "${raw}"`);
+        return undefined;
+    }
+    const pos = { i: 0 };
+    const result = parseExpr(tokens, pos);
+    if (result === undefined || pos.i !== tokens.length) {
+        console.warn(`resolveBonusValue: cannot resolve bonus expression "${raw}"`);
+        return undefined;
+    }
+    return Math.floor(result);
+}
 
 /**
  * Get the total value of all enabled improvements matching the specified type.
  * Respects uniqueName stacking limitations (only highest applied in group).
  * Optionally filter by improvedName (e.g., getting bonuses for a specific skill).
+ * Matches exactly (desktop clsImprovement.cs:911-916) — an improvement with an
+ * empty improvedName is never a fallback match for a named query.
  */
 export function valueOf(
     improvements: readonly Improvement[] | undefined,
@@ -29,9 +161,7 @@ export function valueOf(
 
     if (improvedName !== undefined) {
         // e.g. `type: 'Skill', improvedName: 'Pistols'`
-        activeImprovements = activeImprovements.filter(
-            (imp) => imp.improvedName === improvedName || imp.improvedName === ''
-        );
+        activeImprovements = activeImprovements.filter((imp) => imp.improvedName === improvedName);
     }
 
     // For standard summation
@@ -134,49 +264,54 @@ export function createImprovementsFromBonus(
         results.push(base);
     };
 
+    /** Resolve a raw bonus value at this call's rating; undefined stays undefined (never NaN/0). */
+    const r = (raw: BonusValue | undefined): number | undefined => resolveBonusValue(raw, rating);
+
     // Arrays of specific targets
     if (bonusData.specificattribute) {
         for (const attr of bonusData.specificattribute) {
-            b('Attribute', attr.name.toLowerCase(), {
-                val: attr.val ?? 0,
-                min: attr.min ?? 0,
-                max: attr.max ?? 0,
-                aug: attr.aug ?? 0
+            b('Attribute', String(attr.name).toLowerCase(), {
+                val: r(attr.val) ?? 0,
+                min: r(attr.min) ?? 0,
+                max: r(attr.max) ?? 0,
+                // desktop: XML `aug` means augmented-maximum, not "augmented bonus" (clsImprovement.cs:1575-1608)
+                augMax: r(attr.aug) ?? 0
             });
         }
     }
     if (bonusData.selectattribute && selectedAttribute) {
         b('Attribute', selectedAttribute.toLowerCase(), {
-            val: bonusData.selectattribute.val ?? 0,
-            min: bonusData.selectattribute.min ?? 0, // In Chummer, min to max often means reducing limit
-            max: bonusData.selectattribute.max ?? 0
+            val: r(bonusData.selectattribute.val) ?? 0,
+            min: r(bonusData.selectattribute.min) ?? 0, // In Chummer, min to max often means reducing limit
+            max: r(bonusData.selectattribute.max) ?? 0,
+            augMax: r(bonusData.selectattribute.aug) ?? 0
         });
     }
     if (bonusData.specificskill) {
         for (const skill of bonusData.specificskill) {
             b('Skill', skill.name, {
-                val: skill.bonus ?? 0,
-                max: skill.max ?? 0
+                val: r(skill.bonus) ?? 0,
+                max: r(skill.max) ?? 0
             });
         }
     }
     if (bonusData.selectskill && selectedSkill) {
         b('Skill', selectedSkill, {
-            val: bonusData.selectskill.bonus ?? 0,
-            max: bonusData.selectskill.max ?? 0
+            val: r(bonusData.selectskill.bonus) ?? 0,
+            max: r(bonusData.selectskill.max) ?? 0
         });
     }
     if (bonusData.skillgroup) {
         for (const group of bonusData.skillgroup) {
             b('SkillGroup', group.name, {
-                val: group.bonus ?? 0
+                val: r(group.bonus) ?? 0
             });
         }
     }
     if (bonusData.skillcategory) {
         for (const cat of bonusData.skillcategory) {
             b('SkillCategory', cat.name, {
-                val: cat.bonus ?? 0
+                val: r(cat.bonus) ?? 0
             });
         }
     }
@@ -208,7 +343,8 @@ export function createImprovementsFromBonus(
 
     for (const [key, impType] of Object.entries(propMappings)) {
         if (bonusData[key] !== undefined) {
-            b(impType, '', { val: bonusData[key] });
+            const resolved = r(bonusData[key]);
+            if (resolved !== undefined) b(impType, '', { val: resolved });
         }
     }
 

@@ -15,30 +15,60 @@ import { valueOf } from './improvementManager';
  * Attribute Helpers
  * ============================================ */
 
-/** Get total attribute value (base + bonus). */
+/** Attribute keys that carry metatype-defined limits (attributeLimits). */
+type LimitedAttributeKey = 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil' | 'edg' | 'mag' | 'res';
+
+/** Natural maximum including improvements (metatype max + Attribute 'max' modifiers, e.g. Exceptional Attribute). */
+export function getAttributeNaturalMax(char: Character, attr: LimitedAttributeKey): number {
+	const limits = char.attributeLimits[attr];
+	const baseMax = limits ? limits.max : 0;
+	return baseMax + valueOf(char.improvements, 'Attribute', attr, 'max');
+}
+
+/**
+ * Augmented maximum: the metatype-provided cap (attributeLimits[attr].aug),
+ * plus 'augMax' improvements. NOT a universal floor(max x 1.5) formula —
+ * Edge/Magic/Resonance/Essence have no augmentation multiplier in SR4
+ * (their aug equals their natural max), and several metatypes (Naga,
+ * Pixie, Free Spirit, some Shapeshifters, A.I.) carry non-standard
+ * multipliers on specific attributes. Verified against every metatype in
+ * static/data/metatypes.json: only bod/agi/rea/str/cha/int/log/wil follow
+ * floor(max*1.5) for most (not all) metatypes, so the shipped per-attribute
+ * value is the source of truth, not a derived formula.
+ */
+export function getAttributeAugmentedMax(char: Character, attr: LimitedAttributeKey): number {
+	const limits = char.attributeLimits[attr];
+	const baseAugMax = limits ? limits.aug : 0;
+	return baseAugMax + valueOf(char.improvements, 'Attribute', attr, 'augMax');
+}
+
+/** Get total attribute value (base + bonus), clamped to the augmented maximum. */
 export function getAttributeTotal(
 	char: Character,
 	attr: 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil' | 'edg'
 ): number {
 	const a = char.attributes[attr];
 	const impBonus = valueOf(char.improvements, 'Attribute', attr);
-	return a.base + a.bonus + impBonus;
+	const total = a.base + a.bonus + impBonus;
+	return Math.min(total, getAttributeAugmentedMax(char, attr));
 }
 
-/** Get Magic attribute total (0 if mundane). */
+/** Get Magic attribute total (0 if mundane), clamped to the augmented maximum. */
 export function getMagicTotal(char: Character): number {
 	const mag = char.attributes.mag;
 	if (!mag) return 0;
 	const impBonus = valueOf(char.improvements, 'Attribute', 'mag');
-	return mag.base + mag.bonus + impBonus;
+	const total = mag.base + mag.bonus + impBonus;
+	return Math.min(total, getAttributeAugmentedMax(char, 'mag'));
 }
 
-/** Get Resonance attribute total (0 if not technomancer). */
+/** Get Resonance attribute total (0 if not technomancer), clamped to the augmented maximum. */
 export function getResonanceTotal(char: Character): number {
 	const res = char.attributes.res;
 	if (!res) return 0;
 	const impBonus = valueOf(char.improvements, 'Attribute', 'res');
-	return res.base + res.bonus + impBonus;
+	const total = res.base + res.bonus + impBonus;
+	return Math.min(total, getAttributeAugmentedMax(char, 'res'));
 }
 
 /** Get current Essence. */

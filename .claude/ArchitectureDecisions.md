@@ -22,3 +22,42 @@ The `chummer-design-system.css` file was not loading correctly when imported via
 ### Result
 
 The design system styles (including the cyan buttons) now load correctly without build errors.
+
+## No Transaction System for Improvements (2026-07-18, issue #66)
+
+### Problem
+
+Desktop's `ImprovementManager` has an explicit `Commit()`/`Rollback()` transaction
+system (`clsImprovement.cs:2800-2817`): improvement creation accumulates in a
+pending list, and a user cancelling a selection dialog (e.g. picking a skill
+for Aptitude) triggers `Rollback()` to discard the half-created improvements.
+The question for the web port: does `engine/improvementManager.ts` need an
+equivalent transaction/rollback mechanism?
+
+### Decision
+
+**Do not port a transaction system.** `createImprovementsFromBonus` is a pure
+function returning a plain array — nothing is written to character state
+until the caller assembles a single new `Character` object and passes it to
+`characterStore.set()`. Store mutation functions already follow this pattern
+project-wide (see CLAUDE.md Conventions: immutable updates, `{ success, error }`
+returns). This means:
+
+- Improvement creation and the corresponding character-state change land in
+  the **same atomic `characterStore.set()` call**, or not at all — there is
+  no intermediate state to roll back from.
+- User-cancelled selection dialogs (e.g. `AddQualityOptions.selectedSkill`)
+  are resolved by the wizard **before** the mutation function is ever called
+  — if the user cancels, the mutation function simply never runs. Desktop's
+  rollback need only exists because its improvement list is a mutable,
+  shared, long-lived collection that dialogs write into directly; the web
+  store has no equivalent shared mutable state to unwind.
+
+### Consequence
+
+`valueOf`/`removeImprovements`/`createImprovementsFromBonus` stay pure
+functions with no enable/disable-by-transaction bookkeeping. If a future
+issue introduces genuinely multi-step improvement creation that can fail
+partway (e.g. #68's more complex handlers), prefer building the full
+`Improvement[]` array first and only appending it to character state once
+complete, rather than introducing a rollback mechanism.

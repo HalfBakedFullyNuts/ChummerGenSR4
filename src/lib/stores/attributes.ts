@@ -10,6 +10,7 @@
 import { get, derived, type Readable } from 'svelte/store';
 import { type Character, type AttributeValue } from '$types';
 import { characterStore, KARMA_BUILD_COSTS } from './character';
+import { getAttributeNaturalMax } from '../engine/calculations';
 
 /* ============================================
  * Attribute Constants and Types
@@ -194,7 +195,8 @@ export function setAttribute(attrCode: AttributeValueKey, value: number): void {
 	const limits = char.attributeLimits[attrCode];
 	if (!limits) return;
 
-	const clampedValue = Math.max(limits.min, Math.min(limits.max, value));
+	const naturalMax = getAttributeNaturalMax(char, attrCode);
+	const clampedValue = Math.max(limits.min, Math.min(naturalMax, value));
 
 	const currentAttr = char.attributes[attrCode];
 	if (!currentAttr) return;
