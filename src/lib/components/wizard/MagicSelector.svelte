@@ -24,7 +24,7 @@
 		initializeResonance,
 		addComplexForm,
 		removeComplexForm
-	} from '$stores/character';
+	} from '$stores';
 	import BookReference from '$lib/components/ui/BookReference.svelte';
 	import FociSelector from './FociSelector.svelte';
 

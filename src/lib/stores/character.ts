@@ -17,8 +17,6 @@ import {
 	type KnowledgeSkillCategory,
 	type CharacterMagic,
 	type CharacterSpell,
-	type CharacterPower,
-	type CharacterResonance,
 	type Contact,
 	type AttributeValue,
 	type ExpenseEntry,
@@ -29,10 +27,8 @@ import {
 	calculateAttributeTotal
 } from '$types';
 import {
-	findMetatype,
 	gameData,
-	skills as skillsStore,
-	type GameData
+	skills as skillsStore
 } from './gamedata';
 import {
 	createImprovementsFromBonus,
@@ -262,64 +258,6 @@ export function prevWizardStep(): boolean {
 		currentStepStore.set(prevStep.id);
 	}
 	return true;
-}
-
-/**
- * Set character metatype.
- * Updates attribute limits and base values from metatype data.
- */
-export function setMetatype(
-	gameData: GameData,
-	metatypeName: string,
-	metavariantName: string | null = null
-): void {
-	const char = get(characterStore);
-	if (!char) return;
-
-	const metatype = findMetatype(gameData, metatypeName);
-	if (!metatype) return;
-
-	/* Calculate BP cost */
-	let bpCost = metatype.bp;
-	if (metavariantName) {
-		const variant = metatype.metavariants.find((v) => v.name === metavariantName);
-		if (variant) {
-			bpCost = variant.bp;
-		}
-	}
-
-	/* Set attribute base values to metatype minimums */
-	const attrs = metatype.attributes;
-
-	/* Update character with new metatype */
-	const updated: Character = {
-		...char,
-		identity: {
-			...char.identity,
-			metatype: metatypeName,
-			metavariant: metavariantName
-		},
-		attributes: {
-			...char.attributes,
-			bod: { ...char.attributes.bod, base: attrs.bod.min },
-			agi: { ...char.attributes.agi, base: attrs.agi.min },
-			rea: { ...char.attributes.rea, base: attrs.rea.min },
-			str: { ...char.attributes.str, base: attrs.str.min },
-			cha: { ...char.attributes.cha, base: attrs.cha.min },
-			int: { ...char.attributes.int, base: attrs.int.min },
-			log: { ...char.attributes.log, base: attrs.log.min },
-			wil: { ...char.attributes.wil, base: attrs.wil.min },
-			edg: { ...char.attributes.edg, base: attrs.edg.min }
-		},
-		attributeLimits: metatype.attributes,
-		buildPointsSpent: {
-			...char.buildPointsSpent,
-			metatype: bpCost
-		},
-		updatedAt: new Date().toISOString()
-	};
-
-	characterStore.set(updated);
 }
 
 /** Attribute keys that have AttributeValue (not number or null). */
@@ -1760,151 +1698,6 @@ export function removeSpell(spellId: string): void {
 }
 
 /**
- * Add an adept power to the character.
- */
-export function addPower(power: { name: string; points: number; level: number }): void {
-	const char = get(characterStore);
-	if (!char || !char.magic) return;
-
-	/* Check power point availability */
-	const newUsed = char.magic.powerPointsUsed + power.points;
-	if (newUsed > char.magic.powerPoints) return;
-
-	const newPower: CharacterPower = {
-		id: generateId(),
-		name: power.name,
-		points: power.points,
-		level: power.level,
-		notes: ''
-	};
-
-	const updated: Character = {
-		...char,
-		magic: {
-			...char.magic,
-			powers: [...char.magic.powers, newPower],
-			powerPointsUsed: newUsed
-		},
-		updatedAt: new Date().toISOString()
-	};
-
-	characterStore.set(updated);
-}
-
-/**
- * Remove an adept power from the character.
- */
-export function removePower(powerId: string): void {
-	const char = get(characterStore);
-	if (!char || !char.magic) return;
-
-	const power = char.magic.powers.find((p) => p.id === powerId);
-	if (!power) return;
-
-	const updated: Character = {
-		...char,
-		magic: {
-			...char.magic,
-			powers: char.magic.powers.filter((p) => p.id !== powerId),
-			powerPointsUsed: char.magic.powerPointsUsed - power.points
-		},
-		updatedAt: new Date().toISOString()
-	};
-
-	characterStore.set(updated);
-}
-
-/**
- * Initialize technomancer resonance.
- */
-export function initializeResonance(stream: string): void {
-	const char = get(characterStore);
-	if (!char) return;
-
-	const resonanceData: CharacterResonance = {
-		stream,
-		submersionGrade: 0,
-		complexForms: [],
-		sprites: [],
-		echoes: []
-	};
-
-	const updated: Character = {
-		...char,
-		resonance: resonanceData,
-		attributes: {
-			...char.attributes,
-			res: { base: 1, bonus: 0, karma: 0 }
-		},
-		updatedAt: new Date().toISOString()
-	};
-
-	characterStore.set(updated);
-}
-
-/**
- * Add a complex form to the character (technomancer).
- * Costs 5 BP per complex form during creation.
- */
-export function addComplexForm(form: {
-	name: string;
-	target: string;
-	duration: string;
-	fv: string;
-}): void {
-	const char = get(characterStore);
-	if (!char || !char.resonance) return;
-
-	/* Check if form already exists */
-	if (char.resonance.complexForms.some((f) => f.name === form.name)) return;
-
-	const newForm = {
-		id: generateId(),
-		...form,
-		rating: 1,
-		notes: ''
-	};
-
-	const updated: Character = {
-		...char,
-		resonance: {
-			...char.resonance,
-			complexForms: [...char.resonance.complexForms, newForm]
-		},
-		buildPointsSpent: {
-			...char.buildPointsSpent,
-			complexForms: char.buildPointsSpent.complexForms + 5
-		},
-		updatedAt: new Date().toISOString()
-	};
-
-	characterStore.set(updated);
-}
-
-/**
- * Remove a complex form from the character.
- */
-export function removeComplexForm(formId: string): void {
-	const char = get(characterStore);
-	if (!char || !char.resonance) return;
-
-	const updated: Character = {
-		...char,
-		resonance: {
-			...char.resonance,
-			complexForms: char.resonance.complexForms.filter((f) => f.id !== formId)
-		},
-		buildPointsSpent: {
-			...char.buildPointsSpent,
-			complexForms: char.buildPointsSpent.complexForms - 5
-		},
-		updatedAt: new Date().toISOString()
-	};
-
-	characterStore.set(updated);
-}
-
-/**
  * Learn a new complex form with karma (career mode).
  */
 export function learnComplexForm(form: {
@@ -2980,70 +2773,6 @@ export function submerge(): { success: boolean; error?: string } {
 	return { success: true };
 }
 
-/**
- * Learn an echo (requires submersion).
- * Each submersion grade grants one echo.
- */
-export function learnEcho(echoName: string): { success: boolean; error?: string } {
-	const char = get(characterStore);
-	if (!char) {
-		return { success: false, error: 'No character loaded' };
-	}
-	if (!char.resonance) {
-		return { success: false, error: 'Character is not a technomancer' };
-	}
-
-	/* Check if already known */
-	if (char.resonance.echoes.includes(echoName)) {
-		return { success: false, error: 'Echo already known' };
-	}
-
-	/* Check if they have available echo slots (one per submersion grade) */
-	const availableSlots = char.resonance.submersionGrade;
-	const usedSlots = char.resonance.echoes.length;
-
-	if (usedSlots >= availableSlots) {
-		return { success: false, error: 'No echo slots available (need to submerge)' };
-	}
-
-	/* Add the echo */
-	characterStore.update((c) => {
-		if (!c || !c.resonance) return c;
-		return {
-			...c,
-			resonance: {
-				...c.resonance,
-				echoes: [...c.resonance.echoes, echoName]
-			},
-			updatedAt: new Date().toISOString()
-		};
-	});
-
-	return { success: true };
-}
-
-/**
- * Remove an echo.
- */
-export function removeEcho(echoName: string): void {
-	const char = get(characterStore);
-	if (!char || !char.resonance) return;
-
-	if (!char.resonance.echoes.includes(echoName)) return;
-
-	characterStore.update((c) => {
-		if (!c || !c.resonance) return c;
-		return {
-			...c,
-			resonance: {
-				...c.resonance,
-				echoes: c.resonance.echoes.filter((e) => e !== echoName)
-			},
-			updatedAt: new Date().toISOString()
-		};
-	});
-}
-
 /* ============================================
  * Spirit Management Functions
  * ============================================ */
@@ -3173,68 +2902,6 @@ export function updateSpiritServices(spiritId: string, services: number): void {
 /* ============================================
  * Metamagic Functions
  * ============================================ */
-
-/**
- * Learn a metamagic ability (requires initiation).
- * Each initiation grade grants one metamagic.
- */
-export function learnMetamagic(metamagicName: string): { success: boolean; error?: string } {
-	const char = get(characterStore);
-	if (!char) {
-		return { success: false, error: 'No character loaded' };
-	}
-	if (!char.magic) {
-		return { success: false, error: 'Character is not awakened' };
-	}
-
-	/* Check if already known */
-	if (char.magic.metamagics.includes(metamagicName)) {
-		return { success: false, error: 'Metamagic already known' };
-	}
-
-	/* Check if they have available metamagic slots (one per initiation grade) */
-	const availableSlots = char.magic.initiateGrade;
-	const usedSlots = char.magic.metamagics.length;
-
-	if (usedSlots >= availableSlots) {
-		return { success: false, error: 'No metamagic slots available (need to initiate)' };
-	}
-
-	/* Add the metamagic */
-	characterStore.update((c) => {
-		if (!c || !c.magic) return c;
-		return {
-			...c,
-			magic: {
-				...c.magic,
-				metamagics: [...c.magic.metamagics, metamagicName]
-			},
-			updatedAt: new Date().toISOString()
-		};
-	});
-
-	return { success: true };
-}
-
-/**
- * Remove a metamagic ability.
- */
-export function removeMetamagic(metamagicName: string): void {
-	const char = get(characterStore);
-	if (!char || !char.magic) return;
-
-	characterStore.update((c) => {
-		if (!c || !c.magic) return c;
-		return {
-			...c,
-			magic: {
-				...c.magic,
-				metamagics: c.magic.metamagics.filter((m) => m !== metamagicName)
-			},
-			updatedAt: new Date().toISOString()
-		};
-	});
-}
 
 /* ============================================
  * Sprite Management Functions

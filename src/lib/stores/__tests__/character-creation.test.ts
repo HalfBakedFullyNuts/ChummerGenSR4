@@ -12,7 +12,6 @@ import {
 	remainingBP,
 	bpBreakdown,
 	startNewCharacter,
-	setMetatype,
 	addQuality,
 	setSkill,
 	addContact,
@@ -22,6 +21,7 @@ import {
 	magicType,
 	currentEssence
 } from '../character';
+import { setMetatype } from '../creation';
 import { addCyberware } from '../equipment';
 import type { GameData } from '../gamedata';
 import type { GameCyberware } from '$types';

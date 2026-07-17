@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Character, Metatype } from '$types';
-	import { updateIdentity, setMetatype } from '$stores/character';
+	import { updateIdentity, setMetatype } from '$stores';
 	import { gameData } from '$stores/gamedata';
 
 	export let character: Character;

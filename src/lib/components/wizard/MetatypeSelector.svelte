@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { gameData, metatypes } from '$stores/gamedata';
-	import { character, setMetatype } from '$stores/character';
+	import { character, setMetatype } from '$stores';
 	import type { Metatype } from '$types';
 	import BookReference from '$lib/components/ui/BookReference.svelte';
 
