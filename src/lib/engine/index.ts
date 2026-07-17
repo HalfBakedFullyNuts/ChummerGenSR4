@@ -53,20 +53,3 @@ export {
 	type ValidationIssue,
 	type ValidationResult
 } from './validation';
-
-// Improvements - bonuses from cyberware, qualities, powers, etc.
-export {
-	getCyberwareImprovements,
-	getQualityImprovements,
-	getAdeptPowerImprovements,
-	getAllImprovements,
-	getTotalImprovement,
-	getImprovementsForTarget,
-	getImprovementsBySource,
-	getStackedValue,
-	getImprovementSummary,
-	type ImprovementTarget,
-	type ImprovementSource,
-	type Improvement,
-	type ImprovementSummary
-} from './improvements';
