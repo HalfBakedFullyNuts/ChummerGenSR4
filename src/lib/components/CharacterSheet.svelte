@@ -14,8 +14,9 @@
 		calculateInitiativeModifiers,
 		type FiringMode
 	} from '$lib/utils/dice';
-	import { positiveQualities, negativeQualities } from '$stores/gamedata';
+	import { positiveQualities, negativeQualities, ranges as rangesStore } from '$stores/gamedata';
 	import { formatQualityBonus, type FormattedBonus } from '$lib/utils/qualities';
+	import { calculateWeaponRange } from '$lib/utils/ranges';
 	import Tooltip from './ui/Tooltip.svelte';
 
 	/** Character to display. */
@@ -800,6 +801,9 @@
 						{@const weaponPool = getWeaponPool(weapon)}
 						{@const maxAmmo = getMaxAmmo(weapon.ammo)}
 						{@const firingModes = parseFireModes(weapon.mode)}
+						{@const computedRange = $rangesStore
+							? calculateWeaponRange(weapon.category, char, $rangesStore)
+							: null}
 						<div class="p-2 bg-surface-variant rounded">
 							<div class="flex justify-between items-start">
 								<div class="font-medium text-text-primary">{weapon.name}</div>
@@ -812,6 +816,13 @@
 							<div class="flex flex-wrap gap-3 text-xs text-text-muted mt-1">
 								<span>DMG: <span class="text-text-secondary">{weapon.damage}</span></span>
 								<span>AP: <span class="text-text-secondary">{weapon.ap}</span></span>
+								{#if computedRange}
+									<span
+										>Range: <span class="text-text-secondary" title="S/M/L/E"
+											>{computedRange.short}/{computedRange.medium}/{computedRange.long}/{computedRange.extreme}m</span
+										></span
+									>
+								{/if}
 								{#if interactive}
 									<span class="text-primary-dark">({weaponPool.skillName})</span>
 								{/if}

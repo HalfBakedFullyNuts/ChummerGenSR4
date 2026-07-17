@@ -1,0 +1,181 @@
+/**
+ * Improvement Data Types
+ * ======================
+ * Represents the 89 mechanical enhancements and penalties parsed from game data
+ * that affect a character's attributes, skills, and calculations.
+ */
+
+/**
+ * All 89 improvement types ported from the desktop app structure.
+ */
+export type ImprovementType =
+    | 'Skill'
+    | 'Attribute'
+    | 'Text'
+    | 'BallisticArmor'
+    | 'ImpactArmor'
+    | 'Reach'
+    | 'Nuyen'
+    | 'Essence'
+    | 'Reaction'
+    | 'PhysicalCM'
+    | 'StunCM'
+    | 'UnarmedDV'
+    | 'SkillGroup'
+    | 'SkillCategory'
+    | 'SkillAttribute'
+    | 'InitiativePass'
+    | 'MatrixInitiative'
+    | 'MatrixInitiativePass'
+    | 'LifestyleCost'
+    | 'CMThreshold'
+    | 'EnhancedArticulation'
+    | 'WeaponCategoryDV'
+    | 'CyberwareEssCost'
+    | 'SpecialTab'
+    | 'Initiative'
+    | 'Uneducated'
+    | 'LivingPersonaResponse'
+    | 'LivingPersonaSignal'
+    | 'LivingPersonaFirewall'
+    | 'LivingPersonaSystem'
+    | 'LivingPersonaBiofeedback'
+    | 'Smartlink'
+    | 'BiowareEssCost'
+    | 'GenetechCostMultiplier'
+    | 'BasicBiowareEssCost'
+    | 'TransgenicsBiowareCost'
+    | 'SoftWeave'
+    | 'SensitiveSystem'
+    | 'ConditionMonitor'
+    | 'UnarmedDVPhysical'
+    | 'MovementPercent'
+    | 'Adapsin'
+    | 'FreePositiveQualities'
+    | 'FreeNegativeQualities'
+    | 'NuyenMaxBP'
+    | 'CMOverflow'
+    | 'FreeSpiritPowerPoints'
+    | 'AdeptPowerPoints'
+    | 'ArmorEncumbrancePenalty'
+    | 'Uncouth'
+    | 'Initiation'
+    | 'Submersion'
+    | 'Infirm'
+    | 'Skillwire'
+    | 'DamageResistance'
+    | 'RestrictedItemCount'
+    | 'AdeptLinguistics'
+    | 'SwimPercent'
+    | 'FlyPercent'
+    | 'FlySpeed'
+    | 'JudgeIntentions'
+    | 'LiftAndCarry'
+    | 'Memory'
+    | 'Concealability'
+    | 'SwapSkillAttribute'
+    | 'DrainResistance'
+    | 'FadingResistance'
+    | 'MatrixInitiativePassAdd'
+    | 'InitiativePassAdd'
+    | 'Composure'
+    | 'UnarmedAP'
+    | 'CMThresholdOffset'
+    | 'Restricted'
+    | 'Notoriety'
+    | 'SpellCategory'
+    | 'ThrowRange'
+    | 'SkillsoftAccess'
+    | 'AddSprite'
+    | 'BlackMarketDiscount'
+    | 'SelectWeapon'
+    | 'ComplexFormLimit'
+    | 'SpellLimit'
+    | 'QuickeningMetamagic'
+    | 'BasicLifestyleCost'
+    | 'ThrowSTR'
+    | 'IgnoreCMPenaltyStun'
+    | 'IgnoreCMPenaltyPhysical'
+    | 'CyborgEssence'
+    | 'EssenceMax';
+
+/**
+ * Sources that can grant an improvement.
+ */
+export type ImprovementSource =
+    | 'Quality'
+    | 'Power'
+    | 'Metatype'
+    | 'Cyberware'
+    | 'Metavariant'
+    | 'Bioware'
+    | 'Nanotech'
+    | 'Genetech'
+    | 'ArmorEncumbrance'
+    | 'Gear'
+    | 'Spell'
+    | 'MartialArtAdvantage'
+    | 'Initiation'
+    | 'Submersion'
+    | 'Metamagic'
+    | 'Echo'
+    | 'Armor'
+    | 'ArmorMod'
+    | 'EssenceLoss'
+    | 'ConditionMonitor'
+    | 'CritterPower'
+    | 'ComplexForm'
+    | 'EdgeUse'
+    | 'MutantCritter'
+    | 'Cyberzombie'
+    | 'StackedFocus'
+    | 'Focus'
+    | 'AttributeLoss'
+    | 'Custom';
+
+/**
+ * An individual Improvement modifying stats, calculations, or unlocking capabilities.
+ */
+export interface Improvement {
+    /** Unique internal ID for tracking array entries. */
+    id: string;
+    /** The specific stat or target being improved (e.g. 'Reaction', 'Firearms', etc). */
+    improvedName: string;
+    /** The name of the item/quality providing the bonus. */
+    sourceName: string;
+    /** The category of bonus being applied. */
+    type: ImprovementType;
+    /** The category of item providing the improvement. */
+    source: ImprovementSource;
+
+    /* Numeric modifiers */
+    /** Minimum value modifier. */
+    min: number;
+    /** Natural Maximum value modifier. */
+    max: number;
+    /** Augmented bonus. */
+    aug: number;
+    /** Augmented Maximum value modifier. */
+    augMax: number;
+    /** Base value modifier (often flat bonus). */
+    val: number;
+    /** The Rating of the source item, which sometimes multiplies the effect. */
+    rating: number;
+
+    /* Logic fields */
+    /** Comma or space separated list of strings this improvement should selectively ignore. */
+    exclude: string;
+    /** For stacking rules: only the single highest value matching the UniqueName is applied. */
+    uniqueName: string;
+    /** True if flat add to skill rating vs dice pool */
+    addToRating: boolean;
+    /** If false, this improvement is temporarily suppressed/inactive. */
+    enabled: boolean;
+
+    /* Custom metadata */
+    custom?: boolean;
+    customName?: string;
+    customId?: string;
+    customGroup?: string;
+    notes?: string;
+}

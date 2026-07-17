@@ -24,6 +24,7 @@ import {
 	remainingNuyen,
 	currentEssence
 } from '../character';
+import { addChildCyberware } from '../equipment';
 import type { GameWeapon, GameArmor, GameCyberware, GameGear } from '$types';
 
 // Mock game data for testing
@@ -369,6 +370,35 @@ describe('Equipment Store - Cyberware Essence', () => {
 
 			// 6.0 - 1.0 - 0.8 = 4.2
 			expect(get(currentEssence)).toBeCloseTo(4.2);
+		});
+	});
+
+	describe('Nested Cyberware (Children)', () => {
+		it('should deduct essence recursively for children', () => {
+			const parentCyber: GameCyberware = { ...mockCyberware, name: 'Cyberarm', ess: 1.0 };
+			const childCyber: GameCyberware = { ...mockCyberware, name: 'Gyromount', ess: 0.5 };
+
+			// Add parent
+			addCyberware(parentCyber, 'Standard');
+
+			const parentId = get(character)?.equipment.cyberware[0]?.id;
+			expect(parentId).toBeDefined();
+
+			// Essence is 6.0 - 1.0 = 5.0
+			expect(get(currentEssence)).toBeCloseTo(5.0);
+
+			// Add child to parent
+			if (parentId) {
+				addChildCyberware(parentId, childCyber, 'Standard');
+			}
+
+			// Validate child is nested
+			const cyber = get(character)?.equipment.cyberware[0];
+			expect(cyber?.children).toHaveLength(1);
+			expect(cyber?.children[0]?.name).toBe('Gyromount');
+
+			// Validate recursive essence calculation (6.0 - 1.0 - 0.5 = 4.5)
+			expect(get(currentEssence)).toBeCloseTo(4.5);
 		});
 	});
 });

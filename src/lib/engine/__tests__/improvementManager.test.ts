@@ -2,11 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
     valueOf,
     removeImprovements,
-    createImprovementsFromBonus,
-    type Improvement,
-    type ImprovementType,
-    type ImprovementSource
+    createImprovementsFromBonus
 } from '../improvementManager';
+import type { Improvement } from '$types';
 
 describe('ImprovementManager', () => {
     let mockImprovements: Improvement[];
@@ -106,7 +104,7 @@ describe('ImprovementManager', () => {
     });
 
     it('ignores disabled improvements', () => {
-        mockImprovements[0].enabled = false;
+        mockImprovements[0]!.enabled = false;
         expect(valueOf(mockImprovements, 'PhysicalCM')).toBe(0);
     });
 
@@ -125,5 +123,94 @@ describe('ImprovementManager', () => {
         const filtered = removeImprovements(mockImprovements, 'Cyberware', 'Wired Reflexes 2');
         expect(filtered.length).toBe(mockImprovements.length - 1);
         expect(filtered.find(i => i.id === 'imp-2')).toBeUndefined();
+    });
+
+    describe('createImprovementsFromBonus', () => {
+        it('handles undefined bonusData gracefully', () => {
+            const imps = createImprovementsFromBonus('Quality', 'Test', null as any);
+            expect(imps).toEqual([]);
+        });
+
+        it('parses specificattribute bonuses', () => {
+            const bonusData = {
+                specificattribute: [
+                    { name: 'Strength', val: 2, aug: 0, min: 0, max: 0 }
+                ]
+            };
+            const imps = createImprovementsFromBonus('Quality', 'Test', bonusData);
+            expect(imps.length).toBe(1);
+            expect(imps[0]!.type).toBe('Attribute');
+            expect(imps[0]!.improvedName).toBe('strength');
+            expect(imps[0]!.val).toBe(2);
+        });
+
+        it('parses selectattribute with user selection', () => {
+            const bonusData = {
+                selectattribute: { val: 1, min: 0, max: 0 }
+            };
+            const imps = createImprovementsFromBonus('Quality', 'Test', bonusData, 1, undefined, 'Agility');
+            expect(imps.length).toBe(1);
+            expect(imps[0]!.type).toBe('Attribute');
+            expect(imps[0]!.improvedName).toBe('agility');
+            expect(imps[0]!.val).toBe(1);
+        });
+
+        it('parses specificskill and selectskill', () => {
+            const bonusData = {
+                specificskill: [
+                    { name: 'Pistols', bonus: 2, max: 0 }
+                ],
+                selectskill: { bonus: 1, max: 0 }
+            };
+            const imps = createImprovementsFromBonus('Quality', 'Test', bonusData, 1, 'Longarms');
+            expect(imps.length).toBe(2);
+            expect(imps[0]!.type).toBe('Skill');
+            expect(imps[0]!.improvedName).toBe('Pistols');
+            expect(imps[0]!.val).toBe(2);
+            expect(imps[1]!.type).toBe('Skill');
+            expect(imps[1]!.improvedName).toBe('Longarms');
+            expect(imps[1]!.val).toBe(1);
+        });
+
+        it('parses skillgroup and skillcategory', () => {
+            const bonusData = {
+                skillgroup: [
+                    { name: 'Firearms', bonus: 1 }
+                ],
+                skillcategory: [
+                    { name: 'Combat', bonus: 1 }
+                ]
+            };
+            const imps = createImprovementsFromBonus('Quality', 'Test', bonusData);
+            expect(imps.length).toBe(2);
+            expect(imps[0]!.type).toBe('SkillGroup');
+            expect(imps[0]!.improvedName).toBe('Firearms');
+            expect(imps[1]!.type).toBe('SkillCategory');
+            expect(imps[1]!.improvedName).toBe('Combat');
+        });
+
+        it('parses prop mappings', () => {
+            const bonusData = {
+                initiative: 1,
+                initiativepass: 2,
+                cyberwareessmultiplier: 0.8
+            };
+            const imps = createImprovementsFromBonus('Quality', 'Test', bonusData);
+            expect(imps.length).toBe(3);
+            expect(imps.find(i => i.type === 'Initiative')!.val).toBe(1);
+            expect(imps.find(i => i.type === 'InitiativePass')!.val).toBe(2);
+            expect(imps.find(i => i.type === 'CyberwareEssCost')!.val).toBe(0.8);
+        });
+
+        it('parses flags and special tabs', () => {
+            const bonusData = {
+                uneducated: 1,
+                enabletab: 'Magician'
+            };
+            const imps = createImprovementsFromBonus('Quality', 'Test', bonusData);
+            expect(imps.length).toBe(2);
+            expect(imps.find(i => i.type === 'Uneducated')!.val).toBe(1);
+            expect(imps.find(i => i.type === 'SpecialTab')!.improvedName).toBe('Magician');
+        });
     });
 });

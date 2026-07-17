@@ -2,6 +2,7 @@
 	import { positiveQualities, negativeQualities, skills, type GameQuality } from '$stores/gamedata';
 	import { character, addQuality, removeQuality, addQualityAgain } from '$stores/character';
 	import Tooltip from '$lib/components/ui/Tooltip.svelte';
+	import BookReference from '$lib/components/ui/BookReference.svelte';
 	import {
 		formatQualityBonus,
 		qualityMatchesSearch,
@@ -613,7 +614,7 @@
 				{/if}
 
 				<div class="text-text-muted text-xs mt-1">
-					{group.source} p.{group.page}
+					<BookReference code={group.source} page={group.page} />
 				</div>
 
 				<Tooltip show={hasTooltip} maxWidth="24rem">

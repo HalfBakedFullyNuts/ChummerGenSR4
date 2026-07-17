@@ -174,6 +174,7 @@ describe('Equipment Cost Calculation', () => {
 					conceal: 0,
 					cost: 500,
 					accessories: [],
+					modifications: [],
 					notes: ''
 				},
 				{
@@ -191,6 +192,7 @@ describe('Equipment Cost Calculation', () => {
 					conceal: 2,
 					cost: 50,
 					accessories: [],
+					modifications: [],
 					notes: ''
 				}
 			]
@@ -235,7 +237,7 @@ describe('Equipment Cost Calculation', () => {
 					capacity: 0,
 					capacityUsed: 0,
 					location: '',
-					subsystems: [],
+					children: [],
 					notes: ''
 				}
 			]
@@ -260,7 +262,8 @@ describe('Equipment Cost Calculation', () => {
 					capacityUsed: 0,
 					capacityCost: 0,
 					containerId: null,
-					containedItems: []
+					containedItems: [],
+					children: []
 				}
 			]
 		};
@@ -301,6 +304,7 @@ describe('Equipment Cost Calculation', () => {
 					conceal: 0,
 					cost: 500,
 					accessories: [],
+					modifications: [],
 					notes: ''
 				}
 			],
@@ -331,7 +335,7 @@ describe('Equipment Cost Calculation', () => {
 					capacity: 0,
 					capacityUsed: 0,
 					location: '',
-					subsystems: [],
+					children: [],
 					notes: ''
 				}
 			],
@@ -351,7 +355,8 @@ describe('Equipment Cost Calculation', () => {
 					capacityUsed: 0,
 					capacityCost: 0,
 					containerId: null,
-					containedItems: []
+					containedItems: [],
+					children: []
 				}
 			],
 			lifestyle: {
@@ -363,7 +368,8 @@ describe('Equipment Cost Calculation', () => {
 				location: '',
 				notes: ''
 			},
-			martialArts: []
+			martialArts: [],
+			foci: []
 		};
 		expect(calculateEquipmentCost(equipment)).toBe(500 + 900 + 1000 + 700 + 2000);
 	});
@@ -387,7 +393,7 @@ describe('Essence Cost Calculation', () => {
 				capacity: 0,
 				capacityUsed: 0,
 				location: '',
-				subsystems: [],
+				children: [],
 				notes: ''
 			},
 			{
@@ -401,7 +407,7 @@ describe('Essence Cost Calculation', () => {
 				capacity: 0,
 				capacityUsed: 0,
 				location: '',
-				subsystems: [],
+				children: [],
 				notes: ''
 			}
 		];
@@ -421,7 +427,7 @@ describe('Essence Cost Calculation', () => {
 				capacity: 12,
 				capacityUsed: 4,
 				location: '',
-				subsystems: [
+				children: [
 					{
 						id: '1a',
 						name: 'Smartlink',
@@ -433,7 +439,7 @@ describe('Essence Cost Calculation', () => {
 						capacity: 0,
 						capacityUsed: 0,
 						location: '',
-						subsystems: [],
+						children: [],
 						notes: ''
 					}
 				],

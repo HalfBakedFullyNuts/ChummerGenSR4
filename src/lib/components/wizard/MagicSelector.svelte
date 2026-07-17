@@ -25,9 +25,11 @@
 		addComplexForm,
 		removeComplexForm
 	} from '$stores/character';
+	import BookReference from '$lib/components/ui/BookReference.svelte';
+	import FociSelector from './FociSelector.svelte';
 
 	/** Currently active tab for magicians. */
-	let activeTab: 'tradition' | 'spells' | 'powers' = 'tradition';
+	let activeTab: 'tradition' | 'spells' | 'powers' | 'foci' = 'tradition';
 
 	/** Currently active tab for technomancers. */
 	let techTab: 'stream' | 'forms' = 'stream';
@@ -139,6 +141,7 @@
 		search: string
 	): GameProgram[] {
 		return allPrograms.filter((p) => {
+			if (!p.complexform) return false;
 			const matchesCat = category === 'All' || p.category === category;
 			const matchesSearch = search === '' || p.name.toLowerCase().includes(search.toLowerCase());
 			return matchesCat && matchesSearch;
@@ -282,7 +285,7 @@
 									: ''}
 							</div>
 							<div class="text-text-muted text-xs mt-1">
-								{stream.source} p.{stream.page}
+								<BookReference code={stream.source} page={stream.page} />
 							</div>
 						</button>
 					{/each}
@@ -365,7 +368,7 @@
 								<span class="cw-badge cw-badge-ghost text-xs">{program.category}</span>
 							</div>
 							<div class="text-text-muted text-xs mt-1">
-								{program.source} p.{program.page}
+								<BookReference code={program.source} page={program.page} />
 							</div>
 						</button>
 					{/each}
@@ -438,6 +441,15 @@
 					Powers
 				</button>
 			{/if}
+			<button
+				class="px-4 py-2 rounded transition-colors
+					{activeTab === 'foci'
+					? 'bg-primary-main text-white'
+					: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+				on:click={() => (activeTab = 'foci')}
+			>
+				Foci
+			</button>
 		</div>
 
 		<!-- Tradition Tab -->
@@ -528,7 +540,7 @@
 								{mentor.advantage}
 							</div>
 							<div class="text-text-muted text-xs mt-1">
-								{mentor.source} p.{mentor.page}
+								<BookReference code={mentor.source} page={mentor.page} />
 							</div>
 						</button>
 					{/each}
@@ -690,6 +702,13 @@
 						</button>
 					{/each}
 				</div>
+			</div>
+		{/if}
+
+		<!-- Foci Tab -->
+		{#if activeTab === 'foci'}
+			<div class="mt-4">
+				<FociSelector />
 			</div>
 		{/if}
 	{/if}

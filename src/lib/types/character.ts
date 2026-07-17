@@ -9,6 +9,7 @@ import type { CharacterAttributes, MetatypeAttributes } from './attributes';
 import type { CharacterSkill, CharacterSkillGroup, KnowledgeSkill } from './skills';
 import type { CharacterEquipment } from './equipment';
 import { EMPTY_EQUIPMENT } from './equipment';
+import type { Improvement } from './improvements';
 
 /** Character build methods. */
 export type BuildMethod = 'bp' | 'karma';
@@ -197,6 +198,9 @@ export interface Character {
 	/* Qualities */
 	readonly qualities: readonly CharacterQuality[];
 
+	/* Improvements applied */
+	readonly improvements: readonly Improvement[];
+
 	/* Magic (null if mundane) */
 	readonly magic: CharacterMagic | null;
 
@@ -243,7 +247,6 @@ export interface CharacterMagic {
 	readonly spells: readonly CharacterSpell[];
 	readonly powers: readonly CharacterPower[];
 	readonly spirits: readonly BoundSpirit[];
-	readonly foci: readonly Focus[];
 	readonly metamagics: readonly string[];
 }
 
@@ -282,17 +285,6 @@ export interface BoundSpirit {
 	readonly force: number;
 	readonly services: number;
 	readonly bound: boolean;
-}
-
-/**
- * Magical focus.
- */
-export interface Focus {
-	readonly id: string;
-	readonly name: string;
-	readonly type: string;
-	readonly force: number;
-	readonly bonded: boolean;
 }
 
 /**
@@ -440,6 +432,7 @@ export function createEmptyCharacter(
 		knowledgeSkills: [],
 		knowledgeSkillPoints: 0,
 		qualities: [],
+		improvements: [],
 		magic: null,
 		resonance: null,
 		contacts: [],

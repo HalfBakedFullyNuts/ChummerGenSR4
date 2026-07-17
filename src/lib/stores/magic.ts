@@ -17,7 +17,7 @@ import {
 	type CharacterPower,
 	type BoundSpirit
 } from '$types';
-import { characterStore, generateId } from './character';
+import { characterStore, generateId, isCareerMode } from './character';
 
 /* ============================================
  * Magic Type Detection
@@ -83,7 +83,6 @@ export function initializeMagic(tradition: string): void {
 		spells: [],
 		powers: [],
 		spirits: [],
-		foci: [],
 		metamagics: []
 	};
 
@@ -401,6 +400,87 @@ export function removeMetamagic(metamagicName: string): void {
 				...c.magic,
 				metamagics: c.magic.metamagics.filter((m) => m !== metamagicName)
 			},
+			updatedAt: new Date().toISOString()
+		};
+	});
+}
+
+/* ============================================
+ * Foci Bonding
+ * ============================================ */
+
+/** Calculate Karma/BP cost to bond a focus based on its type and force. */
+export function getFocusKarmaCost(name: string, category: string, force: number): number {
+	if (name.includes('Power Focus')) return force * 4;
+	if (name.includes('Weapon Focus') || category === 'Metamagic Foci') return force * 3;
+	if (name.includes('Sustaining Focus')) return force * 1;
+	// Default for Spellcasting, Counterspelling, Summoning, Banishing, Binding
+	return force * 2;
+}
+
+/** Bond a focus. */
+export function bondFocus(focusId: string): { success: boolean; error?: string } {
+	const char = get(characterStore);
+	if (!char) return { success: false, error: 'No character' };
+	if (!char.magic) return { success: false, error: 'Not awakened' };
+
+	const isCareer = get(isCareerMode);
+
+	const fociList = char.equipment.foci || [];
+	const focusIndex = fociList.findIndex(f => f.id === focusId);
+	if (focusIndex === -1) return { success: false, error: 'Focus not found' };
+
+	const focus = fociList[focusIndex];
+	if (!focus) return { success: false, error: 'Focus is missing' };
+	if (focus.bonded) return { success: false, error: 'Already bonded' };
+
+	const cost = getFocusKarmaCost(focus.name, focus.category, focus.force);
+
+	// Needs sufficient Karma (or BP in creation)
+	if (isCareer) {
+		if (char.karma < cost) return { success: false, error: `Need ${cost} Karma to bond.` };
+	}
+
+	characterStore.update((c) => {
+		if (!c) return c;
+		const cloneFoci = [...(c.equipment.foci || [])];
+		cloneFoci[focusIndex] = { ...focus, bonded: true };
+
+		return {
+			...c,
+			equipment: { ...c.equipment, foci: cloneFoci },
+			karma: isCareer ? c.karma - cost : c.karma,
+			updatedAt: new Date().toISOString()
+		};
+	});
+
+	return { success: true };
+}
+
+/** Unbond a focus. */
+export function unbondFocus(focusId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const isCareer = get(isCareerMode);
+
+	const fociList = char.equipment.foci || [];
+	const focusIndex = fociList.findIndex(f => f.id === focusId);
+	if (focusIndex === -1) return;
+	const focus = fociList[focusIndex];
+	if (!focus || !focus.bonded) return;
+
+	const cost = getFocusKarmaCost(focus.name, focus.category, focus.force);
+
+	characterStore.update((c) => {
+		if (!c) return c;
+		const cloneFoci = [...(c.equipment.foci || [])];
+		cloneFoci[focusIndex] = { ...focus, bonded: false };
+
+		return {
+			...c,
+			equipment: { ...c.equipment, foci: cloneFoci },
+			karma: !isCareer ? c.karma + cost : c.karma,
 			updatedAt: new Date().toISOString()
 		};
 	});

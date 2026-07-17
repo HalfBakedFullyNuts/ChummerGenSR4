@@ -1,0 +1,354 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import * as calculations from '../calculations';
+import { createEmptyCharacter, type Character } from '$types';
+
+// Let's create a helper to build a default character for tests
+function createBaseCharacter(): Character {
+	const char = createEmptyCharacter('test-char', 'test-user', 'bp');
+
+	return {
+		...char,
+		identity: {
+			...char.identity,
+			name: 'Test Character',
+			metatype: 'Human',
+			age: '25',
+			sex: 'Male',
+			height: '180cm',
+			weight: '80kg'
+		},
+		attributes: {
+			bod: { base: 3, bonus: 0, karma: 0 },
+			agi: { base: 3, bonus: 0, karma: 0 },
+			rea: { base: 3, bonus: 0, karma: 0 },
+			str: { base: 3, bonus: 0, karma: 0 },
+			cha: { base: 3, bonus: 0, karma: 0 },
+			int: { base: 3, bonus: 0, karma: 0 },
+			log: { base: 3, bonus: 0, karma: 0 },
+			wil: { base: 3, bonus: 0, karma: 0 },
+			edg: { base: 3, bonus: 0, karma: 0 },
+			mag: { base: 0, bonus: 0, karma: 0 },
+			res: { base: 0, bonus: 0, karma: 0 },
+			ess: 6.0
+		},
+		magic: {
+			tradition: '',
+			mentor: null,
+			initiateGrade: 0,
+			powerPoints: 0,
+			powerPointsUsed: 0,
+			spells: [],
+			powers: [],
+			spirits: [],
+			metamagics: []
+		},
+		equipment: {
+			weapons: [],
+			armor: [],
+			cyberware: [],
+			bioware: [],
+			gear: [],
+			vehicles: [],
+			lifestyle: {
+				id: 'lifestyle-1',
+				name: 'Low',
+				level: 'Low',
+				monthlyCost: 2000,
+				monthsPrepaid: 0,
+				location: '',
+				notes: ''
+			},
+			martialArts: [],
+			foci: []
+		},
+		condition: {
+			physicalMax: 10,
+			physicalCurrent: 0,
+			stunMax: 10,
+			stunCurrent: 0,
+			overflow: 0,
+			edgeCurrent: 0
+		},
+		buildPoints: 400
+	};
+}
+
+describe('calculations engine', () => {
+    let char: any;
+
+    beforeEach(() => {
+        char = createBaseCharacter();
+    });
+
+    describe('Attribute Helpers', () => {
+        it('getAttributeTotal calculates base + bonus + improvements', () => {
+            char.attributes.agi = { base: 4, bonus: 1, karma: 0 };
+            char.improvements = [{
+                id: 'imp-1',
+                type: 'Attribute',
+                improvedName: 'agi',
+                source: 'Cyberware',
+                sourceName: 'Muscle Toner',
+                val: 2,
+                min: 0, max: 0, aug: 0, augMax: 0, rating: 2,
+                exclude: '', uniqueName: '', addToRating: false, enabled: true
+            }];
+
+            expect(calculations.getAttributeTotal(char, 'agi')).toBe(7); // 4 + 1 + 2
+        });
+
+        it('getMagicTotal returns 0 if mundane, or correct value', () => {
+            expect(calculations.getMagicTotal(char)).toBe(0);
+
+            char.attributes.mag = { base: 3, bonus: 1, karma: 0 };
+            expect(calculations.getMagicTotal(char)).toBe(4);
+        });
+
+        it('getResonanceTotal returns 0 if not technomancer, or correct value', () => {
+            expect(calculations.getResonanceTotal(char)).toBe(0);
+
+            char.attributes.res = { base: 4, bonus: 0, karma: 0 };
+            expect(calculations.getResonanceTotal(char)).toBe(4);
+        });
+
+        it('getEssence returns essence', () => {
+            char.attributes.ess = 4.5;
+            expect(calculations.getEssence(char)).toBe(4.5);
+        });
+    });
+
+    describe('Condition Monitors', () => {
+        it('calculatePhysicalCM equals ceil(bod/2) + 8 + bonus', () => {
+            char.attributes.bod.base = 5; // ceil(5/2) = 3; 3+8 = 11
+            expect(calculations.calculatePhysicalCM(char)).toBe(11);
+
+            char.improvements = [{
+                id: 'imp-1', type: 'PhysicalCM', improvedName: '', source: 'Quality', sourceName: 'Toughness',
+                val: 1, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                exclude: '', uniqueName: '', addToRating: false, enabled: true
+            }];
+            expect(calculations.calculatePhysicalCM(char)).toBe(12);
+        });
+
+        it('calculateStunCM equals ceil(wil/2) + 8 + bonus', () => {
+            char.attributes.wil.base = 4; // ceil(4/2) = 2; 2+8 = 10
+            expect(calculations.calculateStunCM(char)).toBe(10);
+        });
+
+        it('calculateOverflow equals bod + bonus', () => {
+            char.attributes.bod.base = 6;
+            expect(calculations.calculateOverflow(char)).toBe(6);
+
+            char.improvements = [
+                { id: '1', type: 'CMOverflow', improvedName: '', source: 'Quality', sourceName: 'Test', val: 2, min: 0, max: 0, aug: 0, augMax: 0, rating: 1, exclude: '', uniqueName: '', addToRating: false, enabled: true },
+                { id: '2', type: 'PhysicalCM', improvedName: '', source: 'Quality', sourceName: 'Test2', val: 1, min: 0, max: 0, aug: 0, augMax: 0, rating: 1, exclude: '', uniqueName: '', addToRating: false, enabled: true }
+            ];
+            expect(calculations.calculateOverflow(char)).toBe(9);
+        });
+
+        it('getWoundModifier calculates -1 per 3 boxes total damage? Wait, the logic in code might be subtracting both?', () => {
+            char.condition.physicalCurrent = 4; // flor(4/3) = 1
+            char.condition.stunCurrent = 2; // floor(2/3) = 0
+            expect(calculations.getWoundModifier(char)).toBe(-1); // from physical
+
+            char.condition.physicalCurrent = 3; // 1
+            char.condition.stunCurrent = 3; // 1
+            // Actually looking at code: `return -(physicalMod + stunMod);` So -2.
+            expect(calculations.getWoundModifier(char)).toBe(-2);
+        });
+    });
+
+    describe('Initiative and Movement', () => {
+        it('calculateInitiative returns rea + int + bonus', () => {
+            char.attributes.rea.base = 4;
+            char.attributes.int.base = 3;
+            expect(calculations.calculateInitiative(char)).toBe(7);
+        });
+
+        it('calculateInitiativeDice checks cyberware and powers for dice', () => {
+            expect(calculations.calculateInitiativeDice(char)).toBe(1);
+
+            char.equipment.cyberware = [
+                { id: 'c1', name: 'Wired Reflexes', rating: 2, cost: 0, essence: 0, avail: '0', grades: '', subid: '', category: '', system: '' }
+            ];
+            expect(calculations.calculateInitiativeDice(char)).toBe(3);
+
+            char.magic = { ...char.magic!, powers: [{ id: 'p1', name: 'Improved Reflexes', level: 3, points: 0, subid: '', requirement: '' }] };
+            expect(calculations.calculateInitiativeDice(char)).toBe(4); // Max of cyber and powers
+        });
+
+        it('calculateInitativeBonus logic checks', () => {
+            char.equipment.cyberware = [
+                { id: 'c1', name: 'Reaction Enhancers', rating: 2, cost: 0, essence: 0, avail: '', grades: '', subid: '', category: '', system: '' }
+            ];
+            expect(calculations.calculateInitiativeBonus(char)).toBe(2);
+        });
+
+        it('calculateWalkSpeed and calculateRunSpeed', () => {
+            char.attributes.agi.base = 5;
+            expect(calculations.calculateWalkSpeed(char)).toBe(10);
+            expect(calculations.calculateRunSpeed(char)).toBe(20);
+        });
+
+        it('calculateSprintBonus based on metatype', () => {
+            char.identity.metatype = 'Elf';
+            expect(calculations.calculateSprintBonus(char)).toBe(1);
+        });
+    });
+
+    describe('Limits', () => {
+        it('calculatePhysicalLimit', () => {
+            char.attributes.str.base = 4;
+            char.attributes.bod.base = 3;
+            char.attributes.rea.base = 5;
+            // (4*2 + 3 + 5) / 3 = 16 / 3 = 5.33 => 6
+            expect(calculations.calculatePhysicalLimit(char)).toBe(6);
+        });
+
+        it('calculateMentalLimit', () => {
+            char.attributes.log.base = 2;
+            char.attributes.int.base = 4;
+            char.attributes.wil.base = 4;
+            // (2*2 + 4 + 4) / 3 = 12 / 3 = 4
+            expect(calculations.calculateMentalLimit(char)).toBe(4);
+        });
+        it('calculateSocialLimit', () => {
+            char.attributes.cha.base = 5;
+            char.attributes.wil.base = 4;
+            char.attributes.ess = 5.5;
+            // (5*2 + 4 + 5) / 3 = 19 / 3 = 6.33 => 7
+            expect(calculations.calculateSocialLimit(char)).toBe(7);
+        });
+    });
+
+    describe('Dice Pools and Special Attributes', () => {
+        it('calculateDicePool with skill', () => {
+            char.attributes.agi.base = 4;
+            char.skills = [{
+                id: 's1', name: 'Pistols', rating: 3, bonus: 1, base: 3, karma: 0,
+                isKnowledge: false, isLanguage: false,
+                skillgroup: '', category: '', default: true, specs: []
+            }];
+            char.condition.physicalCurrent = 3; // -1 modifier
+
+            expect(calculations.calculateDicePool(char, 'Pistols', 'agi')).toBe(7); // 4 (AGI) + 3 (Rating) + 1 (Bonus) - 1 (Wound) = 7
+        });
+
+        it('calculateDicePool without skill allowing default', () => {
+            char.attributes.agi.base = 4;
+            char.skills = []; // No skill
+            char.condition.physicalCurrent = 0; // 0 modifier
+
+            // Defaults to attr - 1: 4 - 1 = 3
+            expect(calculations.calculateDicePool(char, 'Pistols', 'agi')).toBe(3);
+        });
+
+        it('calculateComposure calculates CHA + WIL + improvement', () => {
+            char.attributes.cha.base = 3;
+            char.attributes.wil.base = 4;
+            expect(calculations.calculateComposure(char)).toBe(7);
+        });
+
+        it('calculateJudgeIntentions calculates CHA + INT + improvement', () => {
+            char.attributes.cha.base = 3;
+            char.attributes.int.base = 5;
+            expect(calculations.calculateJudgeIntentions(char)).toBe(8);
+        });
+
+        it('calculateMemory calculates LOG + WIL + improvement', () => {
+            char.attributes.log.base = 4;
+            char.attributes.wil.base = 3;
+            expect(calculations.calculateMemory(char)).toBe(7);
+        });
+
+        it('calculateLiftCarry calculates BOD + STR + improvement', () => {
+            char.attributes.bod.base = 5;
+            char.attributes.str.base = 5;
+            expect(calculations.calculateLiftCarry(char)).toBe(10);
+        });
+    });
+
+    describe('Combat Values', () => {
+        it('calculateDefense is REA + INT', () => {
+            char.attributes.rea.base = 4;
+            char.attributes.int.base = 3;
+            expect(calculations.calculateDefense(char)).toBe(7);
+        });
+
+        it('calculateDodge is REA + Dodge skill + modifiers', () => {
+            char.attributes.rea.base = 4;
+            char.skills = [{
+                id: 's1', name: 'Dodge', rating: 3, bonus: 0, base: 3, karma: 0,
+                isKnowledge: false, isLanguage: false,
+                skillgroup: '', category: '', default: true, specs: []
+            }];
+            expect(calculations.calculateDodge(char)).toBe(7);
+        });
+
+        it('calculateArmorBallistic calculates highest + half of remainder + bonus', () => {
+            char.equipment.armor = [
+                { id: 'a1', name: 'Jacket', ballistic: 4, impact: 2, capacity: 0, cost: 0, equipable: true, equipped: true, armorCapacity: 0 },
+                { id: 'a2', name: 'Vest', ballistic: 2, impact: 3, capacity: 0, cost: 0, equipable: true, equipped: true, armorCapacity: 0 }
+            ];
+            // highest 4 + Math.floor(2/2) = 5
+            expect(calculations.calculateArmorBallistic(char)).toBe(5);
+        });
+
+        it('calculateArmorImpact calculates highest + half of remainder + bonus', () => {
+            char.equipment.armor = [
+                { id: 'a1', name: 'Jacket', ballistic: 4, impact: 2, capacity: 0, cost: 0, equipable: true, equipped: true, armorCapacity: 0 },
+                { id: 'a2', name: 'Vest', ballistic: 2, impact: 5, capacity: 0, cost: 0, equipable: true, equipped: true, armorCapacity: 0 }
+            ];
+            // highest 5 + Math.floor(2/2) = 6
+            expect(calculations.calculateArmorImpact(char)).toBe(6);
+        });
+    });
+
+    describe('Magic and Matrix', () => {
+        it('calculateDrainResist calculates based on tradition', () => {
+            char.magic!.tradition = 'Hermetic';
+            char.attributes.wil.base = 4;
+            char.attributes.log.base = 5;
+            char.attributes.cha.base = 2; // Shouldn't be used
+            expect(calculations.calculateDrainResist(char)).toBe(9);
+
+            char.magic!.tradition = 'Shamanic'; // Default fallback
+            expect(calculations.calculateDrainResist(char)).toBe(6); // WIL + CHA
+        });
+
+        it('calculateAstralInitiative is INT * 2', () => {
+            char.attributes.int.base = 4;
+            expect(calculations.calculateAstralInitiative(char)).toBe(8);
+            expect(calculations.calculateAstralInitiativeDice()).toBe(2);
+        });
+
+        it('calculateFadingResist is RES + WIL if resonant', () => {
+            // No resonance
+            expect(calculations.calculateFadingResist(char)).toBe(0);
+
+            // With resonance
+            char.resonance = { programs: [], complexForms: [], forms: [] };
+            char.attributes.res = { base: 4, bonus: 0, karma: 0 };
+            char.attributes.wil.base = 5;
+            expect(calculations.calculateFadingResist(char)).toBe(9);
+        });
+
+        it('calculateMatrixInitiative is INT + RES', () => {
+            char.attributes.int.base = 4;
+            char.attributes.res = { base: 4, bonus: 0, karma: 0 };
+            expect(calculations.calculateMatrixInitiative(char)).toBe(8);
+            expect(calculations.calculateMatrixInitiativeDice(char)).toBe(3);
+        });
+    });
+
+    describe('calculateAll', () => {
+        it('returns an object wrapping all calculation functions', () => {
+            const results = calculations.calculateAll(char);
+            expect(results).toHaveProperty('physicalCM');
+            expect(results).toHaveProperty('defense');
+            expect(results).toHaveProperty('drainResist');
+            expect(results.initiativeDice).toBeGreaterThanOrEqual(1);
+        });
+    });
+
+});

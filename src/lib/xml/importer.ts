@@ -177,6 +177,7 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 		knowledgeSkills,
 		knowledgeSkillPoints: getNumber(data, 'knowpts'),
 		qualities,
+		improvements: [],
 		magic,
 		resonance,
 		contacts,
@@ -188,7 +189,8 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 			lifestyle,
 			bioware: [],
 			vehicles: [],
-			martialArts: []
+			martialArts: [],
+			foci: []
 		},
 		nuyen: getNumber(data, 'nuyen'),
 		startingNuyen: 0,
@@ -458,6 +460,7 @@ function parseWeapons(weapons: unknown): CharacterWeapon[] {
 				conceal: getNumber(weapon, 'conceal'),
 				cost: getNumber(weapon, 'cost'),
 				accessories: [],
+				modifications: [],
 				notes: getString(weapon, 'notes')
 			});
 		}
@@ -500,9 +503,17 @@ function parseArmor(armors: unknown): CharacterArmor[] {
 function parseCyberware(cyberwares: unknown): CharacterCyberware[] {
 	const result: CharacterCyberware[] = [];
 
-	if (cyberwares && typeof cyberwares === 'object' && 'cyberware' in cyberwares) {
-		const cyberList = ensureArray((cyberwares as Record<string, unknown>).cyberware);
+	let cyberList: any[] = [];
+	if (cyberwares && typeof cyberwares === 'object') {
+		if ('cyberware' in cyberwares) {
+			cyberList = ensureArray((cyberwares as Record<string, unknown>).cyberware);
+		} else if (Array.isArray(cyberwares)) {
+			cyberList = cyberwares;
+		}
+
 		for (const cyber of cyberList) {
+			if (!cyber || typeof cyber !== 'object') continue;
+
 			const gradeStr = getString(cyber, 'grade');
 			const grade: CyberwareGrade =
 				gradeStr === 'Alphaware'
@@ -515,6 +526,12 @@ function parseCyberware(cyberwares: unknown): CharacterCyberware[] {
 								? 'Used'
 								: 'Standard';
 
+			let children: CharacterCyberware[] = [];
+			const childrenXml = (cyber as Record<string, unknown>).children;
+			if (childrenXml) {
+				children = parseCyberware(childrenXml);
+			}
+
 			result.push({
 				id: generateId(),
 				name: getString(cyber, 'name'),
@@ -526,7 +543,7 @@ function parseCyberware(cyberwares: unknown): CharacterCyberware[] {
 				capacity: getNumber(cyber, 'capacity'),
 				capacityUsed: 0,
 				location: getString(cyber, 'location'),
-				subsystems: [],
+				children,
 				notes: getString(cyber, 'notes')
 			});
 		}
@@ -541,9 +558,23 @@ function parseCyberware(cyberwares: unknown): CharacterCyberware[] {
 function parseGear(gears: unknown): CharacterGear[] {
 	const result: CharacterGear[] = [];
 
-	if (gears && typeof gears === 'object' && 'gear' in gears) {
-		const gearList = ensureArray((gears as Record<string, unknown>).gear);
+	let gearList: any[] = [];
+	if (gears && typeof gears === 'object') {
+		if ('gear' in gears) {
+			gearList = ensureArray((gears as Record<string, unknown>).gear);
+		} else if (Array.isArray(gears)) {
+			gearList = gears;
+		}
+
 		for (const gear of gearList) {
+			if (!gear || typeof gear !== 'object') continue;
+
+			let children: CharacterGear[] = [];
+			const childrenXml = (gear as Record<string, unknown>).children;
+			if (childrenXml) {
+				children = parseGear(childrenXml);
+			}
+
 			result.push({
 				id: generateId(),
 				name: getString(gear, 'name'),
@@ -557,7 +588,8 @@ function parseGear(gears: unknown): CharacterGear[] {
 				capacityUsed: 0,
 				capacityCost: 0,
 				containerId: null,
-				containedItems: []
+				containedItems: [],
+				children
 			});
 		}
 	}
@@ -637,7 +669,6 @@ function parseMagic(data: Record<string, unknown>): CharacterMagic | null {
 		spells,
 		powers,
 		spirits: [],
-		foci: [],
 		metamagics: []
 	};
 }

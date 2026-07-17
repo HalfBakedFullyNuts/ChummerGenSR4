@@ -36,7 +36,12 @@
 		registerSprite,
 		getExpenseLog
 	} from '$stores';
-	import { echoes as echoesStore, skills as skillsStore } from '$stores/gamedata';
+	import BookReference from '$lib/components/ui/BookReference.svelte';
+	import {
+		echoes as echoesStore,
+		skills as skillsStore,
+		metamagics as metamagicsStore
+	} from '$stores/gamedata';
 
 	// const dispatch = createEventDispatcher();  // TODO: Add event dispatching when needed
 
@@ -230,20 +235,10 @@
 		edg: 'Edge'
 	};
 
-	/** Available metamagics (simplified list). */
-	const METAMAGICS = [
-		'Centering',
-		'Channeling',
-		'Extended Masking',
-		'Flexible Signature',
-		'Geomancy',
-		'Invoking',
-		'Masking',
-		'Psychometry',
-		'Quickening',
-		'Reflecting',
-		'Shielding'
-	];
+	/** Available metamagics mapped from store. */
+	$: availableMetamagics = $metamagicsStore
+		? [...$metamagicsStore].sort((a, b) => a.name.localeCompare(b.name))
+		: [];
 
 	/** Spirit types based on tradition. */
 	const SPIRIT_TYPES = ['Air', 'Beast', 'Earth', 'Fire', 'Man', 'Water', 'Guardian', 'Task'];
@@ -559,13 +554,16 @@
 					</div>
 				{/if}
 				{#if metamagicSlots > 0}
-					<div class="flex flex-wrap gap-1">
-						{#each METAMAGICS.filter((m) => !$character?.magic?.metamagics.includes(m)) as metamagic}
+					<div class="flex flex-wrap gap-2">
+						{#each availableMetamagics.filter((m) => !$character?.magic?.metamagics.includes(m.name)) as metamagic}
 							<button
-								class="px-2 py-0.5 bg-surface-variant text-text-secondary text-xs rounded hover:bg-info-main/20 hover:text-info-main transition-colors"
-								on:click={() => handleLearnMetamagic(metamagic)}
+								class="px-3 py-1 bg-surface-variant text-text-secondary text-xs rounded hover:bg-info-main/20 hover:text-info-main transition-colors text-left"
+								on:click={() => handleLearnMetamagic(metamagic.name)}
 							>
-								+ {metamagic}
+								<div class="font-medium">+ {metamagic.name}</div>
+								<div class="text-text-muted mt-1">
+									<BookReference code={metamagic.source} page={metamagic.page} />
+								</div>
 							</button>
 						{/each}
 					</div>

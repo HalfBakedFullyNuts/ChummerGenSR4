@@ -81,7 +81,7 @@
 	{/if}
 
 	<!-- Quick Actions -->
-	<section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+	<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
 		<div class="relative">
 			<AddCharacterButton variant="card" userId={$user?.uid ?? null} />
 		</div>
@@ -106,6 +106,15 @@
 			<p class="text-text-muted text-sm">
 				Explore skills, spells, gear, and more from SR4 rulebooks.
 			</p>
+		</a>
+		<a href="/settings" class="cw-card p-4 group hover:border-warning-dark transition-colors">
+			<div class="flex items-center gap-3 mb-2">
+				<span class="material-icons text-warning-dark">settings</span>
+				<h3 class="text-text-primary font-medium group-hover:text-warning-dark transition-colors">
+					Settings
+				</h3>
+			</div>
+			<p class="text-text-muted text-sm">Configure defaults and sourcebooks.</p>
 		</a>
 	</section>
 

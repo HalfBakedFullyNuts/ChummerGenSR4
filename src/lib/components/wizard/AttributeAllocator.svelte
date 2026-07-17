@@ -6,7 +6,7 @@
 		attributeValidation,
 		bpBreakdown
 	} from '$stores/character';
-	import { qualityBonuses, getAttributeMaxAdjustment } from '$stores/qualityBonuses';
+	import { valueOf } from '$lib/engine/improvementManager';
 	import type { AttributeValue } from '$types';
 	import { ATTRIBUTE_NAMES } from '$types';
 	import QualitySelector from './QualitySelector.svelte';
@@ -16,12 +16,13 @@
 	const MENTAL_ATTRS: readonly AttributeValueKey[] = ['cha', 'int', 'log', 'wil'];
 	const SPECIAL_ATTRS: readonly AttributeValueKey[] = ['edg'];
 
-	// Check if Magic is unlocked (Adept, Magician, Mystic Adept, or Aspected Magician qualities)
 	$: isMagicUnlocked =
-		$qualityBonuses.enabledTabs.has('magician') || $qualityBonuses.enabledTabs.has('adept');
+		valueOf($character?.improvements ?? [], 'SpecialTab', 'magician') > 0 ||
+		valueOf($character?.improvements ?? [], 'SpecialTab', 'adept') > 0;
 
 	// Check if Resonance is unlocked (Technomancer quality)
-	$: isResonanceUnlocked = $qualityBonuses.enabledTabs.has('technomancer');
+	$: isResonanceUnlocked =
+		valueOf($character?.improvements ?? [], 'SpecialTab', 'technomancer') > 0;
 
 	function getAttrValue(char: typeof $character, code: AttributeValueKey): AttributeValue | null {
 		if (!char) return null;
@@ -33,15 +34,19 @@
 	/** Get attribute limits including quality bonus adjustments (for display and validation). */
 	function getAttrLimits(
 		char: typeof $character,
-		code: AttributeValueKey,
-		bonuses: typeof $qualityBonuses
+		code: AttributeValueKey
 	): { min: number; max: number } | null {
 		if (!char) return null;
 		const baseLimits = char.attributeLimits[code];
 		if (!baseLimits) return null;
 
-		// Apply quality bonus adjustments to max
-		const maxAdjustment = getAttributeMaxAdjustment(code, bonuses);
+		// Apply improvement max adjustments (typically from 'Attribute' type with non-zero max)
+		// Usually min/max adjustments from qualities/metagenics affect the natural maximum.
+		const improvements = char.improvements.filter(
+			(i) => i.enabled && i.type === 'Attribute' && i.improvedName === code && i.max !== 0
+		);
+		const maxAdjustment = improvements.reduce((sum, imp) => sum + imp.max * imp.rating, 0);
+
 		return {
 			min: baseLimits.min,
 			max: baseLimits.max + maxAdjustment
@@ -68,7 +73,7 @@
 		validation: typeof $attributeValidation
 	): boolean {
 		const attr = getAttrValue($character, code);
-		const limits = getAttrLimits($character, code, $qualityBonuses);
+		const limits = getAttrLimits($character, code);
 		if (!attr || !limits) return false;
 
 		// If this attribute is already at max, it's fine (can't increment anyway)
@@ -92,7 +97,7 @@
 		validation: typeof $attributeValidation
 	): { text: string; isError: boolean } | null {
 		const attr = getAttrValue($character, code);
-		const limits = getAttrLimits($character, code, $qualityBonuses);
+		const limits = getAttrLimits($character, code);
 		if (!attr || !limits) return null;
 
 		// N/A attributes (like physical for AI) don't get max messages
@@ -128,7 +133,7 @@
 
 	function incrementAttr(code: AttributeValueKey): void {
 		const attr = getAttrValue($character, code);
-		const limits = getAttrLimits($character, code, $qualityBonuses);
+		const limits = getAttrLimits($character, code);
 		if (!attr || !limits) return;
 		const newValue = Math.min(attr.base + 1, limits.max);
 		setAttribute(code, newValue);
@@ -136,7 +141,7 @@
 
 	function decrementAttr(code: AttributeValueKey): void {
 		const attr = getAttrValue($character, code);
-		const limits = getAttrLimits($character, code, $qualityBonuses);
+		const limits = getAttrLimits($character, code);
 		if (!attr || !limits) return;
 		const newValue = Math.max(attr.base - 1, limits.min);
 		setAttribute(code, newValue);
@@ -154,20 +159,25 @@
 	$: logValue = getAttrValue($character, 'log')?.base ?? 0;
 	$: wilValue = getAttrValue($character, 'wil')?.base ?? 0;
 
-	// Condition Monitors (include quality bonuses)
-	$: physicalCM = 8 + Math.ceil(bodValue / 2) + $qualityBonuses.conditionMonitor;
-	$: stunCM = 8 + Math.ceil(wilValue / 2);
-	$: initiative = reaValue + intValue + $qualityBonuses.initiative;
-	$: initiativePasses = 1 + $qualityBonuses.initiativePasses; // Base passes + quality bonuses
+	// Condition Monitors (include improvements)
+	$: physicalCM =
+		8 + Math.ceil(bodValue / 2) + valueOf($character?.improvements ?? [], 'PhysicalCM');
+	$: stunCM = 8 + Math.ceil(wilValue / 2) + valueOf($character?.improvements ?? [], 'StunCM');
+	$: initiative = reaValue + intValue + valueOf($character?.improvements ?? [], 'Initiative');
+	$: initiativePasses =
+		1 +
+		valueOf($character?.improvements ?? [], 'InitiativePass') +
+		valueOf($character?.improvements ?? [], 'InitiativePassAdd');
 
-	// Compound tests (include quality bonuses)
-	$: composure = chaValue + wilValue + $qualityBonuses.composure;
-	$: judgeIntentions = chaValue + intValue + $qualityBonuses.judgeIntentions;
-	$: memory = logValue + wilValue;
-	$: liftCarry = bodValue + strValue;
+	// Compound tests (include improvements)
+	$: composure = chaValue + wilValue + valueOf($character?.improvements ?? [], 'Composure');
+	$: judgeIntentions =
+		chaValue + intValue + valueOf($character?.improvements ?? [], 'JudgeIntentions');
+	$: memory = logValue + wilValue + valueOf($character?.improvements ?? [], 'Memory');
+	$: liftCarry = bodValue + strValue + valueOf($character?.improvements ?? [], 'LiftAndCarry');
 
 	// Check if character has no physical body (e.g., AI)
-	$: hasNoPhysicalBody = isAttributeNA(getAttrLimits($character, 'bod', $qualityBonuses));
+	$: hasNoPhysicalBody = isAttributeNA(getAttrLimits($character, 'bod'));
 
 	$: isKarmaBuild = $character?.buildMethod === 'karma';
 	$: attrCost = $bpBreakdown?.attributes ?? 0;
@@ -249,7 +259,7 @@
 
 				{#each PHYSICAL_ATTRS as code, idx}
 					{@const attr = getAttrValue($character, code)}
-					{@const limits = getAttrLimits($character, code, $qualityBonuses)}
+					{@const limits = getAttrLimits($character, code)}
 					{@const isNA = isAttributeNA(limits)}
 					{@const augmented = limits ? getAugmentedLimit(limits.max) : 0}
 					{@const maxMsg = !isKarmaBuild ? getMaxMessage(code, $attributeValidation) : null}
@@ -318,7 +328,7 @@
 
 				{#each MENTAL_ATTRS as code, idx}
 					{@const attr = getAttrValue($character, code)}
-					{@const limits = getAttrLimits($character, code, $qualityBonuses)}
+					{@const limits = getAttrLimits($character, code)}
 					{@const augmented = limits ? getAugmentedLimit(limits.max) : 0}
 					{@const maxMsg = !isKarmaBuild ? getMaxMessage(code, $attributeValidation) : null}
 					{@const blockedByMaxRule =
@@ -375,7 +385,7 @@
 
 				{#each SPECIAL_ATTRS as code, idx}
 					{@const attr = getAttrValue($character, code)}
-					{@const limits = getAttrLimits($character, code, $qualityBonuses)}
+					{@const limits = getAttrLimits($character, code)}
 					{@const augmented = limits ? getAugmentedLimit(limits.max) : 0}
 					{@const maxMsg = !isKarmaBuild ? getMaxMessage(code, $attributeValidation) : null}
 					{@const blockedByMaxRule =
@@ -421,7 +431,7 @@
 				<!-- Magic (always displayed, editable when unlocked) -->
 				{#if true}
 					{@const magAttr = getAttrValue($character, 'mag')}
-					{@const magLimits = getAttrLimits($character, 'mag', $qualityBonuses)}
+					{@const magLimits = getAttrLimits($character, 'mag')}
 					{@const magAugmented = magLimits ? getAugmentedLimit(magLimits.max) : 0}
 					<div
 						class="flex items-center px-4 py-3 border-b border-gray-100 bg-white {!isMagicUnlocked
@@ -469,7 +479,7 @@
 				<!-- Resonance (always displayed, editable when unlocked) -->
 				{#if true}
 					{@const resAttr = getAttrValue($character, 'res')}
-					{@const resLimits = getAttrLimits($character, 'res', $qualityBonuses)}
+					{@const resLimits = getAttrLimits($character, 'res')}
 					{@const resAugmented = resLimits ? getAugmentedLimit(resLimits.max) : 0}
 					<div
 						class="flex items-center px-4 py-3 border-b border-gray-100 bg-gray-50 {!isResonanceUnlocked

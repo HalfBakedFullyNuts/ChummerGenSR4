@@ -134,7 +134,10 @@ const mockGameData: GameData = {
 	vehicleCategories: [],
 	martialArts: [],
 	echoes: [],
-	streams: []
+	streams: [],
+	metamagics: [],
+	books: [],
+	ranges: []
 };
 
 describe('Character Creation - Metatype BP Costs', () => {

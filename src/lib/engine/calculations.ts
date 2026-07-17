@@ -9,6 +9,7 @@
  */
 
 import type { Character, CharacterSkill } from '$types';
+import { valueOf } from './improvementManager';
 
 /* ============================================
  * Attribute Helpers
@@ -20,21 +21,24 @@ export function getAttributeTotal(
 	attr: 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil' | 'edg'
 ): number {
 	const a = char.attributes[attr];
-	return a.base + a.bonus;
+	const impBonus = valueOf(char.improvements, 'Attribute', attr);
+	return a.base + a.bonus + impBonus;
 }
 
 /** Get Magic attribute total (0 if mundane). */
 export function getMagicTotal(char: Character): number {
 	const mag = char.attributes.mag;
 	if (!mag) return 0;
-	return mag.base + mag.bonus;
+	const impBonus = valueOf(char.improvements, 'Attribute', 'mag');
+	return mag.base + mag.bonus + impBonus;
 }
 
 /** Get Resonance attribute total (0 if not technomancer). */
 export function getResonanceTotal(char: Character): number {
 	const res = char.attributes.res;
 	if (!res) return 0;
-	return res.base + res.bonus;
+	const impBonus = valueOf(char.improvements, 'Attribute', 'res');
+	return res.base + res.bonus + impBonus;
 }
 
 /** Get current Essence. */
@@ -46,21 +50,21 @@ export function getEssence(char: Character): number {
  * Condition Monitors
  * ============================================ */
 
-/** Calculate Physical Condition Monitor boxes. */
 export function calculatePhysicalCM(char: Character): number {
 	const bod = getAttributeTotal(char, 'bod');
-	return Math.ceil(bod / 2) + 8;
+	const bonus = valueOf(char.improvements, 'PhysicalCM');
+	return Math.ceil(bod / 2) + 8 + bonus;
 }
 
-/** Calculate Stun Condition Monitor boxes. */
 export function calculateStunCM(char: Character): number {
 	const wil = getAttributeTotal(char, 'wil');
-	return Math.ceil(wil / 2) + 8;
+	const bonus = valueOf(char.improvements, 'StunCM');
+	return Math.ceil(wil / 2) + 8 + bonus;
 }
 
-/** Calculate Overflow boxes (before death). */
 export function calculateOverflow(char: Character): number {
-	return getAttributeTotal(char, 'bod');
+	const bonus = valueOf(char.improvements, 'PhysicalCM') + valueOf(char.improvements, 'CMOverflow');
+	return getAttributeTotal(char, 'bod') + bonus;
 }
 
 /** Get wound modifier from damage. */
@@ -80,7 +84,8 @@ export function getWoundModifier(char: Character): number {
 export function calculateInitiative(char: Character): number {
 	const rea = getAttributeTotal(char, 'rea');
 	const int = getAttributeTotal(char, 'int');
-	return rea + int;
+	const impBonus = valueOf(char.improvements, 'Initiative');
+	return rea + int + impBonus;
 }
 
 /** Calculate number of Initiative Dice (base is 1). */
@@ -109,6 +114,10 @@ export function calculateInitiativeDice(char: Character): number {
 			}
 		}
 	}
+
+	// Add improvements
+	dice += valueOf(char.improvements, 'InitiativePass') || 0;
+	dice += valueOf(char.improvements, 'InitiativePassAdd') || 0;
 
 	return dice;
 }
@@ -228,24 +237,20 @@ export function calculateDicePool(
 	return Math.max(0, pool);
 }
 
-/** Calculate Composure test pool (CHA + WIL). */
 export function calculateComposure(char: Character): number {
-	return getAttributeTotal(char, 'cha') + getAttributeTotal(char, 'wil');
+	return getAttributeTotal(char, 'cha') + getAttributeTotal(char, 'wil') + valueOf(char.improvements, 'Composure');
 }
 
-/** Calculate Judge Intentions pool (CHA + INT). */
 export function calculateJudgeIntentions(char: Character): number {
-	return getAttributeTotal(char, 'cha') + getAttributeTotal(char, 'int');
+	return getAttributeTotal(char, 'cha') + getAttributeTotal(char, 'int') + valueOf(char.improvements, 'JudgeIntentions');
 }
 
-/** Calculate Memory test pool (LOG + WIL). */
 export function calculateMemory(char: Character): number {
-	return getAttributeTotal(char, 'log') + getAttributeTotal(char, 'wil');
+	return getAttributeTotal(char, 'log') + getAttributeTotal(char, 'wil') + valueOf(char.improvements, 'Memory');
 }
 
-/** Calculate Lift/Carry pool (BOD + STR). */
 export function calculateLiftCarry(char: Character): number {
-	return getAttributeTotal(char, 'bod') + getAttributeTotal(char, 'str');
+	return getAttributeTotal(char, 'bod') + getAttributeTotal(char, 'str') + valueOf(char.improvements, 'LiftAndCarry');
 }
 
 /* ============================================
@@ -281,6 +286,8 @@ export function calculateArmorBallistic(char: Character): number {
 		}
 	}
 
+	total += valueOf(char.improvements, 'BallisticArmor');
+
 	return total;
 }
 
@@ -300,6 +307,8 @@ export function calculateArmorImpact(char: Character): number {
 		}
 	}
 
+	total += valueOf(char.improvements, 'ImpactArmor');
+
 	return total;
 }
 
@@ -317,10 +326,10 @@ export function calculateDrainResist(char: Character): number {
 	const wil = getAttributeTotal(char, 'wil');
 
 	if (tradition.includes('hermetic') || tradition.includes('chaos')) {
-		return wil + getAttributeTotal(char, 'log');
+		return wil + getAttributeTotal(char, 'log') + valueOf(char.improvements, 'DrainResistance');
 	}
 	// Default to shamanic (WIL + CHA)
-	return wil + getAttributeTotal(char, 'cha');
+	return wil + getAttributeTotal(char, 'cha') + valueOf(char.improvements, 'DrainResistance');
 }
 
 /** Calculate Astral Initiative. */
@@ -345,19 +354,17 @@ export function calculateFadingResist(char: Character): number {
 	// Fading resistance is RES + WIL
 	const res = getResonanceTotal(char);
 	const wil = getAttributeTotal(char, 'wil');
-	return res + wil;
+	return res + wil + valueOf(char.improvements, 'FadingResistance');
 }
 
-/** Calculate Matrix Initiative (hot-sim). */
 export function calculateMatrixInitiative(char: Character): number {
 	const int = getAttributeTotal(char, 'int');
 	const res = getResonanceTotal(char);
-	return int + res;
+	return int + res + valueOf(char.improvements, 'MatrixInitiative');
 }
 
-/** Calculate Matrix Initiative Dice. */
-export function calculateMatrixInitiativeDice(): number {
-	return 3; // Hot-sim VR
+export function calculateMatrixInitiativeDice(char: Character): number {
+	return 3 + valueOf(char.improvements, 'MatrixInitiativePass') + valueOf(char.improvements, 'MatrixInitiativePassAdd'); // Hot-sim VR implies 3 base in many SR4 contexts, with improvements doing the rest
 }
 
 /* ============================================

@@ -200,8 +200,34 @@ export interface GameLifestyle {
 export interface GameProgram {
 	name: string;
 	category: string;
+	complexform?: boolean;
 	source: string;
 	page: number;
+}
+
+/** Metamagic from game data. */
+export interface GameMetamagic {
+	name: string;
+	adept: boolean;
+	magician: boolean;
+	source: string;
+	page: number;
+}
+
+/** Book from game data. */
+export interface GameBook {
+	name: string;
+	code: string;
+}
+
+/** Range from game data. */
+export interface GameRange {
+	category: string;
+	min: string;
+	short: string;
+	medium: string;
+	long: string;
+	extreme: string;
 }
 
 /** Bioware from game data. */
@@ -305,6 +331,10 @@ export interface GameData {
 	/* Technomancer */
 	echoes: GameEcho[];
 	streams: GameStream[];
+	/* Misc */
+	metamagics: GameMetamagic[];
+	books: GameBook[];
+	ranges: GameRange[];
 }
 
 /** Empty game data for initial state. */
@@ -344,7 +374,11 @@ const EMPTY_GAME_DATA: GameData = {
 	martialArts: [],
 	/* Technomancer */
 	echoes: [],
-	streams: []
+	streams: [],
+	/* Misc */
+	metamagics: [],
+	books: [],
+	ranges: []
 };
 
 /* Internal stores */
@@ -420,7 +454,10 @@ export async function loadGameData(): Promise<void> {
 			vehiclesData,
 			martialArtsData,
 			echoesData,
-			streamsData
+			streamsData,
+			metamagicsData,
+			booksData,
+			rangesData
 		] = await Promise.all([
 			fetchDataFile<{ categories: string[]; metatypes: Metatype[] }>('metatypes.json'),
 			fetchDataFile<{
@@ -447,7 +484,10 @@ export async function loadGameData(): Promise<void> {
 			fetchDataFile<{ categories: string[]; vehicles: GameVehicle[] }>('vehicles.json'),
 			fetchDataFile<{ styles: GameMartialArt[] }>('martialarts.json'),
 			fetchDataFile<{ echoes: GameEcho[] }>('echoes.json'),
-			fetchDataFile<{ streams: GameStream[] }>('streams.json')
+			fetchDataFile<{ streams: GameStream[] }>('streams.json'),
+			fetchDataFile<{ metamagics: GameMetamagic[] }>('metamagic.json'),
+			fetchDataFile<{ books: GameBook[] }>('books.json'),
+			fetchDataFile<{ ranges: GameRange[] }>('ranges.json')
 		]);
 
 		/* Combine into single game data object */
@@ -487,7 +527,11 @@ export async function loadGameData(): Promise<void> {
 			martialArts: limitArray(martialArtsData?.styles),
 			/* Technomancer */
 			echoes: limitArray(echoesData?.echoes),
-			streams: limitArray(streamsData?.streams)
+			streams: limitArray(streamsData?.streams),
+			/* Misc */
+			metamagics: limitArray(metamagicsData?.metamagics),
+			books: limitArray(booksData?.books),
+			ranges: limitArray(rangesData?.ranges)
 		};
 
 		gameDataStore.set(data);
@@ -784,3 +828,16 @@ export function findStream(data: GameData, name: string): GameStream | undefined
 	if (!name) return undefined;
 	return data.streams.find((s) => s.name === name);
 }
+
+/* ============================================
+ * Misc Derived Stores
+ * ============================================ */
+
+/** Derived store for metamagics. */
+export const metamagics: Readable<GameMetamagic[]> = derived(gameData, ($data) => $data.metamagics);
+
+/** Derived store for books. */
+export const books: Readable<GameBook[]> = derived(gameData, ($data) => $data.books);
+
+/** Derived store for ranges. */
+export const ranges: Readable<GameRange[]> = derived(gameData, ($data) => $data.ranges);

@@ -2,6 +2,7 @@
 	import { gameData, metatypes } from '$stores/gamedata';
 	import { character, setMetatype } from '$stores/character';
 	import type { Metatype } from '$types';
+	import BookReference from '$lib/components/ui/BookReference.svelte';
 
 	let selectedCategory = 'Metahuman';
 	let hasAutoSelected = false;
@@ -204,10 +205,10 @@
 					<!-- Source -->
 					<div class="text-gray-500 text-xs flex items-center gap-1 border-t border-gray-200 pt-2">
 						<span class="material-icons text-xs">menu_book</span>
-						{metatype.source} p.{metatype.page}
+						<BookReference code={metatype.source} page={metatype.page} />
 					</div>
-				</div>
-			</button>
+				</div></button
+			>
 		{/each}
 	</div>
 

@@ -24,8 +24,11 @@
 		removeLifestyle,
 		KARMA_BUILD_COSTS
 	} from '$stores/character';
-	import { gameData } from '$stores/gamedata';
+	import { addChildCyberware, addWeaponToVehicle } from '../../stores/equipment';
+	import { gameData, ranges as rangesStore } from '$stores/gamedata';
 	import { BP_TO_NUYEN_RATES, type CyberwareGrade, type BiowareGrade } from '$types';
+	import { calculateWeaponRange } from '$lib/utils/ranges';
+	import BookReference from '$lib/components/ui/BookReference.svelte';
 	import type {
 		CharacterWeapon,
 		CharacterArmor,
@@ -36,6 +39,7 @@
 		CharacterGear,
 		CharacterLifestyle
 	} from '$types';
+	import EquipmentNode from './EquipmentNode.svelte';
 
 	/** Modal state. */
 	type ModalType =
@@ -49,6 +53,7 @@
 		| 'lifestyle'
 		| null;
 	let activeModal: ModalType = null;
+	let attachTarget: { type: ModalType; id: string; name: string } | null = null;
 
 	/** Selected item for details panel. */
 	type SelectedItem =
@@ -211,8 +216,12 @@
 	$: canDecrement = resourcesBP > 0;
 
 	/** Open modal. */
-	function openModal(type: ModalType): void {
+	function openModal(
+		type: ModalType,
+		target: { type: ModalType; id: string; name: string } | null = null
+	): void {
 		activeModal = type;
+		attachTarget = target;
 		modalCategory = '';
 		modalSubcategory = '';
 		modalSearch = '';
@@ -221,6 +230,7 @@
 	/** Close modal. */
 	function closeModal(): void {
 		activeModal = null;
+		attachTarget = null;
 		modalCategory = '';
 		modalSubcategory = '';
 		modalSearch = '';
@@ -445,16 +455,15 @@
 							</h4>
 							<div class="space-y-1">
 								{#each ownedWeapons as weapon (weapon.id)}
-									<button
-										class="w-full flex items-center justify-between p-2 rounded text-sm text-left transition-colors
-											{selectedItem?.type === 'weapon' && selectedItem.item.id === weapon.id
-											? 'bg-primary-main/20 border border-primary-main/50'
-											: 'bg-gray-50 hover:bg-gray-100'}"
-										on:click={() => selectWeapon(weapon)}
-									>
-										<span class="text-gray-800 truncate">{weapon.name}</span>
-										<span class="text-gray-500 text-xs ml-2">{formatNuyen(weapon.cost)}</span>
-									</button>
+									<EquipmentNode
+										item={weapon}
+										selectedItemId={selectedItem?.type === 'weapon'
+											? selectedItem.item.id
+											: undefined}
+										onSelect={selectWeapon}
+										type="weapon"
+										formatCost={formatNuyen}
+									/>
 								{/each}
 							</div>
 						</div>
@@ -468,16 +477,15 @@
 							</h4>
 							<div class="space-y-1">
 								{#each ownedArmor as armor (armor.id)}
-									<button
-										class="w-full flex items-center justify-between p-2 rounded text-sm text-left transition-colors
-											{selectedItem?.type === 'armor' && selectedItem.item.id === armor.id
-											? 'bg-primary-main/20 border border-primary-main/50'
-											: 'bg-gray-50 hover:bg-gray-100'}"
-										on:click={() => selectArmor(armor)}
-									>
-										<span class="text-gray-800 truncate">{armor.name}</span>
-										<span class="text-gray-500 text-xs ml-2">{formatNuyen(armor.cost)}</span>
-									</button>
+									<EquipmentNode
+										item={armor}
+										selectedItemId={selectedItem?.type === 'armor'
+											? selectedItem.item.id
+											: undefined}
+										onSelect={selectArmor}
+										type="armor"
+										formatCost={formatNuyen}
+									/>
 								{/each}
 							</div>
 						</div>
@@ -491,16 +499,15 @@
 							</h4>
 							<div class="space-y-1">
 								{#each ownedCyberware as cyber (cyber.id)}
-									<button
-										class="w-full flex items-center justify-between p-2 rounded text-sm text-left transition-colors
-											{selectedItem?.type === 'cyberware' && selectedItem.item.id === cyber.id
-											? 'bg-primary-main/20 border border-primary-main/50'
-											: 'bg-gray-50 hover:bg-gray-100'}"
-										on:click={() => selectCyberware(cyber)}
-									>
-										<span class="text-gray-800 truncate">{cyber.name}</span>
-										<span class="text-gray-500 text-xs ml-2">ESS: {cyber.essence.toFixed(2)}</span>
-									</button>
+									<EquipmentNode
+										item={cyber}
+										selectedItemId={selectedItem?.type === 'cyberware'
+											? selectedItem.item.id
+											: undefined}
+										onSelect={selectCyberware}
+										type="cyberware"
+										formatCost={formatNuyen}
+									/>
 								{/each}
 							</div>
 						</div>
@@ -514,16 +521,15 @@
 							</h4>
 							<div class="space-y-1">
 								{#each ownedBioware as bio (bio.id)}
-									<button
-										class="w-full flex items-center justify-between p-2 rounded text-sm text-left transition-colors
-											{selectedItem?.type === 'bioware' && selectedItem.item.id === bio.id
-											? 'bg-primary-main/20 border border-primary-main/50'
-											: 'bg-gray-50 hover:bg-gray-100'}"
-										on:click={() => selectBioware(bio)}
-									>
-										<span class="text-gray-800 truncate">{bio.name}</span>
-										<span class="text-gray-500 text-xs ml-2">ESS: {bio.essence.toFixed(2)}</span>
-									</button>
+									<EquipmentNode
+										item={bio}
+										selectedItemId={selectedItem?.type === 'bioware'
+											? selectedItem.item.id
+											: undefined}
+										onSelect={selectBioware}
+										type="bioware"
+										formatCost={formatNuyen}
+									/>
 								{/each}
 							</div>
 						</div>
@@ -537,16 +543,15 @@
 							</h4>
 							<div class="space-y-1">
 								{#each ownedVehicles as vehicle (vehicle.id)}
-									<button
-										class="w-full flex items-center justify-between p-2 rounded text-sm text-left transition-colors
-											{selectedItem?.type === 'vehicle' && selectedItem.item.id === vehicle.id
-											? 'bg-primary-main/20 border border-primary-main/50'
-											: 'bg-gray-50 hover:bg-gray-100'}"
-										on:click={() => selectVehicle(vehicle)}
-									>
-										<span class="text-gray-800 truncate">{vehicle.name}</span>
-										<span class="text-gray-500 text-xs ml-2">{formatNuyen(vehicle.cost)}</span>
-									</button>
+									<EquipmentNode
+										item={vehicle}
+										selectedItemId={selectedItem?.type === 'vehicle'
+											? selectedItem.item.id
+											: undefined}
+										onSelect={selectVehicle}
+										type="vehicle"
+										formatCost={formatNuyen}
+									/>
 								{/each}
 							</div>
 						</div>
@@ -560,22 +565,15 @@
 							</h4>
 							<div class="space-y-1">
 								{#each ownedGear as gear (gear.id)}
-									<button
-										class="w-full flex items-center justify-between p-2 rounded text-sm text-left transition-colors
-											{selectedItem?.type === 'gear' && selectedItem.item.id === gear.id
-											? 'bg-primary-main/20 border border-primary-main/50'
-											: 'bg-gray-50 hover:bg-gray-100'}"
-										on:click={() => selectGear(gear)}
-									>
-										<span class="text-gray-800 truncate">
-											{gear.name}
-											{#if gear.quantity > 1}<span class="text-gray-400">(x{gear.quantity})</span
-												>{/if}
-										</span>
-										<span class="text-gray-500 text-xs ml-2"
-											>{formatNuyen(gear.cost * gear.quantity)}</span
-										>
-									</button>
+									<EquipmentNode
+										item={gear}
+										selectedItemId={selectedItem?.type === 'gear'
+											? selectedItem.item.id
+											: undefined}
+										onSelect={selectGear}
+										type="gear"
+										formatCost={formatNuyen}
+									/>
 								{/each}
 							</div>
 						</div>
@@ -640,6 +638,9 @@
 					</div>
 				{:else if selectedItem.type === 'weapon'}
 					{@const weapon = selectedItem.item}
+					{@const computedRange = $rangesStore
+						? calculateWeaponRange(weapon.category, $character, $rangesStore)
+						: null}
 					<div class="space-y-3">
 						<h4 class="font-semibold text-gray-800">{weapon.name}</h4>
 						<div class="grid grid-cols-2 gap-2 text-sm">
@@ -667,6 +668,14 @@
 								<span class="text-gray-500">Ammo:</span>
 								<span class="text-gray-800">{weapon.ammo}</span>
 							</div>
+							{#if computedRange}
+								<div class="col-span-2">
+									<span class="text-gray-500">Range:</span>
+									<span class="text-gray-800"
+										>{computedRange.short}/{computedRange.medium}/{computedRange.long}/{computedRange.extreme}m</span
+									>
+								</div>
+							{/if}
 							<div class="col-span-2">
 								<span class="text-gray-500">Cost:</span>
 								<span class="text-primary-dark font-mono">{formatNuyen(weapon.cost)}</span>
@@ -733,8 +742,21 @@
 							</div>
 						</div>
 						<button
-							class="w-full cw-btn bg-red-500 hover:bg-red-600 text-white mt-4"
-							on:click={() => removeAndClear(() => removeCyberware(cyber.id))}
+							class="w-full cw-btn border border-primary-main text-primary-dark mt-4"
+							on:click={() =>
+								openModal('cyberware', { type: 'cyberware', id: cyber.id, name: cyber.name })}
+						>
+							<span class="material-icons text-sm mr-1">add</span>
+							Install Plugin/Mod
+						</button>
+						<button
+							class="w-full cw-btn bg-red-500 hover:bg-red-600 text-white mt-2"
+							on:click={() =>
+								removeAndClear(() => {
+									removeCyberware(cyber.id);
+									// Note: We'd need to properly handle removing child vs parent.
+									// `removeCyberware` in equipment.ts should recursively find or we use a separate path.
+								})}
 						>
 							<span class="material-icons text-sm mr-1">delete</span>
 							Remove Cyberware
@@ -813,7 +835,15 @@
 							</div>
 						</div>
 						<button
-							class="w-full cw-btn bg-red-500 hover:bg-red-600 text-white mt-4"
+							class="w-full cw-btn border border-primary-main text-primary-dark mt-4"
+							on:click={() =>
+								openModal('weapon', { type: 'vehicle', id: vehicle.id, name: vehicle.name })}
+						>
+							<span class="material-icons text-sm mr-1">add</span>
+							Mount Weapon
+						</button>
+						<button
+							class="w-full cw-btn bg-red-500 hover:bg-red-600 text-white mt-2"
 							on:click={() => removeAndClear(() => removeVehicle(vehicle.id))}
 						>
 							<span class="material-icons text-sm mr-1">delete</span>
@@ -1058,7 +1088,11 @@
 									<button
 										class="cw-btn cw-btn-primary text-xs py-1 px-2 shrink-0 ml-2"
 										on:click={() => {
-											addWeapon(weapon);
+											if (attachTarget?.id && attachTarget.type === 'vehicle') {
+												addWeaponToVehicle(attachTarget.id, weapon);
+											} else {
+												addWeapon(weapon);
+											}
 											closeModal();
 										}}
 									>
@@ -1298,7 +1332,11 @@
 											class="cw-btn cw-btn-primary text-xs py-1 px-2 shrink-0 ml-2"
 											disabled={$currentEssence < adjustedEss}
 											on:click={() => {
-												addCyberware(cyber, selectedGrade);
+												if (attachTarget?.id) {
+													addChildCyberware(attachTarget.id, cyber, selectedGrade);
+												} else {
+													addCyberware(cyber, selectedGrade);
+												}
 												closeModal();
 											}}
 										>
@@ -1452,7 +1490,11 @@
 									>
 										<span class="text-gray-800 truncate flex-1 min-w-0">{style.name}</span>
 										<span class="text-gray-600 w-20 text-right shrink-0"
-											>{style.source} p.{style.page}</span
+											><BookReference
+												code={style.source}
+												page={style.page}
+												expanded={false}
+											/></span
 										>
 										<span class="font-mono text-info-dark w-14 text-right shrink-0"
 											>{MARTIAL_ARTS_COSTS.STYLE} BP</span
@@ -1479,6 +1521,7 @@
 								class="flex items-center p-2 border-b border-gray-300 text-xs text-gray-500 font-semibold uppercase tracking-wide bg-white shrink-0"
 							>
 								<span class="flex-1 min-w-0">Name</span>
+								<span class="w-20 text-right">Source</span>
 								<span class="w-24 text-right">Monthly Cost</span>
 								<span class="w-16 ml-2"></span>
 							</div>
@@ -1488,6 +1531,13 @@
 										class="flex items-center p-2 bg-gray-50 rounded text-xs hover:bg-gray-100 transition-colors"
 									>
 										<span class="text-gray-800 truncate flex-1 min-w-0">{lifestyle.name}</span>
+										<span class="text-gray-600 w-20 text-right shrink-0"
+											><BookReference
+												code={lifestyle.source}
+												page={lifestyle.page}
+												expanded={false}
+											/></span
+										>
 										<span class="font-mono text-primary-dark w-24 text-right shrink-0"
 											>{formatNuyen(lifestyle.cost)}/mo</span
 										>

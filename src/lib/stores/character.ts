@@ -44,12 +44,17 @@ import {
 } from '$types';
 import {
 	findMetatype,
+	gameData,
 	skills as skillsStore,
 	type GameData,
 	type GameBioware,
 	type GameVehicle,
 	type GameMartialArt
 } from './gamedata';
+import {
+	createImprovementsFromBonus,
+	removeImprovements
+} from '../engine/improvementManager';
 
 /** Maximum BP for standard character creation. */
 const MAX_BP = 400;
@@ -631,6 +636,21 @@ export function addQuality(
 	const grantsMagic = MAGIC_QUALITIES.includes(name);
 	const grantsResonance = RESONANCE_QUALITIES.includes(name);
 
+	/* Create improvements from quality */
+	const gData = get(gameData);
+	const gQuality = gData.qualities.find(q => q.name === name);
+	let newImprovements: any[] = [];
+	if (gQuality?.bonus) {
+		newImprovements = createImprovementsFromBonus(
+			'Quality',
+			name,
+			gQuality.bonus,
+			1,
+			options?.selectedSkill,
+			options?.selectedAttribute
+		);
+	}
+
 	/* Initialize attributes if not already set */
 	let attributes = char.attributes;
 	if (grantsMagic && (!attributes.mag || attributes.mag === null)) {
@@ -649,6 +669,7 @@ export function addQuality(
 	const updated: Character = {
 		...char,
 		qualities: [...char.qualities, newQuality],
+		improvements: [...char.improvements, ...newImprovements],
 		attributes,
 		buildPointsSpent: {
 			...char.buildPointsSpent,
@@ -680,6 +701,19 @@ export function addQualityAgain(
 	/* Create unique name with instance number */
 	const instanceName = instanceCount === 0 ? baseName : `${baseName} #${instanceCount + 1}`;
 
+	/* Create improvements from quality */
+	const gData = get(gameData);
+	const gQuality = gData.qualities.find(q => q.name === baseName);
+	let newImprovements: any[] = [];
+	if (gQuality?.bonus) {
+		newImprovements = createImprovementsFromBonus(
+			'Quality',
+			instanceName,
+			gQuality.bonus,
+			1
+		);
+	}
+
 	const newQuality: CharacterQuality = {
 		id: generateId(),
 		name: instanceName,
@@ -692,6 +726,7 @@ export function addQualityAgain(
 	const updated: Character = {
 		...char,
 		qualities: [...char.qualities, newQuality],
+		improvements: [...char.improvements, ...newImprovements],
 		buildPointsSpent: {
 			...char.buildPointsSpent,
 			qualities: char.buildPointsSpent.qualities + bp
@@ -745,6 +780,7 @@ export function removeQuality(qualityId: string): void {
 	const updated: Character = {
 		...char,
 		qualities: remainingQualities,
+		improvements: removeImprovements(char.improvements, 'Quality', quality.name),
 		attributes,
 		buildPointsSpent: {
 			...char.buildPointsSpent,
@@ -1607,7 +1643,6 @@ export function initializeMagic(tradition: string): void {
 		spells: [],
 		powers: [],
 		spirits: [],
-		foci: [],
 		metamagics: []
 	};
 
@@ -2028,6 +2063,7 @@ export function addWeapon(weapon: GameWeapon): void {
 		conceal: weapon.conceal,
 		cost: weapon.cost,
 		accessories: [],
+		modifications: [],
 		notes: ''
 	};
 
@@ -2162,7 +2198,7 @@ export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Stan
 		capacity: 0,
 		capacityUsed: 0,
 		location: '',
-		subsystems: [],
+		children: [],
 		notes: ''
 	};
 
@@ -2321,6 +2357,8 @@ export function addVehicle(vehicle: GameVehicle): void {
 		sensor: vehicle.sensor,
 		cost: vehicle.cost,
 		mods: [],
+		weapons: [],
+		gear: [],
 		notes: ''
 	};
 
@@ -2557,7 +2595,8 @@ export function addGear(
 			capacityUsed: 0,
 			capacityCost: gear.capacityCost ?? 1,
 			containerId,
-			containedItems: []
+			containedItems: [],
+			children: []
 		};
 		newGear = [...char.equipment.gear, newItem];
 
@@ -2569,10 +2608,10 @@ export function addGear(
 				newGear = newGear.map((g, i) =>
 					i === containerIndex
 						? {
-								...g,
-								capacityUsed: container.capacityUsed + (gear.capacityCost ?? 1),
-								containedItems: [...container.containedItems, newItem.id]
-							}
+							...g,
+							capacityUsed: container.capacityUsed + (gear.capacityCost ?? 1),
+							containedItems: [...container.containedItems, newItem.id]
+						}
 						: g
 				);
 			}
@@ -2630,10 +2669,10 @@ export function removeGear(gearId: string): void {
 			newGear = newGear.map((g, i) =>
 				i === containerIndex
 					? {
-							...g,
-							capacityUsed: Math.max(0, container.capacityUsed - gear.capacityCost),
-							containedItems: container.containedItems.filter((id) => id !== gearId)
-						}
+						...g,
+						capacityUsed: Math.max(0, container.capacityUsed - gear.capacityCost),
+						containedItems: container.containedItems.filter((id) => id !== gearId)
+					}
 					: g
 			);
 		}

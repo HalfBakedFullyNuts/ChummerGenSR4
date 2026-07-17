@@ -16,6 +16,7 @@ import {
 	type CharacterMartialArt,
 	type CharacterGear,
 	type CharacterLifestyle,
+	type CharacterFocus,
 	type GameWeapon,
 	type GameArmor,
 	type GameCyberware,
@@ -102,6 +103,7 @@ export function addWeapon(weapon: GameWeapon): void {
 		conceal: weapon.conceal,
 		cost: weapon.cost,
 		accessories: [],
+		modifications: [],
 		notes: ''
 	};
 
@@ -133,6 +135,71 @@ export function removeWeapon(weaponId: string): void {
 			weapons: char.equipment.weapons.filter((w) => w.id !== weaponId)
 		},
 		nuyen: char.nuyen + weapon.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/* ============================================
+ * Foci
+ * ============================================ */
+
+/** Add a focus to the character's equipment. */
+export function addFocus(
+	name: string,
+	category: string,
+	force: number,
+	costMultiplier: number
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const cost = force * costMultiplier;
+	if (char.nuyen < cost) return;
+
+	const newFocus: CharacterFocus = {
+		id: generateId(),
+		name,
+		category,
+		force,
+		cost,
+		bonded: false,
+		improvements: []
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			foci: [...(char.equipment.foci || []), newFocus]
+		},
+		nuyen: char.nuyen - cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/** Remove a focus. */
+export function removeFocus(focusId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const fociList = char.equipment.foci || [];
+	const focus = fociList.find((f) => f.id === focusId);
+	if (!focus) return;
+
+	// If bonded, refund Karma/BP. We assume UI has prompted them or handles unbonding gracefully.
+	// For simplicity, just refund nuyen here, UI can unbond first.
+	// We will refund Nuyen.
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			foci: fociList.filter((f) => f.id !== focusId)
+		},
+		nuyen: char.nuyen + focus.cost,
 		updatedAt: new Date().toISOString()
 	};
 
@@ -229,7 +296,7 @@ export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Stan
 		capacity: 0,
 		capacityUsed: 0,
 		location: '',
-		subsystems: [],
+		children: [],
 		notes: ''
 	};
 
@@ -274,6 +341,99 @@ export function removeCyberware(cyberId: string): void {
 
 	characterStore.set(updated);
 }
+
+/** Add a child cyberware to a parent cyberware. */
+export function addChildCyberware(
+	parentId: string,
+	cyber: GameCyberware,
+	grade: CyberwareGrade = 'Standard'
+): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const gradeMultipliers: Record<CyberwareGrade, { ess: number; cost: number }> = {
+		Standard: { ess: 1.0, cost: 1 },
+		Alphaware: { ess: 0.8, cost: 2 },
+		Betaware: { ess: 0.7, cost: 4 },
+		Deltaware: { ess: 0.5, cost: 10 },
+		Used: { ess: 1.2, cost: 0.5 }
+	};
+
+	const multiplier = gradeMultipliers[grade];
+	// Child cyberware essence is inherently reduced in some rules, but standard calculation here is base.
+	const essenceCost = cyber.ess * multiplier.ess;
+	const nuyenCost = Math.floor(cyber.cost * multiplier.cost);
+
+	if (char.nuyen < nuyenCost) return;
+	// Parent cyberware may have capacity we should use instead of essence, but leaving basic logic first
+	if (char.attributes.ess - essenceCost < 0) return;
+
+	const newChild: CharacterCyberware = {
+		id: generateId(),
+		name: cyber.name,
+		category: cyber.category,
+		grade,
+		rating: cyber.rating || 1,
+		essence: essenceCost,
+		cost: nuyenCost,
+		capacity: 0,
+		capacityUsed: 0,
+		location: '',
+		children: [],
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			cyberware: char.equipment.cyberware.map((c) =>
+				c.id === parentId ? { ...c, children: [...c.children, newChild] } : c
+			)
+		},
+		attributes: {
+			...char.attributes,
+			ess: char.attributes.ess - essenceCost
+		},
+		nuyen: char.nuyen - nuyenCost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/** Remove a child cyberware from a parent cyberware. Restores essence. */
+export function removeChildCyberware(parentId: string, childId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const parent = char.equipment.cyberware.find((c) => c.id === parentId);
+	if (!parent) return;
+
+	const child = parent.children.find((c) => c.id === childId);
+	if (!child) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			cyberware: char.equipment.cyberware.map((c) =>
+				c.id === parentId
+					? { ...c, children: c.children.filter((ch) => ch.id !== childId) }
+					: c
+			)
+		},
+		attributes: {
+			...char.attributes,
+			ess: char.attributes.ess + child.essence
+		},
+		nuyen: char.nuyen + child.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
 
 /** Add bioware to the character. */
 export function addBioware(
@@ -373,6 +533,8 @@ export function addVehicle(vehicle: GameVehicle): void {
 		sensor: vehicle.sensor,
 		cost: vehicle.cost,
 		mods: [],
+		weapons: [],
+		gear: [],
 		notes: ''
 	};
 
@@ -414,6 +576,79 @@ export function removeVehicle(vehicleId: string): void {
 
 	characterStore.set(updated);
 }
+
+/** Add a weapon to a vehicle. */
+export function addWeaponToVehicle(vehicleId: string, weapon: GameWeapon): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	if (char.nuyen < weapon.cost) return;
+
+	const ammoMatch = weapon.ammo.match(/^(\d+)/);
+	const maxAmmo = ammoMatch && ammoMatch[1] ? parseInt(ammoMatch[1], 10) : 0;
+
+	const newWeapon: CharacterWeapon = {
+		id: generateId(),
+		name: weapon.name,
+		category: weapon.category,
+		type: weapon.type,
+		reach: weapon.reach,
+		damage: weapon.damage,
+		ap: weapon.ap,
+		mode: weapon.mode,
+		rc: weapon.rc,
+		ammo: weapon.ammo,
+		currentAmmo: maxAmmo,
+		conceal: weapon.conceal,
+		cost: weapon.cost,
+		accessories: [],
+		modifications: [],
+		notes: ''
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			vehicles: char.equipment.vehicles.map((v) =>
+				v.id === vehicleId ? { ...v, weapons: [...(v.weapons || []), newWeapon] } : v
+			)
+		},
+		nuyen: char.nuyen - weapon.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/** Remove a weapon from a vehicle. */
+export function removeWeaponFromVehicle(vehicleId: string, weaponId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const vehicle = char.equipment.vehicles.find((v) => v.id === vehicleId);
+	if (!vehicle) return;
+
+	const weapon = vehicle.weapons?.find((w) => w.id === weaponId);
+	if (!weapon) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			vehicles: char.equipment.vehicles.map((v) =>
+				v.id === vehicleId
+					? { ...v, weapons: v.weapons.filter((w) => w.id !== weaponId) }
+					: v
+			)
+		},
+		nuyen: char.nuyen + weapon.cost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
 
 /* ============================================
  * Martial Arts
@@ -593,7 +828,8 @@ export function addGear(
 			capacityUsed: 0,
 			capacityCost: gear.capacityCost ?? 1,
 			containerId,
-			containedItems: []
+			containedItems: [],
+			children: []
 		};
 		newGear = [...char.equipment.gear, newItem];
 
@@ -604,10 +840,10 @@ export function addGear(
 				newGear = newGear.map((g, i) =>
 					i === containerIndex
 						? {
-								...g,
-								capacityUsed: container.capacityUsed + (gear.capacityCost ?? 1),
-								containedItems: [...container.containedItems, newItem.id]
-							}
+							...g,
+							capacityUsed: container.capacityUsed + (gear.capacityCost ?? 1),
+							containedItems: [...container.containedItems, newItem.id]
+						}
 						: g
 				);
 			}
@@ -658,10 +894,10 @@ export function removeGear(gearId: string): void {
 			newGear = newGear.map((g, i) =>
 				i === containerIndex
 					? {
-							...g,
-							capacityUsed: Math.max(0, container.capacityUsed - gear.capacityCost),
-							containedItems: container.containedItems.filter((id) => id !== gearId)
-						}
+						...g,
+						capacityUsed: Math.max(0, container.capacityUsed - gear.capacityCost),
+						containedItems: container.containedItems.filter((id) => id !== gearId)
+					}
 					: g
 			);
 		}
@@ -755,7 +991,76 @@ export function moveGearToContainer(
 	return { success: true };
 }
 
+/** Add a gear child directly to a parent gear (nesting, not just container). */
+export function addGearToGear(parentId: string, gear: GameGear, quantity: number = 1): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const totalCost = gear.cost * quantity;
+	if (char.nuyen < totalCost) return;
+
+	const newChild: CharacterGear = {
+		id: generateId(),
+		name: gear.name,
+		category: gear.category,
+		rating: gear.rating,
+		quantity,
+		cost: gear.cost,
+		location: '',
+		notes: '',
+		capacity: gear.capacity ?? 0,
+		capacityUsed: 0,
+		capacityCost: gear.capacityCost ?? 1,
+		containerId: parentId,
+		containedItems: [],
+		children: []
+	};
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			gear: char.equipment.gear.map((g) =>
+				g.id === parentId ? { ...g, children: [...g.children, newChild] } : g
+			)
+		},
+		nuyen: char.nuyen - totalCost,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
+/** Remove a gear child from a parent gear. */
+export function removeGearFromGear(parentId: string, childId: string): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const parent = char.equipment.gear.find((g) => g.id === parentId);
+	if (!parent) return;
+
+	const child = parent.children.find((c) => c.id === childId);
+	if (!child) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			gear: char.equipment.gear.map((g) =>
+				g.id === parentId
+					? { ...g, children: g.children.filter((ch) => ch.id !== childId) }
+					: g
+			)
+		},
+		nuyen: char.nuyen + child.cost * child.quantity,
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
 /* ============================================
+
  * Lifestyle
  * ============================================ */
 

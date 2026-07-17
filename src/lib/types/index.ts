@@ -24,6 +24,9 @@ export {
 	isAttributeValid
 } from './attributes';
 
+/* Improvement types */
+export type { ImprovementType, ImprovementSource, Improvement } from './improvements';
+
 /* Skill types */
 export type {
 	SkillCategoryType,
@@ -66,7 +69,6 @@ export type {
 	CharacterSpell,
 	CharacterPower,
 	BoundSpirit,
-	Focus,
 	CharacterResonance,
 	ComplexForm,
 	CompiledSprite,
@@ -111,7 +113,9 @@ export type {
 	LifestyleLevel,
 	GameLifestyle,
 	CharacterLifestyle,
-	CharacterEquipment
+	CharacterEquipment,
+	CharacterFocus,
+	StackedFocus
 } from './equipment';
 
 export {

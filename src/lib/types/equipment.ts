@@ -78,6 +78,7 @@ export interface CharacterWeapon {
 	readonly conceal: number;
 	readonly cost: number;
 	readonly accessories: readonly WeaponAccessory[];
+	readonly modifications: readonly WeaponMod[];
 	readonly notes: string;
 }
 
@@ -86,6 +87,16 @@ export interface WeaponAccessory {
 	readonly id: string;
 	readonly name: string;
 	readonly mount: string;
+	readonly cost: number;
+}
+
+/** Weapon modification (internal/permanent). */
+export interface WeaponMod {
+	readonly id: string;
+	readonly name: string;
+	readonly slots: number;
+	readonly damageBonus: number;
+	readonly apBonus: number;
 	readonly cost: number;
 }
 
@@ -206,7 +217,7 @@ export interface CharacterCyberware {
 	readonly capacity: number;
 	readonly capacityUsed: number;
 	readonly location: string;
-	readonly subsystems: readonly CharacterCyberware[];
+	readonly children: readonly CharacterCyberware[];
 	readonly notes: string;
 }
 
@@ -317,6 +328,8 @@ export interface CharacterVehicle {
 	readonly sensor: number;
 	readonly cost: number;
 	readonly mods: readonly VehicleMod[];
+	readonly weapons: readonly CharacterWeapon[];
+	readonly gear: readonly CharacterGear[];
 	readonly notes: string;
 }
 
@@ -409,6 +422,8 @@ export interface CharacterGear {
 	readonly containerId: string | null;
 	/** Items contained within this gear (if it's a container). */
 	readonly containedItems: readonly string[];
+	/** Child gear attached to or installed in this gear. */
+	readonly children: readonly CharacterGear[];
 }
 
 /** Check if gear has capacity to hold items. */
@@ -457,6 +472,32 @@ export interface CharacterLifestyle {
 }
 
 /* ============================================
+ * Foci
+ * ============================================ */
+
+/**
+ * Magical focus on a character.
+ */
+export interface CharacterFocus {
+	readonly id: string;
+	readonly name: string;
+	readonly category: string;
+	readonly force: number;
+	readonly cost: number;
+	readonly bonded: boolean;
+	readonly improvements: readonly import('./improvements').Improvement[];
+}
+
+/**
+ * Stacked Focus configuration.
+ */
+export interface StackedFocus {
+	readonly id: string;
+	readonly primaryFocusId: string;
+	readonly secondaryFocusId: string;
+}
+
+/* ============================================
  * Equipment Summary Types
  * ============================================ */
 
@@ -470,6 +511,7 @@ export interface CharacterEquipment {
 	readonly gear: readonly CharacterGear[];
 	readonly lifestyle: CharacterLifestyle | null;
 	readonly martialArts: readonly CharacterMartialArt[];
+	readonly foci: readonly CharacterFocus[];
 }
 
 /** Calculate total equipment cost. */
@@ -513,22 +555,31 @@ export function calculateEquipmentCost(equipment: CharacterEquipment): number {
 		total += equipment.lifestyle.monthlyCost * equipment.lifestyle.monthsPrepaid;
 	}
 
+	for (const focus of equipment.foci ?? []) {
+		total += focus.cost;
+	}
+
 	// Martial arts have BP cost, not nuyen cost (5 BP per style, 2 BP per technique)
 	// So they don't add to equipment cost
 
 	return total;
 }
 
-/** Calculate total essence cost of cyberware. */
-export function calculateEssenceCost(cyberware: readonly CharacterCyberware[]): number {
+// Helper to calculate essence recursively
+function sumEssenceRecursive(cyberwareList: readonly CharacterCyberware[]): number {
 	let total = 0;
-	for (const cyber of cyberware) {
+	for (const cyber of cyberwareList) {
 		total += cyber.essence;
-		for (const sub of cyber.subsystems) {
-			total += sub.essence;
+		if (cyber.children && cyber.children.length > 0) {
+			total += sumEssenceRecursive(cyber.children);
 		}
 	}
 	return total;
+}
+
+/** Calculate total essence cost of cyberware. */
+export function calculateEssenceCost(cyberware: readonly CharacterCyberware[]): number {
+	return sumEssenceRecursive(cyberware);
 }
 
 /** Calculate total essence cost of bioware. */
@@ -554,7 +605,8 @@ export const EMPTY_EQUIPMENT: CharacterEquipment = {
 	vehicles: [],
 	gear: [],
 	lifestyle: null,
-	martialArts: []
+	martialArts: [],
+	foci: []
 } as const;
 
 /* ============================================

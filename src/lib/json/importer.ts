@@ -151,6 +151,7 @@ function mergeWithDefaults(data: Record<string, unknown>, userId: string): Chara
 		knowledgeSkills: getArr(data, 'knowledgeSkills'),
 		knowledgeSkillPoints: getNum(data, 'knowledgeSkillPoints', 0),
 		qualities: getArr(data, 'qualities'),
+		improvements: getArr(data, 'improvements'),
 		magic: (data.magic as Character['magic']) ?? null,
 		resonance: (data.resonance as Character['resonance']) ?? null,
 		contacts: getArr(data, 'contacts'),
@@ -162,7 +163,8 @@ function mergeWithDefaults(data: Record<string, unknown>, userId: string): Chara
 			gear: getArr(equipment, 'gear'),
 			vehicles: getArr(equipment, 'vehicles'),
 			lifestyle: (equipment.lifestyle as Character['equipment']['lifestyle']) ?? null,
-			martialArts: getArr(equipment, 'martialArts')
+			martialArts: getArr(equipment, 'martialArts'),
+			foci: getArr(equipment, 'foci')
 		},
 		nuyen: getNum(data, 'nuyen', 0),
 		startingNuyen: getNum(data, 'startingNuyen', 0),

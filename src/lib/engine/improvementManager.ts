@@ -6,181 +6,9 @@
  * It matches the Desktop's ImprovementManager logic.
  */
 
-import type { Character } from '$types';
 
-/**
- * All 89 improvement types ported from the desktop app structure.
- */
-export type ImprovementType =
-    | 'Skill'
-    | 'Attribute'
-    | 'Text'
-    | 'BallisticArmor'
-    | 'ImpactArmor'
-    | 'Reach'
-    | 'Nuyen'
-    | 'Essence'
-    | 'Reaction'
-    | 'PhysicalCM'
-    | 'StunCM'
-    | 'UnarmedDV'
-    | 'SkillGroup'
-    | 'SkillCategory'
-    | 'SkillAttribute'
-    | 'InitiativePass'
-    | 'MatrixInitiative'
-    | 'MatrixInitiativePass'
-    | 'LifestyleCost'
-    | 'CMThreshold'
-    | 'EnhancedArticulation'
-    | 'WeaponCategoryDV'
-    | 'CyberwareEssCost'
-    | 'SpecialTab'
-    | 'Initiative'
-    | 'Uneducated'
-    | 'LivingPersonaResponse'
-    | 'LivingPersonaSignal'
-    | 'LivingPersonaFirewall'
-    | 'LivingPersonaSystem'
-    | 'LivingPersonaBiofeedback'
-    | 'Smartlink'
-    | 'BiowareEssCost'
-    | 'GenetechCostMultiplier'
-    | 'BasicBiowareEssCost'
-    | 'TransgenicsBiowareCost'
-    | 'SoftWeave'
-    | 'SensitiveSystem'
-    | 'ConditionMonitor'
-    | 'UnarmedDVPhysical'
-    | 'MovementPercent'
-    | 'Adapsin'
-    | 'FreePositiveQualities'
-    | 'FreeNegativeQualities'
-    | 'NuyenMaxBP'
-    | 'CMOverflow'
-    | 'FreeSpiritPowerPoints'
-    | 'AdeptPowerPoints'
-    | 'ArmorEncumbrancePenalty'
-    | 'Uncouth'
-    | 'Initiation'
-    | 'Submersion'
-    | 'Infirm'
-    | 'Skillwire'
-    | 'DamageResistance'
-    | 'RestrictedItemCount'
-    | 'AdeptLinguistics'
-    | 'SwimPercent'
-    | 'FlyPercent'
-    | 'FlySpeed'
-    | 'JudgeIntentions'
-    | 'LiftAndCarry'
-    | 'Memory'
-    | 'Concealability'
-    | 'SwapSkillAttribute'
-    | 'DrainResistance'
-    | 'FadingResistance'
-    | 'MatrixInitiativePassAdd'
-    | 'InitiativePassAdd'
-    | 'Composure'
-    | 'UnarmedAP'
-    | 'CMThresholdOffset'
-    | 'Restricted'
-    | 'Notoriety'
-    | 'SpellCategory'
-    | 'ThrowRange'
-    | 'SkillsoftAccess'
-    | 'AddSprite'
-    | 'BlackMarketDiscount'
-    | 'SelectWeapon'
-    | 'ComplexFormLimit'
-    | 'SpellLimit'
-    | 'QuickeningMetamagic'
-    | 'BasicLifestyleCost'
-    | 'ThrowSTR'
-    | 'IgnoreCMPenaltyStun'
-    | 'IgnoreCMPenaltyPhysical'
-    | 'CyborgEssence'
-    | 'EssenceMax';
 
-/**
- * Sources that can grant an improvement.
- */
-export type ImprovementSource =
-    | 'Quality'
-    | 'Power'
-    | 'Metatype'
-    | 'Cyberware'
-    | 'Metavariant'
-    | 'Bioware'
-    | 'Nanotech'
-    | 'Genetech'
-    | 'ArmorEncumbrance'
-    | 'Gear'
-    | 'Spell'
-    | 'MartialArtAdvantage'
-    | 'Initiation'
-    | 'Submersion'
-    | 'Metamagic'
-    | 'Echo'
-    | 'Armor'
-    | 'ArmorMod'
-    | 'EssenceLoss'
-    | 'ConditionMonitor'
-    | 'CritterPower'
-    | 'ComplexForm'
-    | 'EdgeUse'
-    | 'MutantCritter'
-    | 'Cyberzombie'
-    | 'StackedFocus'
-    | 'AttributeLoss'
-    | 'Custom';
-
-/**
- * An individual Improvement modifying stats, calculations, or unlocking capabilities.
- */
-export interface Improvement {
-    /** Unique internal ID for tracking array entries. */
-    id: string;
-    /** The specific stat or target being improved (e.g. 'Reaction', 'Firearms', etc). */
-    improvedName: string;
-    /** The name of the item/quality providing the bonus. */
-    sourceName: string;
-    /** The category of bonus being applied. */
-    type: ImprovementType;
-    /** The category of item providing the improvement. */
-    source: ImprovementSource;
-
-    /* Numeric modifiers */
-    /** Minimum value modifier. */
-    min: number;
-    /** Natural Maximum value modifier. */
-    max: number;
-    /** Augmented bonus. */
-    aug: number;
-    /** Augmented Maximum value modifier. */
-    augMax: number;
-    /** Base value modifier (often flat bonus). */
-    val: number;
-    /** The Rating of the source item, which sometimes multiplies the effect. */
-    rating: number;
-
-    /* Logic fields */
-    /** Comma or space separated list of strings this improvement should selectively ignore. */
-    exclude: string;
-    /** For stacking rules: only the single highest value matching the UniqueName is applied. */
-    uniqueName: string;
-    /** True if flat add to skill rating vs dice pool */
-    addToRating: boolean;
-    /** If false, this improvement is temporarily suppressed/inactive. */
-    enabled: boolean;
-
-    /* Custom metadata */
-    custom?: boolean;
-    customName?: string;
-    customId?: string;
-    customGroup?: string;
-    notes?: string;
-}
+import type { Improvement, ImprovementType, ImprovementSource } from '$types';
 
 /**
  * Get the total value of all enabled improvements matching the specified type.
@@ -213,7 +41,7 @@ export function valueOf(
     const uniqueGroups = new Map<string, number>();
 
     for (const imp of activeImprovements) {
-        const value = imp[propertyToSum] * imp.rating; // Value is usually `val` multiplied by `rating` depending on implementation
+
         // Actually, standard Chummer ValueOf sometimes multiplies by Rating or sometimes leaves it unmultiplied.
         // For our base implementation, we assume `val * rating`. However, many xml items bake the rating directly into their raw XML value, so we might need to adjust this logic later as we parse XML nodes. Flat `val` is safest for now if parsed correctly.
         // Let's use `val` directly unless it's a rating-based item.
@@ -268,24 +96,134 @@ function generateImprovementId(): string {
  * @param sourceName The specific name of the item
  * @param bonusData Any type representing the xml node's bonus section
  * @param rating Optional rating if the item scales with it
+ * @param selectedSkill User-selected skill (if applicable)
+ * @param selectedAttribute User-selected attribute (if applicable)
  */
 export function createImprovementsFromBonus(
     source: ImprovementSource,
     sourceName: string,
-    bonusData: any, // Raw JSON object mimicking XML node children
-    rating: number = 1
+    bonusData: any, // Raw JSON object mirroring QualityBonus or similar
+    rating: number = 1,
+    selectedSkill?: string,
+    selectedAttribute?: string
 ): Improvement[] {
     if (!bonusData) return [];
 
     const results: Improvement[] = [];
 
-    // This is a placeholder for the large factory switch that will parse
-    // different keys out of \`bonusData\` and generate Improvement objects.
+    // Helper to create an improvement template
+    const b = (type: ImprovementType, improvedName: string, overrides: Partial<Improvement> = {}) => {
+        const base: Improvement = {
+            id: generateImprovementId(),
+            improvedName,
+            sourceName,
+            type,
+            source,
+            min: 0,
+            max: 0,
+            aug: 0,
+            augMax: 0,
+            val: 0,
+            rating,
+            exclude: '',
+            uniqueName: '',
+            addToRating: false,
+            enabled: true,
+            ...overrides
+        };
+        results.push(base);
+    };
 
-    // Example parsed data shape logic to be fleshed out:
-    // if (bonusData.specificattribute) {
-    //    createAttributeImprovement(bonusData.specificattribute, results);
-    // }
+    // Arrays of specific targets
+    if (bonusData.specificattribute) {
+        for (const attr of bonusData.specificattribute) {
+            b('Attribute', attr.name.toLowerCase(), {
+                val: attr.val ?? 0,
+                min: attr.min ?? 0,
+                max: attr.max ?? 0,
+                aug: attr.aug ?? 0
+            });
+        }
+    }
+    if (bonusData.selectattribute && selectedAttribute) {
+        b('Attribute', selectedAttribute.toLowerCase(), {
+            val: bonusData.selectattribute.val ?? 0,
+            min: bonusData.selectattribute.min ?? 0, // In Chummer, min to max often means reducing limit
+            max: bonusData.selectattribute.max ?? 0
+        });
+    }
+    if (bonusData.specificskill) {
+        for (const skill of bonusData.specificskill) {
+            b('Skill', skill.name, {
+                val: skill.bonus ?? 0,
+                max: skill.max ?? 0
+            });
+        }
+    }
+    if (bonusData.selectskill && selectedSkill) {
+        b('Skill', selectedSkill, {
+            val: bonusData.selectskill.bonus ?? 0,
+            max: bonusData.selectskill.max ?? 0
+        });
+    }
+    if (bonusData.skillgroup) {
+        for (const group of bonusData.skillgroup) {
+            b('SkillGroup', group.name, {
+                val: group.bonus ?? 0
+            });
+        }
+    }
+    if (bonusData.skillcategory) {
+        for (const cat of bonusData.skillcategory) {
+            b('SkillCategory', cat.name, {
+                val: cat.bonus ?? 0
+            });
+        }
+    }
+
+    // Simple numeric properties
+    const propMappings: Record<string, ImprovementType> = {
+        initiative: 'Initiative',
+        initiativepass: 'InitiativePass',
+        conditionmonitor: 'ConditionMonitor',
+        composure: 'Composure',
+        judgeintentions: 'JudgeIntentions',
+        damageresistance: 'DamageResistance',
+        drainresist: 'DrainResistance',
+        notoriety: 'Notoriety',
+        lifestylecost: 'LifestyleCost',
+        reach: 'Reach',
+        unarmeddv: 'UnarmedDV',
+        movementpercent: 'MovementPercent',
+        swimpercent: 'SwimPercent',
+        flyspeed: 'FlySpeed',
+        restricteditemcount: 'RestrictedItemCount',
+        nuyenmaxbp: 'NuyenMaxBP',
+        freepositivequalities: 'FreePositiveQualities',
+        freenegativequalities: 'FreeNegativeQualities',
+        skillwire: 'Skillwire',
+        cyberwareessmultiplier: 'CyberwareEssCost',
+        biowareessmultiplier: 'BiowareEssCost'
+    };
+
+    for (const [key, impType] of Object.entries(propMappings)) {
+        if (bonusData[key] !== undefined) {
+            b(impType, '', { val: bonusData[key] });
+        }
+    }
+
+    // Boolean flags (represented as flat value 1 or stored in Custom logic)
+    // For now, representing them by their specific string Improvements or 'Text'
+    if (bonusData.uneducated) b('Uneducated', '', { val: 1 });
+    if (bonusData.uncouth) b('Uncouth', '', { val: 1 });
+    if (bonusData.infirm) b('Infirm', '', { val: 1 });
+    if (bonusData.sensitivesystem) b('SensitiveSystem', '', { val: 1 });
+    if (bonusData.blackmarketdiscount) b('BlackMarketDiscount', '', { val: 1 });
+
+    // enabletab grants access to new sections like adept, magician, technomancer
+    if (bonusData.enabletab) {
+        b('SpecialTab', bonusData.enabletab, { val: 1 });
+    }
 
     return results;
 }
