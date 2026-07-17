@@ -212,6 +212,140 @@ function parseOrString(value: unknown): string {
 }
 
 /**
+ * Repeating child keys inside a <bonus> node that must always be arrays,
+ * even when only a single instance is present in the source XML.
+ * Mirrors src/lib/types/improvements.ts BonusData.
+ */
+const BONUS_LIST_KEYS = [
+	'specificattribute',
+	'addattribute',
+	'specificskill',
+	'skillgroup',
+	'skillcategory'
+];
+
+/**
+ * Flatten a single list-item node (e.g. one <specificattribute> entry) into a
+ * plain object, hoisting any XML attribute on a child element (e.g. the
+ * `precedence` attribute on `<name precedence="1">REA</name>`) up as a
+ * sibling key alongside that child's text value.
+ *
+ * `<specificattribute><name precedence="1">REA</name><val>Rating</val></specificattribute>`
+ * becomes `{ name: 'REA', precedence: '1', val: 'Rating' }`.
+ */
+function flattenBonusListItem(raw: Record<string, unknown>): Record<string, unknown> {
+	const result: Record<string, unknown> = {};
+	for (const [key, rawVal] of Object.entries(raw)) {
+		/*
+		 * `name` (among others) is in the XML parser's global isArray list
+		 * (needed elsewhere for repeated <name rating="X">...</name> siblings),
+		 * so a single `<name precedence="1">REA</name>` child arrives
+		 * pre-wrapped as a one-element array. Unwrap before checking for
+		 * the `#text`/attribute leaf shape.
+		 */
+		const val = Array.isArray(rawVal) && rawVal.length === 1 ? rawVal[0] : rawVal;
+		if (val !== null && typeof val === 'object' && !Array.isArray(val) && '#text' in val) {
+			const obj = val as Record<string, unknown>;
+			result[key] = obj['#text'];
+			for (const [attrKey, attrVal] of Object.entries(obj)) {
+				if (attrKey.startsWith('@_')) {
+					result[attrKey.slice(2)] = attrVal;
+				}
+			}
+		} else {
+			result[key] = val;
+		}
+	}
+	return result;
+}
+
+/**
+ * Generically flatten a parsed XML value for structure-preserving JSON output:
+ * - A self-closing empty tag (e.g. `<blackmarketdiscount />`) parses to `''`;
+ *   in Chummer's bonus schema an empty tag is always a presence/boolean flag
+ *   (desktop's CreateImprovements checks node existence, not content), so it
+ *   becomes `true` — never a falsy `''` that would silently break `if (bonus.x)`.
+ * - Plain primitives (numbers/booleans already resolved by fast-xml-parser) pass through.
+ * - A `{'#text': X, '@_attr': Y}` leaf (element with both text and attributes,
+ *   e.g. rare cases outside the known list-item shapes) becomes `{ value: X, attr: Y }`.
+ * - A leaf with only `#text` passes through as the text.
+ * - A plain nested object with no `#text` (e.g. `<conditionmonitor><physical>1</physical></conditionmonitor>`)
+ *   recurses per key, stripping `@_` prefixes.
+ * - A single-key `{ name: 'X' }` object collapses to just `'X'` (desktop's
+ *   `<enabletab><name>adept</name></enabletab>` idiom for one-off wrapper tags).
+ */
+function flattenGenericBonusValue(val: unknown): unknown {
+	if (val === null || val === undefined) return undefined;
+	if (val === '') return true;
+	if (typeof val !== 'object') return val;
+	if (Array.isArray(val)) return val.map(flattenGenericBonusValue);
+
+	const obj = val as Record<string, unknown>;
+
+	if ('#text' in obj) {
+		const attrs = Object.entries(obj).filter(([k]) => k.startsWith('@_'));
+		if (attrs.length === 0) return obj['#text'];
+		const flat: Record<string, unknown> = { value: obj['#text'] };
+		for (const [k, v] of attrs) flat[k.slice(2)] = v;
+		return flat;
+	}
+
+	const keys = Object.keys(obj);
+	if (keys.length === 1 && keys[0] === 'name') {
+		/* `name` is force-arrayed by the parser's global isArray list even for
+		 * single, attribute-less occurrences (e.g. <enabletab><name>adept</name></enabletab>). */
+		const nameVal =
+			Array.isArray(obj['name']) && (obj['name'] as unknown[]).length === 1
+				? (obj['name'] as unknown[])[0]
+				: obj['name'];
+		if (typeof nameVal !== 'object') return nameVal;
+	}
+
+	const nested: Record<string, unknown> = {};
+	for (const [k, v] of Object.entries(obj)) {
+		if (k.startsWith('@_')) {
+			nested[k.slice(2)] = v;
+			continue;
+		}
+		nested[k] = flattenGenericBonusValue(v);
+	}
+	return nested;
+}
+
+/**
+ * Convert a raw parsed `<bonus>` XML node into structure-preserving JSON.
+ * Does not resolve semantics (e.g. "Rating" expressions, precedence
+ * stacking) — that is engine/improvementManager.ts's job (see #66/#68).
+ * This function's only job is to never silently drop bonus data.
+ */
+function extractBonus(raw: unknown): Record<string, unknown> | undefined {
+	if (raw === null || raw === undefined || typeof raw !== 'object') return undefined;
+	const rawObj = raw as Record<string, unknown>;
+	if (Object.keys(rawObj).length === 0) return undefined;
+
+	const result: Record<string, unknown> = {};
+	for (const [key, val] of Object.entries(rawObj)) {
+		if (BONUS_LIST_KEYS.includes(key)) {
+			result[key] = toArray(val as Record<string, unknown> | Record<string, unknown>[]).map((item) =>
+				flattenBonusListItem(item as Record<string, unknown>)
+			);
+		} else {
+			/*
+			 * Some bonus child tags share a name with the XML parser's global
+			 * isArray list (added for unrelated top-level collections, e.g.
+			 * `<armor>` under `<armors>`), so a single, non-repeating child
+			 * like `<bonus><armor><b>1</b><i>1</i></armor></bonus>` arrives
+			 * pre-wrapped in a one-element array. Unwrap it here — outside
+			 * BONUS_LIST_KEYS, a real repeating bonus child never occurs today.
+			 */
+			const unwrapped = Array.isArray(val) && val.length === 1 ? val[0] : val;
+			result[key] = flattenGenericBonusValue(unwrapped);
+		}
+	}
+	return result;
+}
+
+/**
  * Convert metatypes.xml to JSON.
  * Extracts metatypes with attribute limits and metavariants.
  */
@@ -248,12 +382,14 @@ function convertMetatypes(): ConversionResult {
 		qualities: { positive: string[]; negative: string[] };
 		source: string;
 		page: number;
+		bonus?: Record<string, unknown>;
 		metavariants: Array<{
 			name: string;
 			bp: number;
 			qualities: { positive: string[]; negative: string[] };
 			source: string;
 			page: number;
+			bonus?: Record<string, unknown>;
 		}>;
 	}
 
@@ -349,13 +485,16 @@ function convertMetatypes(): ConversionResult {
 			metavariants: []
 		};
 
+		const mtBonus = extractBonus(m['bonus']);
+		if (mtBonus) mt.bonus = mtBonus;
+
 		/* Process metavariants */
 		const variants = toArray(
 			(m['metavariants'] as Record<string, unknown>)?.['metavariant'] as Record<string, unknown>[]
 		);
 		for (const v of variants) {
 			if (!v || typeof v !== 'object') continue;
-			mt.metavariants.push({
+			const variant: Metatype['metavariants'][number] = {
 				name: String(v['name'] ?? ''),
 				bp: Number(v['bp'] ?? 0),
 				qualities: {
@@ -368,7 +507,10 @@ function convertMetatypes(): ConversionResult {
 				},
 				source: String(v['source'] ?? ''),
 				page: Number(v['page'] ?? 0)
-			});
+			};
+			const variantBonus = extractBonus(v['bonus']);
+			if (variantBonus) variant.bonus = variantBonus;
+			mt.metavariants.push(variant);
 		}
 
 		processed.push(mt);
@@ -478,6 +620,26 @@ function convertQualities(): ConversionResult {
 		page: number;
 		mutant: boolean;
 		limit: boolean;
+		bonus?: Record<string, unknown>;
+		effect?: string;
+		descriptionLabel?: string;
+	}
+
+	/*
+	 * effect/descriptionLabel are hand-authored display text with no
+	 * corresponding tag in qualities.xml. Preserve them from the existing
+	 * output by name so regenerating never drops curated content the
+	 * desktop XML can't supply.
+	 */
+	const existingPath = path.join(OUTPUT_DIR, 'qualities.json');
+	const preservedByName = new Map<string, { effect?: string; descriptionLabel?: string }>();
+	if (fs.existsSync(existingPath)) {
+		const existing = JSON.parse(fs.readFileSync(existingPath, 'utf-8')) as {
+			qualities: Array<{ name: string; effect?: string; descriptionLabel?: string }>;
+		};
+		for (const q of existing.qualities) {
+			preservedByName.set(q.name, { effect: q.effect, descriptionLabel: q.descriptionLabel });
+		}
 	}
 
 	const qualities: Quality[] = [];
@@ -487,15 +649,25 @@ function convertQualities(): ConversionResult {
 		const q = qualitiesRaw[i];
 		if (!q || typeof q !== 'object') continue;
 
-		qualities.push({
-			name: String(q['name'] ?? ''),
+		const name = String(q['name'] ?? '');
+		const preserved = preservedByName.get(name);
+
+		const quality: Quality = {
+			name,
 			bp: Number(q['bp'] ?? 0),
 			category: String(q['category'] ?? 'Positive') as 'Positive' | 'Negative',
 			source: String(q['source'] ?? ''),
 			page: Number(q['page'] ?? 0),
 			mutant: String(q['mutant']).toLowerCase() === 'yes',
 			limit: String(q['limit']).toLowerCase() !== 'no'
-		});
+		};
+
+		const bonus = extractBonus(q['bonus']);
+		if (bonus) quality.bonus = bonus;
+		if (preserved?.effect) quality.effect = preserved.effect;
+		if (preserved?.descriptionLabel) quality.descriptionLabel = preserved.descriptionLabel;
+
+		qualities.push(quality);
 	}
 
 	const output = { categories: categoriesRaw, qualities };
@@ -583,6 +755,7 @@ function convertPowers(): ConversionResult {
 		action: string;
 		source: string;
 		page: number;
+		bonus?: Record<string, unknown>;
 	}
 
 	const powers: Power[] = [];
@@ -592,7 +765,7 @@ function convertPowers(): ConversionResult {
 		const p = powersRaw[i];
 		if (!p || typeof p !== 'object') continue;
 
-		powers.push({
+		const power: Power = {
 			name: String(p['name'] ?? ''),
 			points: Number(p['points'] ?? 0),
 			levels: String(p['levels']).toLowerCase() === 'true',
@@ -600,7 +773,10 @@ function convertPowers(): ConversionResult {
 			action: String(p['action'] ?? ''),
 			source: String(p['source'] ?? ''),
 			page: Number(p['page'] ?? 0)
-		});
+		};
+		const bonus = extractBonus(p['bonus']);
+		if (bonus) power.bonus = bonus;
+		powers.push(power);
 	}
 
 	writeJsonFile('powers.json', { powers });
@@ -876,6 +1052,7 @@ function convertArmor(): ConversionResult {
 		cost: number;
 		source: string;
 		page: number;
+		bonus?: Record<string, unknown>;
 	}
 
 	const armor: Armor[] = [];
@@ -889,7 +1066,7 @@ function convertArmor(): ConversionResult {
 		const bVal = String(a['b'] ?? '0');
 		const iVal = String(a['i'] ?? '0');
 
-		armor.push({
+		const armorItem: Armor = {
 			name: String(a['name'] ?? ''),
 			category: String(a['category'] ?? ''),
 			ballistic: bVal.startsWith('+') ? parseInt(bVal) : Number(bVal),
@@ -899,7 +1076,10 @@ function convertArmor(): ConversionResult {
 			cost: Number(String(a['cost'] ?? '0').replace(/Variable\([^)]+\)/g, '0')),
 			source: String(a['source'] ?? ''),
 			page: Number(a['page'] ?? 0)
-		});
+		};
+		const bonus = extractBonus(a['bonus']);
+		if (bonus) armorItem.bonus = bonus;
+		armor.push(armorItem);
 	}
 
 	writeJsonFile('armor.json', { categories: categoriesRaw, armor });
@@ -958,6 +1138,7 @@ function convertCyberware(): ConversionResult {
 		rating: number;
 		source: string;
 		page: number;
+		bonus?: Record<string, unknown>;
 	}
 
 	const cyberware: Cyberware[] = [];
@@ -1014,6 +1195,8 @@ function convertCyberware(): ConversionResult {
 		if (essFormula) item.essFormula = essFormula;
 		if (costFormula) item.costFormula = costFormula;
 		if (costByRating) item.costByRating = costByRating;
+		const bonus = extractBonus(c['bonus']);
+		if (bonus) item.bonus = bonus;
 
 		cyberware.push(item);
 	}
@@ -1074,6 +1257,7 @@ function convertGear(): ConversionResult {
 		cost: number;
 		source: string;
 		page: number;
+		bonus?: Record<string, unknown>;
 	}
 
 	const gear: GearItem[] = [];
@@ -1089,7 +1273,7 @@ function convertGear(): ConversionResult {
 			continue;
 		}
 
-		gear.push({
+		const gearItem: GearItem = {
 			name: String(g['name'] ?? ''),
 			category,
 			rating: Number(g['rating'] ?? 0),
@@ -1097,7 +1281,10 @@ function convertGear(): ConversionResult {
 			cost: Number(g['cost'] ?? 0),
 			source: String(g['source'] ?? ''),
 			page: Number(g['page'] ?? 0)
-		});
+		};
+		const bonus = extractBonus(g['bonus']);
+		if (bonus) gearItem.bonus = bonus;
+		gear.push(gearItem);
 	}
 
 	writeJsonFile('gear.json', { categories, gear });
@@ -1124,6 +1311,7 @@ function convertMetamagic(): ConversionResult {
 		magician: boolean;
 		source: string;
 		page: number;
+		bonus?: Record<string, unknown>;
 	}
 
 	const metamagics: Metamagic[] = [];
@@ -1133,13 +1321,16 @@ function convertMetamagic(): ConversionResult {
 		const m = metamagicsRaw[i];
 		if (!m || typeof m !== 'object') continue;
 
-		metamagics.push({
+		const metamagic: Metamagic = {
 			name: String(m['name'] ?? ''),
 			adept: String(m['adept']).toLowerCase() === 'yes',
 			magician: String(m['magician']).toLowerCase() === 'yes',
 			source: String(m['source'] ?? ''),
 			page: Number(m['page'] ?? 0)
-		});
+		};
+		const bonus = extractBonus(m['bonus']);
+		if (bonus) metamagic.bonus = bonus;
+		metamagics.push(metamagic);
 	}
 
 	writeJsonFile('metamagic.json', { metamagics });

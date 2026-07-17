@@ -14,8 +14,14 @@ import type {
 	GameArmor,
 	GameCyberware,
 	GameGear,
-	CyberwareGradeMultiplier
+	GameBioware,
+	CyberwareGradeMultiplier,
+	QualityBonus,
+	BonusData
 } from '$types';
+
+/** Re-exported for backward compatibility — canonical definition lives in types/improvements.ts (BonusData). */
+export type { QualityBonus };
 
 /* Maximum items to load per category (safety bound) */
 const MAX_ITEMS = 10000;
@@ -24,106 +30,6 @@ const MAX_ITEMS = 10000;
 interface LoadingState {
 	loading: boolean;
 	error: string | null;
-}
-
-/** Attribute modifier in quality bonus. */
-export interface QualityAttributeBonus {
-	name: string;
-	min?: number;
-	max?: number;
-	val?: number;
-	aug?: number;
-}
-
-/** Skill modifier in quality bonus. */
-export interface QualitySkillBonus {
-	name: string;
-	bonus?: number;
-	max?: number;
-}
-
-/** Skill group modifier in quality bonus. */
-export interface QualitySkillGroupBonus {
-	name: string;
-	bonus?: number;
-}
-
-/** Skill category modifier in quality bonus. */
-export interface QualitySkillCategoryBonus {
-	name: string;
-	bonus?: number;
-}
-
-/** Quality bonus data structure. */
-export interface QualityBonus {
-	/** Add a new attribute (e.g., MAG for Adept) */
-	addattribute?: QualityAttributeBonus[];
-	/** Modify specific attribute values */
-	specificattribute?: QualityAttributeBonus[];
-	/** Enable a character tab (adept, magician, technomancer, critter) */
-	enabletab?: string;
-	/** Specific skill bonuses */
-	specificskill?: QualitySkillBonus[];
-	/** Skill group bonuses */
-	skillgroup?: QualitySkillGroupBonus[];
-	/** Skill category bonuses */
-	skillcategory?: QualitySkillCategoryBonus[];
-	/** User-selected skill bonus */
-	selectskill?: { max?: number; bonus?: number };
-	/** User-selected attribute bonus */
-	selectattribute?: { min?: number; max?: number; val?: number };
-	/** Initiative bonus */
-	initiative?: number;
-	/** Additional Initiative Passes */
-	initiativepass?: number;
-	/** Condition Monitor boxes */
-	conditionmonitor?: number;
-	/** Notoriety modifier */
-	notoriety?: number;
-	/** Composure bonus */
-	composure?: number;
-	/** Judge Intentions bonus */
-	judgeintentions?: number;
-	/** Damage Resistance bonus */
-	damageresistance?: number;
-	/** Drain Resistance bonus */
-	drainresist?: number;
-	/** Lifestyle cost modifier (percentage) */
-	lifestylecost?: number;
-	/** Cyberware Essence cost multiplier */
-	cyberwareessmultiplier?: number;
-	/** Bioware Essence cost multiplier */
-	biowareessmultiplier?: number;
-	/** Reach modifier for melee */
-	reach?: number;
-	/** Unarmed damage value modifier */
-	unarmeddv?: number;
-	/** Movement speed modifier (percentage) */
-	movementpercent?: number;
-	/** Swimming speed modifier (percentage) */
-	swimpercent?: number;
-	/** Flying speed */
-	flyspeed?: number;
-	/** Additional restricted item allowance */
-	restricteditemcount?: number;
-	/** Maximum BP that can be spent on Nuyen */
-	nuyenmaxbp?: number;
-	/** Free positive quality BP */
-	freepositivequalities?: number;
-	/** Free negative quality BP */
-	freenegativequalities?: number;
-	/** Skillwire rating */
-	skillwire?: number;
-	/** Uneducated flag - Technical/Academic skills cost double */
-	uneducated?: boolean;
-	/** Uncouth flag - Social skills cost double */
-	uncouth?: boolean;
-	/** Infirm flag - Physical attributes cost double */
-	infirm?: boolean;
-	/** Sensitive System flag - Double Essence cost for cyberware */
-	sensitivesystem?: boolean;
-	/** Black Market Discount access */
-	blackmarketdiscount?: boolean;
 }
 
 /** Quality from game data. */
@@ -166,6 +72,7 @@ export interface GamePower {
 	action: string;
 	source: string;
 	page: number;
+	bonus?: BonusData;
 }
 
 /** Tradition from game data. */
@@ -212,6 +119,7 @@ export interface GameMetamagic {
 	magician: boolean;
 	source: string;
 	page: number;
+	bonus?: BonusData;
 }
 
 /** Book from game data. */
@@ -230,18 +138,8 @@ export interface GameRange {
 	extreme: string;
 }
 
-/** Bioware from game data. */
-export interface GameBioware {
-	name: string;
-	category: string;
-	rating: number;
-	ess: number;
-	cost: number;
-	capacity: number;
-	avail: string;
-	source: string;
-	page: number;
-}
+/** Re-exported for backward compatibility — canonical definition lives in types/equipment.ts. */
+export type { GameBioware };
 
 /** Vehicle from game data. */
 export interface GameVehicle {
@@ -275,7 +173,10 @@ export interface GameEcho {
 	source: string;
 	page: number;
 	limit: number;
-	bonus: string;
+	/** Human-readable effect description (renamed from `bonus` to avoid colliding with the structured field below). */
+	bonusText: string;
+	/** Structured mechanical bonus, once echoes.xml is converted (no converter exists yet — see #62b). */
+	bonus?: BonusData;
 }
 
 /** Technomancer stream from game data. */

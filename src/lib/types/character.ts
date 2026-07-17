@@ -9,7 +9,7 @@ import type { CharacterAttributes, MetatypeAttributes } from './attributes';
 import type { CharacterSkill, CharacterSkillGroup, KnowledgeSkill } from './skills';
 import type { CharacterEquipment } from './equipment';
 import { EMPTY_EQUIPMENT } from './equipment';
-import type { Improvement } from './improvements';
+import type { Improvement, BonusData } from './improvements';
 
 /** Character build methods. */
 export type BuildMethod = 'bp' | 'karma';
@@ -34,6 +34,7 @@ export interface Metatype {
 	readonly source: string;
 	readonly page: number;
 	readonly metavariants: readonly Metavariant[];
+	readonly bonus?: BonusData;
 }
 
 /**
@@ -49,6 +50,7 @@ export interface Metavariant {
 	};
 	readonly source: string;
 	readonly page: number;
+	readonly bonus?: BonusData;
 }
 
 /**

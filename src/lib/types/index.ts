@@ -25,7 +25,19 @@ export {
 } from './attributes';
 
 /* Improvement types */
-export type { ImprovementType, ImprovementSource, Improvement } from './improvements';
+export type {
+	ImprovementType,
+	ImprovementSource,
+	Improvement,
+	BonusValue,
+	BonusData,
+	QualityBonus,
+	AttributeBonusEntry,
+	SkillBonusEntry,
+	SkillGroupBonusEntry,
+	SkillCategoryBonusEntry,
+	ConditionMonitorBonus
+} from './improvements';
 
 /* Skill types */
 export type {

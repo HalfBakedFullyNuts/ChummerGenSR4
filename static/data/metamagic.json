@@ -33,7 +33,10 @@
       "adept": false,
       "magician": true,
       "source": "SR4",
-      "page": 198
+      "page": 198,
+      "bonus": {
+        "quickeningmetamagic": true
+      }
     },
     {
       "name": "Shielding",
@@ -54,14 +57,20 @@
       "adept": true,
       "magician": false,
       "source": "SM",
-      "page": 53
+      "page": 53,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Attunement (Item)",
       "adept": true,
       "magician": false,
       "source": "SM",
-      "page": 54
+      "page": 54,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Channeling",
@@ -236,14 +245,20 @@
       "adept": false,
       "magician": true,
       "source": "RC",
-      "page": 92
+      "page": 92,
+      "bonus": {
+        "freespiritpowerpoints": 1
+      }
     },
     {
       "name": "Additional Power Point",
       "adept": true,
       "magician": false,
       "source": "SM",
-      "page": 31
+      "page": 31,
+      "bonus": {
+        "adeptpowerpoints": 1
+      }
     },
     {
       "name": "Absorption",
@@ -264,7 +279,10 @@
       "adept": true,
       "magician": false,
       "source": "SM",
-      "page": 60
+      "page": 60,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Extended Masking",

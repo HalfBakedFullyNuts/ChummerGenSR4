@@ -469,8 +469,8 @@
 								<span class="text-text-muted text-xs">Max: {echo.limit}</span>
 							{/if}
 						</div>
-						{#if echo.bonus}
-							<p class="text-text-secondary text-sm mt-1">{echo.bonus}</p>
+						{#if echo.bonusText}
+							<p class="text-text-secondary text-sm mt-1">{echo.bonusText}</p>
 						{/if}
 						<p class="text-text-muted text-xs mt-1">{echo.source} p.{echo.page}</p>
 					</div>

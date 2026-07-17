@@ -4,6 +4,8 @@
  * Defines weapons, armor, cyberware, and gear.
  */
 
+import type { BonusData } from './improvements';
+
 /* ============================================
  * Weapon Types
  * ============================================ */
@@ -125,6 +127,7 @@ export interface GameArmor {
 	readonly cost: number;
 	readonly source: string;
 	readonly page: number;
+	readonly bonus?: BonusData;
 }
 
 /** Armor owned by a character. */
@@ -203,6 +206,7 @@ export interface GameCyberware {
 	readonly rating: number;
 	readonly minRating: number;
 	readonly maxRating: number;
+	readonly bonus?: BonusData;
 }
 
 /** Cyberware installed on a character. */
@@ -252,11 +256,14 @@ export const BIOWARE_GRADES = [
 export interface GameBioware {
 	readonly name: string;
 	readonly category: string;
+	readonly rating: number;
 	readonly ess: number;
+	readonly capacity: number;
 	readonly avail: string;
 	readonly cost: number;
 	readonly source: string;
 	readonly page: number;
+	readonly bonus?: BonusData;
 }
 
 /** Bioware installed on a character. */
@@ -400,6 +407,7 @@ export interface GameGear {
 	readonly capacity?: number;
 	readonly capacityCost?: number;
 	readonly isContainer?: boolean;
+	readonly bonus?: BonusData;
 }
 
 /** Gear owned by a character. */

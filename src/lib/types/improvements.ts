@@ -179,3 +179,100 @@ export interface Improvement {
     customGroup?: string;
     notes?: string;
 }
+
+/**
+ * A bonus value as carried from XML: either a resolved number, or an
+ * unresolved expression string ("Rating", "-Rating", "FixedValues(2,3,5)")
+ * that the parser resolves at creation time (see engine/improvementManager.ts).
+ */
+export type BonusValue = number | string;
+
+/** Attribute modifier entry (`<specificattribute>` / `<addattribute>`). */
+export interface AttributeBonusEntry {
+    readonly name: string;
+    /** Desktop `precedence` attribute on `<name>` — drives ValueOf's precedence0/precedence1 stacking rules. */
+    readonly precedence?: string;
+    readonly min?: BonusValue;
+    readonly max?: BonusValue;
+    readonly val?: BonusValue;
+    readonly aug?: BonusValue;
+}
+
+/** Skill modifier entry (`<specificskill>`). */
+export interface SkillBonusEntry {
+    readonly name: string;
+    readonly bonus?: BonusValue;
+    readonly max?: BonusValue;
+}
+
+/** Skill group modifier entry (`<skillgroup>`). */
+export interface SkillGroupBonusEntry {
+    readonly name: string;
+    readonly bonus?: BonusValue;
+}
+
+/** Skill category modifier entry (`<skillcategory>`). */
+export interface SkillCategoryBonusEntry {
+    readonly name: string;
+    readonly bonus?: BonusValue;
+}
+
+/** Condition monitor bonus (`<conditionmonitor>`) — physical/stun/threshold/overflow boxes. */
+export interface ConditionMonitorBonus {
+    readonly physical?: BonusValue;
+    readonly stun?: BonusValue;
+    readonly threshold?: BonusValue;
+    readonly thresholdoffset?: BonusValue;
+    readonly overflow?: BonusValue;
+}
+
+/**
+ * Structured `<bonus>` data carried from game-data XML into JSON.
+ * Renamed and extended from the former `QualityBonus` (values widened to
+ * `BonusValue` so unresolved "Rating"/"FixedValues(...)" expressions survive
+ * conversion). `createImprovementsFromBonus` (engine/improvementManager.ts)
+ * resolves these into typed Improvements; the index signature lets the
+ * converter carry forward bonus keys the parser doesn't handle yet (#68)
+ * without dropping them.
+ */
+export interface BonusData {
+    readonly addattribute?: readonly AttributeBonusEntry[];
+    readonly specificattribute?: readonly AttributeBonusEntry[];
+    readonly enabletab?: string;
+    readonly specificskill?: readonly SkillBonusEntry[];
+    readonly skillgroup?: readonly SkillGroupBonusEntry[];
+    readonly skillcategory?: readonly SkillCategoryBonusEntry[];
+    readonly selectskill?: { readonly max?: BonusValue; readonly bonus?: BonusValue };
+    readonly selectattribute?: { readonly min?: BonusValue; readonly max?: BonusValue; readonly val?: BonusValue };
+    readonly initiative?: BonusValue;
+    readonly initiativepass?: BonusValue;
+    readonly conditionmonitor?: ConditionMonitorBonus;
+    readonly notoriety?: BonusValue;
+    readonly composure?: BonusValue;
+    readonly judgeintentions?: BonusValue;
+    readonly damageresistance?: BonusValue;
+    readonly drainresist?: BonusValue;
+    readonly lifestylecost?: BonusValue;
+    readonly cyberwareessmultiplier?: BonusValue;
+    readonly biowareessmultiplier?: BonusValue;
+    readonly reach?: BonusValue;
+    readonly unarmeddv?: BonusValue;
+    readonly movementpercent?: BonusValue;
+    readonly swimpercent?: BonusValue;
+    readonly flyspeed?: BonusValue;
+    readonly restricteditemcount?: BonusValue;
+    readonly nuyenmaxbp?: BonusValue;
+    readonly freepositivequalities?: BonusValue;
+    readonly freenegativequalities?: BonusValue;
+    readonly skillwire?: BonusValue;
+    readonly uneducated?: boolean;
+    readonly uncouth?: boolean;
+    readonly infirm?: boolean;
+    readonly sensitivesystem?: boolean;
+    readonly blackmarketdiscount?: boolean;
+    /** Tolerate bonus keys the parser doesn't resolve yet — never silently drop unrecognized data. */
+    readonly [key: string]: unknown;
+}
+
+/** @deprecated Use {@link BonusData} — kept so existing `QualityBonus` imports keep working. */
+export type QualityBonus = BonusData;

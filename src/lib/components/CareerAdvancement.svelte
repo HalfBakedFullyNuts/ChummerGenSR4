@@ -620,7 +620,7 @@
 							<button
 								class="px-2 py-0.5 bg-surface-variant text-text-secondary text-xs rounded hover:bg-secondary-main/20 hover:text-secondary-dark transition-colors"
 								on:click={() => handleLearnEcho(echo.name)}
-								title={echo.bonus || ''}
+								title={echo.bonusText || ''}
 							>
 								+ {echo.name}
 							</button>

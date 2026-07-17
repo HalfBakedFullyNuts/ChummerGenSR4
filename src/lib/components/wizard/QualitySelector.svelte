@@ -15,6 +15,7 @@
 		type GroupedQuality
 	} from '$lib/utils/qualityGrouping';
 	import { ATTRIBUTE_NAMES, type AttributeCode } from '$lib/types/attributes';
+	import type { BonusValue } from '$types';
 
 	/** Current tab - positive or negative qualities. */
 	let activeTab: 'positive' | 'negative' = 'positive';
@@ -33,11 +34,11 @@
 		requiresAttribute: boolean;
 		requiresDescription: boolean;
 		descriptionLabel?: string;
-		skillBonus?: number;
-		skillMax?: number;
-		attributeBonus?: number;
-		attributeMin?: number;
-		attributeMax?: number;
+		skillBonus?: BonusValue;
+		skillMax?: BonusValue;
+		attributeBonus?: BonusValue;
+		attributeMin?: BonusValue;
+		attributeMax?: BonusValue;
 	} | null = null;
 
 	/** Selected skill for pending quality. */
@@ -763,7 +764,7 @@
 									</span>
 								{:else if pendingSelectionQuality.skillBonus !== undefined}
 									<span class="text-xs text-text-muted ml-1">
-										({pendingSelectionQuality.skillBonus >= 0
+										({Number(pendingSelectionQuality.skillBonus) >= 0
 											? '+'
 											: ''}{pendingSelectionQuality.skillBonus} bonus)
 									</span>
