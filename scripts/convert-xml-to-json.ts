@@ -122,16 +122,109 @@ function toArray<T>(value: T | T[] | undefined): T[] {
 }
 
 /**
- * Parse a formula value and extract the base multiplier.
- * Shadowrun 4E follows "Rating × base" pattern for rated items.
+ * Minimal recursive-descent arithmetic evaluator for Rating-based cost/essence
+ * formulas (e.g. "Rating * 3000", "600 + (Rating * 100)", "(Rating - 3) * 1500"),
+ * used only to compute a flat rating-1 display baseline at conversion time —
+ * mirrors src/lib/engine/improvementManager.ts's resolveBonusValue evaluator,
+ * duplicated here (rather than imported) since this script is a standalone
+ * Node/tsx entry point with no SvelteKit path-alias resolution. The actual
+ * per-purchase evaluation at runtime happens via that module's
+ * evaluateRatingFormula against the preserved costFormula/essFormula string.
+ * Returns undefined for expressions it can't parse (e.g. `ceiling(...)`/`div`).
+ */
+function evaluateFormulaAtRating(formula: string, rating: number): number | undefined {
+	const substituted = formula.replace(/Rating/gi, String(rating));
+	let i = 0;
+	const tokens: string[] = [];
+	while (i < substituted.length) {
+		const ch = substituted[i]!;
+		if (ch === ' ') {
+			i++;
+			continue;
+		}
+		if ('+-*/()'.includes(ch)) {
+			tokens.push(ch);
+			i++;
+			continue;
+		}
+		if (/[0-9.]/.test(ch)) {
+			let j = i;
+			while (j < substituted.length && /[0-9.]/.test(substituted[j]!)) j++;
+			tokens.push(substituted.slice(i, j));
+			i = j;
+			continue;
+		}
+		return undefined;
+	}
+
+	const pos = { i: 0 };
+	const parseFactor = (): number | undefined => {
+		const tok = tokens[pos.i];
+		if (tok === '-') {
+			pos.i++;
+			const inner = parseFactor();
+			return inner === undefined ? undefined : -inner;
+		}
+		if (tok === '(') {
+			pos.i++;
+			const inner = parseExpr();
+			if (tokens[pos.i] !== ')') return undefined;
+			pos.i++;
+			return inner;
+		}
+		if (tok !== undefined && /^[0-9.]+$/.test(tok)) {
+			pos.i++;
+			return Number(tok);
+		}
+		return undefined;
+	};
+	const parseTerm = (): number | undefined => {
+		let value = parseFactor();
+		if (value === undefined) return undefined;
+		while (tokens[pos.i] === '*' || tokens[pos.i] === '/') {
+			const op = tokens[pos.i];
+			pos.i++;
+			const rhs = parseFactor();
+			if (rhs === undefined) return undefined;
+			value = op === '*' ? value * rhs : value / rhs;
+		}
+		return value;
+	};
+	const parseExpr = (): number | undefined => {
+		let value = parseTerm();
+		if (value === undefined) return undefined;
+		while (tokens[pos.i] === '+' || tokens[pos.i] === '-') {
+			const op = tokens[pos.i];
+			pos.i++;
+			const rhs = parseTerm();
+			if (rhs === undefined) return undefined;
+			value = op === '+' ? value + rhs : value - rhs;
+		}
+		return value;
+	};
+
+	const result = parseExpr();
+	if (result === undefined || pos.i !== tokens.length) return undefined;
+	/* Clean up binary floating-point noise (e.g. 0.1 + 0.2 = 0.30000000000000004);
+	 * Shadowrun ess/cost formulas never need more than a handful of decimals. */
+	return Math.round(result * 1e6) / 1e6;
+}
+
+/**
+ * Parse a formula value into a plain number or a `FixedValues(...)` per-rating
+ * table. Any other Rating-referencing arithmetic ("Rating * 3000",
+ * "600 + (Rating * 100)", "(Rating - 3) * 1500", ...) is intentionally left
+ * unparsed here and returned as `null` — reducing it to a single coefficient
+ * silently discards the Rating-scaling (or the additive base), which is
+ * exactly the issue #71-adjacent bug this function used to have. Callers
+ * preserve the original string (e.g. `costFormula`/`essFormula`) so it can be
+ * evaluated against the actual purchased rating at runtime instead.
  *
  * Handles:
  * - Simple numbers: "5000" -> 5000
- * - Rating formulas: "Rating * 3000" -> 3000
- * - Complex: "(Rating * 0.1) + 0.2" -> { base: 0.1, addon: 0.2 }
  * - FixedValues: "FixedValues(500,750,1000)" -> [500, 750, 1000]
  *
- * Returns number for simple values, null if unparseable.
+ * Returns number/array for the shapes above, null otherwise (formula string).
  */
 function parseFormulaValue(value: unknown): number | number[] | null {
 	if (value === undefined || value === null || value === '') {
@@ -158,30 +251,6 @@ function parseFormulaValue(value: unknown): number | number[] | null {
 		if (values.every((v) => !isNaN(v))) {
 			return values;
 		}
-	}
-
-	/* Rating * X pattern */
-	const ratingMultMatch = str.match(/^Rating\s*\*\s*([\d.]+)$/i);
-	if (ratingMultMatch && ratingMultMatch[1]) {
-		return parseFloat(ratingMultMatch[1]);
-	}
-
-	/* (Rating * X) + Y pattern - return base multiplier X */
-	const complexMatch = str.match(/^\(Rating\s*\*\s*([\d.]+)\)\s*\+\s*([\d.]+)$/i);
-	if (complexMatch && complexMatch[1]) {
-		return parseFloat(complexMatch[1]);
-	}
-
-	/* X + (Rating * Y) pattern - return base multiplier Y */
-	const reverseComplexMatch = str.match(/^([\d.]+)\s*\+\s*\(Rating\s*\*\s*([\d.]+)\)$/i);
-	if (reverseComplexMatch && reverseComplexMatch[2]) {
-		return parseFloat(reverseComplexMatch[2]);
-	}
-
-	/* (Rating * X) pattern (no addon) */
-	const parenMatch = str.match(/^\(Rating\s*\*\s*([\d.]+)\)$/i);
-	if (parenMatch && parenMatch[1]) {
-		return parseFloat(parenMatch[1]);
 	}
 
 	return null;
@@ -1162,8 +1231,11 @@ function convertCyberware(): ConversionResult {
 			essByRating = essParsed;
 			ess = essParsed[0] ?? null;
 		} else if (essRaw !== undefined && essRaw !== null && essRaw !== '') {
-			/* Preserve formula string for complex cases */
+			/* Preserve formula string for complex cases, evaluated at runtime
+			 * against the purchased rating; `ess` is just a rating-1 display
+			 * baseline (mirrors the FixedValues index-0 convention above). */
 			essFormula = String(essRaw);
+			ess = evaluateFormulaAtRating(essFormula, 1) ?? null;
 		}
 
 		/* Parse cost - may be a formula like "Rating * 3000" or "FixedValues(500,750,1000)" */
@@ -1179,8 +1251,11 @@ function convertCyberware(): ConversionResult {
 			costByRating = costParsed;
 			cost = costParsed[0] ?? null;
 		} else if (costRaw !== undefined && costRaw !== null && costRaw !== '') {
-			/* Preserve formula string for complex cases */
+			/* Preserve formula string for complex cases, evaluated at runtime
+			 * against the purchased rating; `cost` is just a rating-1 display
+			 * baseline (mirrors the FixedValues index-0 convention above). */
 			costFormula = String(costRaw);
+			cost = evaluateFormulaAtRating(costFormula, 1) ?? null;
 		}
 
 		const item: Cyberware = {

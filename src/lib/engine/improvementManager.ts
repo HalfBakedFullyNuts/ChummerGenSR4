@@ -156,6 +156,33 @@ export function resolveBonusValue(raw: BonusValue | undefined, rating: number): 
 }
 
 /**
+ * Evaluate a Rating-based cost/essence arithmetic formula (desktop
+ * cyberware/gear `<cost>`/`<ess>` fields), e.g. "Rating * 3000",
+ * "600 + (Rating * 100)", "(Rating - 3) * 1500". Shares resolveBonusValue's
+ * tokenizer/parser but, unlike it, never floors the result — essence
+ * formulas routinely resolve to fractional values (e.g. "0.5 + (Rating * 0.25)").
+ * Returns undefined (caller must fall back) for expressions the tokenizer
+ * doesn't support, e.g. desktop's `ceiling(...)`/`div` functions.
+ */
+export function evaluateRatingFormula(formula: string, rating: number): number | undefined {
+    const substituted = formula.replace(/Rating/gi, String(rating));
+    const tokens = tokenizeArithmetic(substituted);
+    if (!tokens) {
+        console.warn(`evaluateRatingFormula: cannot resolve formula "${formula}"`);
+        return undefined;
+    }
+    const pos = { i: 0 };
+    const result = parseExpr(tokens, pos);
+    if (result === undefined || pos.i !== tokens.length) {
+        console.warn(`evaluateRatingFormula: cannot resolve formula "${formula}"`);
+        return undefined;
+    }
+    /* Clean up binary floating-point noise (e.g. 0.1 + 0.2 = 0.30000000000000004);
+     * Shadowrun ess/cost formulas never need more than a handful of decimals. */
+    return Math.round(result * 1e6) / 1e6;
+}
+
+/**
  * Sum plain (no-uniqueName) improvements, plus the highest value from each
  * uniqueName group. The precedence0/precedence1 override cases are handled
  * by the caller before falling back to this standard grouping.

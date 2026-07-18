@@ -33,7 +33,8 @@ import {
 	createImprovementsFromBonus,
 	removeImprovements,
 	removeImprovementsForTree,
-	valueOf
+	valueOf,
+	evaluateRatingFormula
 } from '../engine/improvementManager';
 
 /**
@@ -315,14 +316,30 @@ export function setArmorEquipped(armorId: string, equipped: boolean): void {
  * ============================================ */
 
 /**
- * Look up a per-rating value from a desktop `FixedValues(...)` table (e.g.
- * Wired Reflexes essence 2/3/5), falling back to the flat value when no
- * table exists. Rating is clamped into [1, table.length].
+ * Resolve a cyberware ess/cost value at the purchased rating:
+ *  - a `FixedValues(...)` table (e.g. Wired Reflexes essence 2/3/5) is
+ *    looked up by rating, clamped into [1, table.length];
+ *  - otherwise a continuous Rating formula (e.g. "Rating * 3000",
+ *    "600 + (Rating * 100)") is evaluated against the purchased rating
+ *    (issue #71-adjacent bug: these used to be reduced to a flat coefficient
+ *    at conversion time and never actually scaled with rating);
+ *  - otherwise falls back to the flat value.
  */
-function resolveByRating(flat: number, byRating: readonly number[] | undefined, rating: number): number {
-	if (byRating === undefined || byRating.length === 0) return flat;
-	const index = Math.min(Math.max(rating, 1), byRating.length) - 1;
-	return byRating[index] ?? flat;
+function resolveByRating(
+	flat: number,
+	byRating: readonly number[] | undefined,
+	formula: string | undefined,
+	rating: number
+): number {
+	if (byRating !== undefined && byRating.length > 0) {
+		const index = Math.min(Math.max(rating, 1), byRating.length) - 1;
+		return byRating[index] ?? flat;
+	}
+	if (formula !== undefined) {
+		const evaluated = evaluateRatingFormula(formula, rating);
+		if (evaluated !== undefined) return evaluated;
+	}
+	return flat;
 }
 
 /** Add cyberware to the character. Reduces essence. `rating` defaults to the item's own rating field when omitted. */
@@ -340,8 +357,8 @@ export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Stan
 
 	const purchasedRating = rating ?? cyber.rating ?? 1;
 	const multiplier = gradeMultipliers[grade];
-	const baseEss = resolveByRating(cyber.ess, cyber.essByRating, purchasedRating);
-	const baseCost = resolveByRating(cyber.cost, cyber.costByRating, purchasedRating);
+	const baseEss = resolveByRating(cyber.ess, cyber.essByRating, cyber.essFormula, purchasedRating);
+	const baseCost = resolveByRating(cyber.cost, cyber.costByRating, cyber.costFormula, purchasedRating);
 	const essenceCost = baseEss * multiplier.ess * essenceMultiplier(char.improvements, 'Cyberware');
 	const nuyenCost = Math.floor(baseCost * multiplier.cost);
 
@@ -441,8 +458,8 @@ export function addChildCyberware(
 	const purchasedRating = rating ?? cyber.rating ?? 1;
 	const multiplier = gradeMultipliers[grade];
 	// Child cyberware essence is inherently reduced in some rules, but standard calculation here is base.
-	const baseEss = resolveByRating(cyber.ess, cyber.essByRating, purchasedRating);
-	const baseCost = resolveByRating(cyber.cost, cyber.costByRating, purchasedRating);
+	const baseEss = resolveByRating(cyber.ess, cyber.essByRating, cyber.essFormula, purchasedRating);
+	const baseCost = resolveByRating(cyber.cost, cyber.costByRating, cyber.costFormula, purchasedRating);
 	const essenceCost = baseEss * multiplier.ess * essenceMultiplier(char.improvements, 'Cyberware');
 	const nuyenCost = Math.floor(baseCost * multiplier.cost);
 
