@@ -5,7 +5,8 @@ import {
     createImprovementsFromBonus,
     resolveBonusValue,
     skillPoolBonus,
-    hasFlag
+    hasFlag,
+    __resetUnknownBonusKeyWarnings
 } from '../improvementManager';
 import type { Improvement } from '$types';
 
@@ -437,6 +438,86 @@ describe('ImprovementManager', () => {
             const bonusData = { conditionmonitor: { overflow: 1 } };
             const imps = createImprovementsFromBonus('Quality', 'Test', bonusData);
             expect(imps.some(i => (i.type as string) === 'ConditionMonitor')).toBe(false);
+        });
+
+        describe('issue #68 bonus key expansion', () => {
+            it('addattribute stores val 0 with uniqueName enableattribute (desktop parity)', () => {
+                const bonusData = {
+                    addattribute: [{ name: 'MAG', min: 1, max: 6, val: 1, aug: 6 }]
+                };
+                const imps = createImprovementsFromBonus('Quality', 'Adept', bonusData);
+                expect(imps).toEqual([
+                    expect.objectContaining({ type: 'Attribute', improvedName: 'mag', val: 0, uniqueName: 'enableattribute' })
+                ]);
+            });
+
+            it('livingpersona only produces LivingPersonaResponse, not the other four children', () => {
+                const bonusData = { livingpersona: { response: 1, signal: 2, firewall: 3, system: 4, biofeedback: 5 } };
+                const imps = createImprovementsFromBonus('Echo', 'Test', bonusData);
+                expect(imps).toEqual([
+                    expect.objectContaining({ type: 'LivingPersonaResponse', val: 1 })
+                ]);
+            });
+
+            it('smartlink is a presence-only flag by default', () => {
+                const bonusData = { smartlink: true };
+                const imps = createImprovementsFromBonus('Cyberware', 'Smartlink System', bonusData);
+                expect(imps).toEqual([expect.objectContaining({ type: 'Smartlink', val: 1 })]);
+            });
+
+            it('matrixinitiativepass groups by uniqueName across sources (no stacking)', () => {
+                const gear1 = createImprovementsFromBonus('Gear', 'g1', { matrixinitiativepass: 1 });
+                const gear2 = createImprovementsFromBonus('Gear', 'g2', { matrixinitiativepass: 1 });
+                expect(valueOf([...gear1, ...gear2], 'MatrixInitiativePass')).toBe(1); // highest, not summed
+            });
+
+            it('weaponcategorydv unwraps the array-forced name', () => {
+                const bonusData = { weaponcategorydv: { name: ['Clubs'], bonus: 1 } };
+                const imps = createImprovementsFromBonus('MartialArtAdvantage', 'Test', bonusData);
+                expect(imps).toEqual([
+                    expect.objectContaining({ type: 'WeaponCategoryDV', improvedName: 'Clubs', val: 1 })
+                ]);
+            });
+
+            it('spellcategory resolves a precedence-tagged array-wrapped name', () => {
+                const bonusData = { spellcategory: { name: [{ value: 'Combat', precedence: '0' }], val: 2 } };
+                const imps = createImprovementsFromBonus('Gear', 'Test', bonusData);
+                expect(imps).toEqual([
+                    expect.objectContaining({ type: 'SpellCategory', improvedName: 'Combat', val: 2, uniqueName: 'precedence0' })
+                ]);
+            });
+
+            it('selecttext produces a Text improvement named from the user selection', () => {
+                const bonusData = { selecttext: true };
+                const imps = createImprovementsFromBonus('Quality', 'Allergy (Common)', bonusData, 1, undefined, undefined, 'Gluten');
+                expect(imps).toEqual([expect.objectContaining({ type: 'Text', improvedName: 'Gluten', val: 1 })]);
+            });
+
+            it('nuyenamt maps to Nuyen (signed)', () => {
+                const bonusData = { nuyenamt: -5000 };
+                const imps = createImprovementsFromBonus('Quality', 'In Debt', bonusData);
+                expect(imps).toEqual([expect.objectContaining({ type: 'Nuyen', val: -5000 })]);
+            });
+
+            it('initiative resolves a precedence-tagged value (Boosted Reflexes)', () => {
+                const bonusData = { initiative: { value: 'Rating', precedence: '1' } };
+                const imps = createImprovementsFromBonus('Cyberware', 'Boosted Reflexes', bonusData, 2);
+                expect(imps).toEqual([
+                    expect.objectContaining({ type: 'Initiative', val: 2, uniqueName: 'precedence1' })
+                ]);
+            });
+
+            it('an unknown bonus key warns once and produces no improvement, never throws', () => {
+                __resetUnknownBonusKeyWarnings();
+                const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+                expect(() => createImprovementsFromBonus('Quality', 'Test', { bogus: 1 })).not.toThrow();
+                const imps = createImprovementsFromBonus('Quality', 'Test', { bogus: 1 });
+
+                expect(imps).toEqual([]);
+                expect(warnSpy.mock.calls.filter(([msg]) => typeof msg === 'string' && msg.includes('"bogus"'))).toHaveLength(1);
+                warnSpy.mockRestore();
+            });
         });
 
         it('rating upgrade is remove-then-recreate, never in-place mutation', () => {

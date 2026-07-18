@@ -61,7 +61,33 @@ const DEFERRED: Partial<Record<ImprovementType, string>> = {
     Uneducated: '#67',
     Uncouth: '#67',
     Infirm: '#67',
-    BlackMarketDiscount: '#96'
+    BlackMarketDiscount: '#96',
+    // issue #68 additions — parser now produces these, none have a consuming
+    // calculation/UI surface yet:
+    SkillAttribute: '#68-followup', // dice-pool consumption noted as a #65 follow-up
+    WeaponCategoryDV: '#72', // weapon accessories / combat epic (Epic 17)
+    SpellCategory: '#68-followup', // spell casting surface (Epic 19)
+    LivingPersonaResponse: '#79', // calculateMatrixInitiative technomancer-branch rewrite (Epic C2)
+    Smartlink: '#68-followup',
+    BasicBiowareEssCost: '#68-followup',
+    CyborgEssence: '#68-followup',
+    QuickeningMetamagic: '#68-followup',
+    FreeSpiritPowerPoints: '#68-followup',
+    AdeptPowerPoints: '#68-followup',
+    BasicLifestyleCost: '#68-followup',
+    UnarmedAP: '#68-followup',
+    ThrowRange: '#68-followup',
+    ThrowSTR: '#68-followup',
+    GenetechCostMultiplier: '#68-followup',
+    TransgenicsBiowareCost: '#68-followup',
+    SkillsoftAccess: '#68-followup',
+    Nuyen: '#68-followup', // BP validation surface
+    Concealability: '#68-followup',
+    UnarmedDVPhysical: '#68-followup',
+    AdeptLinguistics: '#68-followup',
+    SwapSkillAttribute: '#68-followup',
+    Text: '#68-followup', // selecttext/selectside/selectmentorspirit/selectparagon placeholders — no display surface yet
+    Restricted: '#68-followup'
 };
 
 describe('Improvement producer/consumer matrix (issue #64)', () => {

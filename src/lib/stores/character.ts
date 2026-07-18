@@ -562,7 +562,8 @@ export function addQuality(
 			gQuality.bonus,
 			1,
 			options?.selectedSkill,
-			options?.selectedAttribute
+			options?.selectedAttribute,
+			options?.customDescription
 		);
 	}
 

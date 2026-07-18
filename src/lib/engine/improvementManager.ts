@@ -14,7 +14,12 @@ import type {
     ImprovementSource,
     BonusValue,
     ConditionMonitorBonus,
-    ArmorBonus
+    ArmorBonus,
+    NameEntry,
+    SkillAttributeBonus,
+    WeaponCategoryDVBonus,
+    SpellCategoryBonus,
+    LivingPersonaBonus
 } from '$types';
 
 /** Signature of the `b(...)` improvement-builder closure inside createImprovementsFromBonus. */
@@ -338,9 +343,10 @@ function generateImprovementId(): string {
     return `imp-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
 }
 
-/** Resolve a plain-or-precedence-carrying condition-monitor value, e.g. Will to Live's
- * plain `overflow: 1` vs High Pain Tolerance's `thresholdoffset: { value: 1, precedence: '0' }`. */
-function resolveConditionMonitorEntry(
+/** Resolve a plain-or-precedence-carrying bonus value, e.g. Will to Live's plain
+ * `overflow: 1` vs High Pain Tolerance's `thresholdoffset: { value: 1, precedence: '0' }`
+ * vs Boosted Reflexes' `initiative: { value: 'Rating', precedence: '1' }`. */
+function resolvePrecedenceEntry(
     raw: BonusValue | { value: BonusValue; precedence?: string } | undefined,
     r: (raw: BonusValue | undefined) => number | undefined
 ): { val: number; uniqueName: string } | undefined {
@@ -374,10 +380,10 @@ function applyConditionMonitorBonus(
     const overflow = r(cm.overflow);
     if (overflow !== undefined) b('CMOverflow', '', { val: overflow });
 
-    const threshold = resolveConditionMonitorEntry(cm.threshold, r);
+    const threshold = resolvePrecedenceEntry(cm.threshold, r);
     if (threshold) b('CMThreshold', '', { val: threshold.val, uniqueName: threshold.uniqueName });
 
-    const thresholdOffset = resolveConditionMonitorEntry(cm.thresholdoffset, r);
+    const thresholdOffset = resolvePrecedenceEntry(cm.thresholdoffset, r);
     if (thresholdOffset) b('CMThresholdOffset', '', { val: thresholdOffset.val, uniqueName: thresholdOffset.uniqueName });
 }
 
@@ -392,6 +398,71 @@ function applyArmorBonus(
 
     const impact = r(armor.i);
     if (impact !== undefined) b('ImpactArmor', '', { val: impact });
+}
+
+/**
+ * Unwrap a `<name>` entry the XML parser's global isArray list force-wraps
+ * into a one-element array even when non-repeating, resolving the
+ * `{ value, precedence }` shape produced when the element carries an XML
+ * attribute (e.g. `<name precedence="0">Combat</name>`).
+ */
+function resolveNameEntry(entry: NameEntry | readonly NameEntry[] | undefined): { name: string; precedence?: string } | undefined {
+    const first = Array.isArray(entry) ? entry[0] : entry;
+    if (typeof first === 'string') return { name: first };
+    if (first !== undefined && typeof first === 'object') return { name: first.value, precedence: first.precedence };
+    return undefined;
+}
+
+/** Desktop `<skillattribute>` (cyberware/bioware/gear/qualities) — a named attribute-linked skill bonus. */
+function applySkillAttributeBonus(
+    data: SkillAttributeBonus,
+    r: (raw: BonusValue | undefined) => number | undefined,
+    b: ImprovementBuilder
+): void {
+    const resolved = resolveNameEntry(data.name);
+    const val = r(data.bonus);
+    if (resolved && val !== undefined) b('SkillAttribute', resolved.name, { val });
+}
+
+/** Desktop `<weaponcategorydv>` (powers/martial arts) — flat DV bonus for a weapon category. */
+function applyWeaponCategoryDVBonus(
+    data: WeaponCategoryDVBonus,
+    r: (raw: BonusValue | undefined) => number | undefined,
+    b: ImprovementBuilder
+): void {
+    const resolved = resolveNameEntry(data.name);
+    const val = r(data.bonus);
+    if (resolved && val !== undefined) b('WeaponCategoryDV', resolved.name, { val });
+}
+
+/** Desktop `<spellcategory>` (gear/mentors) — bonus dice/force for a spell category, may carry precedence. */
+function applySpellCategoryBonus(
+    data: SpellCategoryBonus,
+    r: (raw: BonusValue | undefined) => number | undefined,
+    b: ImprovementBuilder
+): void {
+    const resolved = resolveNameEntry(data.name);
+    const val = r(data.val);
+    if (resolved && val !== undefined) {
+        b('SpellCategory', resolved.name, {
+            val,
+            uniqueName: resolved.precedence !== undefined ? `precedence${resolved.precedence}` : ''
+        });
+    }
+}
+
+/**
+ * Desktop `<livingpersona>` (echoes/qualities) — only `response` is produced
+ * here (issue #68 Tier 1); signal/firewall/system/biofeedback feed the
+ * Matrix/persona surface owned by a later epic (see #64 DEFERRED).
+ */
+function applyLivingPersonaBonus(
+    data: LivingPersonaBonus,
+    r: (raw: BonusValue | undefined) => number | undefined,
+    b: ImprovementBuilder
+): void {
+    const response = r(data.response);
+    if (response !== undefined) b('LivingPersonaResponse', '', { val: response });
 }
 
 /**
@@ -439,8 +510,76 @@ export const PRODUCIBLE_TYPES: readonly ImprovementType[] = [
     'Infirm',
     'SensitiveSystem',
     'BlackMarketDiscount',
-    'SpecialTab'
+    'SpecialTab',
+    // issue #68 additions:
+    'MatrixInitiative',
+    'MatrixInitiativePass',
+    'MatrixInitiativePassAdd',
+    'SkillAttribute',
+    'WeaponCategoryDV',
+    'SpellCategory',
+    'LivingPersonaResponse',
+    'Smartlink',
+    'BasicBiowareEssCost',
+    'CyborgEssence',
+    'QuickeningMetamagic',
+    'FreeSpiritPowerPoints',
+    'AdeptPowerPoints',
+    'BasicLifestyleCost',
+    'UnarmedAP',
+    'ThrowRange',
+    'ThrowSTR',
+    'GenetechCostMultiplier',
+    'TransgenicsBiowareCost',
+    'SkillsoftAccess',
+    'Nuyen',
+    'Concealability',
+    'UnarmedDVPhysical',
+    'AdeptLinguistics',
+    'SwapSkillAttribute',
+    'Text',
+    'Restricted'
 ];
+
+/**
+ * Every top-level `<bonus>` child key `createImprovementsFromBonus` recognizes
+ * (issue #68). Kept in sync by hand — `warnUnknownBonusKeys` uses this to
+ * flag data keys the parser doesn't yet handle, so new game-data keys never
+ * silently disappear (`scripts/survey-bonus-keys.mjs` + the exhaustiveness
+ * test in `__tests__/improvement-matrix.test.ts` verify this against shipped data).
+ */
+const KNOWN_BONUS_KEYS = new Set([
+    'addattribute', 'specificattribute', 'selectattribute', 'enabletab',
+    'specificskill', 'selectskill', 'skillgroup', 'skillcategory',
+    'conditionmonitor', 'armor', 'skillattribute', 'weaponcategorydv', 'spellcategory', 'livingpersona',
+    'initiative', 'initiativepass', 'composure', 'judgeintentions', 'damageresistance', 'drainresist',
+    'fadingresist', 'notoriety', 'lifestylecost', 'reach', 'unarmeddv', 'movementpercent', 'swimpercent',
+    'flyspeed', 'restricteditemcount', 'nuyenmaxbp', 'freepositivequalities', 'freenegativequalities',
+    'skillwire', 'memory', 'cyberwareessmultiplier', 'biowareessmultiplier',
+    'matrixinitiative', 'matrixinitiativepass', 'matrixinitiativepassadd', 'basicbiowareessmultiplier',
+    'freespiritpowerpoints', 'adeptpowerpoints', 'basiclifestylecost', 'unarmedap', 'throwrange', 'throwstr',
+    'genetechcostmultiplier', 'transgenicsgenetechcost', 'nuyenamt', 'concealability',
+    'uneducated', 'uncouth', 'infirm', 'sensitivesystem', 'blackmarketdiscount', 'smartlink',
+    'cyborgessence', 'quickeningmetamagic', 'unarmeddvphysical', 'adeptlinguistics', 'swapskillattribute',
+    'skillsoftaccess',
+    'selecttext', 'selectside', 'selectrestricted', 'selectmentorspirit', 'selectparagon'
+]);
+
+const warnedUnknownBonusKeys = new Set<string>();
+
+/** Test-only: reset the per-session unknown-bonus-key warning dedup set. */
+export function __resetUnknownBonusKeyWarnings(): void {
+    warnedUnknownBonusKeys.clear();
+}
+
+/** Warn once per unknown key per session (never throw) — issue #68 warning policy. */
+function warnUnknownBonusKeys(bonusData: Record<string, unknown>, sourceName: string): void {
+    for (const key of Object.keys(bonusData)) {
+        if (KNOWN_BONUS_KEYS.has(key) || warnedUnknownBonusKeys.has(key)) continue;
+        warnedUnknownBonusKeys.add(key);
+        console.warn(`[improvements] unhandled bonus key "${key}" on ${sourceName}`);
+    }
+}
 
 /**
  * Extract improvements from parsed bonus block data.
@@ -450,6 +589,7 @@ export const PRODUCIBLE_TYPES: readonly ImprovementType[] = [
  * @param rating Optional rating if the item scales with it
  * @param selectedSkill User-selected skill (if applicable)
  * @param selectedAttribute User-selected attribute (if applicable)
+ * @param selectedText User-entered text (if applicable, e.g. Allergy's "gluten" — `<selecttext>`)
  */
 export function createImprovementsFromBonus(
     source: ImprovementSource,
@@ -457,7 +597,8 @@ export function createImprovementsFromBonus(
     bonusData: any, // Raw JSON object mirroring QualityBonus or similar
     rating: number = 1,
     selectedSkill?: string,
-    selectedAttribute?: string
+    selectedAttribute?: string,
+    selectedText?: string
 ): Improvement[] {
     if (!bonusData) return [];
 
@@ -490,6 +631,17 @@ export function createImprovementsFromBonus(
     const r = (raw: BonusValue | undefined): number | undefined => resolveBonusValue(raw, rating);
 
     // Arrays of specific targets
+    if (bonusData.addattribute) {
+        // desktop clsImprovement.cs:1200-1212 — reads only the attribute name and
+        // stores value/rating 0, ignoring the XML min/max/val/aug children entirely.
+        // uniqueName 'enableattribute' marks the attribute as unlocked (MAG/RES);
+        // the actual base-1 initialization still goes through the hardcoded
+        // MAGIC_QUALITIES/RESONANCE_QUALITIES gate in stores/character.ts (#63b
+        // risk note) — wiring that gate to this improvement is a follow-up.
+        for (const attr of bonusData.addattribute) {
+            b('Attribute', String(attr.name).toLowerCase(), { val: 0, uniqueName: 'enableattribute' });
+        }
+    }
     if (bonusData.specificattribute) {
         for (const attr of bonusData.specificattribute) {
             b('Attribute', String(attr.name).toLowerCase(), {
@@ -549,6 +701,10 @@ export function createImprovementsFromBonus(
 
     if (bonusData.conditionmonitor) applyConditionMonitorBonus(bonusData.conditionmonitor, r, b);
     if (bonusData.armor) applyArmorBonus(bonusData.armor, r, b);
+    if (bonusData.skillattribute) applySkillAttributeBonus(bonusData.skillattribute, r, b);
+    if (bonusData.weaponcategorydv) applyWeaponCategoryDVBonus(bonusData.weaponcategorydv, r, b);
+    if (bonusData.spellcategory) applySpellCategoryBonus(bonusData.spellcategory, r, b);
+    if (bonusData.livingpersona) applyLivingPersonaBonus(bonusData.livingpersona, r, b);
 
     // Simple numeric properties
     const propMappings: Record<string, ImprovementType> = {
@@ -573,34 +729,86 @@ export function createImprovementsFromBonus(
         skillwire: 'Skillwire',
         memory: 'Memory',
         cyberwareessmultiplier: 'CyberwareEssCost',
-        biowareessmultiplier: 'BiowareEssCost'
+        biowareessmultiplier: 'BiowareEssCost',
+        matrixinitiative: 'MatrixInitiative',
+        matrixinitiativepass: 'MatrixInitiativePass',
+        matrixinitiativepassadd: 'MatrixInitiativePassAdd',
+        basicbiowareessmultiplier: 'BasicBiowareEssCost',
+        freespiritpowerpoints: 'FreeSpiritPowerPoints',
+        adeptpowerpoints: 'AdeptPowerPoints',
+        basiclifestylecost: 'BasicLifestyleCost',
+        unarmedap: 'UnarmedAP',
+        throwrange: 'ThrowRange',
+        throwstr: 'ThrowSTR',
+        genetechcostmultiplier: 'GenetechCostMultiplier',
+        transgenicsgenetechcost: 'TransgenicsBiowareCost',
+        nuyenamt: 'Nuyen',
+        concealability: 'Concealability'
+    };
+
+    // desktop hardcodes these uniqueNames so same-type improvements from different
+    // sources don't stack extra initiative passes with each other (clsImprovement.cs:1830, 1846).
+    const HARDCODED_UNIQUE_NAMES: Record<string, string> = {
+        initiativepass: 'initiativepass',
+        matrixinitiativepass: 'matrixinitiativepass'
     };
 
     for (const [key, impType] of Object.entries(propMappings)) {
         if (bonusData[key] !== undefined) {
-            const resolved = r(bonusData[key]);
+            // Most flat keys are a plain BonusValue, but some (e.g. Boosted Reflexes'
+            // initiative) carry a precedence attribute like conditionmonitor's
+            // threshold/thresholdoffset: { value: 'Rating', precedence: '1' }.
+            const resolved = resolvePrecedenceEntry(bonusData[key], r);
             if (resolved !== undefined) {
-                // desktop hardcodes uniqueName "initiativepass" on every InitiativePass
-                // improvement (clsImprovement.cs:1830) so e.g. Improved Reflexes and Wired
-                // Reflexes don't stack extra initiative passes with each other.
-                const uniqueName = key === 'initiativepass' ? 'initiativepass' : '';
-                b(impType, '', { val: resolved, uniqueName });
+                b(impType, '', {
+                    val: resolved.val,
+                    uniqueName: HARDCODED_UNIQUE_NAMES[key] ?? resolved.uniqueName
+                });
             }
         }
     }
 
     // Boolean flags (represented as flat value 1 or stored in Custom logic)
-    // For now, representing them by their specific string Improvements or 'Text'
-    if (bonusData.uneducated) b('Uneducated', '', { val: 1 });
-    if (bonusData.uncouth) b('Uncouth', '', { val: 1 });
-    if (bonusData.infirm) b('Infirm', '', { val: 1 });
-    if (bonusData.sensitivesystem) b('SensitiveSystem', '', { val: 1 });
-    if (bonusData.blackmarketdiscount) b('BlackMarketDiscount', '', { val: 1 });
+    const flagMappings: Record<string, ImprovementType> = {
+        uneducated: 'Uneducated',
+        uncouth: 'Uncouth',
+        infirm: 'Infirm',
+        sensitivesystem: 'SensitiveSystem',
+        blackmarketdiscount: 'BlackMarketDiscount',
+        cyborgessence: 'CyborgEssence',
+        quickeningmetamagic: 'QuickeningMetamagic',
+        unarmeddvphysical: 'UnarmedDVPhysical',
+        adeptlinguistics: 'AdeptLinguistics',
+        swapskillattribute: 'SwapSkillAttribute',
+        skillsoftaccess: 'SkillsoftAccess'
+    };
+    for (const [key, impType] of Object.entries(flagMappings)) {
+        if (bonusData[key]) b(impType, '', { val: 1 });
+    }
+
+    if (bonusData.smartlink) {
+        // smartlink is usually a presence-only flag (`true`), but can carry a rating number.
+        const smartlinkVal = typeof bonusData.smartlink === 'boolean' ? undefined : r(bonusData.smartlink);
+        b('Smartlink', '', { val: smartlinkVal ?? 1 });
+    }
 
     // enabletab grants access to new sections like adept, magician, technomancer
     if (bonusData.enabletab) {
         b('SpecialTab', bonusData.enabletab, { val: 1 });
     }
+
+    // Selection-prompt keys (issue #68 Tier 2): no consuming UI exists yet for
+    // most of these, so we emit a presence-only placeholder improvement rather
+    // than warn — real selection wiring is a follow-up once the UI exists.
+    if (bonusData.selecttext) b('Text', selectedText ?? '', { val: 1 });
+    if (bonusData.selectrestricted) b('Restricted', '', { val: 1 });
+    // cyberlimb side / mentor / paragon: label only, no gameplay effect (mentor/paragon
+    // are modeled separately via char.magic.mentor)
+    for (const key of ['selectside', 'selectmentorspirit', 'selectparagon']) {
+        if (bonusData[key]) b('Text', '', { val: 1 });
+    }
+
+    warnUnknownBonusKeys(bonusData, sourceName);
 
     return results;
 }

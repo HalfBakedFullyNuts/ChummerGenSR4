@@ -245,6 +245,45 @@ export interface ArmorBonus {
 }
 
 /**
+ * A `<name>` entry that the XML parser's global isArray list force-wraps into
+ * a one-element array even when non-repeating (`skillattribute`,
+ * `weaponcategorydv`), optionally carrying `{ value, precedence }` when the
+ * name element itself has attributes (`spellcategory`).
+ */
+export type NameEntry = string | { readonly value: string; readonly precedence?: string };
+
+/** `<skillattribute>` (cyberware/bioware/gear/qualities) — a named attribute-linked skill bonus. */
+export interface SkillAttributeBonus {
+    readonly name: NameEntry | readonly NameEntry[];
+    readonly bonus?: BonusValue;
+}
+
+/** `<weaponcategorydv>` (powers/martial arts) — flat DV bonus for a weapon category. */
+export interface WeaponCategoryDVBonus {
+    readonly name: NameEntry | readonly NameEntry[];
+    readonly bonus?: BonusValue;
+}
+
+/** `<spellcategory>` (gear/mentors) — bonus dice/force for a spell category, may carry precedence. */
+export interface SpellCategoryBonus {
+    readonly name: NameEntry | readonly NameEntry[];
+    readonly val?: BonusValue;
+}
+
+/**
+ * `<livingpersona>` (echoes/qualities) — technomancer Living Persona attribute
+ * overrides. Only `response` is consumed today (issue #68 Tier 1; the other
+ * four feed the Matrix/persona surface in a later epic).
+ */
+export interface LivingPersonaBonus {
+    readonly response?: BonusValue;
+    readonly signal?: BonusValue;
+    readonly firewall?: BonusValue;
+    readonly system?: BonusValue;
+    readonly biofeedback?: BonusValue;
+}
+
+/**
  * Structured `<bonus>` data carried from game-data XML into JSON.
  * Renamed and extended from the former `QualityBonus` (values widened to
  * `BonusValue` so unresolved "Rating"/"FixedValues(...)" expressions survive
@@ -291,6 +330,38 @@ export interface BonusData {
     readonly infirm?: boolean;
     readonly sensitivesystem?: boolean;
     readonly blackmarketdiscount?: boolean;
+    /** Matrix/Living Persona initiative (issue #68). */
+    readonly matrixinitiative?: BonusValue;
+    readonly matrixinitiativepass?: BonusValue;
+    readonly matrixinitiativepassadd?: BonusValue;
+    readonly skillattribute?: SkillAttributeBonus;
+    readonly weaponcategorydv?: WeaponCategoryDVBonus;
+    readonly spellcategory?: SpellCategoryBonus;
+    readonly livingpersona?: LivingPersonaBonus;
+    readonly smartlink?: BonusValue | boolean;
+    readonly basicbiowareessmultiplier?: BonusValue;
+    readonly cyborgessence?: boolean;
+    readonly quickeningmetamagic?: boolean;
+    readonly freespiritpowerpoints?: BonusValue;
+    readonly adeptpowerpoints?: BonusValue;
+    readonly basiclifestylecost?: BonusValue;
+    readonly unarmeddvphysical?: boolean;
+    readonly adeptlinguistics?: boolean;
+    readonly swapskillattribute?: boolean;
+    readonly unarmedap?: BonusValue;
+    readonly throwrange?: BonusValue;
+    readonly throwstr?: BonusValue;
+    readonly genetechcostmultiplier?: BonusValue;
+    readonly transgenicsgenetechcost?: BonusValue;
+    readonly skillsoftaccess?: boolean;
+    readonly nuyenamt?: BonusValue;
+    readonly concealability?: BonusValue;
+    /** Selection-prompt keys (issue #68 Tier 2) — presence-only today; no consuming UI yet. */
+    readonly selecttext?: boolean;
+    readonly selectside?: boolean;
+    readonly selectrestricted?: boolean;
+    readonly selectmentorspirit?: boolean;
+    readonly selectparagon?: boolean;
     /** Tolerate bonus keys the parser doesn't resolve yet — never silently drop unrecognized data. */
     readonly [key: string]: unknown;
 }

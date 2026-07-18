@@ -38,7 +38,12 @@ export type {
 	SkillCategoryBonusEntry,
 	ConditionMonitorBonus,
 	ArmorBonus,
-	PrecedenceBonusValue
+	PrecedenceBonusValue,
+	NameEntry,
+	SkillAttributeBonus,
+	WeaponCategoryDVBonus,
+	SpellCategoryBonus,
+	LivingPersonaBonus
 } from './improvements';
 
 /* Skill types */
