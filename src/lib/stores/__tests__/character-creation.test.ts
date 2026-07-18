@@ -227,6 +227,32 @@ describe('Character Creation - Metatype improvement wiring (issue #63b)', () => 
 	});
 });
 
+describe('Character Creation - Metatype movement string (issue #70)', () => {
+	const gameDataWithMovement: GameData = {
+		...mockGameData,
+		metatypes: mockGameData.metatypes.map((m) => {
+			if (m.name === 'Human') return { ...m, movement: '10/25, Swim 5' };
+			if (m.name === 'Troll') return { ...m, movement: '15/35, Swim 7' };
+			return m;
+		})
+	};
+
+	beforeEach(() => {
+		startNewCharacter('test-user', 'bp');
+	});
+
+	it('setMetatype populates identity.movement from the metatype', () => {
+		setMetatype(gameDataWithMovement, 'Troll');
+		expect(get(character)!.identity.movement).toBe('15/35, Swim 7');
+	});
+
+	it('switching metatype updates identity.movement', () => {
+		setMetatype(gameDataWithMovement, 'Troll');
+		setMetatype(gameDataWithMovement, 'Human');
+		expect(get(character)!.identity.movement).toBe('10/25, Swim 5');
+	});
+});
+
 describe('Character Creation - Complete BP Budget', () => {
 	beforeEach(() => {
 		startNewCharacter('test-user', 'bp');

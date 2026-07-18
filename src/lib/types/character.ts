@@ -134,6 +134,8 @@ export interface CharacterIdentity {
 	readonly hair: string;
 	readonly eyes: string;
 	readonly skin: string;
+	/** Metatype's movement string (e.g. "10/25, Swim 5"), denormalized at setMetatype-time (issue #70). */
+	readonly movement: string;
 }
 
 /**
@@ -388,7 +390,8 @@ export function createEmptyCharacter(
 			weight: '',
 			hair: '',
 			eyes: '',
-			skin: ''
+			skin: '',
+			movement: '10/25, Swim 5'
 		},
 		background: {
 			description: '',

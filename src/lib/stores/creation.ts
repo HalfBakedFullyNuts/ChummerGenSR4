@@ -236,7 +236,8 @@ export function setMetatype(
 		identity: {
 			...char.identity,
 			metatype: metatypeName,
-			metavariant: metavariantName
+			metavariant: metavariantName,
+			movement: metatype.movement
 		},
 		attributes: {
 			...char.attributes,

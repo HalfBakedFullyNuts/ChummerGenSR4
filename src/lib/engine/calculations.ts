@@ -138,30 +138,75 @@ export function calculateInitiativeDice(char: Character): number {
  * Movement
  * ============================================ */
 
+/** Walk/run/swim/fly rates in meters/turn. */
+export interface MovementRates {
+	readonly walk: number;
+	readonly run: number;
+	readonly swim: number;
+	readonly fly: number;
+}
+
+/** Human fallback movement string, used when a character lacks identity.movement (pre-#70 saves). */
+export const DEFAULT_MOVEMENT = '10/25, Swim 5';
+
+/**
+ * Parse desktop's metatype movement display string, e.g. "10/25, Swim 5" or
+ * "15/45, Fly 90". Warns and returns all-zero rates for an unparseable
+ * string (e.g. "Special" — some critters have no standard movement rate).
+ */
+export function parseMovementString(movement: string): MovementRates {
+	const match = movement.match(/^(\d+)\/(\d+)(?:,\s*(Swim|Fly)\s+(\d+))?/i);
+	if (!match) {
+		console.warn(`parseMovementString: cannot parse movement string "${movement}"`);
+		return { walk: 0, run: 0, swim: 0, fly: 0 };
+	}
+
+	const walk = Number(match[1]);
+	const run = Number(match[2]);
+	const kind = match[3]?.toLowerCase();
+	const extra = match[4] !== undefined ? Number(match[4]) : 0;
+
+	return {
+		walk,
+		run,
+		swim: kind === 'swim' ? extra : 0,
+		fly: kind === 'fly' ? extra : 0
+	};
+}
+
+/**
+ * Movement rates including MovementPercent/SwimPercent/FlySpeed improvements
+ * (desktop clsCharacter.cs:5156-5210): walk/run scale by MovementPercent,
+ * swim scales by SwimPercent, fly gets a flat FlySpeed add-on.
+ */
+export function calculateMovement(char: Character): MovementRates {
+	const base = parseMovementString(char.identity.movement !== '' ? char.identity.movement : DEFAULT_MOVEMENT);
+	const movePct = valueOf(char.improvements, 'MovementPercent') / 100;
+	const swimPct = valueOf(char.improvements, 'SwimPercent') / 100;
+
+	return {
+		walk: base.walk + Math.floor(base.walk * movePct),
+		run: base.run + Math.floor(base.run * movePct),
+		swim: base.swim + Math.floor(base.swim * swimPct),
+		fly: base.fly + valueOf(char.improvements, 'FlySpeed')
+	};
+}
+
 /** Calculate walking speed in meters/turn. */
 export function calculateWalkSpeed(char: Character): number {
-	const agi = getAttributeTotal(char, 'agi');
-	return agi * 2;
+	return calculateMovement(char).walk;
 }
 
 /** Calculate running speed in meters/turn. */
 export function calculateRunSpeed(char: Character): number {
-	const agi = getAttributeTotal(char, 'agi');
-	return agi * 4;
-}
-
-/** Calculate sprinting modifier. */
-export function calculateSprintBonus(char: Character): number {
-	// Base sprint adds +2m per hit on Running + STR
-	// Some metatypes get bonuses
-	const metatype = char.identity.metatype.toLowerCase();
-	if (metatype.includes('elf')) return 1;
-	if (metatype.includes('centaur')) return 2;
-	return 0;
+	return calculateMovement(char).run;
 }
 
 /* ============================================
  * Limits (SR4A optional rule / SR5 equivalent)
+ * SR5-style display values — no SR4 improvement wiring by design (issue #70):
+ * desktop SR4 has no physical/mental/social limit mechanic or matching
+ * improvement types to consult.
  * ============================================ */
 
 /** Calculate Physical Limit. */
@@ -396,6 +441,8 @@ export interface CharacterCalculations {
 	// Movement
 	walkSpeed: number;
 	runSpeed: number;
+	swimSpeed: number;
+	flySpeed: number;
 
 	// Limits
 	physicalLimit: number;
@@ -426,6 +473,8 @@ export interface CharacterCalculations {
 
 /** Calculate all derived values for a character. */
 export function calculateAll(char: Character): CharacterCalculations {
+	const movement = calculateMovement(char);
+
 	return {
 		physicalCM: calculatePhysicalCM(char),
 		stunCM: calculateStunCM(char),
@@ -435,8 +484,10 @@ export function calculateAll(char: Character): CharacterCalculations {
 		initiative: calculateInitiative(char),
 		initiativeDice: calculateInitiativeDice(char),
 
-		walkSpeed: calculateWalkSpeed(char),
-		runSpeed: calculateRunSpeed(char),
+		walkSpeed: movement.walk,
+		runSpeed: movement.run,
+		swimSpeed: movement.swim,
+		flySpeed: movement.fly,
 
 		physicalLimit: calculatePhysicalLimit(char),
 		mentalLimit: calculateMentalLimit(char),

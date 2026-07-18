@@ -28,6 +28,7 @@ import type {
 	CyberwareGrade
 } from '$types';
 import { createEmptyCharacter, getKnowledgeSkillAttribute } from '$types';
+import { DEFAULT_MOVEMENT } from '../engine/calculations';
 
 /** Result of import operation. */
 export interface ImportResult {
@@ -144,7 +145,8 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 			weight: getString(data, 'weight'),
 			hair: getString(data, 'hair'),
 			eyes: getString(data, 'eyes'),
-			skin: getString(data, 'skin')
+			skin: getString(data, 'skin'),
+			movement: getString(data, 'movement') || DEFAULT_MOVEMENT
 		},
 		background: {
 			description: getString(data, 'description'),

@@ -9,6 +9,7 @@ import { get, derived, type Readable } from 'svelte/store';
 import { type Character, type BuildMethod, createEmptyCharacter } from '$types';
 import { characterStore, currentStepStore, generateId, character } from './character';
 import { gameData, type GameData } from './gamedata';
+import { DEFAULT_MOVEMENT } from '../engine/calculations';
 import {
 	saveCharacter as firebaseSave,
 	loadCharacter as firebaseLoad,
@@ -37,6 +38,18 @@ export function backfillSkillMeta(char: Character, data: GameData): Character {
 	return { ...char, skills };
 }
 
+/**
+ * Backfill CharacterIdentity.movement for saves persisted before issue #70
+ * added it (name-lookup against loaded game data, falling back to the human
+ * default when the metatype is unknown). A no-op once already populated.
+ */
+export function backfillMovement(char: Character, data: GameData): Character {
+	if (typeof char.identity.movement === 'string' && char.identity.movement !== '') return char;
+
+	const metatype = data.metatypes.find((m) => m.name === char.identity.metatype);
+	return { ...char, identity: { ...char.identity, movement: metatype?.movement ?? DEFAULT_MOVEMENT } };
+}
+
 interface AsyncResult<T = void> {
 	success: boolean;
 	error?: string;
@@ -60,7 +73,8 @@ export async function loadSavedCharacter(
 	const result = await firebaseLoad(characterId);
 
 	if (result.success && result.data) {
-		const backfilled = backfillSkillMeta(result.data, get(gameData));
+		const data = get(gameData);
+		const backfilled = backfillMovement(backfillSkillMeta(result.data, data), data);
 		characterStore.set(backfilled);
 		if (backfilled.status === 'creation') {
 			currentStepStore.set('finalize');
@@ -72,7 +86,8 @@ export async function loadSavedCharacter(
 
 /** Load an imported character (e.g. from XML) into the store. */
 export function loadImportedCharacter(importedChar: Character): void {
-	const backfilled = backfillSkillMeta(importedChar, get(gameData));
+	const data = get(gameData);
+	const backfilled = backfillMovement(backfillSkillMeta(importedChar, data), data);
 	characterStore.set(backfilled);
 	if (backfilled.status === 'creation') {
 		currentStepStore.set('finalize');

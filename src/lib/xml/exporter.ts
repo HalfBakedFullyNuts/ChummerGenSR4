@@ -23,7 +23,7 @@ export function exportToChummer(character: Character): string {
 	lines.push(`\t<metatypebp>${character.buildPointsSpent.metatype}</metatypebp>`);
 	lines.push(`\t<metavariant>${escapeXml(character.identity.metavariant || '')}</metavariant>`);
 	lines.push(`\t<metatypecategory />`);
-	lines.push(`\t<movement>10/25, Swim 5</movement>`);
+	lines.push(`\t<movement>${escapeXml(character.identity.movement)}</movement>`);
 	lines.push(`\t<mutantcritterbaseskills>0</mutantcritterbaseskills>`);
 
 	/* Identity */

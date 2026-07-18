@@ -7,6 +7,7 @@
 
 import type { Character } from '$types';
 import { createEmptyCharacter } from '$types';
+import { DEFAULT_MOVEMENT } from '../engine/calculations';
 
 /** Result of import operation. */
 export interface ImportResult {
@@ -118,7 +119,8 @@ function mergeWithDefaults(data: Record<string, unknown>, userId: string): Chara
 			weight: getStr(identity, 'weight', ''),
 			hair: getStr(identity, 'hair', ''),
 			eyes: getStr(identity, 'eyes', ''),
-			skin: getStr(identity, 'skin', '')
+			skin: getStr(identity, 'skin', ''),
+			movement: getStr(identity, 'movement', DEFAULT_MOVEMENT)
 		},
 		background: {
 			description: getStr(background, 'description', ''),

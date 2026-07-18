@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as calculations from '../calculations';
 import { createEmptyCharacter, type Character } from '$types';
 
@@ -227,15 +227,79 @@ describe('calculations engine', () => {
             expect(calculations.getAttributeTotal(char, 'rea')).toBe(5); // 3 base + 2 improvement
         });
 
-        it('calculateWalkSpeed and calculateRunSpeed', () => {
-            char.attributes.agi.base = 5;
+        it('calculateWalkSpeed and calculateRunSpeed read the metatype movement string, not AGI (issue #70)', () => {
+            char.attributes.agi.base = 5; // no longer affects movement — desktop SR4 movement is metatype-based
+            char.identity.movement = '10/25, Swim 5'; // human baseline
             expect(calculations.calculateWalkSpeed(char)).toBe(10);
-            expect(calculations.calculateRunSpeed(char)).toBe(20);
+            expect(calculations.calculateRunSpeed(char)).toBe(25);
+        });
+    });
+
+    describe('Movement (issue #70)', () => {
+        it('parseMovementString parses walk/run/swim', () => {
+            expect(calculations.parseMovementString('10/25, Swim 5')).toEqual({ walk: 10, run: 25, swim: 5, fly: 0 });
         });
 
-        it('calculateSprintBonus based on metatype', () => {
-            char.identity.metatype = 'Elf';
-            expect(calculations.calculateSprintBonus(char)).toBe(1);
+        it('parseMovementString parses walk/run/fly', () => {
+            expect(calculations.parseMovementString('15/45, Fly 90')).toEqual({ walk: 15, run: 45, swim: 0, fly: 90 });
+        });
+
+        it('parseMovementString parses troll baseline', () => {
+            expect(calculations.parseMovementString('15/35, Swim 7')).toEqual({ walk: 15, run: 35, swim: 7, fly: 0 });
+        });
+
+        it('parseMovementString warns and returns zeros for an unparseable string', () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            expect(calculations.parseMovementString('Special')).toEqual({ walk: 0, run: 0, swim: 0, fly: 0 });
+            expect(warnSpy).toHaveBeenCalled();
+            warnSpy.mockRestore();
+        });
+
+        it('calculateMovement applies MovementPercent to walk and run (Celerity-style +50%)', () => {
+            char.identity.movement = '10/25, Swim 5';
+            char.improvements = [{
+                id: 'i1', type: 'MovementPercent', improvedName: '', source: 'Quality', sourceName: 'Celerity',
+                val: 50, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                exclude: '', uniqueName: '', addToRating: false, enabled: true
+            }];
+            const movement = calculations.calculateMovement(char);
+            expect(movement.walk).toBe(15); // 10 + floor(10*0.5)
+            expect(movement.run).toBe(37); // 25 + floor(25*0.5)
+        });
+
+        it('calculateMovement applies SwimPercent to swim only', () => {
+            char.identity.movement = '10/25, Swim 5';
+            char.improvements = [{
+                id: 'i1', type: 'SwimPercent', improvedName: '', source: 'Quality', sourceName: 'Test',
+                val: 50, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                exclude: '', uniqueName: '', addToRating: false, enabled: true
+            }];
+            const movement = calculations.calculateMovement(char);
+            expect(movement.swim).toBe(7); // 5 + floor(5*0.5)
+            expect(movement.walk).toBe(10);
+            expect(movement.run).toBe(25);
+        });
+
+        it('calculateMovement applies FlySpeed as a flat add-on', () => {
+            char.identity.movement = '10/25, Swim 5';
+            char.improvements = [{
+                id: 'i1', type: 'FlySpeed', improvedName: '', source: 'Quality', sourceName: 'Wings',
+                val: 20, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                exclude: '', uniqueName: '', addToRating: false, enabled: true
+            }];
+            expect(calculations.calculateMovement(char).fly).toBe(20); // base fly 0 + 20
+        });
+
+        it('troll baseline movement', () => {
+            char.identity.movement = '15/35, Swim 7';
+            const movement = calculations.calculateMovement(char);
+            expect(movement).toEqual({ walk: 15, run: 35, swim: 7, fly: 0 });
+        });
+
+        it('falls back to the human default when identity.movement is empty', () => {
+            char.identity.movement = '';
+            const movement = calculations.calculateMovement(char);
+            expect(movement).toEqual({ walk: 10, run: 25, swim: 5, fly: 0 });
         });
     });
 

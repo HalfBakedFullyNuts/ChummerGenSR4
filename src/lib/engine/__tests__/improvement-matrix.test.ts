@@ -39,7 +39,11 @@ const CONSUMED: readonly ImprovementType[] = [
     // wired in issue #65 via calculateDicePool/skillPoolBonus:
     'Skill',
     'SkillGroup',
-    'SkillCategory'
+    'SkillCategory',
+    // wired in issue #70 via calculateMovement:
+    'MovementPercent',
+    'SwimPercent',
+    'FlySpeed'
 ];
 
 /** Types produced but not yet consumed, with the issue (or follow-up note) tracking the remaining wiring. */
@@ -50,9 +54,6 @@ const DEFERRED: Partial<Record<ImprovementType, string>> = {
     LifestyleCost: '#91',
     Reach: '#64-followup', // combat display surface doesn't exist yet
     UnarmedDV: '#22', // tracked in docs/issues/22-content-depth.md as a follow-up
-    MovementPercent: '#70',
-    SwimPercent: '#70',
-    FlySpeed: '#70',
     RestrictedItemCount: '#93',
     NuyenMaxBP: '#64-followup',
     FreePositiveQualities: '#64-followup',
