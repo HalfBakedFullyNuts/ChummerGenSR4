@@ -121,7 +121,8 @@
 			addPower({
 				name: power.name,
 				points: power.points,
-				level: power.levels ? 1 : 0
+				level: power.levels ? 1 : 0,
+				...(power.bonus !== undefined ? { bonus: power.bonus } : {})
 			});
 		}
 	}

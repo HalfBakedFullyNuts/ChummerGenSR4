@@ -10,6 +10,8 @@
 import { get } from 'svelte/store';
 import { type Character, type CharacterResonance, type CompiledSprite } from '$types';
 import { characterStore, generateId } from './character';
+import { createImprovementsFromBonus, removeImprovements } from '../engine/improvementManager';
+import { echoes as gameEchoes } from './gamedata';
 
 /** Initialize technomancer resonance. */
 export function initializeResonance(stream: string): void {
@@ -114,6 +116,11 @@ export function learnEcho(echoName: string): { success: boolean; error?: string 
 		return { success: false, error: 'No echo slots available (need to submerge)' };
 	}
 
+	const gameEcho = get(gameEchoes).find((e) => e.name === echoName);
+	const echoImps = gameEcho?.bonus
+		? createImprovementsFromBonus('Echo', echoName, gameEcho.bonus, 1)
+		: [];
+
 	characterStore.update((c) => {
 		if (!c || !c.resonance) return c;
 		return {
@@ -122,6 +129,7 @@ export function learnEcho(echoName: string): { success: boolean; error?: string 
 				...c.resonance,
 				echoes: [...c.resonance.echoes, echoName]
 			},
+			improvements: [...c.improvements, ...echoImps],
 			updatedAt: new Date().toISOString()
 		};
 	});
@@ -144,6 +152,7 @@ export function removeEcho(echoName: string): void {
 				...c.resonance,
 				echoes: c.resonance.echoes.filter((e) => e !== echoName)
 			},
+			improvements: removeImprovements(c.improvements, 'Echo', echoName),
 			updatedAt: new Date().toISOString()
 		};
 	});

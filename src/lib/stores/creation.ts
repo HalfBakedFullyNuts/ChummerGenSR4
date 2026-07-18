@@ -9,7 +9,7 @@
  */
 
 import { get, derived, type Readable } from 'svelte/store';
-import { type Character, type BuildMethod, createEmptyCharacter } from '$types';
+import { type Character, type Metatype, type Metavariant, type Improvement, type BuildMethod, createEmptyCharacter } from '$types';
 import { findMetatype, type GameData } from './gamedata';
 import {
 	characterStore,
@@ -20,6 +20,36 @@ import {
 	type WizardStepConfig,
 	WIZARD_STEPS
 } from './character';
+import { createImprovementsFromBonus, removeImprovements } from '../engine/improvementManager';
+
+/**
+ * Remove improvements from any previously-set metatype/metavariant, then
+ * create improvements for the newly-selected metatype/metavariant (source
+ * name = the metatype/metavariant name, since a character has exactly one).
+ */
+function rebuildMetatypeImprovements(
+	char: Character,
+	metatype: Metatype,
+	metatypeName: string,
+	variant: Metavariant | undefined,
+	metavariantName: string | null
+): readonly Improvement[] {
+	let imps: readonly Improvement[] = char.improvements;
+	if (char.identity.metatype !== '') {
+		imps = removeImprovements(imps, 'Metatype', char.identity.metatype);
+	}
+	if (char.identity.metavariant !== null) {
+		imps = removeImprovements(imps, 'Metavariant', char.identity.metavariant);
+	}
+
+	if (metatype.bonus !== undefined) {
+		imps = [...imps, ...createImprovementsFromBonus('Metatype', metatypeName, metatype.bonus, 1)];
+	}
+	if (variant?.bonus !== undefined && metavariantName !== null) {
+		imps = [...imps, ...createImprovementsFromBonus('Metavariant', metavariantName, variant.bonus, 1)];
+	}
+	return imps;
+}
 
 /** Maximum BP for standard character creation. */
 const MAX_BP = 400;
@@ -189,17 +219,16 @@ export function setMetatype(
 	const metatype = findMetatype(gameData, metatypeName);
 	if (!metatype) return;
 
-	/* Calculate BP cost */
-	let bpCost = metatype.bp;
-	if (metavariantName) {
-		const variant = metatype.metavariants.find((v) => v.name === metavariantName);
-		if (variant) {
-			bpCost = variant.bp;
-		}
-	}
+	const variant =
+		metavariantName !== null
+			? metatype.metavariants.find((v) => v.name === metavariantName)
+			: undefined;
+	const bpCost = variant?.bp ?? metatype.bp;
 
 	/* Set attribute base values to metatype minimums */
 	const attrs = metatype.attributes;
+
+	const imps = rebuildMetatypeImprovements(char, metatype, metatypeName, variant, metavariantName);
 
 	/* Update character with new metatype */
 	const updated: Character = {
@@ -226,6 +255,7 @@ export function setMetatype(
 			...char.buildPointsSpent,
 			metatype: bpCost
 		},
+		improvements: imps,
 		updatedAt: new Date().toISOString()
 	};
 

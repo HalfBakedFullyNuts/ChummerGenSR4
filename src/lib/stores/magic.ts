@@ -15,9 +15,12 @@ import {
 	type CharacterMagic,
 	type CharacterSpell,
 	type CharacterPower,
-	type BoundSpirit
+	type BoundSpirit,
+	type BonusData
 } from '$types';
 import { characterStore, generateId, isCareerMode } from './character';
+import { createImprovementsFromBonus, removeImprovements } from '../engine/improvementManager';
+import { metamagics as gameMetamagics } from './gamedata';
 
 /* ============================================
  * Magic Type Detection
@@ -200,7 +203,12 @@ export function removeSpell(spellId: string): void {
 }
 
 /** Add an adept power to the character. */
-export function addPower(power: { name: string; points: number; level: number }): void {
+export function addPower(power: {
+	name: string;
+	points: number;
+	level: number;
+	bonus?: BonusData;
+}): void {
 	const char = get(characterStore);
 	if (!char || !char.magic) return;
 
@@ -215,6 +223,10 @@ export function addPower(power: { name: string; points: number; level: number })
 		notes: ''
 	};
 
+	const powerImps = power.bonus
+		? createImprovementsFromBonus('Power', newPower.id, power.bonus, power.level)
+		: [];
+
 	const updated: Character = {
 		...char,
 		magic: {
@@ -222,6 +234,7 @@ export function addPower(power: { name: string; points: number; level: number })
 			powers: [...char.magic.powers, newPower],
 			powerPointsUsed: newUsed
 		},
+		improvements: [...char.improvements, ...powerImps],
 		updatedAt: new Date().toISOString()
 	};
 
@@ -243,6 +256,7 @@ export function removePower(powerId: string): void {
 			powers: char.magic.powers.filter((p) => p.id !== powerId),
 			powerPointsUsed: char.magic.powerPointsUsed - power.points
 		},
+		improvements: removeImprovements(char.improvements, 'Power', powerId),
 		updatedAt: new Date().toISOString()
 	};
 
@@ -372,6 +386,11 @@ export function learnMetamagic(metamagicName: string): { success: boolean; error
 		return { success: false, error: 'No metamagic slots available (need to initiate)' };
 	}
 
+	const gameMetamagic = get(gameMetamagics).find((m) => m.name === metamagicName);
+	const metamagicImps = gameMetamagic?.bonus
+		? createImprovementsFromBonus('Metamagic', metamagicName, gameMetamagic.bonus, 1)
+		: [];
+
 	characterStore.update((c) => {
 		if (!c || !c.magic) return c;
 		return {
@@ -380,6 +399,7 @@ export function learnMetamagic(metamagicName: string): { success: boolean; error
 				...c.magic,
 				metamagics: [...c.magic.metamagics, metamagicName]
 			},
+			improvements: [...c.improvements, ...metamagicImps],
 			updatedAt: new Date().toISOString()
 		};
 	});
@@ -400,6 +420,7 @@ export function removeMetamagic(metamagicName: string): void {
 				...c.magic,
 				metamagics: c.magic.metamagics.filter((m) => m !== metamagicName)
 			},
+			improvements: removeImprovements(c.improvements, 'Metamagic', metamagicName),
 			updatedAt: new Date().toISOString()
 		};
 	});

@@ -120,48 +120,18 @@ export function calculateInitiative(char: Character): number {
 
 /**
  * Calculate number of Initiative Dice (base is 1).
- * Cyberware initiative-pass sources (Wired Reflexes, Synaptic Booster,
- * Move-by-Wire) now arrive via the InitiativePass improvement (#62c).
- * Adept "Improved Reflexes" name-matching remains until #63b wires powers
- * through the improvement engine too.
+ * Cyberware and adept-power initiative-pass sources (Wired Reflexes, Synaptic
+ * Booster, Move-by-Wire, Improved Reflexes) all arrive via the InitiativePass
+ * improvement (#62c wires equipment, #63b wires powers) — desktop hardcodes
+ * uniqueName "initiativepass" on all of them so they never stack.
  */
 export function calculateInitiativeDice(char: Character): number {
 	let dice = 1;
 
-	// Check adept powers (temporary — #63b replaces this with InitiativePass improvements)
-	if (char.magic?.powers) {
-		for (const power of char.magic.powers) {
-			if (power.name.toLowerCase().includes('improved reflexes')) {
-				dice = Math.max(dice, power.level + 1);
-			}
-		}
-	}
-
-	// Add improvements (cyberware initiative-pass sources land here per #62c)
 	dice += valueOf(char.improvements, 'InitiativePass') || 0;
 	dice += valueOf(char.improvements, 'InitiativePassAdd') || 0;
 
 	return dice;
-}
-
-/**
- * Calculate Initiative bonus from augmentations.
- * Cyberware REA sources now arrive via the Attribute improvement and are
- * already included in getAttributeTotal('rea') (#62c). This function is
- * reduced to the still-unwired adept-power case until #63b lands.
- */
-export function calculateInitiativeBonus(char: Character): number {
-	let bonus = 0;
-
-	if (char.magic?.powers) {
-		for (const power of char.magic.powers) {
-			if (power.name.toLowerCase().includes('improved reflexes')) {
-				bonus = Math.max(bonus, power.level);
-			}
-		}
-	}
-
-	return bonus;
 }
 
 /* ============================================
@@ -392,7 +362,6 @@ export interface CharacterCalculations {
 
 	// Initiative
 	initiative: number;
-	initiativeBonus: number;
 	initiativeDice: number;
 
 	// Movement
@@ -432,8 +401,7 @@ export function calculateAll(char: Character): CharacterCalculations {
 		overflow: calculateOverflow(char),
 		woundModifier: getWoundModifier(char),
 
-		initiative: calculateInitiative(char) + calculateInitiativeBonus(char),
-		initiativeBonus: calculateInitiativeBonus(char),
+		initiative: calculateInitiative(char),
 		initiativeDice: calculateInitiativeDice(char),
 
 		walkSpeed: calculateWalkSpeed(char),

@@ -186,6 +186,47 @@ describe('Character Creation - Metatype BP Costs', () => {
 	});
 });
 
+describe('Character Creation - Metatype improvement wiring (issue #63b)', () => {
+	// Reach flows via the propMappings table today; BallisticArmor/ImpactArmor
+	// (desktop's <armor><b>/<i></armor> node) aren't parsed until #64.
+	const gameDataWithBonus: GameData = {
+		...mockGameData,
+		metatypes: mockGameData.metatypes.map((m) =>
+			m.name === 'Troll' ? { ...m, bonus: { reach: 1 } } : m
+		)
+	};
+
+	beforeEach(() => {
+		startNewCharacter('test-user', 'bp');
+	});
+
+	it('creates Metatype-sourced improvements from the metatype bonus', () => {
+		setMetatype(gameDataWithBonus, 'Troll');
+
+		const char = get(character)!;
+		expect(char.improvements).toEqual([
+			expect.objectContaining({ type: 'Reach', val: 1, source: 'Metatype', sourceName: 'Troll' })
+		]);
+	});
+
+	it('switching metatype removes the old metatype improvements, leaving no orphans', () => {
+		setMetatype(gameDataWithBonus, 'Troll');
+		expect(get(character)!.improvements).toHaveLength(1);
+
+		setMetatype(gameDataWithBonus, 'Human');
+
+		const char = get(character)!;
+		expect(char.improvements.filter((i) => i.source === 'Metatype' || i.source === 'Metavariant')).toHaveLength(0);
+	});
+
+	it('re-setting the same metatype does not duplicate improvements', () => {
+		setMetatype(gameDataWithBonus, 'Troll');
+		setMetatype(gameDataWithBonus, 'Troll');
+
+		expect(get(character)!.improvements).toHaveLength(1);
+	});
+});
+
 describe('Character Creation - Complete BP Budget', () => {
 	beforeEach(() => {
 		startNewCharacter('test-user', 'bp');

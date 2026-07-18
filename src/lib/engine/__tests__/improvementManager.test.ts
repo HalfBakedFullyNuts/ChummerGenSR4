@@ -126,6 +126,55 @@ describe('ImprovementManager', () => {
         expect(filtered.find(i => i.id === 'imp-2')).toBeUndefined();
     });
 
+    describe('valueOf precedence0/precedence1 (issue #63b)', () => {
+        const attr = (overrides: Partial<Improvement>): Improvement => ({
+            id: overrides.id ?? 'imp',
+            type: 'Attribute',
+            source: 'Cyberware',
+            sourceName: 'src',
+            improvedName: 'rea',
+            val: 0,
+            min: 0,
+            max: 0,
+            aug: 0,
+            augMax: 0,
+            rating: 1,
+            exclude: '',
+            uniqueName: '',
+            addToRating: false,
+            enabled: true,
+            ...overrides
+        });
+
+        it('precedence1 sums and overrides plain', () => {
+            const imps = [
+                attr({ id: 'plain', val: 1, uniqueName: '' }),
+                attr({ id: 'p1a', val: 2, uniqueName: 'precedence1' }),
+                attr({ id: 'p1b', val: 1, uniqueName: 'precedence1' })
+            ];
+            // plain +1 ignored once precedence1 entries are present; 2 + 1 = 3
+            expect(valueOf(imps, 'Attribute', 'rea')).toBe(3);
+        });
+
+        it('precedence0 overrides all', () => {
+            const imps = [
+                attr({ id: 'plain', val: 1, uniqueName: '' }),
+                attr({ id: 'p1a', val: 2, uniqueName: 'precedence1' }),
+                attr({ id: 'p1b', val: 1, uniqueName: 'precedence1' }),
+                attr({ id: 'p0', val: 2, uniqueName: 'precedence0' })
+            ];
+            expect(valueOf(imps, 'Attribute', 'rea')).toBe(2);
+        });
+
+        it('precedence0 takes only the highest among multiple precedence0 entries', () => {
+            const imps = [
+                attr({ id: 'p0a', val: 2, uniqueName: 'precedence0' }),
+                attr({ id: 'p0b', val: 5, uniqueName: 'precedence0' })
+            ];
+            expect(valueOf(imps, 'Attribute', 'rea')).toBe(5);
+        });
+    });
+
     describe('createImprovementsFromBonus', () => {
         it('handles undefined bonusData gracefully', () => {
             const imps = createImprovementsFromBonus('Quality', 'Test', null as any);
@@ -220,11 +269,23 @@ describe('ImprovementManager', () => {
                 specificattribute: [{ name: 'REA', precedence: '1', val: 'Rating' }]
             };
             const imps = createImprovementsFromBonus('Cyberware', 'Wired Reflexes', bonusData, 2);
-            expect(imps.find(i => i.type === 'InitiativePass')!.val).toBe(2);
+            const initPass = imps.find(i => i.type === 'InitiativePass')!;
+            expect(initPass.val).toBe(2);
+            // desktop hardcodes uniqueName "initiativepass" on every InitiativePass improvement (#63b)
+            expect(initPass.uniqueName).toBe('initiativepass');
             const rea = imps.find(i => i.type === 'Attribute');
             expect(rea!.improvedName).toBe('rea');
             expect(rea!.val).toBe(2);
-            expect(rea!.uniqueName).toBe(''); // uniqueName from precedence is #63b's job, not #66's
+            // <name precedence="1"> emits uniqueName "precedence1" (#63b)
+            expect(rea!.uniqueName).toBe('precedence1');
+        });
+
+        it('specificattribute without a precedence attribute gets no uniqueName', () => {
+            const bonusData = {
+                specificattribute: [{ name: 'REA', val: 1 }]
+            };
+            const imps = createImprovementsFromBonus('Cyberware', 'Reaction Enhancers', bonusData);
+            expect(imps[0]!.uniqueName).toBe('');
         });
 
         it('rating upgrade is remove-then-recreate, never in-place mutation', () => {

@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { get } from 'svelte/store';
 import { character, characterStore, startNewCharacter, setResourcesBP, addQuality } from '../character';
+import { addCyberware } from '../equipment';
+import { calculateInitiativeDice } from '../../engine/calculations';
+import { valueOf } from '../../engine/improvementManager';
+import { setGameDataForTesting } from '../gamedata';
+import type { GameCyberware } from '$types';
 import {
     initializeMagic,
     setTradition,
@@ -104,6 +109,102 @@ describe('Magic Store', () => {
             char = get(character);
             expect(char?.magic?.powers).toHaveLength(0);
         });
+
+        it('addPower creates typed improvements from the power bonus data (issue #63b)', () => {
+            characterStore.update((c) => {
+                if (!c || !c.magic) return c;
+                return { ...c, magic: { ...c.magic, powerPoints: 6 } };
+            });
+            addPower({
+                name: 'Improved Reflexes 2',
+                points: 2.5,
+                level: 1,
+                bonus: {
+                    initiativepass: 2,
+                    specificattribute: [{ name: 'REA', precedence: '0', val: 2 }]
+                }
+            });
+
+            const char = get(character)!;
+            const powerId = char.magic!.powers[0]!.id;
+            expect(char.improvements).toHaveLength(2);
+            const initPass = char.improvements.find((i) => i.type === 'InitiativePass');
+            const rea = char.improvements.find((i) => i.type === 'Attribute');
+            expect(initPass).toMatchObject({
+                val: 2,
+                uniqueName: 'initiativepass',
+                source: 'Power',
+                sourceName: powerId
+            });
+            expect(rea).toMatchObject({
+                improvedName: 'rea',
+                val: 2,
+                uniqueName: 'precedence0',
+                source: 'Power',
+                sourceName: powerId
+            });
+        });
+
+        it('removePower cleans up its improvements', () => {
+            characterStore.update((c) => {
+                if (!c || !c.magic) return c;
+                return { ...c, magic: { ...c.magic, powerPoints: 6 } };
+            });
+            addPower({
+                name: 'Improved Reflexes 2',
+                points: 2.5,
+                level: 1,
+                bonus: { initiativepass: 2 }
+            });
+            const powerId = get(character)!.magic!.powers[0]!.id;
+
+            removePower(powerId);
+
+            expect(get(character)!.improvements).toHaveLength(0);
+        });
+
+        it('Improved Reflexes (precedence0) and Wired Reflexes (cyberware) do not stack initiative passes or REA (issue #63b + #62c)', () => {
+            characterStore.update((c) => {
+                if (!c || !c.magic) return c;
+                return { ...c, magic: { ...c.magic, powerPoints: 6 } };
+            });
+
+            const wiredReflexes2: GameCyberware = {
+                name: 'Wired Reflexes',
+                category: 'Bodyware',
+                ess: 3,
+                capacity: '0',
+                avail: '12R',
+                cost: 39000,
+                source: 'SR4',
+                page: 342,
+                rating: 2,
+                minRating: 1,
+                maxRating: 3,
+                bonus: {
+                    initiativepass: 'Rating',
+                    specificattribute: [{ name: 'REA', precedence: '1', val: 'Rating' }]
+                }
+            };
+
+            setResourcesBP(50);
+            addCyberware(wiredReflexes2, 'Standard');
+            addPower({
+                name: 'Improved Reflexes 2',
+                points: 2.5,
+                level: 1,
+                bonus: {
+                    initiativepass: 2,
+                    specificattribute: [{ name: 'REA', precedence: '0', val: 2 }]
+                }
+            });
+
+            const char = get(character)!;
+            // initiative dice: base 1 + max(Wired Reflexes 2, Improved Reflexes 2) = 1 + 2 = 3
+            expect(calculateInitiativeDice(char)).toBe(3);
+            // REA bonus: precedence0 (adept) overrides precedence1 (cyberware) entirely = 2
+            expect(valueOf(char.improvements, 'Attribute', 'rea')).toBe(2);
+        });
     });
 
     describe('Spirit Management', () => {
@@ -177,6 +278,28 @@ describe('Magic Store', () => {
             removeMetamagic('Centering');
             const char = get(character);
             expect(char?.magic?.metamagics).toHaveLength(0);
+        });
+
+        it('learnMetamagic creates improvements from game-data bonus (issue #63b)', () => {
+            setGameDataForTesting({
+                metamagics: [
+                    { name: 'Masking', adept: true, magician: true, source: 'SR4', page: 179, bonus: { composure: 1 } }
+                ]
+            });
+            characterStore.update(c => {
+                if (!c || !c.magic) return c;
+                return { ...c, magic: { ...c.magic, initiateGrade: 1 } };
+            });
+
+            learnMetamagic('Masking');
+
+            const char = get(character)!;
+            expect(char.improvements).toEqual([
+                expect.objectContaining({ type: 'Composure', val: 1, source: 'Metamagic', sourceName: 'Masking' })
+            ]);
+
+            removeMetamagic('Masking');
+            expect(get(character)!.improvements).toHaveLength(0);
         });
     });
 

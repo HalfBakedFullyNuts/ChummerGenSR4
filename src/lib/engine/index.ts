@@ -17,7 +17,6 @@ export {
 	getWoundModifier,
 	calculateInitiative,
 	calculateInitiativeDice,
-	calculateInitiativeBonus,
 	calculateWalkSpeed,
 	calculateRunSpeed,
 	calculateSprintBonus,

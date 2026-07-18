@@ -141,8 +141,49 @@ export function resolveBonusValue(raw: BonusValue | undefined, rating: number): 
 }
 
 /**
+ * Sum plain (no-uniqueName) improvements, plus the highest value from each
+ * uniqueName group. The precedence0/precedence1 override cases are handled
+ * by the caller before falling back to this standard grouping.
+ */
+function sumWithUniqueNameGrouping(
+    activeImprovements: readonly Improvement[],
+    propertyToSum: 'val' | 'min' | 'max' | 'aug' | 'augMax'
+): number {
+    let total = 0;
+    const uniqueGroups = new Map<string, number>();
+
+    for (const imp of activeImprovements) {
+        const rawValue = imp[propertyToSum];
+
+        if (imp.uniqueName) {
+            const currentHighest = uniqueGroups.get(imp.uniqueName) ?? 0;
+            if (rawValue > currentHighest) {
+                uniqueGroups.set(imp.uniqueName, rawValue);
+            }
+        } else {
+            total += rawValue;
+        }
+    }
+
+    for (const highest of uniqueGroups.values()) {
+        total += highest;
+    }
+
+    return total;
+}
+
+/**
  * Get the total value of all enabled improvements matching the specified type.
- * Respects uniqueName stacking limitations (only highest applied in group).
+ * Respects uniqueName stacking limitations (only highest applied in group),
+ * plus desktop's precedence0/precedence1 override rules (clsImprovement.cs
+ * ValueOf) used for initiative-enhancer stacking exclusivity:
+ *  - if any active improvement has uniqueName 'precedence0', the result is
+ *    ONLY the highest precedence0 value — everything else is discarded
+ *    (e.g. adept Improved Reflexes overrides all other REA sources).
+ *  - else if any has uniqueName 'precedence1', the result is the SUM of
+ *    every precedence1 entry — everything else is discarded (e.g. Wired
+ *    Reflexes + Reaction Enhancers stack with each other, but exclude any
+ *    plain bonus).
  * Optionally filter by improvedName (e.g., getting bonuses for a specific skill).
  * Matches exactly (desktop clsImprovement.cs:911-916) — an improvement with an
  * empty improvedName is never a fallback match for a named query.
@@ -164,38 +205,17 @@ export function valueOf(
         activeImprovements = activeImprovements.filter((imp) => imp.improvedName === improvedName);
     }
 
-    // For standard summation
-    let total = 0;
-
-    // Keep track of largest uniqueName groupings so we only take the highest.
-    const uniqueGroups = new Map<string, number>();
-
-    for (const imp of activeImprovements) {
-
-        // Actually, standard Chummer ValueOf sometimes multiplies by Rating or sometimes leaves it unmultiplied.
-        // For our base implementation, we assume `val * rating`. However, many xml items bake the rating directly into their raw XML value, so we might need to adjust this logic later as we parse XML nodes. Flat `val` is safest for now if parsed correctly.
-        // Let's use `val` directly unless it's a rating-based item.
-
-        // Wait, Chummer applies Rating during CreateImprovement. `valueOf` usually just sums the stored `val`.
-        // We'll just sum `val` here, assuming `createImprovementsFromBonus` calculates the final resolved value.
-        const rawValue = imp[propertyToSum];
-
-        if (imp.uniqueName) {
-            const currentHighest = uniqueGroups.get(imp.uniqueName) || 0;
-            if (rawValue > currentHighest) {
-                uniqueGroups.set(imp.uniqueName, rawValue);
-            }
-        } else {
-            total += rawValue;
-        }
+    const precedence0 = activeImprovements.filter((imp) => imp.uniqueName === 'precedence0');
+    if (precedence0.length > 0) {
+        return Math.max(...precedence0.map((imp) => imp[propertyToSum]));
     }
 
-    // Add the highest from each unique group
-    for (const highest of uniqueGroups.values()) {
-        total += highest;
+    const precedence1 = activeImprovements.filter((imp) => imp.uniqueName === 'precedence1');
+    if (precedence1.length > 0) {
+        return precedence1.reduce((sum, imp) => sum + imp[propertyToSum], 0);
     }
 
-    return total;
+    return sumWithUniqueNameGrouping(activeImprovements, propertyToSum);
 }
 
 /**
@@ -290,7 +310,10 @@ export function createImprovementsFromBonus(
                 min: r(attr.min) ?? 0,
                 max: r(attr.max) ?? 0,
                 // desktop: XML `aug` means augmented-maximum, not "augmented bonus" (clsImprovement.cs:1575-1608)
-                augMax: r(attr.aug) ?? 0
+                augMax: r(attr.aug) ?? 0,
+                // desktop: <name precedence="N"> drives valueOf's precedence0/precedence1
+                // stacking exclusivity (e.g. Improved Reflexes vs Wired Reflexes on REA)
+                uniqueName: attr.precedence !== undefined ? `precedence${attr.precedence}` : ''
             });
         }
     }
@@ -359,7 +382,13 @@ export function createImprovementsFromBonus(
     for (const [key, impType] of Object.entries(propMappings)) {
         if (bonusData[key] !== undefined) {
             const resolved = r(bonusData[key]);
-            if (resolved !== undefined) b(impType, '', { val: resolved });
+            if (resolved !== undefined) {
+                // desktop hardcodes uniqueName "initiativepass" on every InitiativePass
+                // improvement (clsImprovement.cs:1830) so e.g. Improved Reflexes and Wired
+                // Reflexes don't stack extra initiative passes with each other.
+                const uniqueName = key === 'initiativepass' ? 'initiativepass' : '';
+                b(impType, '', { val: resolved, uniqueName });
+            }
         }
     }
 
