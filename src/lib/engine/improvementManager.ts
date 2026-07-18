@@ -21,6 +21,7 @@ import type {
     SpellCategoryBonus,
     LivingPersonaBonus
 } from '$types';
+import { getEnabledTabs } from '$lib/utils/qualities';
 
 /** Signature of the `b(...)` improvement-builder closure inside createImprovementsFromBonus. */
 type ImprovementBuilder = (type: ImprovementType, improvedName: string, overrides?: Partial<Improvement>) => void;
@@ -793,8 +794,9 @@ export function createImprovementsFromBonus(
     }
 
     // enabletab grants access to new sections like adept, magician, technomancer
-    if (bonusData.enabletab) {
-        b('SpecialTab', bonusData.enabletab, { val: 1 });
+    // (a quality can enable more than one tab, e.g. Mystic Adept: magician + adept)
+    for (const tab of getEnabledTabs(bonusData.enabletab)) {
+        b('SpecialTab', tab, { val: 1 });
     }
 
     // Selection-prompt keys (issue #68 Tier 2): no consuming UI exists yet for

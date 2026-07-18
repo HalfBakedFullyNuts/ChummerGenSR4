@@ -27,6 +27,18 @@ function n(v: BonusValue | undefined): number {
 }
 
 /**
+ * Normalize `<enabletab>` into a list of tab names. Most qualities enable a
+ * single tab (plain string), but qualities enabling more than one (e.g.
+ * Mystic Adept: magician + adept) parse as `{ name: string | string[] }`.
+ */
+export function getEnabledTabs(enabletab: QualityBonus['enabletab']): string[] {
+	if (!enabletab) return [];
+	if (typeof enabletab === 'string') return [enabletab];
+	const { name } = enabletab;
+	return typeof name === 'string' ? [name] : [...name];
+}
+
+/**
  * Format a QualityBonus object into an array of readable bonus descriptions.
  * Returns an empty array if no bonus or bonus is empty.
  */
@@ -70,9 +82,9 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 		}
 	}
 
-	// Enable tab (magician, adept, technomancer)
-	if (bonus.enabletab) {
-		const tabName = bonus.enabletab.charAt(0).toUpperCase() + bonus.enabletab.slice(1);
+	// Enable tab (magician, adept, technomancer) - some qualities enable more than one
+	for (const tab of getEnabledTabs(bonus.enabletab)) {
+		const tabName = tab.charAt(0).toUpperCase() + tab.slice(1);
 		results.push({
 			text: `Enables ${tabName} abilities`,
 			positive: true
@@ -450,10 +462,11 @@ export function generateQualityTags(quality: GameQuality): QualityTag[] {
 		}
 
 		// Magic
+		const enabledTabs = getEnabledTabs(bonus.enabletab);
 		if (
 			bonus.drainresist !== undefined ||
-			bonus.enabletab === 'magician' ||
-			bonus.enabletab === 'adept'
+			enabledTabs.includes('magician') ||
+			enabledTabs.includes('adept')
 		) {
 			tags.add('magic');
 		}
@@ -462,7 +475,7 @@ export function generateQualityTags(quality: GameQuality): QualityTag[] {
 		}
 
 		// Matrix / Technomancer
-		if (bonus.enabletab === 'technomancer') {
+		if (enabledTabs.includes('technomancer')) {
 			tags.add('matrix');
 		}
 		if (bonus.addattribute?.some((a) => a.name === 'RES')) {
