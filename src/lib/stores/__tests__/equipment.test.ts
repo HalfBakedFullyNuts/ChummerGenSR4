@@ -488,6 +488,85 @@ describe('Equipment Store - Cyberware Essence', () => {
 			expect(cyber.cost).toBe(mockCyberware.cost);
 		});
 	});
+
+	describe('Rating-scaled essence/cost via continuous formulas (cyberware.xml Rating * X, not just FixedValues)', () => {
+		const attentionCoprocessor: GameCyberware = {
+			name: 'Attention Coprocessor',
+			category: 'Headware',
+			ess: 0.3,
+			capacity: '0',
+			avail: '8',
+			cost: 3000, // rating-1 display baseline
+			costFormula: 'Rating * 3000',
+			source: 'AU',
+			page: 36,
+			rating: 3,
+			minRating: 1,
+			maxRating: 3
+		};
+
+		const cybergland: GameCyberware = {
+			name: 'Cybergland',
+			category: 'Cosmetic Modification',
+			ess: 0.1,
+			capacity: '[1]',
+			avail: '4',
+			cost: 500,
+			costFormula: '500+((Rating-1) * 100)',
+			source: 'AU',
+			page: 33,
+			rating: 6,
+			minRating: 1,
+			maxRating: 6
+		};
+
+		const cybereyesBasic: GameCyberware = {
+			name: 'Cybereyes Basic System',
+			category: 'Eyeware',
+			ess: 0.2,
+			essFormula: '(Rating * 0.1) + 0.1',
+			capacity: '(Rating * 4)',
+			avail: '0',
+			cost: 500,
+			source: 'SR4',
+			page: 340,
+			rating: 4,
+			minRating: 1,
+			maxRating: 4
+		};
+
+		it('scales a pure "Rating * X" cost formula with the purchased rating', () => {
+			addCyberware(attentionCoprocessor, 'Standard', 3);
+			const cyber = get(character)!.equipment.cyberware[0]!;
+			expect(cyber.cost).toBe(9000); // Rating 3 * 3000, NOT the flat 3000 baseline
+		});
+
+		it('scales an additive "X + (Rating * Y)" cost formula with the purchased rating', () => {
+			addCyberware(cybergland, 'Standard', 4);
+			const cyber = get(character)!.equipment.cyberware[0]!;
+			expect(cyber.cost).toBe(800); // 500 + ((4-1) * 100)
+		});
+
+		it('scales an "(Rating * X) + Y" essence formula with the purchased rating', () => {
+			addCyberware(cybereyesBasic, 'Standard', 3);
+			const cyber = get(character)!.equipment.cyberware[0]!;
+			expect(cyber.essence).toBeCloseTo(0.4); // (3 * 0.1) + 0.1
+		});
+
+		it('applies grade multipliers on top of the rating-scaled formula cost', () => {
+			addCyberware(attentionCoprocessor, 'Alphaware', 2);
+			const cyber = get(character)!.equipment.cyberware[0]!;
+			expect(cyber.cost).toBe(12000); // (2 * 3000) * 2 (Alphaware cost multiplier)
+		});
+
+		it('scales formula cost/essence for child cyberware too', () => {
+			addCyberware(mockCyberware, 'Standard');
+			const parentId = get(character)!.equipment.cyberware[0]!.id;
+			addChildCyberware(parentId, attentionCoprocessor, 'Standard', 2);
+			const child = get(character)!.equipment.cyberware[0]!.children[0]!;
+			expect(child.cost).toBe(6000); // Rating 2 * 3000
+		});
+	});
 });
 
 describe('Equipment Store - Gear Purchases', () => {

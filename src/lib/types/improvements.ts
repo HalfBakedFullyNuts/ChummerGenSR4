@@ -295,7 +295,13 @@ export interface LivingPersonaBonus {
 export interface BonusData {
     readonly addattribute?: readonly AttributeBonusEntry[];
     readonly specificattribute?: readonly AttributeBonusEntry[];
-    readonly enabletab?: string;
+    /**
+     * Usually a plain string (e.g. "adept"). Qualities that enable more than
+     * one tab (e.g. Mystic Adept: magician + adept) have `<enabletab>` with
+     * repeated `<name>` children, which fast-xml-parser collapses into
+     * `{ name: string | string[] }` instead of a string.
+     */
+    readonly enabletab?: string | { readonly name: string | readonly string[] };
     readonly specificskill?: readonly SkillBonusEntry[];
     readonly skillgroup?: readonly SkillGroupBonusEntry[];
     readonly skillcategory?: readonly SkillCategoryBonusEntry[];

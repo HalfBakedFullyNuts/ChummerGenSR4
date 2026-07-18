@@ -200,11 +200,15 @@ export interface GameCyberware {
 	readonly ess: number;
 	/** Per-rating essence cost table (desktop `FixedValues(...)`, e.g. Wired Reflexes 2/3/5) — `ess` is just index 0. */
 	readonly essByRating?: readonly number[];
+	/** Continuous Rating-based essence formula (e.g. "Rating * 0.1", "(Rating - 3) * 1500") — evaluated at the purchased rating; takes priority over `ess` when present. */
+	readonly essFormula?: string;
 	readonly capacity: string;
 	readonly avail: string;
 	readonly cost: number;
 	/** Per-rating nuyen cost table (desktop `FixedValues(...)`) — `cost` is just index 0. */
 	readonly costByRating?: readonly number[];
+	/** Continuous Rating-based cost formula (e.g. "Rating * 3000", "600 + (Rating * 100)") — evaluated at the purchased rating; takes priority over `cost` when present. */
+	readonly costFormula?: string;
 	readonly source: string;
 	readonly page: number;
 	readonly rating: number;
