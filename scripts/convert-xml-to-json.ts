@@ -1130,6 +1130,7 @@ function convertCyberware(): ConversionResult {
 		category: string;
 		ess: number | null;
 		essFormula?: string;
+		essByRating?: number[];
 		capacity: string;
 		avail: string;
 		cost: number | null;
@@ -1153,9 +1154,12 @@ function convertCyberware(): ConversionResult {
 		const essParsed = parseFormulaValue(essRaw);
 		let ess: number | null = null;
 		let essFormula: string | undefined;
+		let essByRating: number[] | undefined;
 		if (typeof essParsed === 'number') {
 			ess = essParsed;
 		} else if (Array.isArray(essParsed)) {
+			/* FixedValues (e.g. Wired Reflexes 2/3/5) - store as array for rating lookup */
+			essByRating = essParsed;
 			ess = essParsed[0] ?? null;
 		} else if (essRaw !== undefined && essRaw !== null && essRaw !== '') {
 			/* Preserve formula string for complex cases */
@@ -1193,6 +1197,7 @@ function convertCyberware(): ConversionResult {
 
 		/* Add optional formula fields only if present */
 		if (essFormula) item.essFormula = essFormula;
+		if (essByRating) item.essByRating = essByRating;
 		if (costFormula) item.costFormula = costFormula;
 		if (costByRating) item.costByRating = costByRating;
 		const bonus = extractBonus(c['bonus']);

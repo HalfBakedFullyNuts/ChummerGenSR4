@@ -198,9 +198,13 @@ export interface GameCyberware {
 	readonly name: string;
 	readonly category: string;
 	readonly ess: number;
+	/** Per-rating essence cost table (desktop `FixedValues(...)`, e.g. Wired Reflexes 2/3/5) — `ess` is just index 0. */
+	readonly essByRating?: readonly number[];
 	readonly capacity: string;
 	readonly avail: string;
 	readonly cost: number;
+	/** Per-rating nuyen cost table (desktop `FixedValues(...)`) — `cost` is just index 0. */
+	readonly costByRating?: readonly number[];
 	readonly source: string;
 	readonly page: number;
 	readonly rating: number;

@@ -220,6 +220,7 @@ export {
     removeWeapon,
     addArmor,
     removeArmor,
+    setArmorEquipped,
     addCyberware,
     addChildCyberware,
     removeChildCyberware,

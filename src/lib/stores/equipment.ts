@@ -288,12 +288,45 @@ export function removeArmor(armorId: string): void {
 	characterStore.set(updated);
 }
 
+/**
+ * Set whether a piece of armor is worn. Only equipped armor contributes to
+ * calculateArmorBallistic/Impact — desktop wears armor at purchase by
+ * default, but the web has no equip-toggle UI yet, so armor bought via
+ * addArmor starts unequipped and must be equipped explicitly.
+ */
+export function setArmorEquipped(armorId: string, equipped: boolean): void {
+	const char = get(characterStore);
+	if (!char) return;
+
+	const updated: Character = {
+		...char,
+		equipment: {
+			...char.equipment,
+			armor: char.equipment.armor.map((a) => (a.id === armorId ? { ...a, equipped } : a))
+		},
+		updatedAt: new Date().toISOString()
+	};
+
+	characterStore.set(updated);
+}
+
 /* ============================================
  * Cyberware & Bioware
  * ============================================ */
 
-/** Add cyberware to the character. Reduces essence. */
-export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Standard'): void {
+/**
+ * Look up a per-rating value from a desktop `FixedValues(...)` table (e.g.
+ * Wired Reflexes essence 2/3/5), falling back to the flat value when no
+ * table exists. Rating is clamped into [1, table.length].
+ */
+function resolveByRating(flat: number, byRating: readonly number[] | undefined, rating: number): number {
+	if (byRating === undefined || byRating.length === 0) return flat;
+	const index = Math.min(Math.max(rating, 1), byRating.length) - 1;
+	return byRating[index] ?? flat;
+}
+
+/** Add cyberware to the character. Reduces essence. `rating` defaults to the item's own rating field when omitted. */
+export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Standard', rating?: number): void {
 	const char = get(characterStore);
 	if (!char) return;
 
@@ -305,9 +338,12 @@ export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Stan
 		Used: { ess: 1.2, cost: 0.5 }
 	};
 
+	const purchasedRating = rating ?? cyber.rating ?? 1;
 	const multiplier = gradeMultipliers[grade];
-	const essenceCost = cyber.ess * multiplier.ess * essenceMultiplier(char.improvements, 'Cyberware');
-	const nuyenCost = Math.floor(cyber.cost * multiplier.cost);
+	const baseEss = resolveByRating(cyber.ess, cyber.essByRating, purchasedRating);
+	const baseCost = resolveByRating(cyber.cost, cyber.costByRating, purchasedRating);
+	const essenceCost = baseEss * multiplier.ess * essenceMultiplier(char.improvements, 'Cyberware');
+	const nuyenCost = Math.floor(baseCost * multiplier.cost);
 
 	if (char.nuyen < nuyenCost) return;
 	if (char.attributes.ess - essenceCost < 0) return;
@@ -317,7 +353,7 @@ export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Stan
 		name: cyber.name,
 		category: cyber.category,
 		grade,
-		rating: cyber.rating || 1,
+		rating: purchasedRating,
 		essence: essenceCost,
 		cost: nuyenCost,
 		capacity: 0,
@@ -388,7 +424,8 @@ export function removeCyberware(cyberId: string): void {
 export function addChildCyberware(
 	parentId: string,
 	cyber: GameCyberware,
-	grade: CyberwareGrade = 'Standard'
+	grade: CyberwareGrade = 'Standard',
+	rating?: number
 ): void {
 	const char = get(characterStore);
 	if (!char) return;
@@ -401,10 +438,13 @@ export function addChildCyberware(
 		Used: { ess: 1.2, cost: 0.5 }
 	};
 
+	const purchasedRating = rating ?? cyber.rating ?? 1;
 	const multiplier = gradeMultipliers[grade];
 	// Child cyberware essence is inherently reduced in some rules, but standard calculation here is base.
-	const essenceCost = cyber.ess * multiplier.ess * essenceMultiplier(char.improvements, 'Cyberware');
-	const nuyenCost = Math.floor(cyber.cost * multiplier.cost);
+	const baseEss = resolveByRating(cyber.ess, cyber.essByRating, purchasedRating);
+	const baseCost = resolveByRating(cyber.cost, cyber.costByRating, purchasedRating);
+	const essenceCost = baseEss * multiplier.ess * essenceMultiplier(char.improvements, 'Cyberware');
+	const nuyenCost = Math.floor(baseCost * multiplier.cost);
 
 	if (char.nuyen < nuyenCost) return;
 	// Parent cyberware may have capacity we should use instead of essence, but leaving basic logic first
@@ -415,7 +455,7 @@ export function addChildCyberware(
 		name: cyber.name,
 		category: cyber.category,
 		grade,
-		rating: cyber.rating || 1,
+		rating: purchasedRating,
 		essence: essenceCost,
 		cost: nuyenCost,
 		capacity: 0,

@@ -1000,6 +1000,11 @@
       "rating": 3,
       "source": "AU",
       "page": 40,
+      "essByRating": [
+        0.6,
+        1,
+        1.6
+      ],
       "costByRating": [
         10000,
         20000,
@@ -1140,6 +1145,11 @@
       "rating": 3,
       "source": "AU",
       "page": 40,
+      "essByRating": [
+        2,
+        3,
+        5
+      ],
       "costByRating": [
         50000,
         85000,
@@ -1346,6 +1356,11 @@
       "rating": 3,
       "source": "SR4",
       "page": 342,
+      "essByRating": [
+        2,
+        3,
+        5
+      ],
       "costByRating": [
         11000,
         32000,
@@ -2728,6 +2743,11 @@
       "rating": 3,
       "source": "AU",
       "page": 153,
+      "essByRating": [
+        2.5,
+        3.5,
+        5.5
+      ],
       "costByRating": [
         45000,
         80000,
@@ -3497,6 +3517,11 @@
       "rating": 3,
       "source": "2050",
       "page": 187,
+      "essByRating": [
+        2,
+        3,
+        5
+      ],
       "costByRating": [
         12000,
         60000,
@@ -3546,6 +3571,11 @@
       "rating": 3,
       "source": "2050",
       "page": 187,
+      "essByRating": [
+        2,
+        3,
+        5
+      ],
       "costByRating": [
         55000,
         165000,
