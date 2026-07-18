@@ -214,6 +214,21 @@ export function removeImprovements(
 }
 
 /**
+ * Remove improvements granted by any of the given item ids — a parent item
+ * plus its nested children (e.g. removing a cyberlimb removes the plugins
+ * installed inside it too). Reused by Epic 17's deep equipment nesting (#75).
+ */
+export function removeImprovementsForTree(
+    improvements: readonly Improvement[],
+    source: ImprovementSource,
+    itemIds: readonly string[]
+): Improvement[] {
+    if (!improvements) return [];
+    const idSet = new Set(itemIds);
+    return improvements.filter((imp) => !(imp.source === source && idSet.has(imp.sourceName)));
+}
+
+/**
  * Generate a unique improvement ID.
  */
 function generateImprovementId(): string {

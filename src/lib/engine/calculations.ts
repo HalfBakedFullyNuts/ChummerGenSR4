@@ -118,25 +118,17 @@ export function calculateInitiative(char: Character): number {
 	return rea + int + impBonus;
 }
 
-/** Calculate number of Initiative Dice (base is 1). */
+/**
+ * Calculate number of Initiative Dice (base is 1).
+ * Cyberware initiative-pass sources (Wired Reflexes, Synaptic Booster,
+ * Move-by-Wire) now arrive via the InitiativePass improvement (#62c).
+ * Adept "Improved Reflexes" name-matching remains until #63b wires powers
+ * through the improvement engine too.
+ */
 export function calculateInitiativeDice(char: Character): number {
 	let dice = 1;
 
-	// Check cyberware for initiative boosters
-	for (const cyber of char.equipment.cyberware) {
-		const name = cyber.name.toLowerCase();
-		const rating = cyber.rating || 1;
-
-		if (name.includes('wired reflexes')) {
-			dice = Math.max(dice, rating + 1);
-		} else if (name.includes('synaptic booster')) {
-			dice = Math.max(dice, rating + 1);
-		} else if (name.includes('move-by-wire')) {
-			dice = Math.max(dice, rating + 1);
-		}
-	}
-
-	// Check adept powers
+	// Check adept powers (temporary — #63b replaces this with InitiativePass improvements)
 	if (char.magic?.powers) {
 		for (const power of char.magic.powers) {
 			if (power.name.toLowerCase().includes('improved reflexes')) {
@@ -145,31 +137,21 @@ export function calculateInitiativeDice(char: Character): number {
 		}
 	}
 
-	// Add improvements
+	// Add improvements (cyberware initiative-pass sources land here per #62c)
 	dice += valueOf(char.improvements, 'InitiativePass') || 0;
 	dice += valueOf(char.improvements, 'InitiativePassAdd') || 0;
 
 	return dice;
 }
 
-/** Calculate Initiative bonus from augmentations. */
+/**
+ * Calculate Initiative bonus from augmentations.
+ * Cyberware REA sources now arrive via the Attribute improvement and are
+ * already included in getAttributeTotal('rea') (#62c). This function is
+ * reduced to the still-unwired adept-power case until #63b lands.
+ */
 export function calculateInitiativeBonus(char: Character): number {
 	let bonus = 0;
-
-	for (const cyber of char.equipment.cyberware) {
-		const name = cyber.name.toLowerCase();
-		const rating = cyber.rating || 1;
-
-		if (name.includes('wired reflexes')) {
-			bonus = Math.max(bonus, rating);
-		} else if (name.includes('synaptic booster')) {
-			bonus = Math.max(bonus, rating);
-		} else if (name.includes('move-by-wire')) {
-			bonus = Math.max(bonus, rating * 2);
-		} else if (name.includes('reaction enhancers')) {
-			bonus += rating;
-		}
-	}
 
 	if (char.magic?.powers) {
 		for (const power of char.magic.powers) {

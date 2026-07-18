@@ -28,6 +28,7 @@ import {
 } from '$types';
 import { characterStore, generateId } from './character';
 import { type GameMartialArt } from './gamedata';
+import { createImprovementsFromBonus, removeImprovements, removeImprovementsForTree } from '../engine/improvementManager';
 
 /* ============================================
  * Resources
@@ -227,12 +228,17 @@ export function addArmor(armor: GameArmor): void {
 		notes: ''
 	};
 
+	const newImprovements = armor.bonus
+		? createImprovementsFromBonus('Armor', newArmor.id, armor.bonus)
+		: [];
+
 	const updated: Character = {
 		...char,
 		equipment: {
 			...char.equipment,
 			armor: [...char.equipment.armor, newArmor]
 		},
+		improvements: [...char.improvements, ...newImprovements],
 		nuyen: char.nuyen - armor.cost,
 		updatedAt: new Date().toISOString()
 	};
@@ -254,6 +260,7 @@ export function removeArmor(armorId: string): void {
 			...char.equipment,
 			armor: char.equipment.armor.filter((a) => a.id !== armorId)
 		},
+		improvements: removeImprovements(char.improvements, 'Armor', armorId),
 		nuyen: char.nuyen + armor.cost,
 		updatedAt: new Date().toISOString()
 	};
@@ -300,6 +307,10 @@ export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Stan
 		notes: ''
 	};
 
+	const newImprovements = cyber.bonus
+		? createImprovementsFromBonus('Cyberware', newCyber.id, cyber.bonus, newCyber.rating)
+		: [];
+
 	const updated: Character = {
 		...char,
 		equipment: {
@@ -310,6 +321,7 @@ export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Stan
 			...char.attributes,
 			ess: char.attributes.ess - essenceCost
 		},
+		improvements: [...char.improvements, ...newImprovements],
 		nuyen: char.nuyen - nuyenCost,
 		updatedAt: new Date().toISOString()
 	};
@@ -317,7 +329,12 @@ export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Stan
 	characterStore.set(updated);
 }
 
-/** Remove cyberware from the character. Restores essence. */
+/** Collect a cyberware item's id plus every descendant child id (recursive). */
+function collectCyberwareTreeIds(cyber: CharacterCyberware): string[] {
+	return [cyber.id, ...cyber.children.flatMap(collectCyberwareTreeIds)];
+}
+
+/** Remove cyberware from the character. Restores essence. Also removes any child cyberware's improvements. */
 export function removeCyberware(cyberId: string): void {
 	const char = get(characterStore);
 	if (!char) return;
@@ -335,6 +352,11 @@ export function removeCyberware(cyberId: string): void {
 			...char.attributes,
 			ess: char.attributes.ess + cyber.essence
 		},
+		improvements: removeImprovementsForTree(
+			char.improvements,
+			'Cyberware',
+			collectCyberwareTreeIds(cyber)
+		),
 		nuyen: char.nuyen + cyber.cost,
 		updatedAt: new Date().toISOString()
 	};
@@ -383,6 +405,10 @@ export function addChildCyberware(
 		notes: ''
 	};
 
+	const newImprovements = cyber.bonus
+		? createImprovementsFromBonus('Cyberware', newChild.id, cyber.bonus, newChild.rating)
+		: [];
+
 	const updated: Character = {
 		...char,
 		equipment: {
@@ -395,6 +421,7 @@ export function addChildCyberware(
 			...char.attributes,
 			ess: char.attributes.ess - essenceCost
 		},
+		improvements: [...char.improvements, ...newImprovements],
 		nuyen: char.nuyen - nuyenCost,
 		updatedAt: new Date().toISOString()
 	};
@@ -402,7 +429,7 @@ export function addChildCyberware(
 	characterStore.set(updated);
 }
 
-/** Remove a child cyberware from a parent cyberware. Restores essence. */
+/** Remove a child cyberware from a parent cyberware. Restores essence. Also removes any grandchild improvements. */
 export function removeChildCyberware(parentId: string, childId: string): void {
 	const char = get(characterStore);
 	if (!char) return;
@@ -427,6 +454,11 @@ export function removeChildCyberware(parentId: string, childId: string): void {
 			...char.attributes,
 			ess: char.attributes.ess + child.essence
 		},
+		improvements: removeImprovementsForTree(
+			char.improvements,
+			'Cyberware',
+			collectCyberwareTreeIds(child)
+		),
 		nuyen: char.nuyen + child.cost,
 		updatedAt: new Date().toISOString()
 	};
@@ -467,6 +499,10 @@ export function addBioware(
 		notes: ''
 	};
 
+	const newImprovements = bio.bonus
+		? createImprovementsFromBonus('Bioware', newBio.id, bio.bonus, rating)
+		: [];
+
 	const updated: Character = {
 		...char,
 		equipment: {
@@ -477,6 +513,7 @@ export function addBioware(
 			...char.attributes,
 			ess: char.attributes.ess - essenceCost
 		},
+		improvements: [...char.improvements, ...newImprovements],
 		nuyen: char.nuyen - nuyenCost,
 		updatedAt: new Date().toISOString()
 	};
@@ -502,6 +539,7 @@ export function removeBioware(bioId: string): void {
 			...char.attributes,
 			ess: char.attributes.ess + bio.essence
 		},
+		improvements: removeImprovements(char.improvements, 'Bioware', bioId),
 		nuyen: char.nuyen + bio.cost,
 		updatedAt: new Date().toISOString()
 	};
@@ -810,7 +848,10 @@ export function addGear(
 			: -1;
 
 	let newGear: readonly CharacterGear[];
+	let newImprovements: ReturnType<typeof createImprovementsFromBonus> = [];
 	if (existingIndex >= 0) {
+		// Stacking onto an existing item — desktop creates improvements once
+		// per gear object, not per unit, so no new improvements here.
 		newGear = char.equipment.gear.map((g, i) =>
 			i === existingIndex ? { ...g, quantity: g.quantity + quantity } : g
 		);
@@ -832,6 +873,9 @@ export function addGear(
 			children: []
 		};
 		newGear = [...char.equipment.gear, newItem];
+		newImprovements = gear.bonus
+			? createImprovementsFromBonus('Gear', newItem.id, gear.bonus, gear.rating || 1)
+			: [];
 
 		if (containerId) {
 			const containerIndex = newGear.findIndex((g) => g.id === containerId);
@@ -856,6 +900,7 @@ export function addGear(
 			...char.equipment,
 			gear: newGear
 		},
+		improvements: [...char.improvements, ...newImprovements],
 		nuyen: char.nuyen - totalCost,
 		updatedAt: new Date().toISOString()
 	};
@@ -863,7 +908,7 @@ export function addGear(
 	characterStore.set(updated);
 }
 
-/** Remove gear from the character's equipment. */
+/** Remove gear from the character's equipment. Also removes contained items' improvements. */
 export function removeGear(gearId: string): void {
 	const char = get(characterStore);
 	if (!char) return;
@@ -909,6 +954,7 @@ export function removeGear(gearId: string): void {
 			...char.equipment,
 			gear: newGear
 		},
+		improvements: removeImprovementsForTree(char.improvements, 'Gear', [...idsToRemove]),
 		nuyen: char.nuyen + refund,
 		updatedAt: new Date().toISOString()
 	};
@@ -1016,6 +1062,10 @@ export function addGearToGear(parentId: string, gear: GameGear, quantity: number
 		children: []
 	};
 
+	const newImprovements = gear.bonus
+		? createImprovementsFromBonus('Gear', newChild.id, gear.bonus, gear.rating || 1)
+		: [];
+
 	const updated: Character = {
 		...char,
 		equipment: {
@@ -1024,6 +1074,7 @@ export function addGearToGear(parentId: string, gear: GameGear, quantity: number
 				g.id === parentId ? { ...g, children: [...g.children, newChild] } : g
 			)
 		},
+		improvements: [...char.improvements, ...newImprovements],
 		nuyen: char.nuyen - totalCost,
 		updatedAt: new Date().toISOString()
 	};
@@ -1031,7 +1082,12 @@ export function addGearToGear(parentId: string, gear: GameGear, quantity: number
 	characterStore.set(updated);
 }
 
-/** Remove a gear child from a parent gear. */
+/** Collect a gear item's id plus every descendant child id (recursive). */
+function collectGearTreeIds(gear: CharacterGear): string[] {
+	return [gear.id, ...gear.children.flatMap(collectGearTreeIds)];
+}
+
+/** Remove a gear child from a parent gear. Also removes any grandchild improvements. */
 export function removeGearFromGear(parentId: string, childId: string): void {
 	const char = get(characterStore);
 	if (!char) return;
@@ -1052,6 +1108,7 @@ export function removeGearFromGear(parentId: string, childId: string): void {
 					: g
 			)
 		},
+		improvements: removeImprovementsForTree(char.improvements, 'Gear', collectGearTreeIds(child)),
 		nuyen: char.nuyen + child.cost * child.quantity,
 		updatedAt: new Date().toISOString()
 	};
