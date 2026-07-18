@@ -1,0 +1,684 @@
+﻿[
+	{
+		"name": "Attention Coprocessor",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 3000
+			}
+		}
+	},
+	{
+		"name": "Olfactory Booster",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 1000
+			}
+		}
+	},
+	{
+		"name": "Radar Sensor",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 3000
+			}
+		}
+	},
+	{
+		"name": "Taste Booster",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 1500
+			}
+		}
+	},
+	{
+		"name": "Voice Modulator (Secondary Pattern)",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 5000
+			}
+		}
+	},
+	{
+		"name": "Cybereyes Basic System",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 500
+			},
+			"costByRating": [500, 750, 1000, 1500],
+			"ess": {
+				"old": null,
+				"new": 0.1
+			}
+		}
+	},
+	{
+		"name": "Eye Laser Microphone",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 500
+			}
+		}
+	},
+	{
+		"name": "Eyeband",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 800
+			},
+			"costByRating": [800, 1000, 1250],
+			"ess": {
+				"old": null,
+				"new": 0.1
+			}
+		}
+	},
+	{
+		"name": "Retinal Duplication",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 15000
+			}
+		}
+	},
+	{
+		"name": "Single Cybereye",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 300
+			},
+			"costByRating": [300, 450, 600, 900],
+			"ess": {
+				"old": null,
+				"new": 0.05
+			}
+		}
+	},
+	{
+		"name": "Vision Enhancement",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 1500
+			}
+		}
+	},
+	{
+		"name": "Cyberears",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 500
+			},
+			"costByRating": [500, 750, 1000, 1500],
+			"ess": {
+				"old": null,
+				"new": 0.1
+			}
+		}
+	},
+	{
+		"name": "Audio Enhancement",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 1500
+			}
+		}
+	},
+	{
+		"name": "Select Sound Filter",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 1000
+			}
+		}
+	},
+	{
+		"name": "Essence Hole",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.01
+			}
+		}
+	},
+	{
+		"name": "Auto-Injector (One-shot)",
+		"changes": {
+			"costFormula": "600 + (Rating * 100)"
+		}
+	},
+	{
+		"name": "Auto-Injector (Reusable)",
+		"changes": {
+			"costFormula": "400 + (Rating * 100)"
+		}
+	},
+	{
+		"name": "Dermal Plating",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.5
+			},
+			"cost": {
+				"old": null,
+				"new": 5000
+			}
+		}
+	},
+	{
+		"name": "Dermal Sheath",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 10000
+			},
+			"costByRating": [10000, 20000, 40000],
+			"ess": {
+				"old": null,
+				"new": 0.6
+			}
+		}
+	},
+	{
+		"name": "Move-by-Wire System",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 50000
+			},
+			"costByRating": [50000, 85000, 175000],
+			"ess": {
+				"old": null,
+				"new": 2
+			}
+		}
+	},
+	{
+		"name": "Muscle Replacement",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 1
+			},
+			"cost": {
+				"old": null,
+				"new": 5000
+			}
+		}
+	},
+	{
+		"name": "Reaction Enhancers",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.3
+			},
+			"cost": {
+				"old": null,
+				"new": 10000
+			}
+		}
+	},
+	{
+		"name": "Skillwires",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.2
+			},
+			"cost": {
+				"old": null,
+				"new": 2000
+			}
+		}
+	},
+	{
+		"name": "Wired Reflexes",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 11000
+			},
+			"costByRating": [11000, 32000, 100000],
+			"ess": {
+				"old": null,
+				"new": 2
+			}
+		}
+	},
+	{
+		"name": "Fingerprint Morphing",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 10000
+			}
+		}
+	},
+	{
+		"name": "Jigsaw Skull",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.6
+			},
+			"cost": {
+				"old": null,
+				"new": 15000
+			}
+		}
+	},
+	{
+		"name": "Armor",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 300
+			}
+		}
+	},
+	{
+		"name": "Bulk Modification",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 1000
+			}
+		}
+	},
+	{
+		"name": "Customized Body",
+		"changes": {
+			"costFormula": "(Rating - 3) * 1500"
+		}
+	},
+	{
+		"name": "Customized Strength",
+		"changes": {
+			"costFormula": "(Rating - 3) * 1500"
+		}
+	},
+	{
+		"name": "Customized Agility",
+		"changes": {
+			"costFormula": "(Rating - 3) * 1500"
+		}
+	},
+	{
+		"name": "Enhanced Body",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 200
+			}
+		}
+	},
+	{
+		"name": "Enhanced Strength",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 250
+			}
+		}
+	},
+	{
+		"name": "Enhanced Agility",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 250
+			}
+		}
+	},
+	{
+		"name": "MDS Subdermal Sheath",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 3000
+			}
+		}
+	},
+	{
+		"name": "Hydraulic Jacks",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 1000
+			}
+		}
+	},
+	{
+		"name": "Modular Cyberlimb",
+		"changes": {
+			"costFormula": "*1.1"
+		}
+	},
+	{
+		"name": "Scanner System",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 500
+			}
+		}
+	},
+	{
+		"name": "Cybergland",
+		"changes": {
+			"costFormula": "500+((Rating-1) * 100)"
+		}
+	},
+	{
+		"name": "Fiberoptic Hair",
+		"changes": {
+			"costFormula": "Variable(450+)"
+		}
+	},
+	{
+		"name": "Built-in Medkit",
+		"changes": {
+			"costFormula": "1000 + (Rating * 100)"
+		}
+	},
+	{
+		"name": "Stirrup Interface",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 45000
+			},
+			"costByRating": [45000, 80000, 100000],
+			"ess": {
+				"old": null,
+				"new": 2.5
+			}
+		}
+	},
+	{
+		"name": "Dynamic Handprints",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 1000
+			}
+		}
+	},
+	{
+		"name": "Nanohive",
+		"changes": {
+			"essFormula": "0.5 + (Rating * 0.25)",
+			"cost": {
+				"old": null,
+				"new": 10000
+			}
+		}
+	},
+	{
+		"name": "Retinal Adjusters",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 5000
+			}
+		}
+	},
+	{
+		"name": "Smart Skin",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.5
+			},
+			"cost": {
+				"old": null,
+				"new": 10000
+			}
+		}
+	},
+	{
+		"name": "Voice Mimic",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 3000
+			}
+		}
+	},
+	{
+		"name": "Chipjack (2050)",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.1
+			},
+			"cost": {
+				"old": null,
+				"new": 2000
+			}
+		}
+	},
+	{
+		"name": "Memory (2050)",
+		"changes": {
+			"essFormula": "ceiling(Rating div 20) * 0.1",
+			"cost": {
+				"old": null,
+				"new": 500
+			}
+		}
+	},
+	{
+		"name": "Boosted Reflexes (2050)",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.9
+			},
+			"cost": {
+				"old": null,
+				"new": 20000
+			}
+		}
+	},
+	{
+		"name": "Customized Body (2050)",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 2000
+			}
+		}
+	},
+	{
+		"name": "Customized Strength (2050)",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 2000
+			}
+		}
+	},
+	{
+		"name": "Customized Agility (2050)",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 2000
+			}
+		}
+	},
+	{
+		"name": "Enhanced Body (2050)",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 300
+			}
+		}
+	},
+	{
+		"name": "Enhanced Strength (2050)",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 350
+			}
+		}
+	},
+	{
+		"name": "Enhanced Agility (2050)",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 400
+			}
+		}
+	},
+	{
+		"name": "Armor (2050)",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 500
+			}
+		}
+	},
+	{
+		"name": "Cosmetic Modifications, Bodyware (2050)",
+		"changes": {
+			"costFormula": "Variable(2000-10000)"
+		}
+	},
+	{
+		"name": "Dermal Plating (2050)",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.5
+			},
+			"cost": {
+				"old": null,
+				"new": 5000
+			}
+		}
+	},
+	{
+		"name": "Filtration System, Air (2050)",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.1
+			},
+			"cost": {
+				"old": null,
+				"new": 15000
+			}
+		}
+	},
+	{
+		"name": "Filtration System, Blood (2050)",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.2
+			},
+			"cost": {
+				"old": null,
+				"new": 10000
+			}
+		}
+	},
+	{
+		"name": "Olfactory Booster (2050)",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 1000
+			}
+		}
+	},
+	{
+		"name": "Muscle Replacement (2050)",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 1
+			},
+			"cost": {
+				"old": null,
+				"new": 20000
+			}
+		}
+	},
+	{
+		"name": "Skillwires (2050)",
+		"changes": {
+			"ess": {
+				"old": null,
+				"new": 0.2
+			},
+			"cost": {
+				"old": null,
+				"new": 50000
+			}
+		}
+	},
+	{
+		"name": "Vehicle Control Rig (2050)",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 12000
+			},
+			"costByRating": [12000, 60000, 300000],
+			"ess": {
+				"old": null,
+				"new": 2
+			}
+		}
+	},
+	{
+		"name": "Wired Reflexes (2050)",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 55000
+			},
+			"costByRating": [55000, 165000, 500000],
+			"ess": {
+				"old": null,
+				"new": 2
+			}
+		}
+	},
+	{
+		"name": "Boosted Reflexes",
+		"changes": {
+			"cost": {
+				"old": null,
+				"new": 15000
+			},
+			"costByRating": [15000, 32000, 47000],
+			"ess": {
+				"old": null,
+				"new": 0.9
+			}
+		}
+	}
+]

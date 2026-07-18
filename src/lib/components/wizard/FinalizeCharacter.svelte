@@ -15,9 +15,7 @@
 	}
 
 	/** Calculate total BP spent. */
-	$: totalSpent = $bpBreakdown
-		? Object.values($bpBreakdown).reduce((a, b) => a + b, 0)
-		: 0;
+	$: totalSpent = $bpBreakdown ? Object.values($bpBreakdown).reduce((a, b) => a + b, 0) : 0;
 
 	/** Validate character. */
 	$: validationMessages = validateCharacter($character);
@@ -79,9 +77,7 @@
 
 		// Check negative quality limit (35 BP max)
 		const negativeBP = Math.abs(
-			char.qualities
-				.filter((q) => q.category === 'Negative')
-				.reduce((sum, q) => sum + q.bp, 0)
+			char.qualities.filter((q) => q.category === 'Negative').reduce((sum, q) => sum + q.bp, 0)
 		);
 		if (negativeBP > 35) {
 			messages.push({
@@ -215,7 +211,10 @@
 				{/if}
 				<div class="flex justify-between py-2 font-medium border-t border-border">
 					<span class="text-text-secondary">Total Spent</span>
-					<span class="text-text-primary font-mono">{totalSpent} / {$character?.buildPoints ?? 400} {$character?.buildMethod === 'karma' ? 'Karma' : 'BP'}</span>
+					<span class="text-text-primary font-mono"
+						>{totalSpent} / {$character?.buildPoints ?? 400}
+						{$character?.buildMethod === 'karma' ? 'Karma' : 'BP'}</span
+					>
 				</div>
 				<div class="flex justify-between py-2">
 					<span class="text-text-secondary">Remaining</span>
@@ -223,7 +222,8 @@
 						class="font-mono font-bold
 							{$remainingBP < 0 ? 'text-error-main' : 'text-primary-dark'}"
 					>
-						{$remainingBP} {$character?.buildMethod === 'karma' ? 'Karma' : 'BP'}
+						{$remainingBP}
+						{$character?.buildMethod === 'karma' ? 'Karma' : 'BP'}
 					</span>
 				</div>
 			{/if}
@@ -299,8 +299,8 @@
 							<span
 								class="px-2 py-1 rounded text-xs
 									{quality.category === 'Positive'
-										? 'bg-success-main/20 text-success-dark'
-										: 'bg-error-main/20 text-error-main'}"
+									? 'bg-success-main/20 text-success-dark'
+									: 'bg-error-main/20 text-error-main'}"
 							>
 								{quality.name}
 								{#if quality.bp !== 0}

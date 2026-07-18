@@ -4,8 +4,9 @@
 		character,
 		incrementSkillGroup,
 		decrementSkillGroup,
-		setSkillWithGroupCheck
-	} from '$stores/character';
+		setSkillWithGroupCheck,
+		setSkillSpecialization
+	} from '$stores';
 	import type { SkillDefinition, SkillGroupName } from '$types';
 	import { MAX_SKILL_GROUP_RATING } from '$types';
 
@@ -18,54 +19,62 @@
 	/** BP cost per skill group point. */
 	const BP_PER_GROUP_POINT = 10;
 
+	/** BP cost per specialization. */
+	const SPECIALIZATION_BP_COST = 2;
+
 	/** Grouping mode. */
 	let groupMode: 'skillgroup' | 'attribute' = 'skillgroup';
 
 	/** Search query filter. */
 	let searchQuery = '';
 
+	/** Specialization modal state. */
+	let showSpecializationModal = false;
+	let selectedSkillForSpec: SkillDefinition | null = null;
+	let customSpecialization = '';
+	let selectedSuggestedSpec: string | null = null;
 
 	/** Skill group metadata with colors and icons. */
 	const SKILL_GROUP_META: Record<string, { color: string; icon: string }> = {
 		// Combat groups - red/amber
-		'Firearms': { color: 'red', icon: 'gps_fixed' },
+		Firearms: { color: 'red', icon: 'gps_fixed' },
 		'Close Combat': { color: 'red', icon: 'sports_martial_arts' },
 		// Magic groups - purple
-		'Conjuring': { color: 'purple', icon: 'auto_awesome' },
-		'Sorcery': { color: 'purple', icon: 'blur_on' },
-		'Tasking': { color: 'violet', icon: 'memory' },
+		Conjuring: { color: 'purple', icon: 'auto_awesome' },
+		Sorcery: { color: 'purple', icon: 'blur_on' },
+		Tasking: { color: 'violet', icon: 'memory' },
 		// Tech groups - blue
-		'Electronics': { color: 'blue', icon: 'developer_board' },
-		'Cracking': { color: 'blue', icon: 'security' },
-		'Mechanic': { color: 'sky', icon: 'build' },
+		Electronics: { color: 'blue', icon: 'developer_board' },
+		Cracking: { color: 'blue', icon: 'security' },
+		Mechanic: { color: 'sky', icon: 'build' },
 		// Social groups - green
-		'Influence': { color: 'green', icon: 'record_voice_over' },
+		Influence: { color: 'green', icon: 'record_voice_over' },
 		// Physical groups - teal
-		'Athletics': { color: 'teal', icon: 'directions_run' },
-		'Stealth': { color: 'slate', icon: 'visibility_off' },
-		'Outdoors': { color: 'emerald', icon: 'forest' },
+		Athletics: { color: 'teal', icon: 'directions_run' },
+		Stealth: { color: 'slate', icon: 'visibility_off' },
+		Outdoors: { color: 'emerald', icon: 'forest' },
 		// Other groups - gray/amber
-		'Biotech': { color: 'pink', icon: 'biotech' },
+		Biotech: { color: 'pink', icon: 'biotech' },
 		'Animal Husbandry': { color: 'amber', icon: 'pets' },
 		// Ungrouped
-		'Ungrouped': { color: 'gray', icon: 'category' }
+		Ungrouped: { color: 'gray', icon: 'category' }
 	};
 
 	/** Attribute metadata with colors and icons. */
 	const ATTRIBUTE_META: Record<string, { color: string; icon: string; name: string }> = {
 		// Physical - amber
-		'BOD': { color: 'amber', icon: 'fitness_center', name: 'Body' },
-		'AGI': { color: 'amber', icon: 'directions_run', name: 'Agility' },
-		'REA': { color: 'amber', icon: 'speed', name: 'Reaction' },
-		'STR': { color: 'amber', icon: 'fitness_center', name: 'Strength' },
+		BOD: { color: 'amber', icon: 'fitness_center', name: 'Body' },
+		AGI: { color: 'amber', icon: 'directions_run', name: 'Agility' },
+		REA: { color: 'amber', icon: 'speed', name: 'Reaction' },
+		STR: { color: 'amber', icon: 'fitness_center', name: 'Strength' },
 		// Mental - blue
-		'CHA': { color: 'blue', icon: 'record_voice_over', name: 'Charisma' },
-		'INT': { color: 'blue', icon: 'psychology', name: 'Intuition' },
-		'LOG': { color: 'blue', icon: 'school', name: 'Logic' },
-		'WIL': { color: 'blue', icon: 'self_improvement', name: 'Willpower' },
+		CHA: { color: 'blue', icon: 'record_voice_over', name: 'Charisma' },
+		INT: { color: 'blue', icon: 'psychology', name: 'Intuition' },
+		LOG: { color: 'blue', icon: 'school', name: 'Logic' },
+		WIL: { color: 'blue', icon: 'self_improvement', name: 'Willpower' },
 		// Special - purple/green
-		'MAG': { color: 'purple', icon: 'auto_awesome', name: 'Magic' },
-		'RES': { color: 'cyan', icon: 'memory', name: 'Resonance' }
+		MAG: { color: 'purple', icon: 'auto_awesome', name: 'Magic' },
+		RES: { color: 'cyan', icon: 'memory', name: 'Resonance' }
 	};
 
 	/** Get color classes for a skill group. */
@@ -102,7 +111,9 @@
 	}
 
 	/** Group skills by skill group name. */
-	function groupBySkillGroup(allSkills: readonly SkillDefinition[]): Map<string, SkillDefinition[]> {
+	function groupBySkillGroup(
+		allSkills: readonly SkillDefinition[]
+	): Map<string, SkillDefinition[]> {
 		const groups = new Map<string, SkillDefinition[]>();
 
 		for (const skill of allSkills) {
@@ -142,16 +153,17 @@
 	}
 
 	/** Filter skills by search query. */
-	function filterSkills(skillMap: Map<string, SkillDefinition[]>, search: string): Map<string, SkillDefinition[]> {
+	function filterSkills(
+		skillMap: Map<string, SkillDefinition[]>,
+		search: string
+	): Map<string, SkillDefinition[]> {
 		if (!search) return skillMap;
 
 		const lower = search.toLowerCase();
 		const filtered = new Map<string, SkillDefinition[]>();
 
 		for (const [groupName, skillList] of skillMap) {
-			const matchingSkills = skillList.filter(s =>
-				s.name.toLowerCase().includes(lower)
-			);
+			const matchingSkills = skillList.filter((s) => s.name.toLowerCase().includes(lower));
 			if (matchingSkills.length > 0) {
 				filtered.set(groupName, matchingSkills);
 			}
@@ -261,6 +273,58 @@
 		}
 	}
 
+	/** Open the specialization modal for a skill. */
+	function openSpecializationModal(skill: SkillDefinition): void {
+		selectedSkillForSpec = skill;
+		const existingSpec = $character?.skills.find((s) => s.name === skill.name)?.specialization;
+		if (existingSpec) {
+			// Check if it's a suggested specialization
+			if (skill.specializations.includes(existingSpec)) {
+				selectedSuggestedSpec = existingSpec;
+				customSpecialization = '';
+			} else {
+				selectedSuggestedSpec = null;
+				customSpecialization = existingSpec;
+			}
+		} else {
+			selectedSuggestedSpec = null;
+			customSpecialization = '';
+		}
+		showSpecializationModal = true;
+	}
+
+	/** Close the specialization modal. */
+	function closeSpecializationModal(): void {
+		showSpecializationModal = false;
+		selectedSkillForSpec = null;
+		customSpecialization = '';
+		selectedSuggestedSpec = null;
+	}
+
+	/** Apply the selected specialization. */
+	function applySpecialization(): void {
+		if (!selectedSkillForSpec) return;
+
+		const spec = selectedSuggestedSpec || customSpecialization.trim() || null;
+		const result = setSkillSpecialization(selectedSkillForSpec.name, spec);
+		if (!result.success && result.error) {
+			console.warn(result.error);
+		}
+		closeSpecializationModal();
+	}
+
+	/** Remove the specialization from the selected skill. */
+	function removeSpecialization(): void {
+		if (!selectedSkillForSpec) return;
+		setSkillSpecialization(selectedSkillForSpec.name, null);
+		closeSpecializationModal();
+	}
+
+	/** Get the current specialization for a skill. */
+	function getSkillSpecialization(skillName: string): string | null {
+		return $character?.skills.find((s) => s.name === skillName)?.specialization ?? null;
+	}
+
 	// Reactive grouping
 	$: skillsByGroup = $skills ? groupBySkillGroup($skills) : new Map();
 	$: skillsByAttr = $skills ? groupByAttribute($skills) : new Map();
@@ -268,9 +332,10 @@
 	// Apply current grouping mode and search filter
 	$: currentGroups = groupMode === 'skillgroup' ? skillsByGroup : skillsByAttr;
 	$: filteredGroups = filterSkills(currentGroups, searchQuery);
-	$: sortedGroupNames = groupMode === 'skillgroup'
-		? getSortedSkillGroups(filteredGroups)
-		: getSortedAttributes(filteredGroups);
+	$: sortedGroupNames =
+		groupMode === 'skillgroup'
+			? getSortedSkillGroups(filteredGroups)
+			: getSortedAttributes(filteredGroups);
 
 	$: skillBP = calculateSkillBP();
 	$: skillGroupBP = calculateSkillGroupBP();
@@ -281,30 +346,44 @@
 	$: characterSkills = $character?.skills ?? [];
 
 	// Reactive lookup for skill group ratings
-	$: skillGroupRatings = new Map<string, number>(characterSkillGroups.map(g => [g.name, g.rating]));
-	$: skillGroupBroken = new Map<string, boolean>(characterSkillGroups.map(g => [g.name, g.broken]));
+	$: skillGroupRatings = new Map<string, number>(
+		characterSkillGroups.map((g) => [g.name, g.rating])
+	);
+	$: skillGroupBroken = new Map<string, boolean>(
+		characterSkillGroups.map((g) => [g.name, g.broken])
+	);
 
 	// Reactive lookup for individual skill ratings
-	$: individualSkillRatings = new Map(characterSkills.map(s => [s.name, s.rating]));
+	$: individualSkillRatings = new Map(characterSkills.map((s) => [s.name, s.rating]));
+
+	// Reactive lookup for skill specializations
+	$: skillSpecializations = new Map(characterSkills.map((s) => [s.name, s.specialization]));
+
+	// Specialization BP spent
+	$: specializationBP =
+		characterSkills.filter((s) => s.specialization !== null).length * SPECIALIZATION_BP_COST;
 </script>
 
 <div class="space-y-4">
 	<!-- BP Summary (centered, matching AttributeAllocator style) -->
 	<div class="flex justify-center">
-		<div class="bg-white border border-gray-200 rounded-lg shadow-md p-4 inline-block min-w-[350px]">
+		<div
+			class="bg-white border border-gray-200 rounded-lg shadow-md p-4 inline-block min-w-[350px]"
+		>
 			<div class="flex items-center justify-between gap-4">
 				<span class="text-black flex items-center gap-2">
 					<span class="material-icons text-sm">school</span>
 					Skill BP Spent
 				</span>
-				<span class="cw-bp-cost text-lg">{totalSkillBP}</span>
+				<span class="cw-bp-cost text-lg">{totalSkillBP + specializationBP}</span>
 			</div>
-			<div class="text-gray-500 text-xs mt-2 flex justify-between">
-				<span>Individual Skills: {skillBP} BP</span>
-				<span>Skill Groups: {skillGroupBP} BP</span>
+			<div class="text-gray-500 text-xs mt-2 grid grid-cols-3 gap-2">
+				<span>Skills: {skillBP} BP</span>
+				<span>Groups: {skillGroupBP} BP</span>
+				<span>Specs: {specializationBP} BP</span>
 			</div>
 			<p class="text-gray-600 text-xs mt-1 text-center border-t border-gray-100 pt-2">
-				Skills: 4 BP/point (max 6) • Groups: 10 BP/point (max {MAX_SKILL_GROUP_RATING})
+				Skills: 4 BP/point • Groups: 10 BP/point • Specializations: 2 BP each
 			</p>
 		</div>
 	</div>
@@ -318,8 +397,8 @@
 				<button
 					class="px-3 py-1.5 rounded text-sm transition-colors
 						{groupMode === 'skillgroup'
-							? 'bg-primary-main text-white'
-							: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+						? 'bg-primary-main text-white'
+						: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
 					on:click={() => (groupMode = 'skillgroup')}
 				>
 					Skill Group
@@ -327,8 +406,8 @@
 				<button
 					class="px-3 py-1.5 rounded text-sm transition-colors
 						{groupMode === 'attribute'
-							? 'bg-primary-main text-white'
-							: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+						? 'bg-primary-main text-white'
+						: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
 					on:click={() => (groupMode = 'attribute')}
 				>
 					Attribute
@@ -349,15 +428,12 @@
 	<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 		{#each sortedGroupNames as groupName}
 			{@const groupSkills = filteredGroups.get(groupName) ?? []}
-			{@const colorClasses = groupMode === 'skillgroup'
-				? getGroupColorClasses(groupName)
-				: getAttrColorClasses(groupName)}
-			{@const icon = groupMode === 'skillgroup'
-				? getGroupIcon(groupName)
-				: getAttrIcon(groupName)}
-			{@const displayName = groupMode === 'skillgroup'
-				? groupName
-				: getAttrName(groupName)}
+			{@const colorClasses =
+				groupMode === 'skillgroup'
+					? getGroupColorClasses(groupName)
+					: getAttrColorClasses(groupName)}
+			{@const icon = groupMode === 'skillgroup' ? getGroupIcon(groupName) : getAttrIcon(groupName)}
+			{@const displayName = groupMode === 'skillgroup' ? groupName : getAttrName(groupName)}
 			{@const isRealGroup = groupMode === 'skillgroup' && groupName !== 'Ungrouped'}
 			{@const groupRating = isRealGroup ? (skillGroupRatings.get(groupName) ?? 0) : 0}
 			{@const isBroken = isRealGroup ? (skillGroupBroken.get(groupName) ?? false) : false}
@@ -366,11 +442,15 @@
 				<!-- Header -->
 				<div class="{colorClasses.bg} px-4 py-2 border-b border-gray-200">
 					<div class="flex items-center justify-between">
-						<h3 class="text-sm font-semibold {colorClasses.text} uppercase tracking-wide flex items-center gap-2">
+						<h3
+							class="text-sm font-semibold {colorClasses.text} uppercase tracking-wide flex items-center gap-2"
+						>
 							<span class="material-icons text-sm">{icon}</span>
 							{displayName}
 							{#if isBroken}
-								<span class="material-icons text-xs text-red-500" title="Group broken">link_off</span>
+								<span class="material-icons text-xs text-red-500" title="Group broken"
+									>link_off</span
+								>
 							{/if}
 						</h3>
 						{#if isRealGroup}
@@ -382,7 +462,11 @@
 								>
 									<span class="material-icons text-xs">remove</span>
 								</button>
-								<span class="w-8 text-center font-mono text-lg {groupRating > 0 ? 'text-primary-dark font-bold' : 'text-gray-400'}">
+								<span
+									class="w-8 text-center font-mono text-lg {groupRating > 0
+										? 'text-primary-dark font-bold'
+										: 'text-gray-400'}"
+								>
 									{groupRating}
 								</span>
 								<button
@@ -401,18 +485,39 @@
 				<div class="max-h-[400px] overflow-y-auto">
 					{#each groupSkills as skill, idx}
 						{@const individualRating = individualSkillRatings.get(skill.name) ?? 0}
-						{@const skillGroupRating = skill.skillgroup ? (skillGroupRatings.get(skill.skillgroup) ?? 0) : 0}
+						{@const skillGroupRating = skill.skillgroup
+							? (skillGroupRatings.get(skill.skillgroup) ?? 0)
+							: 0}
 						{@const effectiveRating = Math.max(individualRating, skillGroupRating)}
 						{@const isActive = effectiveRating > 0}
 						{@const isFromGroup = skillGroupRating > 0 && individualRating <= skillGroupRating}
-						{@const canDecrement = individualRating > skillGroupRating || (individualRating > 0 && skillGroupRating === 0)}
+						{@const canDecrement =
+							individualRating > skillGroupRating ||
+							(individualRating > 0 && skillGroupRating === 0)}
+						{@const currentSpec = skillSpecializations.get(skill.name) ?? null}
 
-						<div class="flex items-center px-4 py-2 border-b border-gray-100 {idx % 2 === 1 ? 'bg-gray-50' : 'bg-white'}">
+						<div
+							class="flex items-center px-4 py-2 border-b border-gray-100 {idx % 2 === 1
+								? 'bg-gray-50'
+								: 'bg-white'}"
+						>
 							<div class="flex-1 min-w-0">
-								<div class="flex items-center gap-1">
-									<span class="text-sm font-medium truncate {isActive ? 'text-primary-dark' : 'text-black'}">
+								<div class="flex items-center gap-1 flex-wrap">
+									<span
+										class="text-sm font-medium truncate {isActive
+											? 'text-primary-dark'
+											: 'text-black'}"
+									>
 										{skill.name}
 									</span>
+									{#if currentSpec}
+										<span
+											class="text-xs text-green-600 font-medium"
+											title="Specialization: +2 to matching rolls"
+										>
+											({currentSpec})
+										</span>
+									{/if}
 									{#if !skill.default}
 										<span class="text-xs text-red-500" title="Cannot use untrained">*</span>
 									{/if}
@@ -427,6 +532,19 @@
 								{/if}
 							</div>
 							<div class="flex items-center gap-1">
+								<!-- Specialization button -->
+								<button
+									class="w-6 h-6 flex items-center justify-center rounded transition-colors
+										{currentSpec ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-100'}
+										{effectiveRating === 0 ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}"
+									on:click={() => openSpecializationModal(skill)}
+									disabled={effectiveRating === 0}
+									title={currentSpec
+										? `Specialization: ${currentSpec} (+2)`
+										: 'Add specialization (2 BP)'}
+								>
+									<span class="material-icons text-sm">{currentSpec ? 'star' : 'star_border'}</span>
+								</button>
 								<button
 									class="cw-btn-inc-dec"
 									on:click={() => decrementSkill(skill.name, skill)}
@@ -434,7 +552,11 @@
 								>
 									<span class="material-icons text-xs">remove</span>
 								</button>
-								<span class="w-8 text-center font-mono text-lg {isActive ? 'text-primary-dark font-bold' : 'text-gray-400'}">
+								<span
+									class="w-8 text-center font-mono text-lg {isActive
+										? 'text-primary-dark font-bold'
+										: 'text-gray-400'}"
+								>
 									{effectiveRating}
 								</span>
 								<button
@@ -463,11 +585,123 @@
 	<div class="cw-panel p-4 text-sm">
 		<h4 class="text-primary-dark font-semibold mb-2">Skill Tips</h4>
 		<ul class="text-text-secondary space-y-1 list-disc list-inside">
-			<li><strong>Skill Groups</strong>: Purchase all skills in a group at once (10 BP/point, max 4)</li>
+			<li>
+				<strong>Skill Groups</strong>: Purchase all skills in a group at once (10 BP/point, max 4)
+			</li>
 			<li><strong>Individual Skills</strong>: Purchase skills separately (4 BP/point, max 6)</li>
-			<li><strong>Breaking Groups</strong>: Raising a skill above its group rating "breaks" the group</li>
+			<li>
+				<strong>Breaking Groups</strong>: Raising a skill above its group rating "breaks" the group
+			</li>
+			<li>
+				<strong>Specializations</strong>: Add a specialty for +2 on matching rolls (2 BP each)
+				<span class="material-icons text-xs align-middle text-green-600">star</span>
+			</li>
 			<li>Skills marked with <span class="text-red-500">*</span> cannot be used untrained</li>
-			<li>Skills marked with <span class="text-indigo-500">G</span> get their rating from a skill group</li>
+			<li>
+				Skills marked with <span class="text-indigo-500">G</span> get their rating from a skill group
+			</li>
 		</ul>
 	</div>
 </div>
+
+<!-- Specialization Modal -->
+{#if showSpecializationModal && selectedSkillForSpec}
+	<div
+		class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+		on:click={closeSpecializationModal}
+		on:keydown={(e) => e.key === 'Escape' && closeSpecializationModal()}
+		role="dialog"
+		aria-modal="true"
+	>
+		<div
+			class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden"
+			on:click|stopPropagation
+			on:keydown|stopPropagation
+			role="document"
+		>
+			<!-- Header -->
+			<div class="bg-primary-main text-white px-4 py-3">
+				<h3 class="font-semibold">Specialize: {selectedSkillForSpec.name}</h3>
+				<p class="text-sm text-white/80">Choose a specialization (+2 bonus, costs 2 BP)</p>
+			</div>
+
+			<!-- Content -->
+			<div class="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
+				<!-- Suggested Specializations -->
+				{#if selectedSkillForSpec.specializations.length > 0}
+					<div>
+						<label class="text-sm font-medium text-gray-700 block mb-2"
+							>Suggested Specializations</label
+						>
+						<div class="space-y-1">
+							{#each selectedSkillForSpec.specializations as spec}
+								<label class="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer">
+									<input
+										type="radio"
+										name="specialization"
+										class="text-primary-main focus:ring-primary-main"
+										checked={selectedSuggestedSpec === spec}
+										on:change={() => {
+											selectedSuggestedSpec = spec;
+											customSpecialization = '';
+										}}
+									/>
+									<span class="text-sm text-gray-700">{spec}</span>
+								</label>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				<!-- Custom Specialization -->
+				<div>
+					<label class="text-sm font-medium text-gray-700 block mb-2">
+						{selectedSkillForSpec.specializations.length > 0
+							? 'Or enter a custom specialization'
+							: 'Enter a specialization'}
+					</label>
+					<input
+						type="text"
+						class="cw-input w-full"
+						placeholder="e.g., Light Pistols, Corporate Etiquette, etc."
+						bind:value={customSpecialization}
+						on:input={() => {
+							selectedSuggestedSpec = null;
+						}}
+					/>
+				</div>
+
+				<!-- Current specialization note -->
+				{#if getSkillSpecialization(selectedSkillForSpec.name)}
+					<p class="text-sm text-gray-500 bg-gray-50 p-2 rounded">
+						<span class="material-icons text-xs align-middle text-green-600">info</span>
+						Current: <strong>{getSkillSpecialization(selectedSkillForSpec.name)}</strong>
+					</p>
+				{/if}
+			</div>
+
+			<!-- Footer -->
+			<div class="px-4 py-3 bg-gray-50 flex justify-between items-center border-t">
+				<div>
+					{#if getSkillSpecialization(selectedSkillForSpec.name)}
+						<button class="text-sm text-red-600 hover:text-red-700" on:click={removeSpecialization}>
+							Remove Specialization
+						</button>
+					{/if}
+				</div>
+				<div class="flex gap-2">
+					<button class="cw-btn cw-btn-secondary" on:click={closeSpecializationModal}>
+						Cancel
+					</button>
+					<button
+						class="cw-btn"
+						on:click={applySpecialization}
+						disabled={!selectedSuggestedSpec && !customSpecialization.trim()}
+					>
+						Apply (2 BP)
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}

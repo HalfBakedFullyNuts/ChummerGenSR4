@@ -36,12 +36,7 @@
 	function handleAddContact(): void {
 		if (!newContact.name.trim()) return;
 
-		addContact(
-			newContact.name,
-			newContact.type,
-			newContact.loyalty,
-			newContact.connection
-		);
+		addContact(newContact.name, newContact.type, newContact.loyalty, newContact.connection);
 
 		/* Reset form */
 		newContact = {
@@ -106,7 +101,9 @@
 				/>
 			</div>
 			<div>
-				<label for="contactConnection" class="block text-text-muted text-xs mb-1">Connection (1-6)</label>
+				<label for="contactConnection" class="block text-text-muted text-xs mb-1"
+					>Connection (1-6)</label
+				>
 				<input
 					id="contactConnection"
 					type="number"

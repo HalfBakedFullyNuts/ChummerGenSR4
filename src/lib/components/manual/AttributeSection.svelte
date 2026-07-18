@@ -63,8 +63,9 @@
 							type="number"
 							min={limits.min}
 							max={limits.max}
-							value={value}
-							on:input={(e) => handleChange(attr.key, parseInt(e.currentTarget.value) || limits.min)}
+							{value}
+							on:input={(e) =>
+								handleChange(attr.key, parseInt(e.currentTarget.value) || limits.min)}
 							class="cw-input w-16 text-center"
 						/>
 						<span class="text-text-muted text-xs">
@@ -94,8 +95,9 @@
 							type="number"
 							min={limits.min}
 							max={limits.max}
-							value={value}
-							on:input={(e) => handleChange(attr.key, parseInt(e.currentTarget.value) || limits.min)}
+							{value}
+							on:input={(e) =>
+								handleChange(attr.key, parseInt(e.currentTarget.value) || limits.min)}
 							class="cw-input w-16 text-center"
 						/>
 						<span class="text-text-muted text-xs">

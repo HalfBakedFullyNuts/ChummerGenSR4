@@ -61,9 +61,7 @@ export async function signOutUser(): Promise<AuthResult> {
  * Calls callback with user (or null) whenever auth state changes.
  * Returns unsubscribe function.
  */
-export function subscribeToAuthState(
-	callback: (user: User | null) => void
-): () => void {
+export function subscribeToAuthState(callback: (user: User | null) => void): () => void {
 	try {
 		const auth = getAuthInstance();
 		return onAuthStateChanged(auth, callback);

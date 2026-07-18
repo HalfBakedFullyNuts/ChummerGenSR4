@@ -2,7 +2,15 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { loadSavedCharacter, character, updateCondition, updateEdge, setAmmo, reloadWeapon, spendAmmo } from '$stores';
+	import {
+		loadSavedCharacter,
+		character,
+		updateCondition,
+		updateEdge,
+		setAmmo,
+		reloadWeapon,
+		spendAmmo
+	} from '$stores';
 	import { gameData, loadGameData } from '$stores/gamedata';
 	import {
 		CharacterSheet,
@@ -124,15 +132,19 @@
 	}
 
 	/** Handle roll result from dice roller. */
-	function handleRollResult(event: CustomEvent<{ results: {
-		dice: number[];
-		hits: number;
-		ones: number;
-		isGlitch: boolean;
-		isCriticalGlitch: boolean;
-		edgeUsed: boolean;
-		pool: number;
-	} }>): void {
+	function handleRollResult(
+		event: CustomEvent<{
+			results: {
+				dice: number[];
+				hits: number;
+				ones: number;
+				isGlitch: boolean;
+				isCriticalGlitch: boolean;
+				edgeUsed: boolean;
+				pool: number;
+			};
+		}>
+	): void {
 		const r = event.detail.results;
 		const entry: RollHistoryEntry = {
 			id: rollIdCounter++,
@@ -159,7 +171,9 @@
 	}
 
 	/** Handle damage change from condition monitor. */
-	function handleDamageChanged(event: CustomEvent<{ type: 'physical' | 'stun'; value: number }>): void {
+	function handleDamageChanged(
+		event: CustomEvent<{ type: 'physical' | 'stun'; value: number }>
+	): void {
 		updateCondition(event.detail.type, event.detail.value);
 	}
 
@@ -178,7 +192,7 @@
 			timestamp: new Date(),
 			testName: 'Initiative',
 			pool: result.dice.length,
-			hits: result.total,  // Using hits field for total
+			hits: result.total, // Using hits field for total
 			isGlitch: false,
 			isCriticalGlitch: false,
 			edgeUsed: false,
@@ -193,7 +207,9 @@
 	}
 
 	/** Handle initiative rolled from combat tracker. */
-	function handleCombatInitiative(event: CustomEvent<{ total: number; passes: number; dice: number[] }>): void {
+	function handleCombatInitiative(
+		event: CustomEvent<{ total: number; passes: number; dice: number[] }>
+	): void {
 		const entry: RollHistoryEntry = {
 			id: rollIdCounter++,
 			timestamp: new Date(),
@@ -210,23 +226,33 @@
 
 	/** Get player base initiative. */
 	$: playerBaseInit = $character
-		? ($character.attributes.rea.base + $character.attributes.rea.bonus) +
-		  ($character.attributes.int.base + $character.attributes.int.bonus)
+		? $character.attributes.rea.base +
+			$character.attributes.rea.bonus +
+			($character.attributes.int.base + $character.attributes.int.bonus)
 		: 10;
 
 	/** Currently selected weapon for attack. */
-	let selectedWeapon: { id: string; name: string; damage: string; ap: string; damageMod: number; ammoUsed: number } | null = null;
+	let selectedWeapon: {
+		id: string;
+		name: string;
+		damage: string;
+		ap: string;
+		damageMod: number;
+		ammoUsed: number;
+	} | null = null;
 
 	/** Currently selected spell for casting. */
 	let selectedSpell: { name: string; drainPool: number; drainValue: string } | null = null;
 
 	/** Handle weapon attack roll. */
-	function handleWeaponRoll(event: CustomEvent<{
-		weapon: { id: string; name: string; damage: string; ap: string };
-		pool: number;
-		skillName: string;
-		firingMode?: { code: string; name: string; ammoPerShot: number; damageMod: number }
-	}>): void {
+	function handleWeaponRoll(
+		event: CustomEvent<{
+			weapon: { id: string; name: string; damage: string; ap: string };
+			pool: number;
+			skillName: string;
+			firingMode?: { code: string; name: string; ammoPerShot: number; damageMod: number };
+		}>
+	): void {
 		const { weapon, pool, skillName, firingMode } = event.detail;
 
 		// Calculate damage modifier and ammo consumption from firing mode
@@ -253,9 +279,10 @@
 		dicePool = modifiedPool;
 
 		// Include modifier info in test name if non-zero
-		const modStr = combatModifierTotal !== 0
-			? ` [${combatModifierTotal >= 0 ? '+' : ''}${combatModifierTotal}]`
-			: '';
+		const modStr =
+			combatModifierTotal !== 0
+				? ` [${combatModifierTotal >= 0 ? '+' : ''}${combatModifierTotal}]`
+				: '';
 		lastTestName = firingMode
 			? `${weapon.name} (${firingMode.code})${modStr}`
 			: `${weapon.name} (${skillName})${modStr}`;
@@ -263,7 +290,14 @@
 	}
 
 	/** Handle spell cast roll. */
-	function handleSpellRoll(event: CustomEvent<{ spell: { name: string }; castPool: number; drainPool: number; drainValue: string }>): void {
+	function handleSpellRoll(
+		event: CustomEvent<{
+			spell: { name: string };
+			castPool: number;
+			drainPool: number;
+			drainValue: string;
+		}>
+	): void {
 		const { spell, castPool, drainPool, drainValue } = event.detail;
 		selectedSpell = { name: spell.name, drainPool, drainValue };
 		selectedWeapon = null;
@@ -292,7 +326,9 @@
 	}
 
 	/** Handle soak roll. */
-	function handleSoakRoll(event: CustomEvent<{ name: string; pool: number; armor: number; ap?: number }>): void {
+	function handleSoakRoll(
+		event: CustomEvent<{ name: string; pool: number; armor: number; ap?: number }>
+	): void {
 		dicePool = event.detail.pool;
 		lastTestName = event.detail.name;
 		selectedWeapon = null;
@@ -301,12 +337,21 @@
 	}
 
 	/** Handle combat modifier changes. */
-	function handleModifierChanged(event: CustomEvent<{ total: number; modifiers: string[]; calledShot: string | null }>): void {
+	function handleModifierChanged(
+		event: CustomEvent<{ total: number; modifiers: string[]; calledShot: string | null }>
+	): void {
 		combatModifierTotal = event.detail.total;
 	}
 
 	/** Handle Matrix action roll. */
-	function handleMatrixRoll(event: CustomEvent<{ action: { name: string }; pool: number; opposed: boolean; opposedBy?: string }>): void {
+	function handleMatrixRoll(
+		event: CustomEvent<{
+			action: { name: string };
+			pool: number;
+			opposed: boolean;
+			opposedBy?: string;
+		}>
+	): void {
 		const { action, pool, opposed, opposedBy } = event.detail;
 		dicePool = pool;
 		lastTestName = `Matrix: ${action.name}${opposed ? ` (vs ${opposedBy})` : ''}`;
@@ -316,7 +361,9 @@
 	}
 
 	/** Handle Vehicle test roll. */
-	function handleVehicleRoll(event: CustomEvent<{ test: { name: string }; pool: number; opposed: boolean }>): void {
+	function handleVehicleRoll(
+		event: CustomEvent<{ test: { name: string }; pool: number; opposed: boolean }>
+	): void {
 		const { test, pool } = event.detail;
 		dicePool = pool;
 		lastTestName = `Vehicle: ${test.name}`;
@@ -344,7 +391,14 @@
 	}
 
 	/** Handle astral action roll. */
-	function handleAstralRoll(event: CustomEvent<{ action: { name: string }; pool: number; opposed: boolean; opposedBy?: string }>): void {
+	function handleAstralRoll(
+		event: CustomEvent<{
+			action: { name: string };
+			pool: number;
+			opposed: boolean;
+			opposedBy?: string;
+		}>
+	): void {
 		const { action, pool, opposed, opposedBy } = event.detail;
 		dicePool = pool;
 		lastTestName = `${action.name}${opposed ? ` (vs ${opposedBy})` : ''}`;
@@ -354,7 +408,9 @@
 	}
 
 	/** Handle summoning roll. */
-	function handleSummoningRoll(event: CustomEvent<{ pool: number; spiritType: string; force: number; resistPool: number }>): void {
+	function handleSummoningRoll(
+		event: CustomEvent<{ pool: number; spiritType: string; force: number; resistPool: number }>
+	): void {
 		const { pool, spiritType, force, resistPool } = event.detail;
 		dicePool = pool;
 		lastTestName = `Summon ${spiritType} (F${force}, vs ${resistPool}d6)`;
@@ -364,7 +420,9 @@
 	}
 
 	/** Handle drain roll. */
-	function handleDrainRoll(event: CustomEvent<{ pool: number; drainValue: number; isPhysical: boolean }>): void {
+	function handleDrainRoll(
+		event: CustomEvent<{ pool: number; drainValue: number; isPhysical: boolean }>
+	): void {
 		const { pool, drainValue, isPhysical } = event.detail;
 		dicePool = pool;
 		lastTestName = `Resist Drain (${drainValue} ${isPhysical ? 'P' : 'S'})`;
@@ -374,7 +432,9 @@
 	}
 
 	/** Handle technomancer compiling roll. */
-	function handleCompilingRoll(event: CustomEvent<{ pool: number; spriteType: string; rating: number; resistPool: number }>): void {
+	function handleCompilingRoll(
+		event: CustomEvent<{ pool: number; spriteType: string; rating: number; resistPool: number }>
+	): void {
 		const { pool, spriteType, rating, resistPool } = event.detail;
 		dicePool = pool;
 		lastTestName = `Compile ${spriteType} (R${rating}, vs ${resistPool}d6)`;
@@ -384,7 +444,9 @@
 	}
 
 	/** Handle technomancer threading roll. */
-	function handleThreadingRoll(event: CustomEvent<{ pool: number; formName: string; rating: number; fadingValue: number }>): void {
+	function handleThreadingRoll(
+		event: CustomEvent<{ pool: number; formName: string; rating: number; fadingValue: number }>
+	): void {
 		const { pool, formName, rating, fadingValue } = event.detail;
 		dicePool = pool;
 		lastTestName = `Thread ${formName} (R${rating}, Fading ${fadingValue})`;
@@ -394,7 +456,9 @@
 	}
 
 	/** Handle fading resistance roll. */
-	function handleFadingRoll(event: CustomEvent<{ pool: number; fadingValue: number; isPhysical: boolean }>): void {
+	function handleFadingRoll(
+		event: CustomEvent<{ pool: number; fadingValue: number; isPhysical: boolean }>
+	): void {
 		const { pool, fadingValue, isPhysical } = event.detail;
 		dicePool = pool;
 		lastTestName = `Resist Fading (${fadingValue} ${isPhysical ? 'P' : 'S'})`;
@@ -404,19 +468,33 @@
 	}
 
 	/** Character attribute helpers. */
-	$: charLogic = $character ? ($character.attributes.log.base + $character.attributes.log.bonus) : 3;
-	$: charIntuition = $character ? ($character.attributes.int.base + $character.attributes.int.bonus) : 3;
-	$: charCharisma = $character ? ($character.attributes.cha.base + $character.attributes.cha.bonus) : 3;
-	$: charWillpower = $character ? ($character.attributes.wil.base + $character.attributes.wil.bonus) : 3;
-	$: charReaction = $character ? ($character.attributes.rea.base + $character.attributes.rea.bonus) : 3;
-	$: charAgility = $character ? ($character.attributes.agi.base + $character.attributes.agi.bonus) : 3;
-	$: charMagic = $character?.attributes.mag ? ($character.attributes.mag.base + $character.attributes.mag.bonus) : null;
-	$: charResonance = $character?.attributes.res ? ($character.attributes.res.base + $character.attributes.res.bonus) : null;
+	$: charLogic = $character ? $character.attributes.log.base + $character.attributes.log.bonus : 3;
+	$: charIntuition = $character
+		? $character.attributes.int.base + $character.attributes.int.bonus
+		: 3;
+	$: charCharisma = $character
+		? $character.attributes.cha.base + $character.attributes.cha.bonus
+		: 3;
+	$: charWillpower = $character
+		? $character.attributes.wil.base + $character.attributes.wil.bonus
+		: 3;
+	$: charReaction = $character
+		? $character.attributes.rea.base + $character.attributes.rea.bonus
+		: 3;
+	$: charAgility = $character
+		? $character.attributes.agi.base + $character.attributes.agi.bonus
+		: 3;
+	$: charMagic = $character?.attributes.mag
+		? $character.attributes.mag.base + $character.attributes.mag.bonus
+		: null;
+	$: charResonance = $character?.attributes.res
+		? $character.attributes.res.base + $character.attributes.res.bonus
+		: null;
 
 	/** Get character skill ratings as a map. */
-	$: characterSkills = $character ? Object.fromEntries(
-		$character.skills.map(s => [s.name, s.rating + s.bonus])
-	) : {};
+	$: characterSkills = $character
+		? Object.fromEntries($character.skills.map((s) => [s.name, s.rating + s.bonus]))
+		: {};
 
 	/** Check if character is awakened. */
 	$: isAwakened = $character?.magic !== null;
@@ -441,29 +519,16 @@
 		<div class="cw-card text-center py-12">
 			<h2 class="text-xl text-error-main mb-4">Error Loading Character</h2>
 			<p class="text-text-secondary mb-6">{loadError}</p>
-			<a href="/characters" class="cw-btn cw-btn-primary">
-				Back to Characters
-			</a>
+			<a href="/characters" class="cw-btn cw-btn-primary"> Back to Characters </a>
 		</div>
 	{:else if $character}
 		<!-- Header with actions -->
 		<header class="mb-6">
 			<div class="flex items-center justify-between mb-3">
-				<a href="/characters" class="cw-btn cw-btn-secondary text-sm">
-					Back to Characters
-				</a>
+				<a href="/characters" class="cw-btn cw-btn-secondary text-sm"> Back to Characters </a>
 				<div class="flex gap-2">
-					<button
-						class="cw-btn cw-btn-primary"
-						on:click={handleEdit}
-					>
-						Edit Character
-					</button>
-					<button
-						class="cw-btn"
-						on:click={() => window.print()}
-						title="Print character sheet"
-					>
+					<button class="cw-btn cw-btn-primary" on:click={handleEdit}> Edit Character </button>
+					<button class="cw-btn" on:click={() => window.print()} title="Print character sheet">
 						Print
 					</button>
 				</div>
@@ -473,43 +538,46 @@
 			<div class="flex flex-wrap gap-2">
 				<button
 					class="cw-btn text-sm {showCombatTracker ? 'cw-btn-primary' : ''}"
-					on:click={() => showCombatTracker = !showCombatTracker}
+					on:click={() => (showCombatTracker = !showCombatTracker)}
 					title="Toggle combat tracker"
 				>
 					Combat
 				</button>
 				<button
 					class="cw-btn text-sm {showCombatModifiers ? 'cw-btn-primary' : ''}"
-					on:click={() => showCombatModifiers = !showCombatModifiers}
+					on:click={() => (showCombatModifiers = !showCombatModifiers)}
 					title="Toggle combat modifiers"
 				>
-					Modifiers {#if combatModifierTotal !== 0}<span class="text-xs">({combatModifierTotal >= 0 ? '+' : ''}{combatModifierTotal})</span>{/if}
+					Modifiers {#if combatModifierTotal !== 0}<span class="text-xs"
+							>({combatModifierTotal >= 0 ? '+' : ''}{combatModifierTotal})</span
+						>{/if}
 				</button>
 				<button
 					class="cw-btn text-sm {showDiceRoller ? 'cw-btn-primary' : ''}"
-					on:click={() => showDiceRoller = !showDiceRoller}
+					on:click={() => (showDiceRoller = !showDiceRoller)}
 					title="Toggle dice roller"
 				>
 					Dice
 				</button>
 				<button
 					class="cw-btn text-sm {showRollHistory ? 'cw-btn-primary' : ''}"
-					on:click={() => showRollHistory = !showRollHistory}
+					on:click={() => (showRollHistory = !showRollHistory)}
 					title="Toggle roll history"
 				>
-					History {#if rollHistory.length > 0}<span class="text-xs">({rollHistory.length})</span>{/if}
+					History {#if rollHistory.length > 0}<span class="text-xs">({rollHistory.length})</span
+						>{/if}
 				</button>
 				<span class="w-px h-6 bg-border mx-1 self-center"></span>
 				<button
 					class="cw-btn text-sm {showMatrixPanel ? 'cw-btn-primary' : ''}"
-					on:click={() => showMatrixPanel = !showMatrixPanel}
+					on:click={() => (showMatrixPanel = !showMatrixPanel)}
 					title="Toggle Matrix actions"
 				>
 					Matrix
 				</button>
 				<button
 					class="cw-btn text-sm {showVehiclePanel ? 'cw-btn-primary' : ''}"
-					on:click={() => showVehiclePanel = !showVehiclePanel}
+					on:click={() => (showVehiclePanel = !showVehiclePanel)}
 					title="Toggle vehicle combat"
 				>
 					Vehicles
@@ -517,7 +585,7 @@
 				{#if isAwakened}
 					<button
 						class="cw-btn text-sm {showMagicPanel ? 'cw-btn-primary' : ''}"
-						on:click={() => showMagicPanel = !showMagicPanel}
+						on:click={() => (showMagicPanel = !showMagicPanel)}
 						title="Toggle magic & astral"
 					>
 						Magic
@@ -526,7 +594,7 @@
 				{#if isTechnomancer}
 					<button
 						class="cw-btn text-sm {showTechnomancerPanel ? 'cw-btn-primary' : ''}"
-						on:click={() => showTechnomancerPanel = !showTechnomancerPanel}
+						on:click={() => (showTechnomancerPanel = !showTechnomancerPanel)}
 						title="Toggle technomancer"
 					>
 						Resonance
@@ -536,7 +604,7 @@
 					<span class="w-px h-6 bg-border mx-1 self-center"></span>
 					<button
 						class="cw-btn text-sm {showCareerAdvancement ? 'cw-btn-primary' : ''}"
-						on:click={() => showCareerAdvancement = !showCareerAdvancement}
+						on:click={() => (showCareerAdvancement = !showCareerAdvancement)}
 						title="Toggle career advancement"
 					>
 						Advancement
@@ -550,7 +618,7 @@
 			<div class="mb-6 combat-tracker-panel">
 				<CombatTracker
 					playerName={$character.identity.name || 'Player'}
-					playerBaseInit={playerBaseInit}
+					{playerBaseInit}
 					playerInitDice={1}
 					on:initiativeRolled={handleCombatInitiative}
 				/>
@@ -583,7 +651,9 @@
 
 				{#if showVehiclePanel}
 					<VehiclePanel
-						pilotSkill={characterSkills['Pilot Ground Craft'] || characterSkills['Pilot Aircraft'] || 0}
+						pilotSkill={characterSkills['Pilot Ground Craft'] ||
+							characterSkills['Pilot Aircraft'] ||
+							0}
 						gunnerySkill={characterSkills['Gunnery'] || 0}
 						reaction={charReaction}
 						agility={charAgility}
@@ -600,7 +670,7 @@
 						intuition={charIntuition}
 						charisma={charCharisma}
 						logic={charLogic}
-						tradition={tradition}
+						{tradition}
 						skills={characterSkills}
 						on:rollAstral={handleAstralRoll}
 						on:rollSummoning={handleSummoningRoll}
@@ -628,9 +698,17 @@
 					<div class="text-sm text-secondary-dark mb-2">Rolling: {lastTestName}</div>
 				{/if}
 				{#if combatModifierTotal !== 0 && selectedWeapon}
-					<div class="cw-panel mb-2 p-2 border-l-4 {combatModifierTotal < 0 ? 'border-error-main bg-error-main/10' : 'border-success-main bg-success-main/10'}">
+					<div
+						class="cw-panel mb-2 p-2 border-l-4 {combatModifierTotal < 0
+							? 'border-error-main bg-error-main/10'
+							: 'border-success-main bg-success-main/10'}"
+					>
 						<span class="text-sm text-text-secondary">Combat Modifiers Applied: </span>
-						<span class="font-mono font-bold {combatModifierTotal < 0 ? 'text-error-main' : 'text-success-main'}">
+						<span
+							class="font-mono font-bold {combatModifierTotal < 0
+								? 'text-error-main'
+								: 'text-success-main'}"
+						>
 							{combatModifierTotal >= 0 ? '+' : ''}{combatModifierTotal}
 						</span>
 					</div>
@@ -661,7 +739,9 @@
 								Drain: <span class="text-info-main font-bold">{selectedSpell.drainValue}</span>
 							</span>
 							<span class="text-text-secondary">
-								Resist: <span class="text-secondary-dark font-bold">{selectedSpell.drainPool}d6</span>
+								Resist: <span class="text-secondary-dark font-bold"
+									>{selectedSpell.drainPool}d6</span
+								>
 							</span>
 							<span class="text-text-muted text-xs">(Hits on spellcasting determine Force)</span>
 						</div>
@@ -677,12 +757,7 @@
 				<div class="flex items-center justify-between mb-3">
 					<h3 class="text-text-primary font-medium">Roll History</h3>
 					{#if rollHistory.length > 0}
-						<button
-							class="cw-btn text-xs text-error-main"
-							on:click={clearHistory}
-						>
-							Clear
-						</button>
+						<button class="cw-btn text-xs text-error-main" on:click={clearHistory}> Clear </button>
 					{/if}
 				</div>
 				{#if rollHistory.length === 0}
@@ -699,10 +774,12 @@
 									{/if}
 								</div>
 								<div class="flex items-center gap-3">
-									<span class="font-mono font-bold
+									<span
+										class="font-mono font-bold
 										{entry.isCriticalGlitch ? 'text-error-main' : ''}
 										{entry.isGlitch && !entry.isCriticalGlitch ? 'text-warning-main' : ''}
-										{!entry.isGlitch ? 'text-success-main' : ''}">
+										{!entry.isGlitch ? 'text-success-main' : ''}"
+									>
 										{entry.hits} hit{entry.hits !== 1 ? 's' : ''}
 										{#if entry.isCriticalGlitch}
 											<span class="text-xs">(CG!)</span>
@@ -746,9 +823,7 @@
 	{:else}
 		<div class="cw-card text-center py-12">
 			<p class="text-text-secondary">No character data available.</p>
-			<a href="/characters" class="cw-btn cw-btn-primary mt-4">
-				Back to Characters
-			</a>
+			<a href="/characters" class="cw-btn cw-btn-primary mt-4"> Back to Characters </a>
 		</div>
 	{/if}
 </main>

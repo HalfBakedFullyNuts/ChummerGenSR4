@@ -121,14 +121,14 @@ export default {
 				slow: '400ms'
 			},
 			boxShadow: {
-				'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-				'DEFAULT': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-				'md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-				'lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-				'xl': '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-				'primary': '0 4px 14px 0 rgba(0, 229, 255, 0.25)',
+				sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+				DEFAULT: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+				md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+				lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+				xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+				primary: '0 4px 14px 0 rgba(0, 229, 255, 0.25)',
 				'primary-hover': '0 6px 20px 0 rgba(0, 229, 255, 0.35)',
-				'error': '0 4px 14px 0 rgba(248, 81, 73, 0.25)'
+				error: '0 4px 14px 0 rgba(248, 81, 73, 0.25)'
 			}
 		}
 	},

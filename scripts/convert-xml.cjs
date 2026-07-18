@@ -26,7 +26,7 @@ function parseXML(xml) {
 
 		if (children) {
 			const grouped = {};
-			children.forEach(child => {
+			children.forEach((child) => {
 				const childTag = child.match(/^<(\w+)/)[1];
 				const parsed = parseElement(child);
 				if (!grouped[childTag]) grouped[childTag] = [];
@@ -93,21 +93,34 @@ function convertBioware() {
 		const essStr = getText(bw, 'ess');
 		const costStr = getText(bw, 'cost');
 
-		// Parse essence (handle formulas like "Rating * 0.75")
+		// Parse essence (handle formulas like "Rating * 0.75" or "(Rating * 0.1) + 0.2")
 		let ess = 0;
 		if (essStr.includes('Rating')) {
-			// Extract multiplier
-			const multMatch = essStr.match(/Rating\s*\*\s*([\d.]+)/);
-			ess = multMatch ? parseFloat(multMatch[1]) : 0.1;
+			// Handle "X + (Rating * Y)" pattern
+			const addMatch = essStr.match(/([\d.]+)\s*\+\s*\(Rating\s*\*\s*([\d.]+)\)/);
+			if (addMatch) {
+				ess = parseFloat(addMatch[2]);
+			} else {
+				// Handle "Rating * X" pattern (may include negative)
+				const multMatch = essStr.match(/Rating\s*\*\s*(-?[\d.]+)/);
+				ess = multMatch ? Math.abs(parseFloat(multMatch[1])) : 0.1;
+			}
 		} else {
 			ess = parseFloat(essStr) || 0;
 		}
 
-		// Parse cost (handle formulas)
+		// Parse cost (handle formulas like "Rating * 3000" or "X + (Rating * Y)")
 		let cost = 0;
 		if (costStr.includes('Rating')) {
-			const multMatch = costStr.match(/Rating\s*\*\s*(\d+)/);
-			cost = multMatch ? parseInt(multMatch[1]) : 1000;
+			// Handle "X + (Rating * Y)" pattern - extract Y as the rating multiplier
+			const addMatch = costStr.match(/([\d.]+)\s*\+\s*\(Rating\s*\*\s*(\d+)\)/);
+			if (addMatch) {
+				cost = parseInt(addMatch[2]);
+			} else {
+				// Handle "Rating * X" pattern
+				const multMatch = costStr.match(/Rating\s*\*\s*(\d+)/);
+				cost = multMatch ? parseInt(multMatch[1]) : 1000;
+			}
 		} else {
 			cost = parseInt(costStr) || 0;
 		}
@@ -191,7 +204,9 @@ function convertMartialArts() {
 
 		// Get techniques
 		const techMatch = s.match(/<techniques>([\s\S]*?)<\/techniques>/);
-		const techniques = techMatch ? getElements(techMatch[1], 'technique').map(t => getText(t, 'name') || t) : [];
+		const techniques = techMatch
+			? getElements(techMatch[1], 'technique').map((t) => getText(t, 'name') || t)
+			: [];
 
 		styles.push({
 			name,

@@ -82,8 +82,8 @@ export function rollDicePool(options: RollOptions): RollResult {
 	}
 
 	// Count results
-	const hits = dice.filter(d => d >= threshold).length;
-	const ones = dice.filter(d => d === 1).length;
+	const hits = dice.filter((d) => d >= threshold).length;
+	const ones = dice.filter((d) => d === 1).length;
 
 	// Glitch: more than half are 1s
 	const isGlitch = ones > dice.length / 2;
@@ -130,7 +130,7 @@ function binomial(n: number, k: number): number {
 
 	let result = 1;
 	for (let i = 1; i <= k; i++) {
-		result = result * (n - k + i) / i;
+		result = (result * (n - k + i)) / i;
 	}
 	return result;
 }
@@ -237,17 +237,17 @@ export function getInitiativeForPass(total: number, passNumber: number): number 
 /** Map weapon categories to their associated combat skills. */
 export const WEAPON_SKILL_MAP: Record<string, string> = {
 	// Melee weapons
-	'Blades': 'Blades',
-	'Clubs': 'Clubs',
-	'Unarmed': 'Unarmed Combat',
+	Blades: 'Blades',
+	Clubs: 'Clubs',
+	Unarmed: 'Unarmed Combat',
 	'Exotic Melee Weapons': 'Exotic Melee Weapon',
 
 	// Ranged - Pistols
-	'Holdouts': 'Pistols',
+	Holdouts: 'Pistols',
 	'Light Pistols': 'Pistols',
 	'Heavy Pistols': 'Pistols',
 	'Machine Pistols': 'Pistols',
-	'Tasers': 'Pistols',
+	Tasers: 'Pistols',
 
 	// Ranged - Automatics
 	'Submachine Guns': 'Automatics',
@@ -257,7 +257,7 @@ export const WEAPON_SKILL_MAP: Record<string, string> = {
 	// Ranged - Longarms
 	'Sports Rifles': 'Longarms',
 	'Sniper Rifles': 'Longarms',
-	'Shotguns': 'Longarms',
+	Shotguns: 'Longarms',
 
 	// Ranged - Heavy Weapons
 	'Light Machine Guns': 'Heavy Weapons',
@@ -267,12 +267,12 @@ export const WEAPON_SKILL_MAP: Record<string, string> = {
 	'Grenade Launchers': 'Heavy Weapons',
 	'Mortar Launchers': 'Heavy Weapons',
 	'Missile Launchers': 'Heavy Weapons',
-	'Flamethrowers': 'Heavy Weapons',
+	Flamethrowers: 'Heavy Weapons',
 	'Laser Weapons': 'Heavy Weapons',
 
 	// Ranged - Archery
-	'Bows': 'Archery',
-	'Crossbows': 'Archery',
+	Bows: 'Archery',
+	Crossbows: 'Archery',
 
 	// Other
 	'Throwing Weapons': 'Throwing Weapons',
@@ -367,8 +367,22 @@ export const FIRING_MODES: Record<string, FiringMode> = {
 	SA: { code: 'SA', name: 'Semi-Automatic', ammoPerShot: 1, poolMod: 0, damageMod: 0, recoil: 1 },
 	BF: { code: 'BF', name: 'Burst Fire', ammoPerShot: 3, poolMod: -2, damageMod: 2, recoil: 3 },
 	LB: { code: 'LB', name: 'Long Burst', ammoPerShot: 6, poolMod: -5, damageMod: 5, recoil: 6 },
-	FA: { code: 'FA', name: 'Full Auto (Narrow)', ammoPerShot: 6, poolMod: -5, damageMod: 5, recoil: 6 },
-	FAW: { code: 'FAW', name: 'Full Auto (Wide)', ammoPerShot: 10, poolMod: -9, damageMod: 9, recoil: 10 },
+	FA: {
+		code: 'FA',
+		name: 'Full Auto (Narrow)',
+		ammoPerShot: 6,
+		poolMod: -5,
+		damageMod: 5,
+		recoil: 6
+	},
+	FAW: {
+		code: 'FAW',
+		name: 'Full Auto (Wide)',
+		ammoPerShot: 10,
+		poolMod: -9,
+		damageMod: 9,
+		recoil: 10
+	},
 	SF: { code: 'SF', name: 'Suppressive Fire', ammoPerShot: 20, poolMod: 0, damageMod: 0, recoil: 0 }
 };
 
@@ -400,7 +414,11 @@ export function parseFireModes(modeString: string): FiringMode[] {
  * @param mode - The firing mode being used.
  * @returns Recoil penalty (negative modifier).
  */
-export function calculateRecoilPenalty(totalRC: number, shotsThisTurn: number, mode: FiringMode): number {
+export function calculateRecoilPenalty(
+	totalRC: number,
+	shotsThisTurn: number,
+	mode: FiringMode
+): number {
 	const cumulativeRecoil = shotsThisTurn + mode.recoil;
 	const uncompensated = Math.max(0, cumulativeRecoil - totalRC - 1);
 	// Avoid returning -0 (use || 0 to convert -0 to 0)
@@ -450,35 +468,150 @@ export interface CombatModifier {
 /** Standard SR4 combat modifiers. */
 export const COMBAT_MODIFIERS: Record<string, CombatModifier> = {
 	// Visibility
-	light_rain: { name: 'Light Rain/Smoke', modifier: -1, category: 'visibility', description: 'Light obscurement' },
-	moderate_rain: { name: 'Moderate Rain/Smoke', modifier: -3, category: 'visibility', description: 'Moderate obscurement' },
-	heavy_rain: { name: 'Heavy Rain/Smoke', modifier: -6, category: 'visibility', description: 'Heavy obscurement' },
-	light_glare: { name: 'Light Glare', modifier: -1, category: 'visibility', description: 'Slight glare' },
-	moderate_glare: { name: 'Moderate Glare', modifier: -3, category: 'visibility', description: 'Bright glare' },
-	blind_fire: { name: 'Blind Fire', modifier: -6, category: 'visibility', description: 'Cannot see target' },
-	total_darkness: { name: 'Total Darkness', modifier: -6, category: 'visibility', description: 'No light at all' },
+	light_rain: {
+		name: 'Light Rain/Smoke',
+		modifier: -1,
+		category: 'visibility',
+		description: 'Light obscurement'
+	},
+	moderate_rain: {
+		name: 'Moderate Rain/Smoke',
+		modifier: -3,
+		category: 'visibility',
+		description: 'Moderate obscurement'
+	},
+	heavy_rain: {
+		name: 'Heavy Rain/Smoke',
+		modifier: -6,
+		category: 'visibility',
+		description: 'Heavy obscurement'
+	},
+	light_glare: {
+		name: 'Light Glare',
+		modifier: -1,
+		category: 'visibility',
+		description: 'Slight glare'
+	},
+	moderate_glare: {
+		name: 'Moderate Glare',
+		modifier: -3,
+		category: 'visibility',
+		description: 'Bright glare'
+	},
+	blind_fire: {
+		name: 'Blind Fire',
+		modifier: -6,
+		category: 'visibility',
+		description: 'Cannot see target'
+	},
+	total_darkness: {
+		name: 'Total Darkness',
+		modifier: -6,
+		category: 'visibility',
+		description: 'No light at all'
+	},
 
 	// Range (for ranged weapons)
-	short_range: { name: 'Short Range', modifier: 0, category: 'range', description: 'Within short range' },
-	medium_range: { name: 'Medium Range', modifier: -1, category: 'range', description: 'Within medium range' },
-	long_range: { name: 'Long Range', modifier: -3, category: 'range', description: 'Within long range' },
-	extreme_range: { name: 'Extreme Range', modifier: -6, category: 'range', description: 'At extreme range' },
+	short_range: {
+		name: 'Short Range',
+		modifier: 0,
+		category: 'range',
+		description: 'Within short range'
+	},
+	medium_range: {
+		name: 'Medium Range',
+		modifier: -1,
+		category: 'range',
+		description: 'Within medium range'
+	},
+	long_range: {
+		name: 'Long Range',
+		modifier: -3,
+		category: 'range',
+		description: 'Within long range'
+	},
+	extreme_range: {
+		name: 'Extreme Range',
+		modifier: -6,
+		category: 'range',
+		description: 'At extreme range'
+	},
 
 	// Cover
-	partial_cover: { name: 'Partial Cover', modifier: -2, category: 'cover', description: 'Target has partial cover' },
-	good_cover: { name: 'Good Cover', modifier: -4, category: 'cover', description: 'Target has good cover' },
-	running_target: { name: 'Running Target', modifier: -2, category: 'cover', description: 'Target is running' },
-	prone_target: { name: 'Prone Target', modifier: -2, category: 'cover', description: 'Target is prone (ranged)' },
-	prone_melee: { name: 'Prone Target (Melee)', modifier: 2, category: 'cover', description: 'Target is prone (melee)' },
+	partial_cover: {
+		name: 'Partial Cover',
+		modifier: -2,
+		category: 'cover',
+		description: 'Target has partial cover'
+	},
+	good_cover: {
+		name: 'Good Cover',
+		modifier: -4,
+		category: 'cover',
+		description: 'Target has good cover'
+	},
+	running_target: {
+		name: 'Running Target',
+		modifier: -2,
+		category: 'cover',
+		description: 'Target is running'
+	},
+	prone_target: {
+		name: 'Prone Target',
+		modifier: -2,
+		category: 'cover',
+		description: 'Target is prone (ranged)'
+	},
+	prone_melee: {
+		name: 'Prone Target (Melee)',
+		modifier: 2,
+		category: 'cover',
+		description: 'Target is prone (melee)'
+	},
 
 	// Position
-	attacker_prone: { name: 'Attacker Prone', modifier: -2, category: 'position', description: 'Attacker is prone' },
-	attacker_running: { name: 'Attacker Running', modifier: -2, category: 'position', description: 'Attacker is running' },
-	off_hand: { name: 'Off-Hand Weapon', modifier: -2, category: 'position', description: 'Using off-hand weapon' },
-	two_weapons: { name: 'Two Weapons', modifier: -2, category: 'position', description: 'Attacking with two weapons' },
-	touch_attack: { name: 'Touch Attack', modifier: 2, category: 'position', description: 'Only need to touch target' },
-	superior_position: { name: 'Superior Position', modifier: 2, category: 'position', description: 'Higher ground or flanking' },
-	friend_in_melee: { name: 'Friend in Melee', modifier: -2, category: 'position', description: 'Shooting into melee' },
+	attacker_prone: {
+		name: 'Attacker Prone',
+		modifier: -2,
+		category: 'position',
+		description: 'Attacker is prone'
+	},
+	attacker_running: {
+		name: 'Attacker Running',
+		modifier: -2,
+		category: 'position',
+		description: 'Attacker is running'
+	},
+	off_hand: {
+		name: 'Off-Hand Weapon',
+		modifier: -2,
+		category: 'position',
+		description: 'Using off-hand weapon'
+	},
+	two_weapons: {
+		name: 'Two Weapons',
+		modifier: -2,
+		category: 'position',
+		description: 'Attacking with two weapons'
+	},
+	touch_attack: {
+		name: 'Touch Attack',
+		modifier: 2,
+		category: 'position',
+		description: 'Only need to touch target'
+	},
+	superior_position: {
+		name: 'Superior Position',
+		modifier: 2,
+		category: 'position',
+		description: 'Higher ground or flanking'
+	},
+	friend_in_melee: {
+		name: 'Friend in Melee',
+		modifier: -2,
+		category: 'position',
+		description: 'Shooting into melee'
+	}
 };
 
 /** Called shot definitions. */
@@ -500,13 +633,32 @@ export const CALLED_SHOTS: Record<string, CalledShot> = {
 	vitals: { name: 'Vitals', modifier: -4, effect: '+2 DV if attack hits' },
 	head: { name: 'Head', modifier: -4, effect: '+2 DV, target may be knocked unconscious' },
 	disarm: { name: 'Disarm', modifier: -4, effect: 'Target drops held item', requiresMelee: true },
-	knock_down: { name: 'Knock Down', modifier: -4, effect: 'Target makes Body test or falls prone', requiresMelee: true },
+	knock_down: {
+		name: 'Knock Down',
+		modifier: -4,
+		effect: 'Target makes Body test or falls prone',
+		requiresMelee: true
+	},
 	limb: { name: 'Specific Limb', modifier: -4, effect: 'Damage to specific limb' },
-	shooting_hand: { name: 'Shooting Hand', modifier: -4, effect: 'Target cannot use weapon', requiresRanged: true },
-	engine_block: { name: 'Engine Block', modifier: -4, effect: 'Disable vehicle', requiresRanged: true },
+	shooting_hand: {
+		name: 'Shooting Hand',
+		modifier: -4,
+		effect: 'Target cannot use weapon',
+		requiresRanged: true
+	},
+	engine_block: {
+		name: 'Engine Block',
+		modifier: -4,
+		effect: 'Disable vehicle',
+		requiresRanged: true
+	},
 	tire: { name: 'Tire', modifier: -4, effect: 'Vehicle loses tire', requiresRanged: true },
 	weak_point: { name: 'Weak Point', modifier: -6, effect: 'Ignore armor' },
-	called_shot_simple: { name: 'Called Shot (Simple)', modifier: -2, effect: 'Hit specific location' },
+	called_shot_simple: {
+		name: 'Called Shot (Simple)',
+		modifier: -2,
+		effect: 'Hit specific location'
+	}
 };
 
 /**
@@ -543,7 +695,7 @@ export function calculateCombatModifier(selectedModifiers: string[], calledShot?
  * @returns Whether suppressive fire is available.
  */
 export function canSuppressiveFire(modes: FiringMode[], currentAmmo: number): boolean {
-	const hasAutoMode = modes.some(m => m.code === 'FA' || m.code === 'BF' || m.code === 'LB');
+	const hasAutoMode = modes.some((m) => m.code === 'FA' || m.code === 'BF' || m.code === 'LB');
 	return hasAutoMode && currentAmmo >= 20;
 }
 
@@ -554,7 +706,11 @@ export function canSuppressiveFire(modes: FiringMode[], currentAmmo: number): bo
  * @param weaponDamage - Weapon's damage string.
  * @returns Suppressive fire info.
  */
-export function getSuppressiveFireInfo(weaponDamage: string): { damage: string; threshold: number; description: string } {
+export function getSuppressiveFireInfo(weaponDamage: string): {
+	damage: string;
+	threshold: number;
+	description: string;
+} {
 	const parsed = parseDamage(weaponDamage);
 	return {
 		damage: weaponDamage,
@@ -922,14 +1078,7 @@ export function calculateBiofeedbackDamage(
  * ============================================ */
 
 /** Technomancer sprite types. */
-export type SpriteType =
-	| 'Courier'
-	| 'Crack'
-	| 'Data'
-	| 'Fault'
-	| 'Machine'
-	| 'Paladin'
-	| 'Probe';
+export type SpriteType = 'Courier' | 'Crack' | 'Data' | 'Fault' | 'Machine' | 'Paladin' | 'Probe';
 
 /** Sprite ability definition. */
 export interface SpriteAbility {
@@ -1009,7 +1158,7 @@ export function calculateThreadingPool(resonance: number, skillRating: number): 
  * @returns Fading value (number of hits to resist).
  */
 export function calculateFadingValue(rating: number, resonance: number): number {
-	const fading = (rating * 2) - resonance;
+	const fading = rating * 2 - resonance;
 	return Math.max(1, fading);
 }
 
@@ -1074,7 +1223,10 @@ export function calculateSpriteTasks(compilationHits: number, spriteHits: number
  * @param registeringSkill - Registering skill rating.
  * @returns Registration dice pool.
  */
-export function calculateRegisteringSpritePool(resonance: number, registeringSkill: number): number {
+export function calculateRegisteringSpritePool(
+	resonance: number,
+	registeringSkill: number
+): number {
 	return Math.max(0, resonance + registeringSkill);
 }
 
@@ -1142,7 +1294,7 @@ export const VEHICLE_TESTS: Record<VehicleTestType, VehicleTest> = {
 	cut_off: {
 		name: 'Cut Off',
 		skill: 'Pilot',
-		description: 'Block another vehicle\'s path',
+		description: "Block another vehicle's path",
 		opposed: true,
 		opposedBy: 'Pilot + Reaction'
 	},
@@ -1162,13 +1314,20 @@ export const VEHICLE_TESTS: Record<VehicleTestType, VehicleTest> = {
 };
 
 /** Vehicle speed categories and their modifiers. */
-export const VEHICLE_SPEED_MODIFIERS: Record<string, { name: string; modifier: number; description: string }> = {
+export const VEHICLE_SPEED_MODIFIERS: Record<
+	string,
+	{ name: string; modifier: number; description: string }
+> = {
 	idle: { name: 'Idle', modifier: 0, description: '0-10% of Speed' },
 	slow: { name: 'Slow', modifier: 0, description: '11-25% of Speed' },
 	cruising: { name: 'Cruising', modifier: -1, description: '26-50% of Speed' },
 	fast: { name: 'Fast', modifier: -3, description: '51-75% of Speed' },
 	very_fast: { name: 'Very Fast', modifier: -6, description: '76-100% of Speed' },
-	exceeding: { name: 'Exceeding Speed', modifier: -9, description: 'Over maximum speed (dangerous!)' }
+	exceeding: {
+		name: 'Exceeding Speed',
+		modifier: -9,
+		description: 'Over maximum speed (dangerous!)'
+	}
 };
 
 /** Terrain modifiers for vehicle tests. */
@@ -1437,7 +1596,10 @@ export const ASTRAL_ACTIONS: Record<AstralActionType, AstralAction> = {
 };
 
 /** Tradition definitions for drain attribute. */
-export const MAGIC_TRADITIONS: Record<string, { name: string; drainAttribute: 'wil' | 'cha' | 'log' | 'int' }> = {
+export const MAGIC_TRADITIONS: Record<
+	string,
+	{ name: string; drainAttribute: 'wil' | 'cha' | 'log' | 'int' }
+> = {
 	hermetic: { name: 'Hermetic', drainAttribute: 'log' },
 	shamanic: { name: 'Shamanic', drainAttribute: 'cha' },
 	buddhist: { name: 'Buddhist', drainAttribute: 'wil' },
@@ -1536,7 +1698,10 @@ export function calculateSummoningDrain(_spiritForce: number, spiritHits: number
  * @param traditionAttribute - Charisma (Shaman) or Logic (Hermetic), etc.
  * @returns Drain resistance pool.
  */
-export function calculateDrainResistancePool(willpower: number, traditionAttribute: number): number {
+export function calculateDrainResistancePool(
+	willpower: number,
+	traditionAttribute: number
+): number {
 	return Math.max(0, willpower + traditionAttribute);
 }
 
@@ -1569,7 +1734,10 @@ export function calculateCounterspellingPool(counterspellingSkill: number, magic
  * @param numProtected - Number of people being protected (including self).
  * @returns Dice each protected person gets (split pool).
  */
-export function calculateSpellDefenseDice(counterspellingSkill: number, numProtected: number): number {
+export function calculateSpellDefenseDice(
+	counterspellingSkill: number,
+	numProtected: number
+): number {
 	if (numProtected <= 0) return 0;
 	return Math.floor(counterspellingSkill / numProtected);
 }
@@ -1614,7 +1782,10 @@ export function calculateSpellcastingPool(spellcastingSkill: number, magic: numb
  * @param counterspellingDice - Additional dice from counterspelling protection.
  * @returns Spell resistance pool.
  */
-export function calculateSpellResistancePool(willpower: number, counterspellingDice: number = 0): number {
+export function calculateSpellResistancePool(
+	willpower: number,
+	counterspellingDice: number = 0
+): number {
 	return Math.max(0, willpower + counterspellingDice);
 }
 
@@ -1626,7 +1797,11 @@ export function calculateSpellResistancePool(willpower: number, counterspellingD
  * @param divideForce - Whether to divide Force by 2 (most spells).
  * @returns Drain value.
  */
-export function calculateSpellDrain(force: number, drainMod: number, divideForce: boolean = true): number {
+export function calculateSpellDrain(
+	force: number,
+	drainMod: number,
+	divideForce: boolean = true
+): number {
 	const baseValue = divideForce ? Math.floor(force / 2) : force;
 	return Math.max(1, baseValue + drainMod);
 }
@@ -1647,7 +1822,7 @@ export function calculateSpellDrain(force: number, drainMod: number, divideForce
  */
 export function calculateArmorStacking(armorPieces: ArmorPiece[], body: number): ArmorStackResult {
 	// Filter to equipped armor only
-	const equipped = armorPieces.filter(a => a.equipped);
+	const equipped = armorPieces.filter((a) => a.equipped);
 
 	if (equipped.length === 0) {
 		return { ballistic: 0, impact: 0, encumbrancePenalty: 0, hasArmor: false };
@@ -1709,19 +1884,25 @@ export interface InitiativeModResult {
  * Cyberware and bioware that provide initiative bonuses.
  * Maps name pattern to function that returns bonuses based on rating.
  */
-const INITIATIVE_AUGMENTATIONS: Record<string, (rating: number) => { initBonus: number; diceBonus: number }> = {
+const INITIATIVE_AUGMENTATIONS: Record<
+	string,
+	(rating: number) => { initBonus: number; diceBonus: number }
+> = {
 	'wired reflexes': (rating) => ({ initBonus: rating, diceBonus: rating }),
 	'synaptic booster': (rating) => ({ initBonus: rating, diceBonus: rating }),
 	'move-by-wire': (rating) => ({ initBonus: rating * 2, diceBonus: rating }),
 	'boosted reflexes': () => ({ initBonus: 0, diceBonus: 1 }),
-	'reaction enhancers': (rating) => ({ initBonus: rating, diceBonus: 0 }),
+	'reaction enhancers': (rating) => ({ initBonus: rating, diceBonus: 0 })
 };
 
 /**
  * Adept powers that provide initiative bonuses.
  */
-const INITIATIVE_POWERS: Record<string, (level: number) => { initBonus: number; diceBonus: number }> = {
-	'improved reflexes': (level) => ({ initBonus: level, diceBonus: level }),
+const INITIATIVE_POWERS: Record<
+	string,
+	(level: number) => { initBonus: number; diceBonus: number }
+> = {
+	'improved reflexes': (level) => ({ initBonus: level, diceBonus: level })
 };
 
 /**
@@ -1747,7 +1928,9 @@ export function calculateInitiativeModifiers(
 				if (bonuses.initBonus > 0 || bonuses.diceBonus > 0) {
 					initiativeBonus += bonuses.initBonus;
 					initiativeDice += bonuses.diceBonus;
-					sources.push(`${cyber.name}${bonuses.initBonus > 0 ? ` (+${bonuses.initBonus} Init)` : ''}${bonuses.diceBonus > 0 ? ` (+${bonuses.diceBonus}d6)` : ''}`);
+					sources.push(
+						`${cyber.name}${bonuses.initBonus > 0 ? ` (+${bonuses.initBonus} Init)` : ''}${bonuses.diceBonus > 0 ? ` (+${bonuses.diceBonus}d6)` : ''}`
+					);
 				}
 				break;
 			}
@@ -1763,7 +1946,9 @@ export function calculateInitiativeModifiers(
 				if (bonuses.initBonus > 0 || bonuses.diceBonus > 0) {
 					initiativeBonus += bonuses.initBonus;
 					initiativeDice += bonuses.diceBonus;
-					sources.push(`${power.name}${bonuses.initBonus > 0 ? ` (+${bonuses.initBonus} Init)` : ''}${bonuses.diceBonus > 0 ? ` (+${bonuses.diceBonus}d6)` : ''}`);
+					sources.push(
+						`${power.name}${bonuses.initBonus > 0 ? ` (+${bonuses.initBonus} Init)` : ''}${bonuses.diceBonus > 0 ? ` (+${bonuses.diceBonus}d6)` : ''}`
+					);
 				}
 				break;
 			}

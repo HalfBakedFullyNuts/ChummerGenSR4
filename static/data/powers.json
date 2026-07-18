@@ -16,7 +16,15 @@
       "maxlevels": 0,
       "action": "",
       "source": "SM",
-      "page": 175
+      "page": 175,
+      "bonus": {
+        "skillgroup": [
+          {
+            "name": "Animal Husbandry",
+            "bonus": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Astral Perception",
@@ -34,7 +42,17 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 195
+      "page": 195,
+      "bonus": {
+        "selectattribute": {
+          "attribute": [
+            "AGI",
+            "BOD",
+            "REA",
+            "STR"
+          ]
+        }
+      }
     },
     {
       "name": "Berserk",
@@ -115,7 +133,16 @@
       "maxlevels": 0,
       "action": "",
       "source": "WA",
-      "page": 15
+      "page": 15,
+      "bonus": {
+        "specificattribute": [
+          {
+            "name": "INT",
+            "val": "Rating",
+            "affectbase": "yes"
+          }
+        ]
+      }
     },
     {
       "name": "Critical Strike",
@@ -124,7 +151,10 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 195
+      "page": 195,
+      "bonus": {
+        "unarmeddv": "Rating"
+      }
     },
     {
       "name": "Demara",
@@ -160,7 +190,10 @@
       "maxlevels": 0,
       "action": "",
       "source": "DG",
-      "page": 17
+      "page": 17,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Elemental Strike",
@@ -169,7 +202,10 @@
       "maxlevels": 0,
       "action": "",
       "source": "SM",
-      "page": 176
+      "page": 176,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Empathic Healing",
@@ -187,7 +223,19 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 195
+      "page": 195,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Perception",
+            "bonus": "Rating"
+          },
+          {
+            "name": "Assensing",
+            "bonus": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Enthralling Performance",
@@ -196,7 +244,10 @@
       "maxlevels": 0,
       "action": "",
       "source": "SM",
-      "page": 176
+      "page": 176,
+      "bonus": {
+        "selectskill": true
+      }
     },
     {
       "name": "Facial Sculpt",
@@ -205,7 +256,15 @@
       "maxlevels": 0,
       "action": "",
       "source": "SM",
-      "page": 177
+      "page": 177,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Disguise",
+            "bonus": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Flexibility",
@@ -214,7 +273,15 @@
       "maxlevels": 0,
       "action": "",
       "source": "SM",
-      "page": 177
+      "page": 177,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Escape Artist",
+            "bonus": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Freefall",
@@ -259,7 +326,14 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 196
+      "page": 196,
+      "bonus": {
+        "selectskill": {
+          "val": "Rating",
+          "applytorating": "yes",
+          "skillcategory": "Combat Active"
+        }
+      }
     },
     {
       "name": "Improved Ability (Non-Combat)",
@@ -268,7 +342,14 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 196
+      "page": 196,
+      "bonus": {
+        "selectskill": {
+          "val": "Rating",
+          "applytorating": "yes",
+          "excludecategory": "Combat Active,Magical Active,Resonance Active"
+        }
+      }
     },
     {
       "name": "Improved Physical Attribute",
@@ -277,7 +358,19 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 196
+      "page": 196,
+      "bonus": {
+        "selectattribute": {
+          "attribute": [
+            "BOD",
+            "AGI",
+            "REA",
+            "STR"
+          ],
+          "val": "Rating",
+          "affectbase": "yes"
+        }
+      }
     },
     {
       "name": "Improved Reflexes 1",
@@ -286,7 +379,17 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 196
+      "page": 196,
+      "bonus": {
+        "initiativepass": 1,
+        "specificattribute": [
+          {
+            "name": "REA",
+            "precedence": "0",
+            "val": 1
+          }
+        ]
+      }
     },
     {
       "name": "Improved Reflexes 2",
@@ -295,7 +398,17 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 196
+      "page": 196,
+      "bonus": {
+        "initiativepass": 2,
+        "specificattribute": [
+          {
+            "name": "REA",
+            "precedence": "0",
+            "val": 2
+          }
+        ]
+      }
     },
     {
       "name": "Improved Reflexes 3",
@@ -304,7 +417,17 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 196
+      "page": 196,
+      "bonus": {
+        "initiativepass": 3,
+        "specificattribute": [
+          {
+            "name": "REA",
+            "precedence": "0",
+            "val": 3
+          }
+        ]
+      }
     },
     {
       "name": "Improved Sense",
@@ -313,7 +436,10 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 196
+      "page": 196,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Indomitable Will",
@@ -367,7 +493,16 @@
       "maxlevels": 0,
       "action": "",
       "source": "WA",
-      "page": 15
+      "page": 15,
+      "bonus": {
+        "specificattribute": [
+          {
+            "name": "LOG",
+            "val": "Rating",
+            "affectbase": "yes"
+          }
+        ]
+      }
     },
     {
       "name": "Keratin Control",
@@ -385,7 +520,10 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 196
+      "page": 196,
+      "bonus": {
+        "unarmeddvphysical": true
+      }
     },
     {
       "name": "Kinesics",
@@ -394,7 +532,16 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 196
+      "page": 196,
+      "bonus": {
+        "judgeintentions": "Rating",
+        "skillcategory": [
+          {
+            "name": "Social Active",
+            "bonus": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Kinesics Mastery",
@@ -421,7 +568,10 @@
       "maxlevels": 0,
       "action": "",
       "source": "SM",
-      "page": 177
+      "page": 177,
+      "bonus": {
+        "adeptlinguistics": true
+      }
     },
     {
       "name": "Living Focus",
@@ -448,7 +598,15 @@
       "maxlevels": 0,
       "action": "",
       "source": "SG",
-      "page": 164
+      "page": 164,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Disguise",
+            "bonus": 2
+          }
+        ]
+      }
     },
     {
       "name": "Melanin Control",
@@ -484,7 +642,10 @@
       "maxlevels": 0,
       "action": "",
       "source": "WAR",
-      "page": 178
+      "page": 178,
+      "bonus": {
+        "swapskillattribute": true
+      }
     },
     {
       "name": "Missile Mastery",
@@ -493,7 +654,15 @@
       "maxlevels": 0,
       "action": "",
       "source": "SM",
-      "page": 178
+      "page": 178,
+      "bonus": {
+        "weaponcategorydv": {
+          "name": [
+            "Throwing Weapons"
+          ],
+          "bonus": 1
+        }
+      }
     },
     {
       "name": "Missile Parry",
@@ -529,7 +698,13 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 197
+      "page": 197,
+      "bonus": {
+        "armor": {
+          "b": "Rating",
+          "i": "Rating"
+        }
+      }
     },
     {
       "name": "Natural Immunity",
@@ -547,7 +722,23 @@
       "maxlevels": 0,
       "action": "",
       "source": "WA",
-      "page": 15
+      "page": 15,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Navigation",
+            "bonus": "Rating"
+          },
+          {
+            "name": "Survival",
+            "bonus": "Rating"
+          },
+          {
+            "name": "Tracking",
+            "bonus": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Natural Survivors (Street Skills)",
@@ -556,7 +747,25 @@
       "maxlevels": 0,
       "action": "",
       "source": "WA",
-      "page": 15
+      "page": 15,
+      "bonus": {
+        "skillcategory": [
+          {
+            "name": "Street",
+            "bonus": "Rating"
+          }
+        ],
+        "specificskill": [
+          {
+            "name": "Shadowing",
+            "bonus": "Rating"
+          },
+          {
+            "name": "Survival",
+            "bonus": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Nerve Strike",
@@ -574,7 +783,15 @@
       "maxlevels": 0,
       "action": "",
       "source": "SM",
-      "page": 179
+      "page": 179,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Palming",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Pain Relief",
@@ -592,7 +809,12 @@
       "maxlevels": 0,
       "action": "",
       "source": "SR4",
-      "page": 197
+      "page": 197,
+      "bonus": {
+        "conditionmonitor": {
+          "thresholdoffset": "Rating"
+        }
+      }
     },
     {
       "name": "Penetrating Strike",
@@ -601,7 +823,10 @@
       "maxlevels": 0,
       "action": "",
       "source": "SM",
-      "page": 179
+      "page": 179,
+      "bonus": {
+        "unarmedap": "-Rating"
+      }
     },
     {
       "name": "Piercing Senses",
@@ -619,7 +844,10 @@
       "maxlevels": 0,
       "action": "",
       "source": "DG",
-      "page": 18
+      "page": 18,
+      "bonus": {
+        "swimpercent": 100
+      }
     },
     {
       "name": "Power Throw",
@@ -628,7 +856,11 @@
       "maxlevels": 0,
       "action": "",
       "source": "SM",
-      "page": 179
+      "page": 179,
+      "bonus": {
+        "throwrange": "Rating * 2",
+        "throwstr": "Rating * 2"
+      }
     },
     {
       "name": "Prodigious Physicality",
@@ -637,7 +869,15 @@
       "maxlevels": 0,
       "action": "",
       "source": "WA",
-      "page": 15
+      "page": 15,
+      "bonus": {
+        "skillgroup": [
+          {
+            "name": "Athletics",
+            "bonus": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Quick Draw",
@@ -691,7 +931,15 @@
       "maxlevels": 0,
       "action": "",
       "source": "WA",
-      "page": 15
+      "page": 15,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Counterspelling",
+            "bonus": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Spell Resistance",
@@ -709,7 +957,12 @@
       "maxlevels": 0,
       "action": "",
       "source": "DG",
-      "page": 18
+      "page": 18,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": "Rating"
+        }
+      }
     },
     {
       "name": "Supernatural Toughness (Stun)",
@@ -718,7 +971,12 @@
       "maxlevels": 0,
       "action": "",
       "source": "DG",
-      "page": 18
+      "page": 18,
+      "bonus": {
+        "conditionmonitor": {
+          "stun": "Rating"
+        }
+      }
     },
     {
       "name": "Sustenance",
@@ -772,7 +1030,15 @@
       "maxlevels": 0,
       "action": "",
       "source": "WA",
-      "page": 15
+      "page": 15,
+      "bonus": {
+        "skillgroup": [
+          {
+            "name": "Stealth",
+            "bonus": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Voice Control",

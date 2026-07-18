@@ -6,7 +6,12 @@ export default defineConfig({
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}'],
 		globals: true,
-		environment: 'jsdom'
+		environment: 'jsdom',
+		coverage: {
+			provider: 'v8',
+			reporter: ['text', 'html'],
+			exclude: ['node_modules/', 'src/**/*.svelte']
+		}
 	},
 	build: {
 		target: 'esnext',

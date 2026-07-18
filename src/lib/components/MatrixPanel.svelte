@@ -48,11 +48,11 @@
 	function getSkillRating(skillName: string): number {
 		// Map Matrix skills to character skill names
 		const skillMap: Record<string, string> = {
-			'Computer': 'Computer',
+			Computer: 'Computer',
 			'Data Search': 'Data Search',
 			'Electronic Warfare': 'Electronic Warfare',
-			'Hacking': 'Hacking',
-			'Cybercombat': 'Cybercombat'
+			Hacking: 'Hacking',
+			Cybercombat: 'Cybercombat'
 		};
 		const mappedSkill = skillMap[skillName];
 		if (!mappedSkill) return 0;
@@ -62,17 +62,21 @@
 	/** Get program rating by name. */
 	function getProgramRating(programName?: string): number {
 		if (!programName) return 0;
-		const program = programs.find(p => p.name.toLowerCase() === programName.toLowerCase());
+		const program = programs.find((p) => p.name.toLowerCase() === programName.toLowerCase());
 		return program?.rating || 0;
 	}
 
 	/** Get attribute value for an action. */
 	function getAttributeValue(attr: 'log' | 'int' | 'cha' | 'res'): number {
 		switch (attr) {
-			case 'log': return logic;
-			case 'int': return intuition;
-			case 'cha': return charisma;
-			case 'res': return resonance || 0;
+			case 'log':
+				return logic;
+			case 'int':
+				return intuition;
+			case 'cha':
+				return charisma;
+			case 'res':
+				return resonance || 0;
 		}
 	}
 
@@ -83,7 +87,9 @@
 		const programRating = action.addProgram ? getProgramRating(action.program) : 0;
 
 		let pool = calculateMatrixPool(
-			Object.keys(MATRIX_ACTIONS).find(k => MATRIX_ACTIONS[k as MatrixActionType] === action) as MatrixActionType,
+			Object.keys(MATRIX_ACTIONS).find(
+				(k) => MATRIX_ACTIONS[k as MatrixActionType] === action
+			) as MatrixActionType,
 			skillRating,
 			attrValue,
 			programRating
@@ -127,7 +133,15 @@
 		},
 		{
 			name: 'Computer',
-			actions: ['analyze', 'browse', 'command', 'edit', 'data_search', 'matrix_perception', 'trace_user']
+			actions: [
+				'analyze',
+				'browse',
+				'command',
+				'edit',
+				'data_search',
+				'matrix_perception',
+				'trace_user'
+			]
 		},
 		{
 			name: 'Cybercombat',
@@ -141,11 +155,7 @@
 		<h3 class="text-text-primary font-medium">Matrix Actions</h3>
 		<div class="flex items-center gap-3">
 			<label class="flex items-center gap-2 cursor-pointer">
-				<input
-					type="checkbox"
-					class="w-4 h-4 accent-secondary-main"
-					bind:checked={vrMode}
-				/>
+				<input type="checkbox" class="w-4 h-4 accent-secondary-main" bind:checked={vrMode} />
 				<span class="text-text-secondary text-sm">Hot-Sim VR</span>
 			</label>
 		</div>
@@ -192,10 +202,14 @@
 							<div class="flex items-center gap-2 mt-1">
 								<span class="text-xs text-text-muted">{action.skill}</span>
 								{#if action.opposed}
-									<span class="text-xs text-warning-main" title="Opposed by: {action.opposedBy}">Opp</span>
+									<span class="text-xs text-warning-main" title="Opposed by: {action.opposedBy}"
+										>Opp</span
+									>
 								{/if}
 								{#if action.program}
-									<span class="text-xs text-info-main" title="Uses {action.program} program">+{action.program}</span>
+									<span class="text-xs text-info-main" title="Uses {action.program} program"
+										>+{action.program}</span
+									>
 								{/if}
 							</div>
 						</button>
@@ -233,7 +247,11 @@
 			<div class="flex justify-between p-2 bg-surface-variant rounded">
 				<span class="text-text-secondary">vs Cybercombat</span>
 				<span class="font-mono text-success-main">
-					{calculateMatrixDefense(commlink.firewall, getProgramRating('Armor'), commlink.response)}d6
+					{calculateMatrixDefense(
+						commlink.firewall,
+						getProgramRating('Armor'),
+						commlink.response
+					)}d6
 				</span>
 			</div>
 		</div>

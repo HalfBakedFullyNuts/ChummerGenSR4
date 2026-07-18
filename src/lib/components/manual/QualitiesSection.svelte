@@ -14,9 +14,9 @@
 
 	/** Filter qualities. */
 	$: filteredQualities = qualities
-		.filter(q => {
-			const matchesSearch = !searchQuery ||
-				q.name.toLowerCase().includes(searchQuery.toLowerCase());
+		.filter((q) => {
+			const matchesSearch =
+				!searchQuery || q.name.toLowerCase().includes(searchQuery.toLowerCase());
 			const matchesCategory = filterCategory === 'all' || q.category === filterCategory;
 			return matchesSearch && matchesCategory;
 		})
@@ -24,7 +24,7 @@
 
 	/** Check if quality is already on character. */
 	function hasQuality(name: string): boolean {
-		return character.qualities.some(q => q.name === name);
+		return character.qualities.some((q) => q.name === name);
 	}
 
 	/** Handle adding a quality. */
@@ -39,12 +39,12 @@
 
 	/** Get positive qualities total BP. */
 	$: positiveTotal = character.qualities
-		.filter(q => q.category === 'Positive')
+		.filter((q) => q.category === 'Positive')
 		.reduce((sum, q) => sum + q.bp, 0);
 
 	/** Get negative qualities total BP. */
 	$: negativeTotal = character.qualities
-		.filter(q => q.category === 'Negative')
+		.filter((q) => q.category === 'Negative')
 		.reduce((sum, q) => sum + Math.abs(q.bp), 0);
 </script>
 
@@ -113,11 +113,7 @@
 		</div>
 		<div>
 			<label for="categoryFilter" class="block text-text-secondary text-sm mb-1">Category</label>
-			<select
-				id="categoryFilter"
-				bind:value={filterCategory}
-				class="cw-select w-full"
-			>
+			<select id="categoryFilter" bind:value={filterCategory} class="cw-select w-full">
 				<option value="all">All</option>
 				<option value="Positive">Positive Only</option>
 				<option value="Negative">Negative Only</option>

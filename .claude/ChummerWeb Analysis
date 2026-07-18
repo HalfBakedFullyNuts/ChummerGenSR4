@@ -1,0 +1,522 @@
+# ChummerGenSR4 — Complete Application Analysis
+
+> [!NOTE]
+> This document provides an exhaustive breakdown of the ChummerGenSR4 desktop application (a Shadowrun 4th Edition character generator) for the purpose of recreating it as a web application.
+
+---
+
+## 1. High-Level Architecture
+
+ChummerGenSR4 is a **C# WinForms MDI (Multiple Document Interface)** application built with .NET Framework (Visual Studio 2014 / .NET 4.x). It follows a loosely-MVC pattern but is predominantly a **code-behind + rich domain model** architecture.
+
+### Technology Stack
+| Component | Technology |
+|---|---|
+| Language | C# (.NET Framework 4.x) |
+| UI Framework | Windows Forms (WinForms) |
+| Data Format | XML (both game data and character saves) |
+| Persistence | File-based XML (character `.chum` files) |
+| Settings | XML settings files + Windows Registry |
+| Localization | Custom XML-based i18n system |
+| Online Features | SOAP Web Services (Omae) |
+
+### Application Flow
+```mermaid
+graph TD
+    A[Program.Main] --> B[LanguageManager.Load]
+    B --> C[frmMain - MDI Parent]
+    C --> D{User Action}
+    D -->|New Character| E[frmSelectBP - Build Method]
+    E --> F[frmMetatype - Race Selection]
+    F --> G[frmCreate - Character Creation]
+    D -->|Open File| H[Character.Load]
+    H -->|Created=false| G
+    H -->|Created=true| I[frmCareer - Career Mode]
+    G -->|Save as Created| I
+```
+
+---
+
+## 2. Core Domain Model (The `Character` Class)
+
+**File**: [clsCharacter.cs](file:///f:/Projects/ChummerDesktop/Chummer/clsCharacter.cs) — **6,006 lines**
+
+The `Character` class is the **central data object**. Everything in the application revolves around it. It holds ALL character state.
+
+### 2.1 Character Fields (Private State)
+
+#### Identity & Meta
+| Field | Type | Purpose |
+|---|---|---|
+| `_strName` | string | Character name |
+| `_strAlias` | string | Street name / alias |
+| `_strPlayerName` | string | Real player name |
+| `_strSex`, `_strAge`, `_strEyes`, `_strHeight`, `_strWeight`, `_strSkin`, `_strHair` | string | Physical descriptors |
+| `_strMugshot` | string | Base64-encoded portrait |
+| `_strDescription`, `_strBackground`, `_strConcept`, `_strNotes`, `_strGameNotes` | string | RP text fields |
+
+#### Build System
+| Field | Type | Purpose |
+|---|---|---|
+| `_intBuildPoints` | int | Total BP (default 400) |
+| `_intKnowledgeSkillPoints` | int | Free knowledge skill points |
+| `_decNuyenMaximumBP` | decimal | Max BP spendable on Nuyen |
+| `_decNuyenBP` | decimal | BP currently spent on Nuyen |
+| `_intBuildKarma` | int | Karma build points |
+| `_objBuildMethod` | CharacterBuildMethod | BP or Karma build |
+| `_blnCreated` | bool | Creation finalized? |
+
+#### Currency & Reputation
+| Field | Type | Purpose |
+|---|---|---|
+| `_intKarma` | int | Current Karma |
+| `_intTotalKarma` | int | Lifetime Karma earned |
+| `_intNuyen` | int | Current Nuyen (money) |
+| `_intStreetCred`, `_intNotoriety`, `_intPublicAwareness`, `_intBurntStreetCred` | int | Reputation stats |
+| `_intMaxAvail` | int | Max item availability (default 12) |
+
+#### Metatype (Race)
+| Field | Type | Purpose |
+|---|---|---|
+| `_strMetatype` | string | Race (Human, Elf, Dwarf, Ork, Troll) |
+| `_strMetavariant` | string | Sub-race variant |
+| `_strMetatypeCategory` | string | Category grouping |
+| `_strMovement` | string | Movement rate override |
+| `_intMetatypeBP` | int | BP cost of metatype |
+
+#### Attributes (13 total)
+| Field | Abbreviation | Description |
+|---|---|---|
+| `_attBOD` | BOD | Body (toughness) |
+| `_attAGI` | AGI | Agility |
+| `_attREA` | REA | Reaction |
+| `_attSTR` | STR | Strength |
+| `_attCHA` | CHA | Charisma |
+| `_attINT` | INT | Intuition |
+| `_attLOG` | LOG | Logic |
+| `_attWIL` | WIL | Willpower |
+| `_attINI` | INI | Initiative (derived) |
+| `_attEDG` | EDG | Edge (luck) |
+| `_attMAG` | MAG | Magic |
+| `_attRES` | RES | Resonance |
+| `_attESS` | ESS | Essence |
+
+Each is an `Attribute` object with: Value, MetatypeMinimum, MetatypeMaximum, MetatypeAugmentedMaximum, plus the Improvement system modifies them.
+
+#### Special Flags
+| Field | Type | Purpose |
+|---|---|---|
+| `_blnMAGEnabled` / `_blnRESEnabled` | bool | Magic/Resonance active |
+| `_blnAdeptEnabled` / `_blnMagicianEnabled` / `_blnTechnomancerEnabled` | bool | Archetype flags |
+| `_blnInitiationEnabled` / `_blnCritterEnabled` | bool | Tab visibility |
+| `_blnUneducated` / `_blnUncouth` / `_blnInfirm` | bool | Quality-driven penalties |
+| `_blnIsCritter` / `_blnPossessed` / `_blnBlackMarket` | bool | Special states |
+
+#### Collections (The Character's "Inventory")
+| Field | Type | Count of Items |
+|---|---|---|
+| `_lstSkills` | `List<Skill>` | Active + Knowledge skills |
+| `_lstSkillGroups` | `List<SkillGroup>` | Skill group ratings |
+| `_lstQualities` | `List<Quality>` | Positive/Negative qualities |
+| `_lstContacts` | `List<Contact>` | Contacts & Enemies |
+| `_lstSpells` | `List<Spell>` | Magician spells |
+| `_lstPowers` | `List<Power>` | Adept powers |
+| `_lstSpirits` | `List<Spirit>` | Bound spirits/sprites |
+| `_lstFoci` / `_lstStackedFoci` | `List<Focus>` / `List<StackedFocus>` | Magical foci |
+| `_lstTechPrograms` | `List<TechProgram>` | Complex Forms |
+| `_lstMartialArts` / `_lstMartialArtManeuvers` | `List<MartialArt>` / `List<MartialArtManeuver>` | Combat styles |
+| `_lstArmor` | `List<Armor>` | Armor pieces |
+| `_lstWeapons` | `List<Weapon>` | Weapons |
+| `_lstCyberware` | `List<Cyberware>` | Cyber/Bioware implants |
+| `_lstGear` | `List<Gear>` | General equipment |
+| `_lstLifestyles` | `List<Lifestyle>` | Living arrangements |
+| `_lstVehicles` | `List<Vehicle>` | Vehicles |
+| `_lstMetamagics` | `List<Metamagic>` | Metamagics / Echoes |
+| `_lstCritterPowers` | `List<CritterPower>` | Critter-specific powers |
+| `_lstImprovements` | `List<Improvement>` | ALL active improvements |
+| `_lstExpenseLog` | `List<ExpenseLogEntry>` | Karma/Nuyen transaction log |
+| `_lstInitiationGrades` | `List<InitiationGrade>` | Initiation progress |
+| `_lstCalendar` | `List<CalendarWeek>` | In-game calendar |
+
+### 2.2 Key Character Methods
+| Method | Lines | Purpose |
+|---|---|---|
+| `Save()` | 223–696 | Serialize entire character to XML file |
+| `Load()` | 698–1477 | Deserialize from XML, rebuild all objects |
+| `PrintToStream()` | 1479–2165 | Export to XML for print/view rendering |
+| `Print()` | 2167–2225 | Open viewer with print XML |
+| `ResetCharacter()` | 2227–2321 | Clear all collections and reset to defaults |
+| `BuildSkillGroupList()` | 2325–2363 | Populate skill groups from XML data |
+| `BuildSkillList()` | 2365–2410 | Populate skills from XML data |
+| `GetAttribute(string)` | 3155–3203 | Switch-based attribute lookup |
+| `HasImprovement()` | 5747–5763 | Check if improvement type exists |
+
+### 2.3 Events System
+The Character fires events when key state changes, allowing forms to react:
+- `MAGEnabledChanged`, `RESEnabledChanged`
+- `AdeptTabEnabledChanged`, `MagicianTabEnabledChanged`, `TechnomancerTabEnabledChanged`
+- `InitiationTabEnabledChanged`, `CritterTabEnabledChanged`
+- `UneducatedChanged`, `UncouthChanged`, `InfirmChanged`
+- `CharacterNameChanged`, `BlackMarketEnabledChanged`
+
+---
+
+## 3. Data Model Classes
+
+### 3.1 Classes in `clsUnique.cs` (8,606 lines)
+"Unique" items — things specific to a character's build.
+
+| Class | Lines | Key Properties |
+|---|---|---|
+| **Attribute** | 14–938 | Abbrev, Value, MetatypeMin/Max/AugMax, TotalValue (computed with Improvements) |
+| **Quality** | 962–1549 | Name, BP, Type (Positive/Negative), Source (Selected/Metatype), ContributeToLimit |
+| **SkillGroup** | 1554–1771 | Name, Rating, RatingMaximum, Broken flag, SkillList |
+| **Skill** | 1776–3219 | Name, Rating, Attribute, Specialization, SkillCategory, IsGrouped, IsKnowledge |
+| **Spirit** | 3233–3521 | Name, Force, ServicesOwed, Bound, Type (Spirit/Sprite) |
+| **Spell** | 3526–4371 | Name, Category, Type, Range, Duration, DV, Descriptor, Limited, Extended, Grade |
+| **Focus** | 4376–4474 | GearId, Rating |
+| **StackedFocus** | 4479–4698 | Bonded, Gear list |
+| **Metamagic** | 4703–5019 | Name, Source (Initiation/Submersion), Grade, Improvements |
+| **Power** | 5024–5544 | Name, Rating, PointsPerLevel, Action, BonusSource |
+| **TechProgram** | 5549–6138 | Name, Rating, Skill, Category, Options list |
+| **TechProgramOption** | 6143–6506 | Name, Rating, linked to parent TechProgram |
+| **MartialArt** | 6511–6754 | Name, Rating, Advantages list |
+| **MartialArtAdvantage** | 6759–6904 | Name, linked to parent MartialArt |
+| **MartialArtManeuver** | 6909–7111 | Name, Source |
+| **Contact** | 7126–7499 | Name, Connection, Loyalty, Type (Contact/Enemy/Pet), Metatype, IsGroup |
+| **CritterPower** | 7504–8069 | Name, Category, Type, Rating, CountTowardsLimit |
+| **InitiationGrade** | 8074–8293 | Grade, Group, Ordeal, Technomancer |
+| **CalendarWeek** | 8294–8605 | Year, Week, Notes |
+
+### 3.2 Classes in `clsEquipment.cs` (15,950 lines)
+Physical gear and equipment.
+
+| Class | Lines | Key Properties |
+|---|---|---|
+| **ArmorMod** | 38–897 | Name, Rating, Armor bonus, MaxRating, Cost, Avail |
+| **Armor** | 902–2071 | Name, ArmorValue, Cost, Avail, ArmorMods list, Gear list, Equipped |
+| **Grade** | 2076–2198 | Name, Essence cost multiplier, Cost multiplier, Avail |
+| **GradeList** | 2203–2271 | Collection of Grade objects for Cyber/Bioware |
+| **Cyberware** | 2276–4160 | Name, Category, Grade, Rating, ESS cost, Children list, Source (Cyber/Bio) |
+| **Weapon** | 4165–7203 | Name, Damage, AP, Mode, Ammo, Range, Accessories, Mods, Concealability |
+| **WeaponAccessory** | 7208–7875 | Name, Mount, DamageBonus, APBonus, Gear list |
+| **WeaponMod** | 7880–8788 | Name, Slots, DamageBonus, APBonus |
+| **Lifestyle** | 8804–9477 | Name, Cost, Months, Type (Standard/BoltHole/Safehouse/Advanced), Qualities |
+| **Gear** | 9482–11926 | Name, Category, Rating, Qty, Cost, Avail, Children list, WeaponBonus |
+| **Commlink** (extends Gear) | 11931–12795 | Response, Signal, Firewall, System, Programs |
+| **OperatingSystem** (extends Gear) | 12800–13277 | Similar to Commlink internals |
+| **VehicleMod** | 13282–14347 | Name, Category, Rating, Slots, Cost, Weapons, Cyberware |
+| **Vehicle** | 14352–15949 | Handling, Accel, Speed, Pilot, Body, Armor, Sensor, Mods, Gear, Weapons |
+
+### 3.3 Every domain class follows the same pattern:
+```
+Create(XmlNode, ...) → Parse XML data source, create TreeNode
+Save(XmlTextWriter)  → Serialize to character save XML
+Load(XmlNode)        → Deserialize from character save XML
+Print(XmlTextWriter) → Export for display/printing
+Properties           → Get/Set for each field
+```
+
+---
+
+## 4. The Improvement System
+
+**File**: [clsImprovement.cs](file:///f:/Projects/ChummerDesktop/Chummer/clsImprovement.cs) — **2,819 lines**
+
+This is the **rules engine** — the most critical system for a web recreation.
+
+### 4.1 How It Works
+Improvements are **modifiers** applied to character stats. When a Quality, Cyberware, Spell, or any other object grants a bonus, it creates `Improvement` objects rather than directly modifying values. This allows clean add/remove.
+
+### 4.2 Improvement Data Structure
+| Property | Type | Purpose |
+|---|---|---|
+| ImprovedName | string | Target (e.g., "BOD", skill name) |
+| SourceName | string | What created it (Quality name, etc.) |
+| ImproveType | ImprovementType enum | What kind (Attribute, Skill, Armor, etc.) |
+| ImproveSource | ImprovementSource enum | Source category (Quality, Cyberware, etc.) |
+| Value, Minimum, Maximum, Augmented, AugmentedMaximum | int | Numeric modifiers |
+| Rating | int | Source item's rating |
+| Exclude | string | Exceptions to the improvement |
+| UniqueName | string | Grouping — only highest in group applies |
+| AddToRating | bool | Applies to skill Rating vs dice pool |
+| Enabled | bool | Active or disabled |
+
+### 4.3 ImprovementType Enum (89 types)
+Covers: Skill, Attribute, BallisticArmor, ImpactArmor, Reach, Nuyen, Essence, Reaction, PhysicalCM, StunCM, UnarmedDV, SkillGroup, SkillCategory, InitiativePass, MatrixInitiative, LifestyleCost, CMThreshold, WeaponCategoryDV, CyberwareEssCost, SpecialTab, LivingPersona stats, Smartlink, BiowareEssCost, MovementPercent, FreePositiveQualities, FreeNegativeQualities, NuyenMaxBP, AdeptPowerPoints, DamageResistance, DrainResistance, FadingResistance, Composure, JudgeIntentions, Memory, and many more.
+
+### 4.4 ImprovementManager (lines 826–2818)
+| Method | Purpose |
+|---|---|
+| `ValueOf(type, addToRating, improvedName)` | Sum all active improvements of a given type |
+| `CreateImprovements(source, sourceName, xmlNode, ...)` | Parse XML bonus nodes and create improvement objects |
+| `RemoveImprovements(source, sourceName)` | Remove all improvements from a source |
+| `CreateImprovement(...)` | Create a single improvement and add to transaction |
+| `Commit()` | Finalize transaction |
+| `Rollback()` | Undo transaction |
+
+The `CreateImprovements` method (lines 1124–2460, **1,300+ lines**) is a massive switch/if-else chain that handles every possible XML bonus node type.
+
+---
+
+## 5. XML Data System
+
+### 5.1 XmlManager (Singleton Cache)
+**File**: [clsXmlManager.cs](file:///f:/Projects/ChummerDesktop/Chummer/clsXmlManager.cs) — 688 lines
+
+- `Load(fileName)` — loads XML from `data/` directory, caches results
+- Merges custom XML files (`custom/` directory overrides)
+- Applies language translations from `lang/` directory
+- Thread-safe singleton via static instance
+
+### 5.2 Data Files (from `bin/` directory in the zip)
+The game data XML files define all available options:
+- `metatypes.xml` — Races with attribute ranges
+- `skills.xml` — All skills with categories and groups
+- `qualities.xml` — Positive/Negative qualities with BP costs
+- `weapons.xml`, `armor.xml`, `gear.xml` — Equipment catalogs
+- `cyberware.xml`, `bioware.xml` — Implant catalogs
+- `spells.xml` — Spell database
+- `powers.xml` — Adept power database
+- `complexforms.xml` — Technomancer programs
+- `vehicles.xml` — Vehicle catalog
+- `martialarts.xml` — Martial arts and maneuvers
+- `critterpowers.xml` — Critter-specific abilities
+- `metamagic.xml` — Metamagic/Echo options
+- `mentors.xml` — Mentor spirits
+- `lifestyles.xml` — Lifestyle options
+- `traditions.xml`, `streams.xml` — Magic/Resonance traditions
+- `books.xml` — Sourcebook references
+- `improvements.xml` — Custom improvement definitions
+- `ranges.xml` — Weapon range tables
+
+---
+
+## 6. UI Layer — Forms Architecture
+
+### 6.1 Main Form (`frmMain`) — MDI Container
+**File**: [frmMain.cs](file:///f:/Projects/ChummerDesktop/Chummer/frmMain.cs) — 847 lines
+
+- MDI parent with menu bar, toolbar, and tabbed child forms
+- Handles: New Character, Open File, MRU list, Options, Dice Roller, Omae
+- `ShowNewForm()` → opens build method selection → metatype → frmCreate
+- `LoadCharacter(fileName)` → loads XML → opens frmCreate or frmCareer based on `Created` flag
+
+### 6.2 Character Creation Form (`frmCreate`) — **23,123 lines**
+**File**: [frmCreate.cs](file:///f:/Projects/ChummerDesktop/Chummer/frmCreate.cs)
+
+This is the **largest single file**. It handles ALL character creation UI across multiple tabs:
+
+| Tab | Content |
+|---|---|
+| Common | Attributes (BOD-EDG, MAG, RES), Qualities, Nuyen |
+| Skills | Active Skills, Skill Groups, Knowledge Skills |
+| Spells | Spell selection (Magician) |
+| Adept Powers | Power selection (Adept) |
+| Complex Forms | Technomancer programs |
+| Martial Arts | Martial arts and maneuvers |
+| Armor | Armor pieces and mods |
+| Weapons | Weapons, accessories, mods |
+| Gear | General equipment |
+| Cyberware | Cyberware and Bioware |
+| Vehicles | Vehicle catalog |
+| Contacts | Contacts and enemies |
+| Character Info | Bio details and portrait |
+| Initiation | Initiation/Submersion grades |
+| Critter | Critter powers (NPC only) |
+
+**Key patterns in frmCreate:**
+- 376+ methods, each handling a specific UI event
+- `frmCreate_Load()` (lines 95–1202): **1,100 lines** of initialization
+- BP calculation: `CalculateBP()` tracks all build point spending
+- Each "Add X" button opens a selection dialog, creates the object, adds to Character
+- Each "Delete X" button removes from Character and removes Improvements
+
+### 6.3 Career Mode Form (`frmCareer`) — **26,951 lines**
+**File**: [frmCareer.cs](file:///f:/Projects/ChummerDesktop/Chummer/frmCareer.cs)
+
+Similar tab structure to frmCreate but for **post-creation play**:
+- Uses Karma instead of BP
+- Tracks spending via ExpenseLogEntry
+- Allows attribute improvement (New Rating × cost in Karma)
+- Skill advancement via Karma
+- Purchase equipment with Nuyen
+- Initiation/Submersion grade advancement
+- Condition Monitor tracking
+
+### 6.4 Selection Dialogs (40+ forms)
+Each `frmSelect*.cs` file is a modal dialog for choosing items:
+
+| Form | Purpose |
+|---|---|
+| `frmSelectBP` | Choose BP/Karma build method |
+| `frmMetatype` | Choose race and special attribute priorities |
+| `frmSelectQuality` | Browse/filter/select qualities |
+| `frmSelectSpell` | Browse/filter/select spells |
+| `frmSelectCyberware` | Browse/filter cyberware with grade/rating |
+| `frmSelectGear` | Browse/filter general gear |
+| `frmSelectWeapon` | Browse/filter weapons |
+| `frmSelectArmor` | Browse/filter armor |
+| `frmSelectVehicle` | Browse/filter vehicles |
+| `frmSelectPower` | Browse/filter adept powers |
+| `frmSelectProgram` | Browse/filter complex forms |
+| `frmSelectSkill` | Choose a skill |
+| `frmSelectMentorSpirit` | Choose mentor spirit |
+| `frmSelectMartialArt` | Choose martial art |
+| `frmSelectLifestyle` | Choose lifestyle |
+| `frmSelectMetamagic` | Choose metamagic/echo |
+| And 25+ more... | Various specialized selectors |
+
+---
+
+## 7. Support Systems
+
+### 7.1 Options System (`clsOptions.cs` — 3,977 lines)
+
+**Two classes:**
+
+**GlobalOptions** (Singleton):
+- Language, StartupFullscreen, AutoUpdate, CultureInfo
+- PDF viewer path, sourcebook page references
+- MRU (Most Recently Used) file list with sticky support
+- Clipboard content type tracking
+
+**CharacterOptions** (Per-character):
+- 100+ boolean flags for optional/house rules
+- BP costs for attributes, skills, qualities, spells
+- Karma costs for all advancement types
+- Book selection (which sourcebooks are enabled)
+- `BookXPath()` — generates XPath filter for enabled books
+- Save/Load to XML settings files in `settings/` directory
+
+### 7.2 Language System (`clsLanguageManager.cs` — 650 lines)
+- Singleton with lazy load
+- Loads `en-us.xml` (English base) + optional language overlay
+- `GetString(key)` — retrieve localized string
+- `UpdateControls(parent)` — recursively translate all controls in a form
+- `TranslateExtra(str)` — translate dynamic content (skill names, etc.)
+- Supports: English, French, German, Japanese
+
+### 7.3 CommonFunctions (`clsCommon.cs` — 1,367 lines)
+Utility class for finding objects in nested collections:
+- `FindGear`, `FindWeapon`, `FindArmor`, `FindCyberware`, `FindSpell`
+- `FindVehicle`, `FindVehicleMod`, `FindVehicleWeapon`, `FindVehicleGear`
+- `FindQuality`, `FindMetamagic`, `FindMartialArt`, `FindContact`
+- `FindNode` — locate TreeNode by tag in TreeView
+- All use recursive search through nested child collections
+
+### 7.4 MainController (`controllers/clsMainController.cs` — 1,044 lines)
+Handles drag-and-drop operations and tab-clearing:
+- `MoveGearNode/Parent/Root` — reorganize gear in tree
+- `MoveArmorNode/Root`, `MoveWeaponNode/Root`, `MoveVehicleNode`
+- `ClearSpellTab`, `ClearAdeptTab`, `ClearTechnomancerTab`, `ClearCritterTab`
+- `ChangeGearEquippedStatus` — cascade equip/unequip through children
+
+### 7.5 Expense Tracking (`clsExpenses.cs` — 571 lines)
+- `ExpenseLogEntry` — Karma or Nuyen transaction with date, amount, reason
+- `ExpenseUndo` — undo metadata (what type of thing was purchased, its ID)
+- Full undo support for career-mode purchases
+
+---
+
+## 8. Calculated/Derived Values
+
+The Character class has many **computed properties** (lines 3200–5640):
+
+| Property | Calculation |
+|---|---|
+| `PhysicalCM` | 8 + ceil(BOD/2) + Improvements |
+| `StunCM` | 8 + ceil(WIL/2) + Improvements |
+| `CMThreshold` | 3 + Improvements |
+| `CMOverflow` | BOD + Improvements |
+| `Essence` | Base(6) - Cyberware ESS costs |
+| `Initiative` | INT + REA + Improvements |
+| `InitiativePasses` | 1 + Improvements |
+| `MatrixInitiative` | INT + Response + Improvements |
+| `JudgeIntentions` | INT + CHA + Improvements |
+| `Composure` | CHA + WIL + Improvements |
+| `LiftAndCarry` | BOD + STR + Improvements |
+| `Memory` | LOG + WIL + Improvements |
+| `ArmorRating` | Sum of equipped armor + mods |
+| `TotalKarma` | Sum of positive Karma expenses |
+| `CareerNuyen` | Sum of positive Nuyen expenses |
+| `Moving/Swim/Fly` | Base by metatype × movement% improvements |
+| `CalculatedStreetCred` | floor(CareerKarma/10) + manualStreetCred |
+| `SkillPoints*` | Various remaining BP/points calculations |
+
+---
+
+## 9. Data Flow Patterns
+
+### 9.1 Adding an Item (e.g., Quality)
+```
+1. User clicks "Add Quality" button
+2. frmCreate.cmdAddQuality_Click()
+3. Opens frmSelectQuality dialog
+4. Dialog loads qualities.xml via XmlManager
+5. Filters by BookXPath (enabled sourcebooks)
+6. User selects → returns Quality XML node
+7. Quality.Create(xmlNode, ...) called
+8. ImprovementManager.CreateImprovements() processes <bonus> XML
+9. Creates Improvement objects for each bonus
+10. ImprovementManager.Commit() adds to Character._lstImprovements
+11. Quality added to Character._lstQualities
+12. TreeNode added to TreeView
+13. CalculateBP() recalculates all build points
+14. UI labels updated
+```
+
+### 9.2 Removing an Item
+```
+1. User selects item in TreeView, clicks Delete
+2. Find object via CommonFunctions.FindX()
+3. ImprovementManager.RemoveImprovements(source, name)
+4. Each removed improvement may trigger side effects
+5. Object removed from Character list
+6. TreeNode removed
+7. CalculateBP() recalculated
+```
+
+### 9.3 Saving a Character
+```
+Character.Save() → XmlTextWriter
+  ├── Write scalar fields (name, metatype, karma, etc.)
+  ├── Write attributes (each Attribute.Save())
+  ├── For each collection:
+  │   ├── Skills, SkillGroups, Contacts, Spells, Powers...
+  │   └── Each object.Save(writer) serializes its own fields
+  ├── Write Improvements list
+  ├── Write Expenses list
+  └── Write organizational data (locations, bundles, groups)
+```
+
+---
+
+## 10. Key Architectural Observations for Web Recreation
+
+### Separation of Concerns (Current)
+| Layer | Implementation | Issues |
+|---|---|---|
+| Data/Model | `cls*.cs` files | Well-structured domain objects |
+| Business Logic | Mixed into `Character` + `ImprovementManager` | Improvement engine is sound but coupled to WinForms (MessageBox calls) |
+| UI | `frm*.cs` files | **Massively coupled** — 23K+ lines per form with logic embedded |
+| Data Access | `XmlManager` | Clean XML caching system |
+| Persistence | `Character.Save/Load` | XML serialization built into domain objects |
+
+### Critical Systems to Replicate
+1. **Improvement System** — The rules engine. Must be faithfully reproduced.
+2. **XML Data Loading** — All game content comes from XML. Convert to JSON or keep XML with a parser.
+3. **Build Point / Karma Calculation** — Complex validation and spending logic.
+4. **Attribute System** — Base/augmented/metatype limits with improvement modifiers.
+5. **Equipment Nesting** — Gear contains Gear, Cyberware contains Cyberware, Vehicles contain Mods contain Weapons contain Accessories contain Gear.
+6. **Expense Tracking** — Full undo support for career mode.
+7. **Character Serialization** — Save/Load format compatibility.
+
+### What Can Be Simplified
+- **TreeView coupling** — The original passes WinForms TreeNodes into domain objects. Web version should keep UI separate.
+- **Duplicate code** — frmCreate and frmCareer share ~60% of their logic but are separate 23K/27K line files.
+- **Find methods** — CommonFunctions has dozens of nearly-identical search methods. A generic finder pattern would reduce this.
+- **Settings** — 100+ boolean options could be a configuration object with defaults.
+
+> [!IMPORTANT]
+> The `ImprovementManager.CreateImprovements()` method (1,300+ lines) is the single most critical piece of logic. It is the **rules engine** that translates XML bonus definitions into concrete stat modifications. Any web recreation **must** faithfully replicate this logic or the character generator will produce incorrect results.

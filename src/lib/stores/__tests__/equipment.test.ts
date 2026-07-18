@@ -11,6 +11,10 @@ import {
 	character,
 	startNewCharacter,
 	setResourcesBP,
+	remainingNuyen,
+	currentEssence
+} from '../character';
+import {
 	addWeapon,
 	removeWeapon,
 	addArmor,
@@ -21,9 +25,8 @@ import {
 	removeGear,
 	setLifestyle,
 	removeLifestyle,
-	remainingNuyen,
-	currentEssence
-} from '../character';
+	addChildCyberware
+} from '../equipment';
 import type { GameWeapon, GameArmor, GameCyberware, GameGear } from '$types';
 
 // Mock game data for testing
@@ -364,11 +367,88 @@ describe('Equipment Store - Cyberware Essence', () => {
 			const cyber1: GameCyberware = { ...mockCyberware, name: 'Standard Cyber', ess: 1.0 };
 			const cyber2: GameCyberware = { ...mockCyberware, name: 'Alpha Cyber', ess: 1.0 };
 
-			addCyberware(cyber1, 'Standard');  // 1.0 essence
+			addCyberware(cyber1, 'Standard'); // 1.0 essence
 			addCyberware(cyber2, 'Alphaware'); // 0.8 essence
 
 			// 6.0 - 1.0 - 0.8 = 4.2
 			expect(get(currentEssence)).toBeCloseTo(4.2);
+		});
+	});
+
+	describe('Nested Cyberware (Children)', () => {
+		it('should deduct essence recursively for children', () => {
+			const parentCyber: GameCyberware = { ...mockCyberware, name: 'Cyberarm', ess: 1.0 };
+			const childCyber: GameCyberware = { ...mockCyberware, name: 'Gyromount', ess: 0.5 };
+
+			// Add parent
+			addCyberware(parentCyber, 'Standard');
+
+			const parentId = get(character)?.equipment.cyberware[0]?.id;
+			expect(parentId).toBeDefined();
+
+			// Essence is 6.0 - 1.0 = 5.0
+			expect(get(currentEssence)).toBeCloseTo(5.0);
+
+			// Add child to parent
+			if (parentId) {
+				addChildCyberware(parentId, childCyber, 'Standard');
+			}
+
+			// Validate child is nested
+			const cyber = get(character)?.equipment.cyberware[0];
+			expect(cyber?.children).toHaveLength(1);
+			expect(cyber?.children[0]?.name).toBe('Gyromount');
+
+			// Validate recursive essence calculation (6.0 - 1.0 - 0.5 = 4.5)
+			expect(get(currentEssence)).toBeCloseTo(4.5);
+		});
+	});
+
+	describe('Rating-scaled essence/cost via essByRating/costByRating (issue #71)', () => {
+		const wiredReflexesFixedValues: GameCyberware = {
+			name: 'Wired Reflexes',
+			category: 'Bodyware',
+			ess: 2, // index 0 — rating 1
+			essByRating: [2, 3, 5],
+			capacity: '0',
+			avail: 'FixedValues(8R,12R,20R)',
+			cost: 11000, // index 0 — rating 1
+			costByRating: [11000, 32000, 100000],
+			source: 'SR4',
+			page: 342,
+			rating: 3,
+			minRating: 1,
+			maxRating: 3
+		};
+
+		it('defaults to the item rating when no explicit rating is passed', () => {
+			addCyberware(wiredReflexesFixedValues, 'Standard');
+			const cyber = get(character)!.equipment.cyberware[0]!;
+			expect(cyber.rating).toBe(3);
+			expect(cyber.essence).toBeCloseTo(5); // essByRating[2]
+			expect(cyber.cost).toBe(100000);
+		});
+
+		it('looks up essence/cost by the explicitly purchased rating', () => {
+			addCyberware(wiredReflexesFixedValues, 'Standard', 2);
+			const cyber = get(character)!.equipment.cyberware[0]!;
+			expect(cyber.rating).toBe(2);
+			expect(cyber.essence).toBeCloseTo(3); // essByRating[1]
+			expect(cyber.cost).toBe(32000);
+		});
+
+		it('rating 1 uses the first table entry', () => {
+			addCyberware(wiredReflexesFixedValues, 'Standard', 1);
+			const cyber = get(character)!.equipment.cyberware[0]!;
+			expect(cyber.essence).toBeCloseTo(2);
+			expect(cyber.cost).toBe(11000);
+		});
+
+		it('falls back to the flat ess/cost when no essByRating/costByRating table exists', () => {
+			addCyberware(mockCyberware, 'Standard', 2); // mockCyberware has no essByRating
+			const cyber = get(character)!.equipment.cyberware[0]!;
+			expect(cyber.essence).toBeCloseTo(mockCyberware.ess);
+			expect(cyber.cost).toBe(mockCyberware.cost);
 		});
 	});
 });
@@ -486,10 +566,10 @@ describe('Equipment Store - Combined Purchases', () => {
 	it('should track total equipment cost correctly', () => {
 		const initialNuyen = get(remainingNuyen);
 
-		addWeapon(mockWeapon);           // 350
-		addArmor(mockArmor);              // 900
+		addWeapon(mockWeapon); // 350
+		addArmor(mockArmor); // 900
 		addCyberware(mockCyberware, 'Standard'); // 11000
-		addGear(mockGear, 2);             // 1400
+		addGear(mockGear, 2); // 1400
 		setLifestyle('Middle', 'Middle', 5000, 1); // 5000
 
 		// Total: 350 + 900 + 11000 + 1400 + 5000 = 18650

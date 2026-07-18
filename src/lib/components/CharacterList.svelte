@@ -187,9 +187,7 @@
 				<span class="text-text-secondary text-sm">
 					{user.displayName || user.email}
 				</span>
-				<button class="cw-btn text-sm" on:click={handleSignOut}>
-					Sign Out
-				</button>
+				<button class="cw-btn text-sm" on:click={handleSignOut}> Sign Out </button>
 			</div>
 		{/if}
 	</div>
@@ -206,7 +204,8 @@
 		<div class="cw-card p-6 text-center py-12">
 			<h3 class="text-xl text-text-primary mb-4">Sign In to Manage Characters</h3>
 			<p class="text-text-secondary mb-6">
-				Sign in with your Google account to save characters to the cloud and access them from any device.
+				Sign in with your Google account to save characters to the cloud and access them from any
+				device.
 			</p>
 			<button class="cw-btn cw-btn-primary px-6 py-2" on:click={handleSignIn}>
 				Sign In with Google
@@ -217,7 +216,9 @@
 	<!-- Loading State -->
 	{#if loading}
 		<div class="cw-card p-6 text-center py-8">
-			<div class="inline-block w-8 h-8 border-4 border-primary-main border-t-transparent rounded-full animate-spin"></div>
+			<div
+				class="inline-block w-8 h-8 border-4 border-primary-main border-t-transparent rounded-full animate-spin"
+			></div>
 			<p class="text-text-secondary mt-4">Loading...</p>
 		</div>
 	{/if}
@@ -233,9 +234,7 @@
 		{#if characters.length === 0}
 			<div class="cw-panel p-8 text-center">
 				<p class="text-text-muted">No saved characters yet.</p>
-				<p class="text-text-secondary text-sm mt-2">
-					Click "Add Character" above to get started.
-				</p>
+				<p class="text-text-secondary text-sm mt-2">Click "Add Character" above to get started.</p>
 			</div>
 		{:else}
 			<div class="grid gap-4">
@@ -254,8 +253,10 @@
 										{char.metatype || 'Unknown Metatype'}
 									</span>
 									<span class="text-text-muted">|</span>
-									<span class:text-primary-dark={char.status === 'creation'}
-										  class:text-secondary-dark={char.status === 'career'}>
+									<span
+										class:text-primary-dark={char.status === 'creation'}
+										class:text-secondary-dark={char.status === 'career'}
+									>
 										{char.status === 'creation' ? 'In Creation' : 'Career Mode'}
 									</span>
 								</div>
@@ -271,19 +272,9 @@
 									>
 										Confirm
 									</button>
-									<button
-										class="cw-btn text-sm"
-										on:click={cancelDelete}
-									>
-										Cancel
-									</button>
+									<button class="cw-btn text-sm" on:click={cancelDelete}> Cancel </button>
 								{:else}
-									<a
-										href="/character/view/{char.id}"
-										class="cw-btn text-sm"
-									>
-										View
-									</a>
+									<a href="/character/view/{char.id}" class="cw-btn text-sm"> View </a>
 									<button
 										class="cw-btn cw-btn-primary text-sm"
 										on:click={() => handleLoad(char.id)}

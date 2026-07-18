@@ -4,6 +4,8 @@
  * Defines weapons, armor, cyberware, and gear.
  */
 
+import type { BonusData } from './improvements';
+
 /* ============================================
  * Weapon Types
  * ============================================ */
@@ -78,6 +80,7 @@ export interface CharacterWeapon {
 	readonly conceal: number;
 	readonly cost: number;
 	readonly accessories: readonly WeaponAccessory[];
+	readonly modifications: readonly WeaponMod[];
 	readonly notes: string;
 }
 
@@ -86,6 +89,16 @@ export interface WeaponAccessory {
 	readonly id: string;
 	readonly name: string;
 	readonly mount: string;
+	readonly cost: number;
+}
+
+/** Weapon modification (internal/permanent). */
+export interface WeaponMod {
+	readonly id: string;
+	readonly name: string;
+	readonly slots: number;
+	readonly damageBonus: number;
+	readonly apBonus: number;
 	readonly cost: number;
 }
 
@@ -114,6 +127,7 @@ export interface GameArmor {
 	readonly cost: number;
 	readonly source: string;
 	readonly page: number;
+	readonly bonus?: BonusData;
 }
 
 /** Armor owned by a character. */
@@ -160,12 +174,7 @@ export type CyberwareCategory =
 	| 'Nanocybernetics';
 
 /** Cyberware grade affecting essence and cost. */
-export type CyberwareGrade =
-	| 'Standard'
-	| 'Alphaware'
-	| 'Betaware'
-	| 'Deltaware'
-	| 'Used';
+export type CyberwareGrade = 'Standard' | 'Alphaware' | 'Betaware' | 'Deltaware' | 'Used';
 
 /** Grade multiplier definition. */
 export interface CyberwareGradeMultiplier {
@@ -189,14 +198,19 @@ export interface GameCyberware {
 	readonly name: string;
 	readonly category: string;
 	readonly ess: number;
+	/** Per-rating essence cost table (desktop `FixedValues(...)`, e.g. Wired Reflexes 2/3/5) — `ess` is just index 0. */
+	readonly essByRating?: readonly number[];
 	readonly capacity: string;
 	readonly avail: string;
 	readonly cost: number;
+	/** Per-rating nuyen cost table (desktop `FixedValues(...)`) — `cost` is just index 0. */
+	readonly costByRating?: readonly number[];
 	readonly source: string;
 	readonly page: number;
 	readonly rating: number;
 	readonly minRating: number;
 	readonly maxRating: number;
+	readonly bonus?: BonusData;
 }
 
 /** Cyberware installed on a character. */
@@ -211,7 +225,7 @@ export interface CharacterCyberware {
 	readonly capacity: number;
 	readonly capacityUsed: number;
 	readonly location: string;
-	readonly subsystems: readonly CharacterCyberware[];
+	readonly children: readonly CharacterCyberware[];
 	readonly notes: string;
 }
 
@@ -242,6 +256,20 @@ export const BIOWARE_GRADES = [
 	{ name: 'Cultured', essMultiplier: 0.75, costMultiplier: 4 }
 ] as const;
 
+/** Game data bioware definition. */
+export interface GameBioware {
+	readonly name: string;
+	readonly category: string;
+	readonly rating: number;
+	readonly ess: number;
+	readonly capacity: number;
+	readonly avail: string;
+	readonly cost: number;
+	readonly source: string;
+	readonly page: number;
+	readonly bonus?: BonusData;
+}
+
 /** Bioware installed on a character. */
 export interface CharacterBioware {
 	readonly id: string;
@@ -257,6 +285,23 @@ export interface CharacterBioware {
 /* ============================================
  * Vehicle Types
  * ============================================ */
+
+/** Game data vehicle definition. */
+export interface GameVehicle {
+	readonly name: string;
+	readonly category: string;
+	readonly handling: string;
+	readonly accel: string;
+	readonly speed: string;
+	readonly pilot: number;
+	readonly body: number;
+	readonly armor: number;
+	readonly sensor: number;
+	readonly avail: string;
+	readonly cost: number;
+	readonly source: string;
+	readonly page: number;
+}
 
 /** Vehicle category from game data. */
 export type VehicleCategory =
@@ -294,6 +339,8 @@ export interface CharacterVehicle {
 	readonly sensor: number;
 	readonly cost: number;
 	readonly mods: readonly VehicleMod[];
+	readonly weapons: readonly CharacterWeapon[];
+	readonly gear: readonly CharacterGear[];
 	readonly notes: string;
 }
 
@@ -309,6 +356,14 @@ export interface VehicleMod {
 /* ============================================
  * Martial Arts Types
  * ============================================ */
+
+/** Game data martial art definition. */
+export interface GameMartialArt {
+	readonly name: string;
+	readonly cost: number;
+	readonly source: string;
+	readonly page: number;
+}
 
 /** Martial art style owned by a character. */
 export interface CharacterMartialArt {
@@ -356,6 +411,7 @@ export interface GameGear {
 	readonly capacity?: number;
 	readonly capacityCost?: number;
 	readonly isContainer?: boolean;
+	readonly bonus?: BonusData;
 }
 
 /** Gear owned by a character. */
@@ -378,6 +434,8 @@ export interface CharacterGear {
 	readonly containerId: string | null;
 	/** Items contained within this gear (if it's a container). */
 	readonly containedItems: readonly string[];
+	/** Child gear attached to or installed in this gear. */
+	readonly children: readonly CharacterGear[];
 }
 
 /** Check if gear has capacity to hold items. */
@@ -402,13 +460,7 @@ export function canFitInContainer(container: CharacterGear, item: CharacterGear)
  * ============================================ */
 
 /** Lifestyle level from game data. */
-export type LifestyleLevel =
-	| 'Street'
-	| 'Squatter'
-	| 'Low'
-	| 'Middle'
-	| 'High'
-	| 'Luxury';
+export type LifestyleLevel = 'Street' | 'Squatter' | 'Low' | 'Middle' | 'High' | 'Luxury';
 
 /** Game data lifestyle definition. */
 export interface GameLifestyle {
@@ -432,6 +484,32 @@ export interface CharacterLifestyle {
 }
 
 /* ============================================
+ * Foci
+ * ============================================ */
+
+/**
+ * Magical focus on a character.
+ */
+export interface CharacterFocus {
+	readonly id: string;
+	readonly name: string;
+	readonly category: string;
+	readonly force: number;
+	readonly cost: number;
+	readonly bonded: boolean;
+	readonly improvements: readonly import('./improvements').Improvement[];
+}
+
+/**
+ * Stacked Focus configuration.
+ */
+export interface StackedFocus {
+	readonly id: string;
+	readonly primaryFocusId: string;
+	readonly secondaryFocusId: string;
+}
+
+/* ============================================
  * Equipment Summary Types
  * ============================================ */
 
@@ -445,6 +523,7 @@ export interface CharacterEquipment {
 	readonly gear: readonly CharacterGear[];
 	readonly lifestyle: CharacterLifestyle | null;
 	readonly martialArts: readonly CharacterMartialArt[];
+	readonly foci: readonly CharacterFocus[];
 }
 
 /** Calculate total equipment cost. */
@@ -488,22 +567,31 @@ export function calculateEquipmentCost(equipment: CharacterEquipment): number {
 		total += equipment.lifestyle.monthlyCost * equipment.lifestyle.monthsPrepaid;
 	}
 
+	for (const focus of equipment.foci ?? []) {
+		total += focus.cost;
+	}
+
 	// Martial arts have BP cost, not nuyen cost (5 BP per style, 2 BP per technique)
 	// So they don't add to equipment cost
 
 	return total;
 }
 
-/** Calculate total essence cost of cyberware. */
-export function calculateEssenceCost(cyberware: readonly CharacterCyberware[]): number {
+// Helper to calculate essence recursively
+function sumEssenceRecursive(cyberwareList: readonly CharacterCyberware[]): number {
 	let total = 0;
-	for (const cyber of cyberware) {
+	for (const cyber of cyberwareList) {
 		total += cyber.essence;
-		for (const sub of cyber.subsystems) {
-			total += sub.essence;
+		if (cyber.children && cyber.children.length > 0) {
+			total += sumEssenceRecursive(cyber.children);
 		}
 	}
 	return total;
+}
+
+/** Calculate total essence cost of cyberware. */
+export function calculateEssenceCost(cyberware: readonly CharacterCyberware[]): number {
+	return sumEssenceRecursive(cyberware);
 }
 
 /** Calculate total essence cost of bioware. */
@@ -529,7 +617,8 @@ export const EMPTY_EQUIPMENT: CharacterEquipment = {
 	vehicles: [],
 	gear: [],
 	lifestyle: null,
-	martialArts: []
+	martialArts: [],
+	foci: []
 } as const;
 
 /* ============================================

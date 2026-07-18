@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Character, Metatype } from '$types';
-	import { updateIdentity, setMetatype } from '$stores/character';
+	import { updateIdentity, setMetatype } from '$stores';
 	import { gameData } from '$stores/gamedata';
 
 	export let character: Character;
@@ -8,7 +8,7 @@
 
 	/** Currently selected metatype name. */
 	$: selectedMetatype = character.identity.metatype;
-	$: selectedMetatypeData = metatypes.find(m => m.name === selectedMetatype);
+	$: selectedMetatypeData = metatypes.find((m) => m.name === selectedMetatype);
 	$: availableMetavariants = selectedMetatypeData?.metavariants ?? [];
 
 	function handleIdentityChange(field: keyof Character['identity'], value: string): void {
@@ -18,7 +18,7 @@
 	function handleMetatypeSelect(event: Event): void {
 		const target = event.target as HTMLSelectElement;
 		const metatypeName = target.value;
-		const metatype = metatypes.find(m => m.name === metatypeName);
+		const metatype = metatypes.find((m) => m.name === metatypeName);
 		if (metatype && $gameData) {
 			setMetatype($gameData, metatype.name, null);
 		}

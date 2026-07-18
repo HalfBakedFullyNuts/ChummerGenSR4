@@ -63,11 +63,16 @@
 		if (!trad) return charisma; // Default to Charisma
 
 		switch (trad.drainAttribute) {
-			case 'log': return logic;
-			case 'cha': return charisma;
-			case 'wil': return willpower;
-			case 'int': return intuition;
-			default: return charisma;
+			case 'log':
+				return logic;
+			case 'cha':
+				return charisma;
+			case 'wil':
+				return willpower;
+			case 'int':
+				return intuition;
+			default:
+				return charisma;
 		}
 	}
 
@@ -88,8 +93,16 @@
 
 	/** Spirit types available. */
 	const spiritTypes: SpiritType[] = [
-		'Air', 'Beasts', 'Earth', 'Fire', 'Guardian',
-		'Guidance', 'Man', 'Plant', 'Task', 'Water'
+		'Air',
+		'Beasts',
+		'Earth',
+		'Fire',
+		'Guardian',
+		'Guidance',
+		'Man',
+		'Plant',
+		'Task',
+		'Water'
 	];
 
 	/** Handle astral action click. */
@@ -197,11 +210,7 @@
 		<div class="flex items-center gap-3">
 			<span class="text-xs text-text-muted">{getTraditionName()}</span>
 			<label class="flex items-center gap-2 cursor-pointer">
-				<input
-					type="checkbox"
-					class="w-4 h-4 accent-info-main"
-					bind:checked={astrallProjecting}
-				/>
+				<input type="checkbox" class="w-4 h-4 accent-info-main" bind:checked={astrallProjecting} />
 				<span class="text-text-secondary text-sm">Projecting</span>
 			</label>
 		</div>
@@ -242,7 +251,9 @@
 						<div class="text-sm text-text-secondary">{action.name}</div>
 						<div class="flex items-center gap-2 mt-1">
 							<span class="font-mono text-info-main text-xs">
-								{actionKey === 'astral_attack' || actionKey === 'mana_bolt' ? astralAttackPool : assensingPool}d6
+								{actionKey === 'astral_attack' || actionKey === 'mana_bolt'
+									? astralAttackPool
+									: assensingPool}d6
 							</span>
 							{#if action.opposed}
 								<span class="text-xs text-warning-main">Opp</span>
@@ -260,11 +271,7 @@
 		<div class="grid grid-cols-2 gap-3 mb-3">
 			<div>
 				<label for="spirit-type" class="text-xs text-text-muted block mb-1">Spirit Type</label>
-				<select
-					id="spirit-type"
-					class="cw-input text-sm w-full"
-					bind:value={selectedSpiritType}
-				>
+				<select id="spirit-type" class="cw-input text-sm w-full" bind:value={selectedSpiritType}>
 					{#each spiritTypes as spiritType}
 						<option value={spiritType}>{spiritType}</option>
 					{/each}
@@ -290,32 +297,16 @@
 			</div>
 			<div>
 				<span class="text-xs text-text-muted">vs Spirit</span>
-				<span class="font-mono text-warning-main ml-1">{calculateSpiritResistance(spiritForce)}d6</span>
+				<span class="font-mono text-warning-main ml-1"
+					>{calculateSpiritResistance(spiritForce)}d6</span
+				>
 			</div>
 		</div>
 
 		<div class="grid grid-cols-3 gap-2">
-			<button
-				type="button"
-				class="cw-btn text-xs"
-				on:click={handleSummoning}
-			>
-				Summon
-			</button>
-			<button
-				type="button"
-				class="cw-btn text-xs"
-				on:click={handleBinding}
-			>
-				Bind
-			</button>
-			<button
-				type="button"
-				class="cw-btn text-xs"
-				on:click={handleBanishing}
-			>
-				Banish
-			</button>
+			<button type="button" class="cw-btn text-xs" on:click={handleSummoning}> Summon </button>
+			<button type="button" class="cw-btn text-xs" on:click={handleBinding}> Bind </button>
+			<button type="button" class="cw-btn text-xs" on:click={handleBanishing}> Banish </button>
 		</div>
 
 		<p class="text-xs text-text-muted mt-2">
@@ -349,15 +340,14 @@
 		</div>
 
 		<p class="text-xs text-text-muted mb-2">
-			Spell Defense: Each protected person gets +{calculateSpellDefenseDice(counterspellingPool, numProtected)} dice
+			Spell Defense: Each protected person gets +{calculateSpellDefenseDice(
+				counterspellingPool,
+				numProtected
+			)} dice
 		</p>
 
 		<div class="grid grid-cols-2 gap-2">
-			<button
-				type="button"
-				class="cw-btn text-xs"
-				on:click={handleCounterspelling}
-			>
+			<button type="button" class="cw-btn text-xs" on:click={handleCounterspelling}>
 				Counterspell
 			</button>
 			<button
@@ -391,7 +381,8 @@
 			<button
 				type="button"
 				class="cw-btn cw-btn-secondary text-xs"
-				on:click={() => dispatch('rollDrain', { pool: drainResistPool, drainValue: 2, isPhysical: false })}
+				on:click={() =>
+					dispatch('rollDrain', { pool: drainResistPool, drainValue: 2, isPhysical: false })}
 			>
 				Resist Drain ({drainResistPool}d6)
 			</button>

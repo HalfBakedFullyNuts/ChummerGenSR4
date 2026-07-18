@@ -20,6 +20,7 @@
 		improveAttribute,
 		improveSkill,
 		// learnNewSkill,  // TODO: implement new skill learning UI
+		addSpecialization,
 		getInitiationCost,
 		initiate,
 		learnMetamagic,
@@ -35,12 +36,25 @@
 		registerSprite,
 		getExpenseLog
 	} from '$stores';
-	import { echoes as echoesStore } from '$stores/gamedata';
+	import BookReference from '$lib/components/ui/BookReference.svelte';
+	import {
+		echoes as echoesStore,
+		skills as skillsStore,
+		metamagics as metamagicsStore
+	} from '$stores/gamedata';
 
 	// const dispatch = createEventDispatcher();  // TODO: Add event dispatching when needed
 
 	/** Current tab. */
-	type Tab = 'overview' | 'attributes' | 'skills' | 'magic' | 'resonance' | 'spirits' | 'sprites' | 'history';
+	type Tab =
+		| 'overview'
+		| 'attributes'
+		| 'skills'
+		| 'magic'
+		| 'resonance'
+		| 'spirits'
+		| 'sprites'
+		| 'history';
 	let currentTab: Tab = 'overview';
 
 	/** Error message. */
@@ -63,10 +77,49 @@
 	let newSpriteRating = 3;
 	let newSpriteTasks = 1;
 
+	let showSpecModal = false;
+	let specSkillName = '';
+	let specCustomValue = '';
+	let specSelectedSuggestion: string | null = null;
+	let specSuggestions: readonly string[] = [];
+
+	/** Open specialization modal for a skill. */
+	function openSpecModal(skillName: string): void {
+		specSkillName = skillName;
+		specCustomValue = '';
+		specSelectedSuggestion = null;
+		// Get suggested specializations from skill definition
+		const skillDef = $skillsStore?.find((s) => s.name === skillName);
+		specSuggestions = skillDef?.specializations ?? [];
+		showSpecModal = true;
+	}
+
+	/** Close specialization modal. */
+	function closeSpecModal(): void {
+		showSpecModal = false;
+		specSkillName = '';
+		specCustomValue = '';
+		specSelectedSuggestion = null;
+		specSuggestions = [];
+	}
+
+	/** Apply specialization to skill. */
+	function handleAddSpecialization(): void {
+		const spec = specSelectedSuggestion || specCustomValue.trim();
+		if (!spec || !specSkillName) return;
+		const result = addSpecialization(specSkillName, spec);
+		if (!result.success) {
+			showError(result.error || 'Failed to add specialization');
+		}
+		closeSpecModal();
+	}
+
 	/** Clear error after delay. */
 	function showError(msg: string): void {
 		error = msg;
-		setTimeout(() => { error = null; }, 3000);
+		setTimeout(() => {
+			error = null;
+		}, 3000);
 	}
 
 	/** Award karma to character. */
@@ -171,15 +224,21 @@
 	/** Attribute names. */
 	const ATTRIBUTES = ['bod', 'agi', 'rea', 'str', 'cha', 'int', 'log', 'wil', 'edg'] as const;
 	const ATTR_NAMES: Record<string, string> = {
-		bod: 'Body', agi: 'Agility', rea: 'Reaction', str: 'Strength',
-		cha: 'Charisma', int: 'Intuition', log: 'Logic', wil: 'Willpower', edg: 'Edge'
+		bod: 'Body',
+		agi: 'Agility',
+		rea: 'Reaction',
+		str: 'Strength',
+		cha: 'Charisma',
+		int: 'Intuition',
+		log: 'Logic',
+		wil: 'Willpower',
+		edg: 'Edge'
 	};
 
-	/** Available metamagics (simplified list). */
-	const METAMAGICS = [
-		'Centering', 'Channeling', 'Extended Masking', 'Flexible Signature', 'Geomancy',
-		'Invoking', 'Masking', 'Psychometry', 'Quickening', 'Reflecting', 'Shielding'
-	];
+	/** Available metamagics mapped from store. */
+	$: availableMetamagics = $metamagicsStore
+		? [...$metamagicsStore].sort((a, b) => a.name.localeCompare(b.name))
+		: [];
 
 	/** Spirit types based on tradition. */
 	const SPIRIT_TYPES = ['Air', 'Beast', 'Earth', 'Fire', 'Man', 'Water', 'Guardian', 'Task'];
@@ -203,7 +262,7 @@
 	/** Calculate skill improvement cost. */
 	function getSkillCost(skillName: string): number | null {
 		if (!$character) return null;
-		const skill = $character.skills.find(s => s.name === skillName);
+		const skill = $character.skills.find((s) => s.name === skillName);
 		if (!skill) return KARMA_COSTS.NEW_SKILL;
 		const newRating = skill.rating + 1;
 		if (newRating > 6) return null;
@@ -217,13 +276,19 @@
 	$: initiationCost = getInitiationCost();
 
 	/** Submersion cost. */
-	$: submersionCost = $character?.resonance ? getSubmersionCost($character.resonance.submersionGrade) : null;
+	$: submersionCost = $character?.resonance
+		? getSubmersionCost($character.resonance.submersionGrade)
+		: null;
 
 	/** Available metamagic slots. */
-	$: metamagicSlots = $character?.magic ? $character.magic.initiateGrade - $character.magic.metamagics.length : 0;
+	$: metamagicSlots = $character?.magic
+		? $character.magic.initiateGrade - $character.magic.metamagics.length
+		: 0;
 
 	/** Available echo slots. */
-	$: echoSlots = $character?.resonance ? $character.resonance.submersionGrade - $character.resonance.echoes.length : 0;
+	$: echoSlots = $character?.resonance
+		? $character.resonance.submersionGrade - $character.resonance.echoes.length
+		: 0;
 
 	/** Tabs based on character type. */
 	$: availableTabs = (() => {
@@ -255,13 +320,17 @@
 			</span>
 			<span class="text-sm">
 				<span class="text-text-muted">Nuyen:</span>
-				<span class="text-success-main font-mono ml-1">{($character?.nuyen ?? 0).toLocaleString()}¥</span>
+				<span class="text-success-main font-mono ml-1"
+					>{($character?.nuyen ?? 0).toLocaleString()}¥</span
+				>
 			</span>
 		</div>
 	</div>
 
 	{#if error}
-		<div class="p-2 mb-4 bg-error-main/20 border border-error-main/50 rounded text-error-main text-sm">
+		<div
+			class="p-2 mb-4 bg-error-main/20 border border-error-main/50 rounded text-error-main text-sm"
+		>
 			{error}
 		</div>
 	{/if}
@@ -272,9 +341,9 @@
 			<button
 				class="px-3 py-1.5 text-sm rounded transition-colors
 					{currentTab === tab.id
-						? 'bg-primary-main/20 text-primary-dark'
-						: 'text-text-secondary hover:bg-surface-variant'}"
-				on:click={() => currentTab = tab.id}
+					? 'bg-primary-main/20 text-primary-dark'
+					: 'text-text-secondary hover:bg-surface-variant'}"
+				on:click={() => (currentTab = tab.id)}
 			>
 				{tab.label}
 			</button>
@@ -353,12 +422,16 @@
 				{#if $character?.resonance}
 					<div class="p-3 bg-surface rounded text-center">
 						<div class="text-text-muted text-xs">Submersion</div>
-						<div class="text-secondary-dark font-mono text-lg">{$character.resonance.submersionGrade}</div>
+						<div class="text-secondary-dark font-mono text-lg">
+							{$character.resonance.submersionGrade}
+						</div>
 					</div>
 				{/if}
 				<div class="p-3 bg-surface rounded text-center">
 					<div class="text-text-muted text-xs">Street Cred</div>
-					<div class="text-text-primary font-mono text-lg">{$character?.reputation.streetCred ?? 0}</div>
+					<div class="text-text-primary font-mono text-lg">
+						{$character?.reputation.streetCred ?? 0}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -402,25 +475,39 @@
 		<div class="space-y-2 max-h-96 overflow-y-auto">
 			{#each $character.skills as skill}
 				{@const cost = getSkillCost(skill.name)}
+				{@const specCost = KARMA_COSTS.NEW_SPECIALIZATION}
 				<div class="flex items-center justify-between p-2 bg-surface rounded">
 					<div class="flex items-center gap-3">
 						<span class="text-text-primary font-medium">{skill.name}</span>
 						<span class="text-primary-dark font-mono">{skill.rating}</span>
 						{#if skill.specialization}
-							<span class="text-text-muted text-xs">({skill.specialization})</span>
+							<span class="text-success-main text-xs font-medium">({skill.specialization})</span>
 						{/if}
 					</div>
-					{#if cost !== null}
-						<button
-							class="cw-btn cw-btn-secondary text-xs"
-							on:click={() => handleImproveSkill(skill.name)}
-							disabled={$character.karma < cost}
-						>
-							+1 ({cost} karma)
-						</button>
-					{:else}
-						<span class="text-text-muted text-xs">Max</span>
-					{/if}
+					<div class="flex items-center gap-1">
+						{#if !skill.specialization}
+							<button
+								class="cw-btn text-xs"
+								on:click={() => openSpecModal(skill.name)}
+								disabled={$character.karma < specCost}
+								title="Add specialization (+2 on matching rolls)"
+							>
+								<span class="material-icons text-xs align-middle">star_border</span>
+								Spec ({specCost})
+							</button>
+						{/if}
+						{#if cost !== null}
+							<button
+								class="cw-btn cw-btn-secondary text-xs"
+								on:click={() => handleImproveSkill(skill.name)}
+								disabled={$character.karma < cost}
+							>
+								+1 ({cost} karma)
+							</button>
+						{:else}
+							<span class="text-text-muted text-xs">Max</span>
+						{/if}
+					</div>
 				</div>
 			{/each}
 		</div>
@@ -452,7 +539,9 @@
 				<h3 class="text-sm font-medium text-text-primary mb-2">
 					Metamagics
 					{#if metamagicSlots > 0}
-						<span class="text-success-main text-xs ml-2">({metamagicSlots} slot{metamagicSlots !== 1 ? 's' : ''} available)</span>
+						<span class="text-success-main text-xs ml-2"
+							>({metamagicSlots} slot{metamagicSlots !== 1 ? 's' : ''} available)</span
+						>
 					{/if}
 				</h3>
 				{#if $character.magic.metamagics.length > 0}
@@ -465,13 +554,16 @@
 					</div>
 				{/if}
 				{#if metamagicSlots > 0}
-					<div class="flex flex-wrap gap-1">
-						{#each METAMAGICS.filter(m => !$character?.magic?.metamagics.includes(m)) as metamagic}
+					<div class="flex flex-wrap gap-2">
+						{#each availableMetamagics.filter((m) => !$character?.magic?.metamagics.includes(m.name)) as metamagic}
 							<button
-								class="px-2 py-0.5 bg-surface-variant text-text-secondary text-xs rounded hover:bg-info-main/20 hover:text-info-main transition-colors"
-								on:click={() => handleLearnMetamagic(metamagic)}
+								class="px-3 py-1 bg-surface-variant text-text-secondary text-xs rounded hover:bg-info-main/20 hover:text-info-main transition-colors text-left"
+								on:click={() => handleLearnMetamagic(metamagic.name)}
 							>
-								+ {metamagic}
+								<div class="font-medium">+ {metamagic.name}</div>
+								<div class="text-text-muted mt-1">
+									<BookReference code={metamagic.source} page={metamagic.page} />
+								</div>
 							</button>
 						{/each}
 					</div>
@@ -487,7 +579,9 @@
 			<div class="p-3 bg-surface rounded">
 				<div class="flex items-center justify-between mb-2">
 					<h3 class="text-sm font-medium text-text-primary">
-						Submersion Grade: <span class="text-secondary-dark">{$character.resonance.submersionGrade}</span>
+						Submersion Grade: <span class="text-secondary-dark"
+							>{$character.resonance.submersionGrade}</span
+						>
 					</h3>
 					{#if submersionCost}
 						<button
@@ -506,7 +600,9 @@
 				<h3 class="text-sm font-medium text-text-primary mb-2">
 					Echoes
 					{#if echoSlots > 0}
-						<span class="text-success-main text-xs ml-2">({echoSlots} slot{echoSlots !== 1 ? 's' : ''} available)</span>
+						<span class="text-success-main text-xs ml-2"
+							>({echoSlots} slot{echoSlots !== 1 ? 's' : ''} available)</span
+						>
 					{/if}
 				</h3>
 				{#if $character.resonance.echoes.length > 0}
@@ -520,11 +616,11 @@
 				{/if}
 				{#if echoSlots > 0 && $echoesStore}
 					<div class="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
-						{#each $echoesStore.filter(e => !$character?.resonance?.echoes.includes(e.name)) as echo}
+						{#each $echoesStore.filter((e) => !$character?.resonance?.echoes.includes(e.name)) as echo}
 							<button
 								class="px-2 py-0.5 bg-surface-variant text-text-secondary text-xs rounded hover:bg-secondary-main/20 hover:text-secondary-dark transition-colors"
 								on:click={() => handleLearnEcho(echo.name)}
-								title={echo.bonus || ''}
+								title={echo.bonusText || ''}
 							>
 								+ {echo.name}
 							</button>
@@ -550,18 +646,34 @@
 					</select>
 					<div class="flex items-center gap-1">
 						<span class="text-xs text-text-muted">F:</span>
-						<input type="number" class="cw-input text-sm w-16" bind:value={newSpiritForce} min="1" max="12" />
+						<input
+							type="number"
+							class="cw-input text-sm w-16"
+							bind:value={newSpiritForce}
+							min="1"
+							max="12"
+						/>
 					</div>
 					<div class="flex items-center gap-1">
 						<span class="text-xs text-text-muted">Srv:</span>
-						<input type="number" class="cw-input text-sm w-16" bind:value={newSpiritServices} min="0" max="20" />
+						<input
+							type="number"
+							class="cw-input text-sm w-16"
+							bind:value={newSpiritServices}
+							min="0"
+							max="20"
+						/>
 					</div>
 					<div class="flex items-center gap-2">
 						<label class="flex items-center gap-1 text-xs text-text-muted">
 							<input type="checkbox" bind:checked={newSpiritBound} />
 							Bound
 						</label>
-						<button class="cw-btn cw-btn-primary text-xs" on:click={handleAddSpirit} disabled={!newSpiritType}>
+						<button
+							class="cw-btn cw-btn-primary text-xs"
+							on:click={handleAddSpirit}
+							disabled={!newSpiritType}
+						>
 							Add
 						</button>
 					</div>
@@ -578,9 +690,13 @@
 							<div class="flex items-center gap-3">
 								<span class="text-text-primary font-medium">{spirit.type}</span>
 								<span class="text-info-main text-sm">F{spirit.force}</span>
-								<span class="text-text-muted text-sm">{spirit.services} service{spirit.services !== 1 ? 's' : ''}</span>
+								<span class="text-text-muted text-sm"
+									>{spirit.services} service{spirit.services !== 1 ? 's' : ''}</span
+								>
 								{#if spirit.bound}
-									<span class="px-1.5 py-0.5 bg-success-main/20 text-success-main text-xs rounded">Bound</span>
+									<span class="px-1.5 py-0.5 bg-success-main/20 text-success-main text-xs rounded"
+										>Bound</span
+									>
 								{/if}
 							</div>
 							<div class="flex gap-1">
@@ -620,13 +736,29 @@
 					</select>
 					<div class="flex items-center gap-1">
 						<span class="text-xs text-text-muted">R:</span>
-						<input type="number" class="cw-input text-sm w-16" bind:value={newSpriteRating} min="1" max="12" />
+						<input
+							type="number"
+							class="cw-input text-sm w-16"
+							bind:value={newSpriteRating}
+							min="1"
+							max="12"
+						/>
 					</div>
 					<div class="flex items-center gap-1">
 						<span class="text-xs text-text-muted">Tasks:</span>
-						<input type="number" class="cw-input text-sm w-16" bind:value={newSpriteTasks} min="0" max="20" />
+						<input
+							type="number"
+							class="cw-input text-sm w-16"
+							bind:value={newSpriteTasks}
+							min="0"
+							max="20"
+						/>
 					</div>
-					<button class="cw-btn cw-btn-primary text-xs" on:click={handleAddSprite} disabled={!newSpriteType}>
+					<button
+						class="cw-btn cw-btn-primary text-xs"
+						on:click={handleAddSprite}
+						disabled={!newSpriteType}
+					>
 						Add
 					</button>
 				</div>
@@ -642,9 +774,13 @@
 							<div class="flex items-center gap-3">
 								<span class="text-text-primary font-medium">{sprite.type}</span>
 								<span class="text-secondary-dark text-sm">R{sprite.rating}</span>
-								<span class="text-text-muted text-sm">{sprite.tasks} task{sprite.tasks !== 1 ? 's' : ''}</span>
+								<span class="text-text-muted text-sm"
+									>{sprite.tasks} task{sprite.tasks !== 1 ? 's' : ''}</span
+								>
 								{#if sprite.registered}
-									<span class="px-1.5 py-0.5 bg-success-main/20 text-success-main text-xs rounded">Registered</span>
+									<span class="px-1.5 py-0.5 bg-success-main/20 text-success-main text-xs rounded"
+										>Registered</span
+									>
 								{/if}
 							</div>
 							<div class="flex gap-1">
@@ -656,10 +792,7 @@
 									Use Task
 								</button>
 								{#if !sprite.registered}
-									<button
-										class="cw-btn text-xs"
-										on:click={() => registerSprite(sprite.id)}
-									>
+									<button class="cw-btn text-xs" on:click={() => registerSprite(sprite.id)}>
 										Register
 									</button>
 								{/if}
@@ -693,7 +826,9 @@
 								<span class="text-text-secondary">{entry.reason}</span>
 							</div>
 							<span class="font-mono {entry.amount >= 0 ? 'text-success-main' : 'text-error-main'}">
-								{entry.amount >= 0 ? '+' : ''}{entry.type === 'nuyen' ? entry.amount.toLocaleString() + '¥' : entry.amount + ' karma'}
+								{entry.amount >= 0 ? '+' : ''}{entry.type === 'nuyen'
+									? entry.amount.toLocaleString() + '¥'
+									: entry.amount + ' karma'}
 							</span>
 						</div>
 					{/each}
@@ -702,3 +837,88 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Specialization Modal -->
+{#if showSpecModal}
+	<div
+		class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+		on:click={closeSpecModal}
+		on:keydown={(e) => e.key === 'Escape' && closeSpecModal()}
+		role="dialog"
+		aria-modal="true"
+	>
+		<div
+			class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden"
+			on:click|stopPropagation
+			on:keydown|stopPropagation
+			role="document"
+		>
+			<!-- Header -->
+			<div class="bg-primary-main text-white px-4 py-3">
+				<h3 class="font-semibold">Add Specialization: {specSkillName}</h3>
+				<p class="text-sm text-white/80">
+					+2 bonus to matching rolls ({KARMA_COSTS.NEW_SPECIALIZATION} karma)
+				</p>
+			</div>
+
+			<!-- Content -->
+			<div class="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
+				<!-- Suggested Specializations -->
+				{#if specSuggestions.length > 0}
+					<div>
+						<label class="text-sm font-medium text-gray-700 block mb-2"
+							>Suggested Specializations</label
+						>
+						<div class="space-y-1">
+							{#each specSuggestions as spec}
+								<label class="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer">
+									<input
+										type="radio"
+										name="specialization"
+										class="text-primary-main focus:ring-primary-main"
+										checked={specSelectedSuggestion === spec}
+										on:change={() => {
+											specSelectedSuggestion = spec;
+											specCustomValue = '';
+										}}
+									/>
+									<span class="text-sm text-gray-700">{spec}</span>
+								</label>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				<!-- Custom Specialization -->
+				<div>
+					<label class="text-sm font-medium text-gray-700 block mb-2">
+						{specSuggestions.length > 0
+							? 'Or enter a custom specialization'
+							: 'Enter a specialization'}
+					</label>
+					<input
+						type="text"
+						class="cw-input w-full"
+						placeholder="e.g., Light Pistols, Corporate Etiquette, etc."
+						bind:value={specCustomValue}
+						on:input={() => {
+							specSelectedSuggestion = null;
+						}}
+					/>
+				</div>
+			</div>
+
+			<!-- Footer -->
+			<div class="px-4 py-3 bg-gray-50 flex justify-end gap-2 border-t">
+				<button class="cw-btn cw-btn-secondary" on:click={closeSpecModal}> Cancel </button>
+				<button
+					class="cw-btn cw-btn-primary"
+					on:click={handleAddSpecialization}
+					disabled={!specSelectedSuggestion && !specCustomValue.trim()}
+				>
+					Apply ({KARMA_COSTS.NEW_SPECIALIZATION} karma)
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}

@@ -9,6 +9,7 @@ import type { CharacterAttributes, MetatypeAttributes } from './attributes';
 import type { CharacterSkill, CharacterSkillGroup, KnowledgeSkill } from './skills';
 import type { CharacterEquipment } from './equipment';
 import { EMPTY_EQUIPMENT } from './equipment';
+import type { Improvement, BonusData } from './improvements';
 
 /** Character build methods. */
 export type BuildMethod = 'bp' | 'karma';
@@ -33,6 +34,7 @@ export interface Metatype {
 	readonly source: string;
 	readonly page: number;
 	readonly metavariants: readonly Metavariant[];
+	readonly bonus?: BonusData;
 }
 
 /**
@@ -48,6 +50,7 @@ export interface Metavariant {
 	};
 	readonly source: string;
 	readonly page: number;
+	readonly bonus?: BonusData;
 }
 
 /**
@@ -65,6 +68,8 @@ export interface CharacterQuality {
 	readonly selectedSkill?: string;
 	/** Selected attribute for qualities with selectattribute bonus (e.g., Exceptional Attribute). */
 	readonly selectedAttribute?: string;
+	/** Custom description for qualities that require user input (e.g., "gluten" for Allergy). */
+	readonly customDescription?: string;
 }
 
 /**
@@ -101,6 +106,7 @@ export interface BuildPointAllocation {
 	readonly attributes: number;
 	readonly skills: number;
 	readonly skillGroups: number;
+	readonly specializations: number;
 	readonly knowledgeSkills: number;
 	readonly qualities: number;
 	readonly spells: number;
@@ -128,6 +134,8 @@ export interface CharacterIdentity {
 	readonly hair: string;
 	readonly eyes: string;
 	readonly skin: string;
+	/** Metatype's movement string (e.g. "10/25, Swim 5"), denormalized at setMetatype-time (issue #70). */
+	readonly movement: string;
 }
 
 /**
@@ -194,6 +202,9 @@ export interface Character {
 	/* Qualities */
 	readonly qualities: readonly CharacterQuality[];
 
+	/* Improvements applied */
+	readonly improvements: readonly Improvement[];
+
 	/* Magic (null if mundane) */
 	readonly magic: CharacterMagic | null;
 
@@ -240,7 +251,6 @@ export interface CharacterMagic {
 	readonly spells: readonly CharacterSpell[];
 	readonly powers: readonly CharacterPower[];
 	readonly spirits: readonly BoundSpirit[];
-	readonly foci: readonly Focus[];
 	readonly metamagics: readonly string[];
 }
 
@@ -279,17 +289,6 @@ export interface BoundSpirit {
 	readonly force: number;
 	readonly services: number;
 	readonly bound: boolean;
-}
-
-/**
- * Magical focus.
- */
-export interface Focus {
-	readonly id: string;
-	readonly name: string;
-	readonly type: string;
-	readonly force: number;
-	readonly bonded: boolean;
 }
 
 /**
@@ -354,6 +353,7 @@ export const DEFAULT_BP_ALLOCATION: BuildPointAllocation = {
 	attributes: 0,
 	skills: 0,
 	skillGroups: 0,
+	specializations: 0,
 	knowledgeSkills: 0,
 	qualities: 0,
 	spells: 0,
@@ -390,7 +390,8 @@ export function createEmptyCharacter(
 			weight: '',
 			hair: '',
 			eyes: '',
-			skin: ''
+			skin: '',
+			movement: '10/25, Swim 5'
 		},
 		background: {
 			description: '',
@@ -436,6 +437,7 @@ export function createEmptyCharacter(
 		knowledgeSkills: [],
 		knowledgeSkillPoints: 0,
 		qualities: [],
+		improvements: [],
 		magic: null,
 		resonance: null,
 		contacts: [],

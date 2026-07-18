@@ -50,9 +50,7 @@
 	/** Handle preset selection */
 	function selectPreset(preset: 'low' | 'default' | 'prime'): void {
 		selectedPreset = preset;
-		pointsValue = method === 'karma'
-			? PRESETS.karma[preset].points
-			: PRESETS.bp[preset].points;
+		pointsValue = method === 'karma' ? PRESETS.karma[preset].points : PRESETS.bp[preset].points;
 	}
 
 	/** Handle custom input change */
@@ -123,7 +121,10 @@
 		<div class="bg-white rounded-lg shadow-xl max-w-md w-full overflow-hidden">
 			<!-- Header -->
 			<div class="px-6 py-4 border-b border-border bg-surface-variant">
-				<h2 id="modal-title" class="text-lg font-semibold text-text-primary flex items-center gap-2">
+				<h2
+					id="modal-title"
+					class="text-lg font-semibold text-text-primary flex items-center gap-2"
+				>
 					<span class="material-icons text-primary-dark">settings</span>
 					Configure {method === 'karma' ? 'Karma' : 'Build Points'}
 				</h2>
@@ -133,9 +134,13 @@
 			<div class="px-6 py-4 space-y-4">
 				<!-- Method Display -->
 				<div class="flex items-center gap-3 p-3 rounded-lg bg-surface-variant border border-border">
-					<div class="w-10 h-10 rounded-full flex items-center justify-center
-						{method === 'karma' ? 'bg-secondary-main/30' : 'bg-primary-main/30'}">
-						<span class="font-bold {method === 'karma' ? 'text-secondary-dark' : 'text-primary-dark'}">
+					<div
+						class="w-10 h-10 rounded-full flex items-center justify-center
+						{method === 'karma' ? 'bg-secondary-main/30' : 'bg-primary-main/30'}"
+					>
+						<span
+							class="font-bold {method === 'karma' ? 'text-secondary-dark' : 'text-primary-dark'}"
+						>
 							{method === 'karma' ? 'K' : 'BP'}
 						</span>
 					</div>
@@ -158,8 +163,8 @@
 								type="button"
 								class="px-3 py-2 rounded-lg text-sm font-medium transition-all
 									{selectedPreset === preset
-										? 'bg-primary-main text-primary-contrast shadow-primary'
-										: 'bg-surface border border-border text-text-secondary hover:border-primary-main hover:text-primary-dark'}"
+									? 'bg-primary-main text-primary-contrast shadow-primary'
+									: 'bg-surface border border-border text-text-secondary hover:border-primary-main hover:text-primary-dark'}"
 								on:click={() => selectPreset(preset)}
 							>
 								<div class="font-semibold">{presets[preset].label}</div>
@@ -188,13 +193,16 @@
 						<span class="text-text-muted font-medium">{unitLabel}</span>
 					</div>
 					<p class="text-xs text-text-muted mt-1">
-						Range: {minPoints} - {maxPoints} {unitLabel}
+						Range: {minPoints} - {maxPoints}
+						{unitLabel}
 					</p>
 				</div>
 
 				<!-- Preset Description -->
 				{#if selectedPreset !== 'custom'}
-					<div class="text-sm text-text-secondary p-3 bg-info-main/10 rounded-lg border border-info-main/30">
+					<div
+						class="text-sm text-text-secondary p-3 bg-info-main/10 rounded-lg border border-info-main/30"
+					>
 						<span class="material-icons text-info-main text-sm align-middle mr-1">info</span>
 						{presets[selectedPreset].description}
 					</div>
@@ -203,18 +211,10 @@
 
 			<!-- Footer -->
 			<div class="px-6 py-4 border-t border-border bg-surface-variant flex justify-end gap-3">
-				<button
-					type="button"
-					class="cw-btn cw-btn-secondary"
-					on:click={handleCancel}
-				>
+				<button type="button" class="cw-btn cw-btn-secondary" on:click={handleCancel}>
 					Cancel
 				</button>
-				<button
-					type="button"
-					class="cw-btn cw-btn-primary"
-					on:click={handleConfirm}
-				>
+				<button type="button" class="cw-btn cw-btn-primary" on:click={handleConfirm}>
 					<span class="material-icons text-sm">check</span>
 					Confirm
 				</button>

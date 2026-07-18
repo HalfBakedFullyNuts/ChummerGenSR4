@@ -28,6 +28,7 @@ import type {
 	CyberwareGrade
 } from '$types';
 import { createEmptyCharacter, getKnowledgeSkillAttribute } from '$types';
+import { DEFAULT_MOVEMENT } from '../engine/calculations';
 
 /** Result of import operation. */
 export interface ImportResult {
@@ -144,7 +145,8 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 			weight: getString(data, 'weight'),
 			hair: getString(data, 'hair'),
 			eyes: getString(data, 'eyes'),
-			skin: getString(data, 'skin')
+			skin: getString(data, 'skin'),
+			movement: getString(data, 'movement') || DEFAULT_MOVEMENT
 		},
 		background: {
 			description: getString(data, 'description'),
@@ -157,9 +159,10 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 		buildPoints: getNumber(data, 'bp') || 400,
 		buildPointsSpent: {
 			metatype: metatypeBP,
-			attributes: 0, /* Calculated elsewhere */
+			attributes: 0 /* Calculated elsewhere */,
 			skills: skillBP,
 			skillGroups: skillGroupBP,
+			specializations: 0,
 			knowledgeSkills: 0,
 			qualities: qualityBP,
 			spells: spellBP,
@@ -176,6 +179,7 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 		knowledgeSkills,
 		knowledgeSkillPoints: getNumber(data, 'knowpts'),
 		qualities,
+		improvements: [],
 		magic,
 		resonance,
 		contacts,
@@ -187,7 +191,8 @@ function parseCharacter(data: Record<string, unknown>, userId: string): Characte
 			lifestyle,
 			bioware: [],
 			vehicles: [],
-			martialArts: []
+			martialArts: [],
+			foci: []
 		},
 		nuyen: getNumber(data, 'nuyen'),
 		startingNuyen: 0,
@@ -247,8 +252,12 @@ function parseAttributes(attrs: unknown): Character['attributes'] {
 		log: { base: attrMap.get('LOG')?.value ?? 1, bonus: attrMap.get('LOG')?.aug ?? 0, karma: 0 },
 		wil: { base: attrMap.get('WIL')?.value ?? 1, bonus: attrMap.get('WIL')?.aug ?? 0, karma: 0 },
 		edg: { base: attrMap.get('EDG')?.value ?? 1, bonus: attrMap.get('EDG')?.aug ?? 0, karma: 0 },
-		mag: attrMap.get('MAG')?.value ? { base: attrMap.get('MAG')!.value, bonus: attrMap.get('MAG')!.aug, karma: 0 } : null,
-		res: attrMap.get('RES')?.value ? { base: attrMap.get('RES')!.value, bonus: attrMap.get('RES')!.aug, karma: 0 } : null,
+		mag: attrMap.get('MAG')?.value
+			? { base: attrMap.get('MAG')!.value, bonus: attrMap.get('MAG')!.aug, karma: 0 }
+			: null,
+		res: attrMap.get('RES')?.value
+			? { base: attrMap.get('RES')!.value, bonus: attrMap.get('RES')!.aug, karma: 0 }
+			: null,
 		ess: parseFloat(String(attrMap.get('ESS')?.value ?? 6))
 	};
 }
@@ -293,7 +302,10 @@ function parseAttributeLimits(attrs: unknown): Character['attributeLimits'] {
 /**
  * Parse skills from XML.
  */
-function parseSkills(skills: unknown): { activeSkills: CharacterSkill[]; knowledgeSkills: KnowledgeSkill[] } {
+function parseSkills(skills: unknown): {
+	activeSkills: CharacterSkill[];
+	knowledgeSkills: KnowledgeSkill[];
+} {
 	const activeSkills: CharacterSkill[] = [];
 	const knowledgeSkills: KnowledgeSkill[] = [];
 
@@ -308,7 +320,9 @@ function parseSkills(skills: unknown): { activeSkills: CharacterSkill[]; knowled
 			if (isKnowledge) {
 				const category = getString(skill, 'skillcategory');
 				const validCategories = ['Academic', 'Interest', 'Language', 'Professional', 'Street'];
-				const validCategory = validCategories.includes(category) ? category as KnowledgeSkillCategory : 'Interest';
+				const validCategory = validCategories.includes(category)
+					? (category as KnowledgeSkillCategory)
+					: 'Interest';
 				knowledgeSkills.push({
 					id: generateId(),
 					name: getString(skill, 'name'),
@@ -339,9 +353,20 @@ function parseSkillGroups(groups: unknown): CharacterSkillGroup[] {
 	const result: CharacterSkillGroup[] = [];
 
 	const validGroupNames: SkillGroupName[] = [
-		'Animal Husbandry', 'Athletics', 'Biotech', 'Close Combat', 'Conjuring',
-		'Cracking', 'Electronics', 'Firearms', 'Influence', 'Mechanic',
-		'Outdoors', 'Sorcery', 'Stealth', 'Tasking'
+		'Animal Husbandry',
+		'Athletics',
+		'Biotech',
+		'Close Combat',
+		'Conjuring',
+		'Cracking',
+		'Electronics',
+		'Firearms',
+		'Influence',
+		'Mechanic',
+		'Outdoors',
+		'Sorcery',
+		'Stealth',
+		'Tasking'
 	];
 
 	if (groups && typeof groups === 'object' && 'skillgroup' in groups) {
@@ -437,6 +462,7 @@ function parseWeapons(weapons: unknown): CharacterWeapon[] {
 				conceal: getNumber(weapon, 'conceal'),
 				cost: getNumber(weapon, 'cost'),
 				accessories: [],
+				modifications: [],
 				notes: getString(weapon, 'notes')
 			});
 		}
@@ -479,15 +505,34 @@ function parseArmor(armors: unknown): CharacterArmor[] {
 function parseCyberware(cyberwares: unknown): CharacterCyberware[] {
 	const result: CharacterCyberware[] = [];
 
-	if (cyberwares && typeof cyberwares === 'object' && 'cyberware' in cyberwares) {
-		const cyberList = ensureArray((cyberwares as Record<string, unknown>).cyberware);
+	let cyberList: any[] = [];
+	if (cyberwares && typeof cyberwares === 'object') {
+		if ('cyberware' in cyberwares) {
+			cyberList = ensureArray((cyberwares as Record<string, unknown>).cyberware);
+		} else if (Array.isArray(cyberwares)) {
+			cyberList = cyberwares;
+		}
+
 		for (const cyber of cyberList) {
+			if (!cyber || typeof cyber !== 'object') continue;
+
 			const gradeStr = getString(cyber, 'grade');
 			const grade: CyberwareGrade =
-				gradeStr === 'Alphaware' ? 'Alphaware' :
-					gradeStr === 'Betaware' ? 'Betaware' :
-						gradeStr === 'Deltaware' ? 'Deltaware' :
-							gradeStr === 'Used' ? 'Used' : 'Standard';
+				gradeStr === 'Alphaware'
+					? 'Alphaware'
+					: gradeStr === 'Betaware'
+						? 'Betaware'
+						: gradeStr === 'Deltaware'
+							? 'Deltaware'
+							: gradeStr === 'Used'
+								? 'Used'
+								: 'Standard';
+
+			let children: CharacterCyberware[] = [];
+			const childrenXml = (cyber as Record<string, unknown>).children;
+			if (childrenXml) {
+				children = parseCyberware(childrenXml);
+			}
 
 			result.push({
 				id: generateId(),
@@ -500,7 +545,7 @@ function parseCyberware(cyberwares: unknown): CharacterCyberware[] {
 				capacity: getNumber(cyber, 'capacity'),
 				capacityUsed: 0,
 				location: getString(cyber, 'location'),
-				subsystems: [],
+				children,
 				notes: getString(cyber, 'notes')
 			});
 		}
@@ -515,9 +560,23 @@ function parseCyberware(cyberwares: unknown): CharacterCyberware[] {
 function parseGear(gears: unknown): CharacterGear[] {
 	const result: CharacterGear[] = [];
 
-	if (gears && typeof gears === 'object' && 'gear' in gears) {
-		const gearList = ensureArray((gears as Record<string, unknown>).gear);
+	let gearList: any[] = [];
+	if (gears && typeof gears === 'object') {
+		if ('gear' in gears) {
+			gearList = ensureArray((gears as Record<string, unknown>).gear);
+		} else if (Array.isArray(gears)) {
+			gearList = gears;
+		}
+
 		for (const gear of gearList) {
+			if (!gear || typeof gear !== 'object') continue;
+
+			let children: CharacterGear[] = [];
+			const childrenXml = (gear as Record<string, unknown>).children;
+			if (childrenXml) {
+				children = parseGear(childrenXml);
+			}
+
 			result.push({
 				id: generateId(),
 				name: getString(gear, 'name'),
@@ -531,7 +590,8 @@ function parseGear(gears: unknown): CharacterGear[] {
 				capacityUsed: 0,
 				capacityCost: 0,
 				containerId: null,
-				containedItems: []
+				containedItems: [],
+				children
 			});
 		}
 	}
@@ -611,7 +671,6 @@ function parseMagic(data: Record<string, unknown>): CharacterMagic | null {
 		spells,
 		powers,
 		spirits: [],
-		foci: [],
 		metamagics: []
 	};
 }

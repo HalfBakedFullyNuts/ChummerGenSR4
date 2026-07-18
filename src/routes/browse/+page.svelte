@@ -15,7 +15,24 @@
 	} from '$stores/gamedata';
 
 	/** Current category tab. */
-	type Category = 'metatypes' | 'skills' | 'qualities' | 'spells' | 'powers' | 'programs' | 'martial' | 'echoes' | 'mentors' | 'traditions' | 'streams' | 'weapons' | 'armor' | 'cyberware' | 'bioware' | 'vehicles' | 'gear';
+	type Category =
+		| 'metatypes'
+		| 'skills'
+		| 'qualities'
+		| 'spells'
+		| 'powers'
+		| 'programs'
+		| 'martial'
+		| 'echoes'
+		| 'mentors'
+		| 'traditions'
+		| 'streams'
+		| 'weapons'
+		| 'armor'
+		| 'cyberware'
+		| 'bioware'
+		| 'vehicles'
+		| 'gear';
 	let currentCategory: Category = 'metatypes';
 
 	/** Search query. */
@@ -39,9 +56,7 @@
 	});
 
 	/** Get unique spell categories. */
-	$: spellCategories = $spells
-		? [...new Set($spells.map((s) => s.category))].sort()
-		: [];
+	$: spellCategories = $spells ? [...new Set($spells.map((s) => s.category))].sort() : [];
 
 	/** Get unique weapon categories. */
 	$: weaponCategories = $gameData.weapons
@@ -49,13 +64,13 @@
 		: [];
 
 	/** Filter metatypes by search. */
-	$: filteredMetatypes = ($gameData.metatypes ?? []).filter((m) =>
-		!search || m.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredMetatypes = ($gameData.metatypes ?? []).filter(
+		(m) => !search || m.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Filter skills by search. */
-	$: filteredSkills = ($gameData.skills ?? []).filter((s) =>
-		!search || s.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredSkills = ($gameData.skills ?? []).filter(
+		(s) => !search || s.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Filter qualities by search and type. */
@@ -73,28 +88,28 @@
 	});
 
 	/** Filter powers by search. */
-	$: filteredPowers = ($powers ?? []).filter((p) =>
-		!search || p.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredPowers = ($powers ?? []).filter(
+		(p) => !search || p.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Filter programs by search. */
-	$: filteredPrograms = ($programs ?? []).filter((p) =>
-		!search || p.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredPrograms = ($programs ?? []).filter(
+		(p) => !search || p.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Filter martial arts by search. */
-	$: filteredMartialArts = ($martialArts ?? []).filter((m) =>
-		!search || m.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredMartialArts = ($martialArts ?? []).filter(
+		(m) => !search || m.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Filter echoes by search. */
-	$: filteredEchoes = ($echoes ?? []).filter((e) =>
-		!search || e.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredEchoes = ($echoes ?? []).filter(
+		(e) => !search || e.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Filter mentors by search. */
-	$: filteredMentors = ($mentors ?? []).filter((m) =>
-		!search || m.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredMentors = ($mentors ?? []).filter(
+		(m) => !search || m.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Filter weapons by search and category. */
@@ -105,28 +120,28 @@
 	});
 
 	/** Filter armor by search. */
-	$: filteredArmor = ($gameData.armor ?? []).filter((a) =>
-		!search || a.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredArmor = ($gameData.armor ?? []).filter(
+		(a) => !search || a.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Filter cyberware by search. */
-	$: filteredCyberware = ($gameData.cyberware ?? []).filter((c) =>
-		!search || c.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredCyberware = ($gameData.cyberware ?? []).filter(
+		(c) => !search || c.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Filter bioware by search. */
-	$: filteredBioware = ($gameData.bioware ?? []).filter((b) =>
-		!search || b.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredBioware = ($gameData.bioware ?? []).filter(
+		(b) => !search || b.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Filter vehicles by search. */
-	$: filteredVehicles = ($gameData.vehicles ?? []).filter((v) =>
-		!search || v.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredVehicles = ($gameData.vehicles ?? []).filter(
+		(v) => !search || v.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Filter gear by search. */
-	$: filteredGear = ($gameData.gear ?? []).filter((g) =>
-		!search || g.name.toLowerCase().includes(search.toLowerCase())
+	$: filteredGear = ($gameData.gear ?? []).filter(
+		(g) => !search || g.name.toLowerCase().includes(search.toLowerCase())
 	);
 
 	/** Category tabs. */
@@ -171,12 +186,7 @@
 		</div>
 
 		<!-- Search -->
-		<input
-			type="text"
-			class="cw-input w-full"
-			placeholder="Search..."
-			bind:value={search}
-		/>
+		<input type="text" class="cw-input w-full" placeholder="Search..." bind:value={search} />
 	</header>
 
 	{#if loading}
@@ -190,9 +200,12 @@
 				<button
 					class="px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap
 						{currentCategory === cat.id
-							? 'bg-primary-main/20 text-primary-dark border border-primary-dark/50'
-							: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
-					on:click={() => { currentCategory = cat.id; search = ''; }}
+						? 'bg-primary-main/20 text-primary-dark border border-primary-dark/50'
+						: 'bg-surface text-text-secondary hover:bg-surface-variant'}"
+					on:click={() => {
+						currentCategory = cat.id;
+						search = '';
+					}}
 				>
 					{cat.label}
 				</button>
@@ -209,17 +222,53 @@
 							<span class="text-primary-dark text-sm font-mono">{meta.bp} BP</span>
 						</div>
 						<div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-xs text-text-muted mt-2">
-							<span>BOD: <span class="text-text-secondary">{meta.attributes.bod.min}-{meta.attributes.bod.max}</span></span>
-							<span>AGI: <span class="text-text-secondary">{meta.attributes.agi.min}-{meta.attributes.agi.max}</span></span>
-							<span>REA: <span class="text-text-secondary">{meta.attributes.rea.min}-{meta.attributes.rea.max}</span></span>
-							<span>STR: <span class="text-text-secondary">{meta.attributes.str.min}-{meta.attributes.str.max}</span></span>
-							<span>CHA: <span class="text-text-secondary">{meta.attributes.cha.min}-{meta.attributes.cha.max}</span></span>
-							<span>INT: <span class="text-text-secondary">{meta.attributes.int.min}-{meta.attributes.int.max}</span></span>
-							<span>LOG: <span class="text-text-secondary">{meta.attributes.log.min}-{meta.attributes.log.max}</span></span>
-							<span>WIL: <span class="text-text-secondary">{meta.attributes.wil.min}-{meta.attributes.wil.max}</span></span>
+							<span
+								>BOD: <span class="text-text-secondary"
+									>{meta.attributes.bod.min}-{meta.attributes.bod.max}</span
+								></span
+							>
+							<span
+								>AGI: <span class="text-text-secondary"
+									>{meta.attributes.agi.min}-{meta.attributes.agi.max}</span
+								></span
+							>
+							<span
+								>REA: <span class="text-text-secondary"
+									>{meta.attributes.rea.min}-{meta.attributes.rea.max}</span
+								></span
+							>
+							<span
+								>STR: <span class="text-text-secondary"
+									>{meta.attributes.str.min}-{meta.attributes.str.max}</span
+								></span
+							>
+							<span
+								>CHA: <span class="text-text-secondary"
+									>{meta.attributes.cha.min}-{meta.attributes.cha.max}</span
+								></span
+							>
+							<span
+								>INT: <span class="text-text-secondary"
+									>{meta.attributes.int.min}-{meta.attributes.int.max}</span
+								></span
+							>
+							<span
+								>LOG: <span class="text-text-secondary"
+									>{meta.attributes.log.min}-{meta.attributes.log.max}</span
+								></span
+							>
+							<span
+								>WIL: <span class="text-text-secondary"
+									>{meta.attributes.wil.min}-{meta.attributes.wil.max}</span
+								></span
+							>
 						</div>
 						<div class="flex gap-4 text-xs text-text-muted mt-1">
-							<span>EDG: <span class="text-primary-dark">{meta.attributes.edg.min}-{meta.attributes.edg.max}</span></span>
+							<span
+								>EDG: <span class="text-primary-dark"
+									>{meta.attributes.edg.min}-{meta.attributes.edg.max}</span
+								></span
+							>
 							<span>ESS: <span class="text-primary-dark">{meta.attributes.ess.max}</span></span>
 						</div>
 						<p class="text-text-muted text-xs mt-1">{meta.source} p.{meta.page}</p>
@@ -257,7 +306,9 @@
 									</span>
 								{/each}
 								{#if skill.specializations.length > 5}
-									<span class="text-text-muted text-xs">+{skill.specializations.length - 5} more</span>
+									<span class="text-text-muted text-xs"
+										>+{skill.specializations.length - 5} more</span
+									>
 								{/if}
 							</div>
 						{/if}
@@ -284,14 +335,20 @@
 					<div class="cw-card p-3">
 						<div class="flex justify-between items-start">
 							<div>
-								<span class="font-medium {quality.category === 'Positive' ? 'text-success-dark' : 'text-error-dark'}">
+								<span
+									class="font-medium {quality.category === 'Positive'
+										? 'text-success-dark'
+										: 'text-error-dark'}"
+								>
 									{quality.name}
 								</span>
 								{#if quality.limit}
 									<span class="text-text-muted text-xs ml-1">(Limited)</span>
 								{/if}
 							</div>
-							<span class="text-sm font-mono {quality.bp > 0 ? 'text-error-dark' : 'text-success-dark'}">
+							<span
+								class="text-sm font-mono {quality.bp > 0 ? 'text-error-dark' : 'text-success-dark'}"
+							>
 								{quality.bp > 0 ? '+' : ''}{quality.bp} BP
 							</span>
 						</div>
@@ -412,8 +469,8 @@
 								<span class="text-text-muted text-xs">Max: {echo.limit}</span>
 							{/if}
 						</div>
-						{#if echo.bonus}
-							<p class="text-text-secondary text-sm mt-1">{echo.bonus}</p>
+						{#if echo.bonusText}
+							<p class="text-text-secondary text-sm mt-1">{echo.bonusText}</p>
 						{/if}
 						<p class="text-text-muted text-xs mt-1">{echo.source} p.{echo.page}</p>
 					</div>
@@ -542,7 +599,9 @@
 					</div>
 				{/each}
 				{#if filteredWeapons.length > 100}
-					<p class="text-text-muted text-center py-2">Showing first 100 of {filteredWeapons.length} items. Use search to narrow results.</p>
+					<p class="text-text-muted text-center py-2">
+						Showing first 100 of {filteredWeapons.length} items. Use search to narrow results.
+					</p>
 				{/if}
 				{#if filteredWeapons.length === 0}
 					<p class="text-text-muted text-center py-4">No weapons found.</p>
@@ -592,7 +651,9 @@
 					</div>
 				{/each}
 				{#if filteredCyberware.length > 100}
-					<p class="text-text-muted text-center py-2">Showing first 100 of {filteredCyberware.length} items. Use search to narrow results.</p>
+					<p class="text-text-muted text-center py-2">
+						Showing first 100 of {filteredCyberware.length} items. Use search to narrow results.
+					</p>
 				{/if}
 				{#if filteredCyberware.length === 0}
 					<p class="text-text-muted text-center py-4">No cyberware found.</p>
@@ -617,7 +678,9 @@
 					</div>
 				{/each}
 				{#if filteredBioware.length > 100}
-					<p class="text-text-muted text-center py-2">Showing first 100 of {filteredBioware.length} items. Use search to narrow results.</p>
+					<p class="text-text-muted text-center py-2">
+						Showing first 100 of {filteredBioware.length} items. Use search to narrow results.
+					</p>
 				{/if}
 				{#if filteredBioware.length === 0}
 					<p class="text-text-muted text-center py-4">No bioware found.</p>
@@ -655,7 +718,9 @@
 					</div>
 				{/each}
 				{#if filteredVehicles.length > 100}
-					<p class="text-text-muted text-center py-2">Showing first 100 of {filteredVehicles.length} items. Use search to narrow results.</p>
+					<p class="text-text-muted text-center py-2">
+						Showing first 100 of {filteredVehicles.length} items. Use search to narrow results.
+					</p>
 				{/if}
 				{#if filteredVehicles.length === 0}
 					<p class="text-text-muted text-center py-4">No vehicles found.</p>
@@ -681,7 +746,9 @@
 					</div>
 				{/each}
 				{#if filteredGear.length > 100}
-					<p class="text-text-muted text-center py-2">Showing first 100 of {filteredGear.length} items. Use search to narrow results.</p>
+					<p class="text-text-muted text-center py-2">
+						Showing first 100 of {filteredGear.length} items. Use search to narrow results.
+					</p>
 				{/if}
 				{#if filteredGear.length === 0}
 					<p class="text-text-muted text-center py-4">No gear found.</p>

@@ -5,6 +5,7 @@
  */
 
 import type { QualityBonus, GameQuality } from '$stores/gamedata';
+import type { BonusValue } from '$types';
 
 /** A formatted bonus line for display. */
 export interface FormattedBonus {
@@ -12,6 +13,29 @@ export interface FormattedBonus {
 	text: string;
 	/** Whether this is a positive (buff) or negative (debuff) effect. */
 	positive: boolean;
+}
+
+/**
+ * Coerce a bonus value to a number for display/comparison. Quality bonus
+ * values are always numeric today; unresolved "Rating"-style expressions
+ * (used by cyberware/bioware/powers, not qualities) fall back to NaN,
+ * which is filtered out by the `!== undefined` checks below never firing
+ * on a NaN-producing string in practice.
+ */
+function n(v: BonusValue | undefined): number {
+	return typeof v === 'number' ? v : Number(v);
+}
+
+/**
+ * Normalize `<enabletab>` into a list of tab names. Most qualities enable a
+ * single tab (plain string), but qualities enabling more than one (e.g.
+ * Mystic Adept: magician + adept) parse as `{ name: string | string[] }`.
+ */
+export function getEnabledTabs(enabletab: QualityBonus['enabletab']): string[] {
+	if (!enabletab) return [];
+	if (typeof enabletab === 'string') return [enabletab];
+	const { name } = enabletab;
+	return typeof name === 'string' ? [name] : [...name];
 }
 
 /**
@@ -27,10 +51,10 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 	if (bonus.specificattribute) {
 		for (const attr of bonus.specificattribute) {
 			if (attr.val !== undefined) {
-				const sign = attr.val >= 0 ? '+' : '';
+				const sign = n(attr.val) >= 0 ? '+' : '';
 				results.push({
 					text: `${sign}${attr.val} ${attr.name}`,
-					positive: attr.val >= 0
+					positive: n(attr.val) >= 0
 				});
 			}
 			if (attr.min !== undefined) {
@@ -58,9 +82,9 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 		}
 	}
 
-	// Enable tab (magician, adept, technomancer)
-	if (bonus.enabletab) {
-		const tabName = bonus.enabletab.charAt(0).toUpperCase() + bonus.enabletab.slice(1);
+	// Enable tab (magician, adept, technomancer) - some qualities enable more than one
+	for (const tab of getEnabledTabs(bonus.enabletab)) {
+		const tabName = tab.charAt(0).toUpperCase() + tab.slice(1);
 		results.push({
 			text: `Enables ${tabName} abilities`,
 			positive: true
@@ -71,10 +95,10 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 	if (bonus.specificskill) {
 		for (const skill of bonus.specificskill) {
 			if (skill.bonus !== undefined) {
-				const sign = skill.bonus >= 0 ? '+' : '';
+				const sign = n(skill.bonus) >= 0 ? '+' : '';
 				results.push({
 					text: `${sign}${skill.bonus} ${skill.name}`,
-					positive: skill.bonus >= 0
+					positive: n(skill.bonus) >= 0
 				});
 			}
 			if (skill.max !== undefined) {
@@ -90,10 +114,10 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 	if (bonus.skillgroup) {
 		for (const group of bonus.skillgroup) {
 			if (group.bonus !== undefined) {
-				const sign = group.bonus >= 0 ? '+' : '';
+				const sign = n(group.bonus) >= 0 ? '+' : '';
 				results.push({
 					text: `${sign}${group.bonus} ${group.name} group`,
-					positive: group.bonus >= 0
+					positive: n(group.bonus) >= 0
 				});
 			}
 		}
@@ -103,10 +127,10 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 	if (bonus.skillcategory) {
 		for (const cat of bonus.skillcategory) {
 			if (cat.bonus !== undefined) {
-				const sign = cat.bonus >= 0 ? '+' : '';
+				const sign = n(cat.bonus) >= 0 ? '+' : '';
 				results.push({
 					text: `${sign}${cat.bonus} ${cat.name} skills`,
-					positive: cat.bonus >= 0
+					positive: n(cat.bonus) >= 0
 				});
 			}
 		}
@@ -115,10 +139,10 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 	// Select skill (user choice)
 	if (bonus.selectskill) {
 		if (bonus.selectskill.bonus !== undefined) {
-			const sign = bonus.selectskill.bonus >= 0 ? '+' : '';
+			const sign = n(bonus.selectskill.bonus) >= 0 ? '+' : '';
 			results.push({
 				text: `${sign}${bonus.selectskill.bonus} to chosen skill`,
-				positive: bonus.selectskill.bonus >= 0
+				positive: n(bonus.selectskill.bonus) >= 0
 			});
 		}
 	}
@@ -126,83 +150,100 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 	// Select attribute (user choice)
 	if (bonus.selectattribute) {
 		if (bonus.selectattribute.val !== undefined) {
-			const sign = bonus.selectattribute.val >= 0 ? '+' : '';
+			const sign = n(bonus.selectattribute.val) >= 0 ? '+' : '';
 			results.push({
 				text: `${sign}${bonus.selectattribute.val} to chosen attribute`,
-				positive: bonus.selectattribute.val >= 0
+				positive: n(bonus.selectattribute.val) >= 0
 			});
 		}
 	}
 
 	// Initiative
 	if (bonus.initiative !== undefined) {
-		const sign = bonus.initiative >= 0 ? '+' : '';
+		const sign = n(bonus.initiative) >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${bonus.initiative} Initiative`,
-			positive: bonus.initiative >= 0
+			positive: n(bonus.initiative) >= 0
 		});
 	}
 
 	// Initiative Pass
 	if (bonus.initiativepass !== undefined) {
-		const sign = bonus.initiativepass >= 0 ? '+' : '';
+		const sign = n(bonus.initiativepass) >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${bonus.initiativepass} Initiative Pass${bonus.initiativepass !== 1 ? 'es' : ''}`,
-			positive: bonus.initiativepass >= 0
+			positive: n(bonus.initiativepass) >= 0
 		});
 	}
 
-	// Condition Monitor
-	if (bonus.conditionmonitor !== undefined) {
-		const sign = bonus.conditionmonitor >= 0 ? '+' : '';
-		results.push({
-			text: `${sign}${bonus.conditionmonitor} Condition Monitor`,
-			positive: bonus.conditionmonitor >= 0
-		});
+	// Condition Monitor (physical/stun/threshold/overflow boxes)
+	if (bonus.conditionmonitor) {
+		const cm = bonus.conditionmonitor;
+		if (cm.physical !== undefined) {
+			const sign = n(cm.physical) >= 0 ? '+' : '';
+			results.push({
+				text: `${sign}${cm.physical} Physical Condition Monitor`,
+				positive: n(cm.physical) >= 0
+			});
+		}
+		if (cm.stun !== undefined) {
+			const sign = n(cm.stun) >= 0 ? '+' : '';
+			results.push({
+				text: `${sign}${cm.stun} Stun Condition Monitor`,
+				positive: n(cm.stun) >= 0
+			});
+		}
+		if (cm.overflow !== undefined) {
+			const sign = n(cm.overflow) >= 0 ? '+' : '';
+			results.push({
+				text: `${sign}${cm.overflow} Condition Monitor Overflow`,
+				positive: n(cm.overflow) >= 0
+			});
+		}
 	}
 
 	// Notoriety
 	if (bonus.notoriety !== undefined) {
-		const sign = bonus.notoriety >= 0 ? '+' : '';
+		const sign = n(bonus.notoriety) >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${bonus.notoriety} Notoriety`,
-			positive: bonus.notoriety <= 0 // Lower notoriety is better
+			positive: n(bonus.notoriety) <= 0 // Lower notoriety is better
 		});
 	}
 
 	// Composure
 	if (bonus.composure !== undefined) {
-		const sign = bonus.composure >= 0 ? '+' : '';
+		const sign = n(bonus.composure) >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${bonus.composure} Composure`,
-			positive: bonus.composure >= 0
+			positive: n(bonus.composure) >= 0
 		});
 	}
 
 	// Judge Intentions
 	if (bonus.judgeintentions !== undefined) {
-		const sign = bonus.judgeintentions >= 0 ? '+' : '';
+		const sign = n(bonus.judgeintentions) >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${bonus.judgeintentions} Judge Intentions`,
-			positive: bonus.judgeintentions >= 0
+			positive: n(bonus.judgeintentions) >= 0
 		});
 	}
 
 	// Damage Resistance
 	if (bonus.damageresistance !== undefined) {
-		const sign = bonus.damageresistance >= 0 ? '+' : '';
+		const sign = n(bonus.damageresistance) >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${bonus.damageresistance} Damage Resistance`,
-			positive: bonus.damageresistance >= 0
+			positive: n(bonus.damageresistance) >= 0
 		});
 	}
 
 	// Drain Resistance
 	if (bonus.drainresist !== undefined) {
-		const sign = bonus.drainresist >= 0 ? '+' : '';
+		const sign = n(bonus.drainresist) >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${bonus.drainresist} Drain Resistance`,
-			positive: bonus.drainresist >= 0
+			positive: n(bonus.drainresist) >= 0
 		});
 	}
 
@@ -210,13 +251,13 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 	if (bonus.lifestylecost !== undefined) {
 		results.push({
 			text: `${bonus.lifestylecost}% Lifestyle cost`,
-			positive: bonus.lifestylecost < 0
+			positive: n(bonus.lifestylecost) < 0
 		});
 	}
 
 	// Cyberware essence multiplier
 	if (bonus.cyberwareessmultiplier !== undefined) {
-		const percent = Math.round((bonus.cyberwareessmultiplier - 1) * 100);
+		const percent = Math.round((n(bonus.cyberwareessmultiplier) - 1) * 100);
 		const sign = percent >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${percent}% Cyberware Essence`,
@@ -226,7 +267,7 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 
 	// Bioware essence multiplier
 	if (bonus.biowareessmultiplier !== undefined) {
-		const percent = Math.round((bonus.biowareessmultiplier - 1) * 100);
+		const percent = Math.round((n(bonus.biowareessmultiplier) - 1) * 100);
 		const sign = percent >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${percent}% Bioware Essence`,
@@ -236,37 +277,37 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 
 	// Reach
 	if (bonus.reach !== undefined) {
-		const sign = bonus.reach >= 0 ? '+' : '';
+		const sign = n(bonus.reach) >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${bonus.reach} Reach`,
-			positive: bonus.reach >= 0
+			positive: n(bonus.reach) >= 0
 		});
 	}
 
 	// Unarmed DV
 	if (bonus.unarmeddv !== undefined) {
-		const sign = bonus.unarmeddv >= 0 ? '+' : '';
+		const sign = n(bonus.unarmeddv) >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${bonus.unarmeddv} Unarmed DV`,
-			positive: bonus.unarmeddv >= 0
+			positive: n(bonus.unarmeddv) >= 0
 		});
 	}
 
 	// Movement percent
 	if (bonus.movementpercent !== undefined) {
-		const sign = bonus.movementpercent >= 0 ? '+' : '';
+		const sign = n(bonus.movementpercent) >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${bonus.movementpercent}% Movement`,
-			positive: bonus.movementpercent >= 0
+			positive: n(bonus.movementpercent) >= 0
 		});
 	}
 
 	// Swim percent
 	if (bonus.swimpercent !== undefined) {
-		const sign = bonus.swimpercent >= 0 ? '+' : '';
+		const sign = n(bonus.swimpercent) >= 0 ? '+' : '';
 		results.push({
 			text: `${sign}${bonus.swimpercent}% Swimming`,
-			positive: bonus.swimpercent >= 0
+			positive: n(bonus.swimpercent) >= 0
 		});
 	}
 
@@ -290,7 +331,7 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 	if (bonus.nuyenmaxbp !== undefined) {
 		results.push({
 			text: `Max ${bonus.nuyenmaxbp} BP on Nuyen`,
-			positive: bonus.nuyenmaxbp > 0
+			positive: n(bonus.nuyenmaxbp) > 0
 		});
 	}
 
@@ -331,7 +372,7 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 	}
 	if (bonus.infirm) {
 		results.push({
-			text: 'Physical attributes cost double',
+			text: 'Physical skills cost double',
 			positive: false
 		});
 	}
@@ -360,7 +401,7 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 export function formatQualityBonusSummary(bonus: QualityBonus | undefined): string {
 	const formatted = formatQualityBonus(bonus);
 	if (formatted.length === 0) return '';
-	return formatted.map(f => f.text).join(', ');
+	return formatted.map((f) => f.text).join(', ');
 }
 
 /** Quality tag categories for searchable keywords. */
@@ -409,7 +450,11 @@ export function generateQualityTags(quality: GameQuality): QualityTag[] {
 		}
 
 		// Social
-		if (bonus.composure !== undefined || bonus.judgeintentions !== undefined || bonus.notoriety !== undefined) {
+		if (
+			bonus.composure !== undefined ||
+			bonus.judgeintentions !== undefined ||
+			bonus.notoriety !== undefined
+		) {
 			tags.add('social');
 		}
 		if (bonus.uncouth) {
@@ -417,18 +462,23 @@ export function generateQualityTags(quality: GameQuality): QualityTag[] {
 		}
 
 		// Magic
-		if (bonus.drainresist !== undefined || bonus.enabletab === 'magician' || bonus.enabletab === 'adept') {
+		const enabledTabs = getEnabledTabs(bonus.enabletab);
+		if (
+			bonus.drainresist !== undefined ||
+			enabledTabs.includes('magician') ||
+			enabledTabs.includes('adept')
+		) {
 			tags.add('magic');
 		}
-		if (bonus.addattribute?.some(a => a.name === 'MAG')) {
+		if (bonus.addattribute?.some((a) => a.name === 'MAG')) {
 			tags.add('magic');
 		}
 
 		// Matrix / Technomancer
-		if (bonus.enabletab === 'technomancer') {
+		if (enabledTabs.includes('technomancer')) {
 			tags.add('matrix');
 		}
-		if (bonus.addattribute?.some(a => a.name === 'RES')) {
+		if (bonus.addattribute?.some((a) => a.name === 'RES')) {
 			tags.add('matrix');
 		}
 
@@ -502,19 +552,45 @@ export function generateQualityTags(quality: GameQuality): QualityTag[] {
 	if (effect.includes('social') || effect.includes('charisma') || effect.includes('negotiation')) {
 		tags.add('social');
 	}
-	if (effect.includes('magic') || effect.includes('spell') || effect.includes('mana') || effect.includes('astral')) {
+	if (
+		effect.includes('magic') ||
+		effect.includes('spell') ||
+		effect.includes('mana') ||
+		effect.includes('astral')
+	) {
 		tags.add('magic');
 	}
-	if (effect.includes('matrix') || effect.includes('hacking') || effect.includes('technomancer') || effect.includes('sprite')) {
+	if (
+		effect.includes('matrix') ||
+		effect.includes('hacking') ||
+		effect.includes('technomancer') ||
+		effect.includes('sprite')
+	) {
 		tags.add('matrix');
 	}
-	if (effect.includes('physical') || effect.includes('body') || effect.includes('strength') || effect.includes('agility')) {
+	if (
+		effect.includes('physical') ||
+		effect.includes('body') ||
+		effect.includes('strength') ||
+		effect.includes('agility')
+	) {
 		tags.add('physical');
 	}
-	if (effect.includes('mental') || effect.includes('logic') || effect.includes('willpower') || effect.includes('intuition')) {
+	if (
+		effect.includes('mental') ||
+		effect.includes('logic') ||
+		effect.includes('willpower') ||
+		effect.includes('intuition')
+	) {
 		tags.add('mental');
 	}
-	if (effect.includes('metatype') || effect.includes('ork') || effect.includes('elf') || effect.includes('dwarf') || effect.includes('troll')) {
+	if (
+		effect.includes('metatype') ||
+		effect.includes('ork') ||
+		effect.includes('elf') ||
+		effect.includes('dwarf') ||
+		effect.includes('troll')
+	) {
 		tags.add('metatype');
 	}
 	if (effect.includes('karma')) {
@@ -535,7 +611,7 @@ export function qualityMatchesSearch(quality: GameQuality, search: string): bool
 	if (!search) return true;
 
 	const lower = search.toLowerCase();
-	const terms = lower.split(/\s+/).filter(t => t.length > 0);
+	const terms = lower.split(/\s+/).filter((t) => t.length > 0);
 
 	// Get searchable text
 	const name = quality.name.toLowerCase();
@@ -544,18 +620,18 @@ export function qualityMatchesSearch(quality: GameQuality, search: string): bool
 	const bonusSummary = formatQualityBonusSummary(quality.bonus).toLowerCase();
 
 	// All terms must match something
-	return terms.every(term => {
+	return terms.every((term) => {
 		// Check if term is a tag prefix (e.g., "tag:combat" or just "combat" for tags)
 		if (term.startsWith('tag:')) {
 			const tagSearch = term.slice(4);
-			return tags.some(t => t.includes(tagSearch));
+			return tags.some((t) => t.includes(tagSearch));
 		}
 
 		// Normal search - check all fields
 		return (
 			name.includes(term) ||
 			effect.includes(term) ||
-			tags.some(t => t.includes(term)) ||
+			tags.some((t) => t.includes(term)) ||
 			bonusSummary.includes(term)
 		);
 	});

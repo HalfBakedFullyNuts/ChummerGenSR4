@@ -8,33 +8,67 @@
  * - Dice pools for common tests
  */
 
-import type { Character, CharacterSkill } from '$types';
+import type { Character, CharacterSkill, SkillCategory } from '$types';
+import { valueOf, skillPoolBonus, hasFlag } from './improvementManager';
 
 /* ============================================
  * Attribute Helpers
  * ============================================ */
 
-/** Get total attribute value (base + bonus). */
+/** Attribute keys that carry metatype-defined limits (attributeLimits). */
+type LimitedAttributeKey = 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil' | 'edg' | 'mag' | 'res';
+
+/** Natural maximum including improvements (metatype max + Attribute 'max' modifiers, e.g. Exceptional Attribute). */
+export function getAttributeNaturalMax(char: Character, attr: LimitedAttributeKey): number {
+	const limits = char.attributeLimits[attr];
+	const baseMax = limits ? limits.max : 0;
+	return baseMax + valueOf(char.improvements, 'Attribute', attr, 'max');
+}
+
+/**
+ * Augmented maximum: the metatype-provided cap (attributeLimits[attr].aug),
+ * plus 'augMax' improvements. NOT a universal floor(max x 1.5) formula —
+ * Edge/Magic/Resonance/Essence have no augmentation multiplier in SR4
+ * (their aug equals their natural max), and several metatypes (Naga,
+ * Pixie, Free Spirit, some Shapeshifters, A.I.) carry non-standard
+ * multipliers on specific attributes. Verified against every metatype in
+ * static/data/metatypes.json: only bod/agi/rea/str/cha/int/log/wil follow
+ * floor(max*1.5) for most (not all) metatypes, so the shipped per-attribute
+ * value is the source of truth, not a derived formula.
+ */
+export function getAttributeAugmentedMax(char: Character, attr: LimitedAttributeKey): number {
+	const limits = char.attributeLimits[attr];
+	const baseAugMax = limits ? limits.aug : 0;
+	return baseAugMax + valueOf(char.improvements, 'Attribute', attr, 'augMax');
+}
+
+/** Get total attribute value (base + bonus), clamped to the augmented maximum. */
 export function getAttributeTotal(
 	char: Character,
 	attr: 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil' | 'edg'
 ): number {
 	const a = char.attributes[attr];
-	return a.base + a.bonus;
+	const impBonus = valueOf(char.improvements, 'Attribute', attr);
+	const total = a.base + a.bonus + impBonus;
+	return Math.min(total, getAttributeAugmentedMax(char, attr));
 }
 
-/** Get Magic attribute total (0 if mundane). */
+/** Get Magic attribute total (0 if mundane), clamped to the augmented maximum. */
 export function getMagicTotal(char: Character): number {
 	const mag = char.attributes.mag;
 	if (!mag) return 0;
-	return mag.base + mag.bonus;
+	const impBonus = valueOf(char.improvements, 'Attribute', 'mag');
+	const total = mag.base + mag.bonus + impBonus;
+	return Math.min(total, getAttributeAugmentedMax(char, 'mag'));
 }
 
-/** Get Resonance attribute total (0 if not technomancer). */
+/** Get Resonance attribute total (0 if not technomancer), clamped to the augmented maximum. */
 export function getResonanceTotal(char: Character): number {
 	const res = char.attributes.res;
 	if (!res) return 0;
-	return res.base + res.bonus;
+	const impBonus = valueOf(char.improvements, 'Attribute', 'res');
+	const total = res.base + res.bonus + impBonus;
+	return Math.min(total, getAttributeAugmentedMax(char, 'res'));
 }
 
 /** Get current Essence. */
@@ -46,21 +80,21 @@ export function getEssence(char: Character): number {
  * Condition Monitors
  * ============================================ */
 
-/** Calculate Physical Condition Monitor boxes. */
 export function calculatePhysicalCM(char: Character): number {
 	const bod = getAttributeTotal(char, 'bod');
-	return Math.ceil(bod / 2) + 8;
+	const bonus = valueOf(char.improvements, 'PhysicalCM');
+	return Math.ceil(bod / 2) + 8 + bonus;
 }
 
-/** Calculate Stun Condition Monitor boxes. */
 export function calculateStunCM(char: Character): number {
 	const wil = getAttributeTotal(char, 'wil');
-	return Math.ceil(wil / 2) + 8;
+	const bonus = valueOf(char.improvements, 'StunCM');
+	return Math.ceil(wil / 2) + 8 + bonus;
 }
 
-/** Calculate Overflow boxes (before death). */
 export function calculateOverflow(char: Character): number {
-	return getAttributeTotal(char, 'bod');
+	const bonus = valueOf(char.improvements, 'PhysicalCM') + valueOf(char.improvements, 'CMOverflow');
+	return getAttributeTotal(char, 'bod') + bonus;
 }
 
 /** Get wound modifier from damage. */
@@ -80,97 +114,99 @@ export function getWoundModifier(char: Character): number {
 export function calculateInitiative(char: Character): number {
 	const rea = getAttributeTotal(char, 'rea');
 	const int = getAttributeTotal(char, 'int');
-	return rea + int;
+	const impBonus = valueOf(char.improvements, 'Initiative');
+	return rea + int + impBonus;
 }
 
-/** Calculate number of Initiative Dice (base is 1). */
+/**
+ * Calculate number of Initiative Dice (base is 1).
+ * Cyberware and adept-power initiative-pass sources (Wired Reflexes, Synaptic
+ * Booster, Move-by-Wire, Improved Reflexes) all arrive via the InitiativePass
+ * improvement (#62c wires equipment, #63b wires powers) — desktop hardcodes
+ * uniqueName "initiativepass" on all of them so they never stack.
+ */
 export function calculateInitiativeDice(char: Character): number {
 	let dice = 1;
 
-	// Check cyberware for initiative boosters
-	for (const cyber of char.equipment.cyberware) {
-		const name = cyber.name.toLowerCase();
-		const rating = cyber.rating || 1;
-
-		if (name.includes('wired reflexes')) {
-			dice = Math.max(dice, rating + 1);
-		} else if (name.includes('synaptic booster')) {
-			dice = Math.max(dice, rating + 1);
-		} else if (name.includes('move-by-wire')) {
-			dice = Math.max(dice, rating + 1);
-		}
-	}
-
-	// Check adept powers
-	if (char.magic?.powers) {
-		for (const power of char.magic.powers) {
-			if (power.name.toLowerCase().includes('improved reflexes')) {
-				dice = Math.max(dice, power.level + 1);
-			}
-		}
-	}
+	dice += valueOf(char.improvements, 'InitiativePass') || 0;
+	dice += valueOf(char.improvements, 'InitiativePassAdd') || 0;
 
 	return dice;
-}
-
-/** Calculate Initiative bonus from augmentations. */
-export function calculateInitiativeBonus(char: Character): number {
-	let bonus = 0;
-
-	for (const cyber of char.equipment.cyberware) {
-		const name = cyber.name.toLowerCase();
-		const rating = cyber.rating || 1;
-
-		if (name.includes('wired reflexes')) {
-			bonus = Math.max(bonus, rating);
-		} else if (name.includes('synaptic booster')) {
-			bonus = Math.max(bonus, rating);
-		} else if (name.includes('move-by-wire')) {
-			bonus = Math.max(bonus, rating * 2);
-		} else if (name.includes('reaction enhancers')) {
-			bonus += rating;
-		}
-	}
-
-	if (char.magic?.powers) {
-		for (const power of char.magic.powers) {
-			if (power.name.toLowerCase().includes('improved reflexes')) {
-				bonus = Math.max(bonus, power.level);
-			}
-		}
-	}
-
-	return bonus;
 }
 
 /* ============================================
  * Movement
  * ============================================ */
 
+/** Walk/run/swim/fly rates in meters/turn. */
+export interface MovementRates {
+	readonly walk: number;
+	readonly run: number;
+	readonly swim: number;
+	readonly fly: number;
+}
+
+/** Human fallback movement string, used when a character lacks identity.movement (pre-#70 saves). */
+export const DEFAULT_MOVEMENT = '10/25, Swim 5';
+
+/**
+ * Parse desktop's metatype movement display string, e.g. "10/25, Swim 5" or
+ * "15/45, Fly 90". Warns and returns all-zero rates for an unparseable
+ * string (e.g. "Special" — some critters have no standard movement rate).
+ */
+export function parseMovementString(movement: string): MovementRates {
+	const match = movement.match(/^(\d+)\/(\d+)(?:,\s*(Swim|Fly)\s+(\d+))?/i);
+	if (!match) {
+		console.warn(`parseMovementString: cannot parse movement string "${movement}"`);
+		return { walk: 0, run: 0, swim: 0, fly: 0 };
+	}
+
+	const walk = Number(match[1]);
+	const run = Number(match[2]);
+	const kind = match[3]?.toLowerCase();
+	const extra = match[4] !== undefined ? Number(match[4]) : 0;
+
+	return {
+		walk,
+		run,
+		swim: kind === 'swim' ? extra : 0,
+		fly: kind === 'fly' ? extra : 0
+	};
+}
+
+/**
+ * Movement rates including MovementPercent/SwimPercent/FlySpeed improvements
+ * (desktop clsCharacter.cs:5156-5210): walk/run scale by MovementPercent,
+ * swim scales by SwimPercent, fly gets a flat FlySpeed add-on.
+ */
+export function calculateMovement(char: Character): MovementRates {
+	const base = parseMovementString(char.identity.movement !== '' ? char.identity.movement : DEFAULT_MOVEMENT);
+	const movePct = valueOf(char.improvements, 'MovementPercent') / 100;
+	const swimPct = valueOf(char.improvements, 'SwimPercent') / 100;
+
+	return {
+		walk: base.walk + Math.floor(base.walk * movePct),
+		run: base.run + Math.floor(base.run * movePct),
+		swim: base.swim + Math.floor(base.swim * swimPct),
+		fly: base.fly + valueOf(char.improvements, 'FlySpeed')
+	};
+}
+
 /** Calculate walking speed in meters/turn. */
 export function calculateWalkSpeed(char: Character): number {
-	const agi = getAttributeTotal(char, 'agi');
-	return agi * 2;
+	return calculateMovement(char).walk;
 }
 
 /** Calculate running speed in meters/turn. */
 export function calculateRunSpeed(char: Character): number {
-	const agi = getAttributeTotal(char, 'agi');
-	return agi * 4;
-}
-
-/** Calculate sprinting modifier. */
-export function calculateSprintBonus(char: Character): number {
-	// Base sprint adds +2m per hit on Running + STR
-	// Some metatypes get bonuses
-	const metatype = char.identity.metatype.toLowerCase();
-	if (metatype.includes('elf')) return 1;
-	if (metatype.includes('centaur')) return 2;
-	return 0;
+	return calculateMovement(char).run;
 }
 
 /* ============================================
  * Limits (SR4A optional rule / SR5 equivalent)
+ * SR5-style display values — no SR4 improvement wiring by design (issue #70):
+ * desktop SR4 has no physical/mental/social limit mechanic or matching
+ * improvement types to consult.
  * ============================================ */
 
 /** Calculate Physical Limit. */
@@ -203,51 +239,64 @@ export function calculateSocialLimit(char: Character): number {
 
 /** Find a skill by name. */
 function findSkill(char: Character, skillName: string): CharacterSkill | undefined {
-	return char.skills.find(
-		(s) => s.name.toLowerCase() === skillName.toLowerCase()
-	);
+	return char.skills.find((s) => s.name.toLowerCase() === skillName.toLowerCase());
 }
 
-/** Calculate dice pool for a skill + attribute test. */
+/**
+ * Calculate dice pool for a skill + attribute test.
+ * Skill/SkillGroup/SkillCategory improvements apply in two disjoint modes
+ * (desktop `ValueOf(type, blnAddToRating, improvedName)`): `addToRating`
+ * improvements raise the effective skill rating, everything else adds
+ * straight to the pool. `skill.bonus` is deprecated and no longer summed
+ * here — improvements are the sole source of skill bonuses now (issue #65).
+ * `defaultCategory` (issue #67): when the character lacks the skill, SR4
+ * forbids defaulting on Technical Active skills for Uneducated characters
+ * and Social Active skills for Uncouth characters — callers that know the
+ * skill's game-data category may pass it to enforce this; omitted, defaulting
+ * behaves as before (attribute - 1).
+ */
 export function calculateDicePool(
 	char: Character,
 	skillName: string,
-	attributeCode: 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil'
+	attributeCode: 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil',
+	defaultCategory?: SkillCategory
 ): number {
 	const skill = findSkill(char, skillName);
 	const attr = getAttributeTotal(char, attributeCode);
 
 	if (!skill) {
-		// Defaulting: attribute - 1 (if skill allows defaulting)
+		if (
+			(defaultCategory === 'Technical Active' && hasFlag(char.improvements, 'Uneducated')) ||
+			(defaultCategory === 'Social Active' && hasFlag(char.improvements, 'Uncouth'))
+		) {
+			return 0; // SR4 p.94-95: cannot default on these categories with the flag active
+		}
+		// Defaulting: attribute - 1. Improvements do not apply when a character
+		// lacks the skill entirely (documented divergence — see issue #65 risks).
 		return Math.max(0, attr - 1);
 	}
 
-	let pool = skill.rating + attr + skill.bonus;
+	const ratingBonus = skillPoolBonus(char.improvements, skill, true);
+	const poolBonus = skillPoolBonus(char.improvements, skill, false);
+	const effectiveRating = skill.rating + ratingBonus;
 
-	// Add wound modifier
-	pool += getWoundModifier(char);
-
-	return Math.max(0, pool);
+	return Math.max(0, effectiveRating + attr + poolBonus + getWoundModifier(char));
 }
 
-/** Calculate Composure test pool (CHA + WIL). */
 export function calculateComposure(char: Character): number {
-	return getAttributeTotal(char, 'cha') + getAttributeTotal(char, 'wil');
+	return getAttributeTotal(char, 'cha') + getAttributeTotal(char, 'wil') + valueOf(char.improvements, 'Composure');
 }
 
-/** Calculate Judge Intentions pool (CHA + INT). */
 export function calculateJudgeIntentions(char: Character): number {
-	return getAttributeTotal(char, 'cha') + getAttributeTotal(char, 'int');
+	return getAttributeTotal(char, 'cha') + getAttributeTotal(char, 'int') + valueOf(char.improvements, 'JudgeIntentions');
 }
 
-/** Calculate Memory test pool (LOG + WIL). */
 export function calculateMemory(char: Character): number {
-	return getAttributeTotal(char, 'log') + getAttributeTotal(char, 'wil');
+	return getAttributeTotal(char, 'log') + getAttributeTotal(char, 'wil') + valueOf(char.improvements, 'Memory');
 }
 
-/** Calculate Lift/Carry pool (BOD + STR). */
 export function calculateLiftCarry(char: Character): number {
-	return getAttributeTotal(char, 'bod') + getAttributeTotal(char, 'str');
+	return getAttributeTotal(char, 'bod') + getAttributeTotal(char, 'str') + valueOf(char.improvements, 'LiftAndCarry');
 }
 
 /* ============================================
@@ -283,6 +332,8 @@ export function calculateArmorBallistic(char: Character): number {
 		}
 	}
 
+	total += valueOf(char.improvements, 'BallisticArmor');
+
 	return total;
 }
 
@@ -302,7 +353,19 @@ export function calculateArmorImpact(char: Character): number {
 		}
 	}
 
+	total += valueOf(char.improvements, 'ImpactArmor');
+
 	return total;
+}
+
+/** SR4 ballistic damage soak: BOD + ballistic armor + DamageResistance improvements (e.g. Toughness). */
+export function calculateDamageSoakBallistic(char: Character): number {
+	return getAttributeTotal(char, 'bod') + calculateArmorBallistic(char) + valueOf(char.improvements, 'DamageResistance');
+}
+
+/** SR4 impact damage soak: BOD + impact armor + DamageResistance improvements (e.g. Toughness). */
+export function calculateDamageSoakImpact(char: Character): number {
+	return getAttributeTotal(char, 'bod') + calculateArmorImpact(char) + valueOf(char.improvements, 'DamageResistance');
 }
 
 /* ============================================
@@ -319,10 +382,10 @@ export function calculateDrainResist(char: Character): number {
 	const wil = getAttributeTotal(char, 'wil');
 
 	if (tradition.includes('hermetic') || tradition.includes('chaos')) {
-		return wil + getAttributeTotal(char, 'log');
+		return wil + getAttributeTotal(char, 'log') + valueOf(char.improvements, 'DrainResistance');
 	}
 	// Default to shamanic (WIL + CHA)
-	return wil + getAttributeTotal(char, 'cha');
+	return wil + getAttributeTotal(char, 'cha') + valueOf(char.improvements, 'DrainResistance');
 }
 
 /** Calculate Astral Initiative. */
@@ -347,19 +410,17 @@ export function calculateFadingResist(char: Character): number {
 	// Fading resistance is RES + WIL
 	const res = getResonanceTotal(char);
 	const wil = getAttributeTotal(char, 'wil');
-	return res + wil;
+	return res + wil + valueOf(char.improvements, 'FadingResistance');
 }
 
-/** Calculate Matrix Initiative (hot-sim). */
 export function calculateMatrixInitiative(char: Character): number {
 	const int = getAttributeTotal(char, 'int');
 	const res = getResonanceTotal(char);
-	return int + res;
+	return int + res + valueOf(char.improvements, 'MatrixInitiative');
 }
 
-/** Calculate Matrix Initiative Dice. */
-export function calculateMatrixInitiativeDice(): number {
-	return 3; // Hot-sim VR
+export function calculateMatrixInitiativeDice(char: Character): number {
+	return 3 + valueOf(char.improvements, 'MatrixInitiativePass') + valueOf(char.improvements, 'MatrixInitiativePassAdd'); // Hot-sim VR implies 3 base in many SR4 contexts, with improvements doing the rest
 }
 
 /* ============================================
@@ -375,12 +436,13 @@ export interface CharacterCalculations {
 
 	// Initiative
 	initiative: number;
-	initiativeBonus: number;
 	initiativeDice: number;
 
 	// Movement
 	walkSpeed: number;
 	runSpeed: number;
+	swimSpeed: number;
+	flySpeed: number;
 
 	// Limits
 	physicalLimit: number;
@@ -391,6 +453,8 @@ export interface CharacterCalculations {
 	defense: number;
 	armorBallistic: number;
 	armorImpact: number;
+	damageSoakBallistic: number;
+	damageSoakImpact: number;
 
 	// Special Attributes
 	composure: number;
@@ -409,18 +473,21 @@ export interface CharacterCalculations {
 
 /** Calculate all derived values for a character. */
 export function calculateAll(char: Character): CharacterCalculations {
+	const movement = calculateMovement(char);
+
 	return {
 		physicalCM: calculatePhysicalCM(char),
 		stunCM: calculateStunCM(char),
 		overflow: calculateOverflow(char),
 		woundModifier: getWoundModifier(char),
 
-		initiative: calculateInitiative(char) + calculateInitiativeBonus(char),
-		initiativeBonus: calculateInitiativeBonus(char),
+		initiative: calculateInitiative(char),
 		initiativeDice: calculateInitiativeDice(char),
 
-		walkSpeed: calculateWalkSpeed(char),
-		runSpeed: calculateRunSpeed(char),
+		walkSpeed: movement.walk,
+		runSpeed: movement.run,
+		swimSpeed: movement.swim,
+		flySpeed: movement.fly,
 
 		physicalLimit: calculatePhysicalLimit(char),
 		mentalLimit: calculateMentalLimit(char),
@@ -429,6 +496,8 @@ export function calculateAll(char: Character): CharacterCalculations {
 		defense: calculateDefense(char),
 		armorBallistic: calculateArmorBallistic(char),
 		armorImpact: calculateArmorImpact(char),
+		damageSoakBallistic: calculateDamageSoakBallistic(char),
+		damageSoakImpact: calculateDamageSoakImpact(char),
 
 		composure: calculateComposure(char),
 		judgeIntentions: calculateJudgeIntentions(char),

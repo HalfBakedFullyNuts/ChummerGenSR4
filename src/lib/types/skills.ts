@@ -71,8 +71,13 @@ export interface CharacterSkill {
 	readonly name: string;
 	readonly rating: number;
 	readonly specialization: string | null;
+	/** @deprecated display-only; dice pools use Skill/SkillGroup/SkillCategory improvements instead (issue #65). */
 	readonly bonus: number;
 	readonly karmaSpent: number;
+	/** Denormalized from SkillDefinition at set-time — dice pools need it without a gamedata lookup. Optional: pre-#65 saves lack it until backfilled. */
+	readonly category?: SkillCategory;
+	/** Denormalized skill group name ('' = none). */
+	readonly group?: string;
 }
 
 /**
@@ -147,10 +152,7 @@ export function calculateSkillPool(
  * Check if skill can default (use without training).
  * Returns attribute - 1 if defaultable, 0 otherwise.
  */
-export function calculateDefaultPool(
-	canDefault: boolean,
-	attributeValue: number
-): number {
+export function calculateDefaultPool(canDefault: boolean, attributeValue: number): number {
 	if (!canDefault) {
 		return 0;
 	}

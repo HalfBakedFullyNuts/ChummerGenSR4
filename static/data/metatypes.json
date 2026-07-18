@@ -547,7 +547,10 @@
             "negative": []
           },
           "source": "RC",
-          "page": 55
+          "page": 55,
+          "bonus": {
+            "reach": 1
+          }
         },
         {
           "name": "Fomori",
@@ -557,7 +560,10 @@
             "negative": []
           },
           "source": "RC",
-          "page": 55
+          "page": 55,
+          "bonus": {
+            "reach": 1
+          }
         },
         {
           "name": "Giant",
@@ -567,7 +573,10 @@
             "negative": []
           },
           "source": "RC",
-          "page": 56
+          "page": 56,
+          "bonus": {
+            "reach": 1
+          }
         },
         {
           "name": "Minotaur",
@@ -577,9 +586,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 57
+          "page": 57,
+          "bonus": {
+            "reach": 1
+          }
         }
-      ]
+      ],
+      "bonus": {
+        "armor": {
+          "b": 1,
+          "i": 1
+        },
+        "reach": 1
+      }
     },
     {
       "name": "Centaur",
@@ -659,7 +678,21 @@
       },
       "source": "RC",
       "page": 84,
-      "metavariants": []
+      "metavariants": [],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter",
+        "lifestylecost": 50,
+        "reach": 1
+      }
     },
     {
       "name": "Naga",
@@ -739,7 +772,20 @@
       },
       "source": "RC",
       "page": 84,
-      "metavariants": []
+      "metavariants": [],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter",
+        "lifestylecost": 50
+      }
     },
     {
       "name": "Pixie",
@@ -819,7 +865,20 @@
       },
       "source": "RC",
       "page": 84,
-      "metavariants": []
+      "metavariants": [],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter",
+        "lifestylecost": 50
+      }
     },
     {
       "name": "Sasquatch",
@@ -899,7 +958,21 @@
       },
       "source": "RC",
       "page": 84,
-      "metavariants": []
+      "metavariants": [],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter",
+        "lifestylecost": 50,
+        "reach": 1
+      }
     },
     {
       "name": "Fox Shapeshifter",
@@ -988,7 +1061,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": -1
+          }
         },
         {
           "name": "Dwarf",
@@ -998,7 +1084,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": -1
+          }
         },
         {
           "name": "Elf",
@@ -1008,7 +1107,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": -1
+          }
         },
         {
           "name": "Ork",
@@ -1018,7 +1130,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": -1
+          }
         },
         {
           "name": "Troll",
@@ -1028,9 +1153,35 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": -1
+          }
         }
-      ]
+      ],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter",
+        "reach": -1
+      }
     },
     {
       "name": "Wolf Shapeshifter",
@@ -1119,7 +1270,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Dwarf",
@@ -1129,7 +1292,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Elf",
@@ -1139,7 +1314,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Ork",
@@ -1149,7 +1336,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Troll",
@@ -1159,9 +1358,33 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         }
-      ]
+      ],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter"
+      }
     },
     {
       "name": "Eagle Shapeshifter",
@@ -1250,7 +1473,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Dwarf",
@@ -1260,7 +1495,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Elf",
@@ -1270,7 +1517,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Ork",
@@ -1280,7 +1539,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Troll",
@@ -1290,9 +1561,33 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         }
-      ]
+      ],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter"
+      }
     },
     {
       "name": "Leopard Shapeshifter",
@@ -1381,7 +1676,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Dwarf",
@@ -1391,7 +1698,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Elf",
@@ -1401,7 +1720,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Ork",
@@ -1411,7 +1742,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Troll",
@@ -1421,9 +1764,33 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         }
-      ]
+      ],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter"
+      }
     },
     {
       "name": "Jaguar Shapeshifter",
@@ -1512,7 +1879,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Dwarf",
@@ -1522,7 +1901,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Elf",
@@ -1532,7 +1923,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Ork",
@@ -1542,7 +1945,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Troll",
@@ -1552,9 +1967,33 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         }
-      ]
+      ],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter"
+      }
     },
     {
       "name": "Seal Shapeshifter",
@@ -1643,7 +2082,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Dwarf",
@@ -1653,7 +2104,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Elf",
@@ -1663,7 +2126,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Ork",
@@ -1673,7 +2148,19 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         },
         {
           "name": "Troll",
@@ -1683,9 +2170,33 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter"
+          }
         }
-      ]
+      ],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter"
+      }
     },
     {
       "name": "Tiger Shapeshifter",
@@ -1774,7 +2285,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Dwarf",
@@ -1784,7 +2308,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Elf",
@@ -1794,7 +2331,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Ork",
@@ -1804,7 +2354,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Troll",
@@ -1814,9 +2377,35 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         }
-      ]
+      ],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter",
+        "reach": 1
+      }
     },
     {
       "name": "Lion Shapeshifter",
@@ -1905,7 +2494,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Dwarf",
@@ -1915,7 +2517,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Elf",
@@ -1925,7 +2540,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Ork",
@@ -1935,7 +2563,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Troll",
@@ -1945,9 +2586,35 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         }
-      ]
+      ],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter",
+        "reach": 1
+      }
     },
     {
       "name": "Bear Shapeshifter",
@@ -2036,7 +2703,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Dwarf",
@@ -2046,7 +2726,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Elf",
@@ -2056,7 +2749,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Ork",
@@ -2066,7 +2772,20 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         },
         {
           "name": "Troll",
@@ -2076,9 +2795,35 @@
             "negative": []
           },
           "source": "RC",
-          "page": 87
+          "page": 87,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 1
+          }
         }
-      ]
+      ],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter",
+        "reach": 1
+      }
     },
     {
       "name": "Free Spirit",
@@ -2158,7 +2903,26 @@
       },
       "source": "RC",
       "page": 91,
-      "metavariants": []
+      "metavariants": [],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 2,
+            "max": 6,
+            "aug": 6,
+            "val": 2
+          }
+        ],
+        "basiclifestylecost": -10,
+        "enabletab": {
+          "name": [
+            "critter",
+            "magician"
+          ]
+        },
+        "initiativepass": 1
+      }
     },
     {
       "name": "A.I.",
@@ -2327,7 +3091,20 @@
             "negative": []
           },
           "source": "CI",
-          "page": 102
+          "page": 102,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 2
+          }
         },
         {
           "name": "Dwarf",
@@ -2337,7 +3114,20 @@
             "negative": []
           },
           "source": "CI",
-          "page": 102
+          "page": 102,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 2
+          }
         },
         {
           "name": "Elf",
@@ -2347,7 +3137,20 @@
             "negative": []
           },
           "source": "CI",
-          "page": 102
+          "page": 102,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 2
+          }
         },
         {
           "name": "Ork",
@@ -2357,7 +3160,20 @@
             "negative": []
           },
           "source": "CI",
-          "page": 102
+          "page": 102,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": -1
+          }
         },
         {
           "name": "Troll",
@@ -2367,9 +3183,35 @@
             "negative": []
           },
           "source": "CI",
-          "page": 102
+          "page": 102,
+          "bonus": {
+            "addattribute": [
+              {
+                "name": "MAG",
+                "min": 1,
+                "max": 6,
+                "aug": 6,
+                "val": 1
+              }
+            ],
+            "enabletab": "critter",
+            "reach": 2
+          }
         }
-      ]
+      ],
+      "bonus": {
+        "addattribute": [
+          {
+            "name": "MAG",
+            "min": 1,
+            "max": 6,
+            "aug": 6,
+            "val": 1
+          }
+        ],
+        "enabletab": "critter",
+        "reach": 2
+      }
     }
   ]
 }

@@ -5,6 +5,7 @@
  */
 
 import type { Character } from '$types';
+import { hasFlag } from '../engine/improvementManager';
 
 /**
  * Export a character to Chummer XML format.
@@ -22,7 +23,7 @@ export function exportToChummer(character: Character): string {
 	lines.push(`\t<metatypebp>${character.buildPointsSpent.metatype}</metatypebp>`);
 	lines.push(`\t<metavariant>${escapeXml(character.identity.metavariant || '')}</metavariant>`);
 	lines.push(`\t<metatypecategory />`);
-	lines.push(`\t<movement>10/25, Swim 5</movement>`);
+	lines.push(`\t<movement>${escapeXml(character.identity.movement)}</movement>`);
 	lines.push(`\t<mutantcritterbaseskills>0</mutantcritterbaseskills>`);
 
 	/* Identity */
@@ -63,14 +64,18 @@ export function exportToChummer(character: Character): string {
 	/* Magic Flags */
 	const hasMagic = character.magic !== null;
 	const hasResonance = character.resonance !== null;
-	lines.push(`\t<adept>${hasMagic && character.qualities.some((q) => q.name === 'Adept') ? 'True' : 'False'}</adept>`);
-	lines.push(`\t<magician>${hasMagic && character.qualities.some((q) => q.name === 'Magician') ? 'True' : 'False'}</magician>`);
+	lines.push(
+		`\t<adept>${hasMagic && character.qualities.some((q) => q.name === 'Adept') ? 'True' : 'False'}</adept>`
+	);
+	lines.push(
+		`\t<magician>${hasMagic && character.qualities.some((q) => q.name === 'Magician') ? 'True' : 'False'}</magician>`
+	);
 	lines.push(`\t<technomancer>${hasResonance ? 'True' : 'False'}</technomancer>`);
 	lines.push(`\t<initiationoverride>False</initiationoverride>`);
 	lines.push(`\t<critter>False</critter>`);
-	lines.push(`\t<uneducated>False</uneducated>`);
-	lines.push(`\t<uncouth>False</uncouth>`);
-	lines.push(`\t<infirm>False</infirm>`);
+	lines.push(`\t<uneducated>${hasFlag(character.improvements, 'Uneducated') ? 'True' : 'False'}</uneducated>`);
+	lines.push(`\t<uncouth>${hasFlag(character.improvements, 'Uncouth') ? 'True' : 'False'}</uncouth>`);
+	lines.push(`\t<infirm>${hasFlag(character.improvements, 'Infirm') ? 'True' : 'False'}</infirm>`);
 
 	/* Attributes */
 	lines.push(`\t<attributes>`);
@@ -137,7 +142,8 @@ export function exportToChummer(character: Character): string {
 	/* Knowledge Skills */
 	for (const skill of character.knowledgeSkills) {
 		/* Derive attribute from category */
-		const attribute = skill.category === 'Academic' || skill.category === 'Professional' ? 'LOG' : 'INT';
+		const attribute =
+			skill.category === 'Academic' || skill.category === 'Professional' ? 'LOG' : 'INT';
 		lines.push(`\t\t<skill>`);
 		lines.push(`\t\t\t<name>${escapeXml(skill.name)}</name>`);
 		lines.push(`\t\t\t<skillgroup />`);
@@ -235,29 +241,7 @@ export function exportToChummer(character: Character): string {
 	/* Cyberware */
 	lines.push(`\t<cyberwares>`);
 	for (const cyber of character.equipment.cyberware) {
-		lines.push(`\t\t<cyberware>`);
-		lines.push(`\t\t\t<guid>${generateGuid()}</guid>`);
-		lines.push(`\t\t\t<name>${escapeXml(cyber.name)}</name>`);
-		lines.push(`\t\t\t<category>${escapeXml(cyber.category)}</category>`);
-		lines.push(`\t\t\t<limbslot />`);
-		lines.push(`\t\t\t<ess>${cyber.essence}</ess>`);
-		lines.push(`\t\t\t<capacity>${cyber.capacity}</capacity>`);
-		lines.push(`\t\t\t<avail>0</avail>`);
-		lines.push(`\t\t\t<cost>${cyber.cost}</cost>`);
-		lines.push(`\t\t\t<source>SR4</source>`);
-		lines.push(`\t\t\t<page />`);
-		lines.push(`\t\t\t<rating>${cyber.rating}</rating>`);
-		lines.push(`\t\t\t<minrating>0</minrating>`);
-		lines.push(`\t\t\t<maxrating>0</maxrating>`);
-		lines.push(`\t\t\t<subsystems />`);
-		lines.push(`\t\t\t<grade>${escapeXml(cyber.grade)}</grade>`);
-		lines.push(`\t\t\t<location>${escapeXml(cyber.location)}</location>`);
-		lines.push(`\t\t\t<suite>False</suite>`);
-		lines.push(`\t\t\t<bonus />`);
-		lines.push(`\t\t\t<improvementsource>Cyberware</improvementsource>`);
-		lines.push(`\t\t\t<children />`);
-		lines.push(`\t\t\t<notes>${escapeXml(cyber.notes)}</notes>`);
-		lines.push(`\t\t</cyberware>`);
+		exportCyberware(lines, cyber, '\t\t');
 	}
 	lines.push(`\t</cyberwares>`);
 
@@ -307,20 +291,7 @@ export function exportToChummer(character: Character): string {
 	/* Gear */
 	lines.push(`\t<gears>`);
 	for (const gear of character.equipment.gear) {
-		lines.push(`\t\t<gear>`);
-		lines.push(`\t\t\t<guid>${generateGuid()}</guid>`);
-		lines.push(`\t\t\t<name>${escapeXml(gear.name)}</name>`);
-		lines.push(`\t\t\t<category>${escapeXml(gear.category)}</category>`);
-		lines.push(`\t\t\t<rating>${gear.rating}</rating>`);
-		lines.push(`\t\t\t<qty>${gear.quantity}</qty>`);
-		lines.push(`\t\t\t<avail>0</avail>`);
-		lines.push(`\t\t\t<cost>${gear.cost}</cost>`);
-		lines.push(`\t\t\t<source>SR4</source>`);
-		lines.push(`\t\t\t<page />`);
-		lines.push(`\t\t\t<location>${escapeXml(gear.location)}</location>`);
-		lines.push(`\t\t\t<children />`);
-		lines.push(`\t\t\t<notes>${escapeXml(gear.notes)}</notes>`);
-		lines.push(`\t\t</gear>`);
+		exportGear(lines, gear, '\t\t');
 	}
 	lines.push(`\t</gears>`);
 
@@ -389,6 +360,77 @@ export function exportToChummer(character: Character): string {
 	lines.push(`</character>`);
 
 	return lines.join('\n');
+}
+
+import type { CharacterCyberware, CharacterGear } from '$types';
+
+/**
+ * Recursively export cyberware.
+ */
+function exportCyberware(lines: string[], cyber: CharacterCyberware, indent: string): void {
+	lines.push(`${indent}<cyberware>`);
+	lines.push(`${indent}\t<guid>${generateGuid()}</guid>`);
+	lines.push(`${indent}\t<name>${escapeXml(cyber.name)}</name>`);
+	lines.push(`${indent}\t<category>${escapeXml(cyber.category)}</category>`);
+	lines.push(`${indent}\t<limbslot />`);
+	lines.push(`${indent}\t<ess>${cyber.essence}</ess>`);
+	lines.push(`${indent}\t<capacity>${cyber.capacity}</capacity>`);
+	lines.push(`${indent}\t<avail>0</avail>`);
+	lines.push(`${indent}\t<cost>${cyber.cost}</cost>`);
+	lines.push(`${indent}\t<source>SR4</source>`);
+	lines.push(`${indent}\t<page />`);
+	lines.push(`${indent}\t<rating>${cyber.rating}</rating>`);
+	lines.push(`${indent}\t<minrating>0</minrating>`);
+	lines.push(`${indent}\t<maxrating>0</maxrating>`);
+	lines.push(`${indent}\t<subsystems />`);
+	lines.push(`${indent}\t<grade>${escapeXml(cyber.grade)}</grade>`);
+	lines.push(`${indent}\t<location>${escapeXml(cyber.location)}</location>`);
+	lines.push(`${indent}\t<suite>False</suite>`);
+	lines.push(`${indent}\t<bonus />`);
+	lines.push(`${indent}\t<improvementsource>Cyberware</improvementsource>`);
+
+	if (cyber.children && cyber.children.length > 0) {
+		lines.push(`${indent}\t<children>`);
+		for (const child of cyber.children) {
+			exportCyberware(lines, child, `${indent}\t\t`);
+		}
+		lines.push(`${indent}\t</children>`);
+	} else {
+		lines.push(`${indent}\t<children />`);
+	}
+
+	lines.push(`${indent}\t<notes>${escapeXml(cyber.notes)}</notes>`);
+	lines.push(`${indent}</cyberware>`);
+}
+
+/**
+ * Recursively export gear.
+ */
+function exportGear(lines: string[], gear: CharacterGear, indent: string): void {
+	lines.push(`${indent}<gear>`);
+	lines.push(`${indent}\t<guid>${generateGuid()}</guid>`);
+	lines.push(`${indent}\t<name>${escapeXml(gear.name)}</name>`);
+	lines.push(`${indent}\t<category>${escapeXml(gear.category)}</category>`);
+	lines.push(`${indent}\t<rating>${gear.rating}</rating>`);
+	lines.push(`${indent}\t<qty>${gear.quantity}</qty>`);
+	lines.push(`${indent}\t<avail>0</avail>`);
+	lines.push(`${indent}\t<cost>${gear.cost}</cost>`);
+	lines.push(`${indent}\t<source>SR4</source>`);
+	lines.push(`${indent}\t<page />`);
+	lines.push(`${indent}\t<location>${escapeXml(gear.location)}</location>`);
+
+	if (gear.children && gear.children.length > 0) {
+		lines.push(`${indent}\t<children>`);
+		for (const child of gear.children) {
+			exportGear(lines, child, `${indent}\t\t`);
+		}
+		lines.push(`${indent}\t</children>`);
+	} else {
+		lines.push(`${indent}\t<children />`);
+	}
+
+	lines.push(`${indent}\t<notes>${escapeXml(gear.notes)}</notes>`);
+	lines.push(`${indent}</gear>`);
 }
 
 /**

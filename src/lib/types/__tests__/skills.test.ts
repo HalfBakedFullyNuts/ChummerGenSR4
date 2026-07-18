@@ -5,11 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-	calculateSkillBpCost,
-	MAX_SKILL_RATING_CREATION,
-	MAX_SKILL_GROUP_RATING
-} from '../skills';
+import { calculateSkillBpCost, MAX_SKILL_RATING_CREATION, MAX_SKILL_GROUP_RATING } from '../skills';
 
 describe('Skill BP Costs', () => {
 	/**

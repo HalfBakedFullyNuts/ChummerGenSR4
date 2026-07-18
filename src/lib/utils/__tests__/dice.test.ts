@@ -437,8 +437,8 @@ describe('Dice Rolling Utilities', () => {
 
 		it('should reduce initiative by 10 for each subsequent pass', () => {
 			expect(getInitiativeForPass(25, 2)).toBe(15); // 25 - 10
-			expect(getInitiativeForPass(25, 3)).toBe(5);  // 25 - 20
-			expect(getInitiativeForPass(35, 4)).toBe(5);  // 35 - 30
+			expect(getInitiativeForPass(25, 3)).toBe(5); // 25 - 20
+			expect(getInitiativeForPass(35, 4)).toBe(5); // 35 - 30
 		});
 
 		it('should return 0 when initiative is too low for pass', () => {
@@ -553,7 +553,7 @@ describe('Dice Rolling Utilities', () => {
 		it('should parse multiple modes', () => {
 			const modes = parseFireModes('SA/BF/FA');
 			expect(modes).toHaveLength(3);
-			expect(modes.map(m => m.code)).toEqual(['SA', 'BF', 'FA']);
+			expect(modes.map((m) => m.code)).toEqual(['SA', 'BF', 'FA']);
 		});
 
 		it('should return empty for invalid modes', () => {
@@ -619,9 +619,7 @@ describe('Armor Stacking', () => {
 		});
 
 		it('should return zeros for no equipped armor', () => {
-			const armor = [
-				{ name: 'Jacket', ballistic: 8, impact: 6, equipped: false }
-			];
+			const armor = [{ name: 'Jacket', ballistic: 8, impact: 6, equipped: false }];
 			const result = calculateArmorStacking(armor, 5);
 			expect(result.ballistic).toBe(0);
 			expect(result.impact).toBe(0);
@@ -629,9 +627,7 @@ describe('Armor Stacking', () => {
 		});
 
 		it('should use single armor values directly', () => {
-			const armor = [
-				{ name: 'Armor Jacket', ballistic: 8, impact: 6, equipped: true }
-			];
+			const armor = [{ name: 'Armor Jacket', ballistic: 8, impact: 6, equipped: true }];
 			const result = calculateArmorStacking(armor, 5);
 			expect(result.ballistic).toBe(8);
 			expect(result.impact).toBe(6);
@@ -666,27 +662,21 @@ describe('Armor Stacking', () => {
 		});
 
 		it('should calculate encumbrance penalty when armor exceeds Body', () => {
-			const armor = [
-				{ name: 'Armor Jacket', ballistic: 8, impact: 6, equipped: true }
-			];
+			const armor = [{ name: 'Armor Jacket', ballistic: 8, impact: 6, equipped: true }];
 			// Body 5, armor 8 = -3 penalty
 			const result = calculateArmorStacking(armor, 5);
 			expect(result.encumbrancePenalty).toBe(-3);
 		});
 
 		it('should have no encumbrance when armor equals Body', () => {
-			const armor = [
-				{ name: 'Armor Jacket', ballistic: 5, impact: 4, equipped: true }
-			];
+			const armor = [{ name: 'Armor Jacket', ballistic: 5, impact: 4, equipped: true }];
 			// Body 5, armor 5 = no penalty
 			const result = calculateArmorStacking(armor, 5);
 			expect(result.encumbrancePenalty).toBe(0);
 		});
 
 		it('should have no encumbrance when armor is below Body', () => {
-			const armor = [
-				{ name: 'Light Armor', ballistic: 3, impact: 2, equipped: true }
-			];
+			const armor = [{ name: 'Light Armor', ballistic: 3, impact: 2, equipped: true }];
 			// Body 5, armor 3 = no penalty
 			const result = calculateArmorStacking(armor, 5);
 			expect(result.encumbrancePenalty).toBe(0);
@@ -1474,38 +1464,26 @@ describe('Initiative Modifiers', () => {
 		});
 
 		it('should calculate Wired Reflexes 1 bonus', () => {
-			const result = calculateInitiativeModifiers(
-				[{ name: 'Wired Reflexes 1', rating: 1 }],
-				[]
-			);
+			const result = calculateInitiativeModifiers([{ name: 'Wired Reflexes 1', rating: 1 }], []);
 			expect(result.initiativeBonus).toBe(1);
 			expect(result.initiativeDice).toBe(1);
 			expect(result.sources).toHaveLength(1);
 		});
 
 		it('should calculate Wired Reflexes 2 bonus', () => {
-			const result = calculateInitiativeModifiers(
-				[{ name: 'Wired Reflexes 2', rating: 2 }],
-				[]
-			);
+			const result = calculateInitiativeModifiers([{ name: 'Wired Reflexes 2', rating: 2 }], []);
 			expect(result.initiativeBonus).toBe(2);
 			expect(result.initiativeDice).toBe(2);
 		});
 
 		it('should calculate Wired Reflexes 3 bonus', () => {
-			const result = calculateInitiativeModifiers(
-				[{ name: 'Wired Reflexes 3', rating: 3 }],
-				[]
-			);
+			const result = calculateInitiativeModifiers([{ name: 'Wired Reflexes 3', rating: 3 }], []);
 			expect(result.initiativeBonus).toBe(3);
 			expect(result.initiativeDice).toBe(3);
 		});
 
 		it('should calculate Synaptic Booster bonus', () => {
-			const result = calculateInitiativeModifiers(
-				[{ name: 'Synaptic Booster 2', rating: 2 }],
-				[]
-			);
+			const result = calculateInitiativeModifiers([{ name: 'Synaptic Booster 2', rating: 2 }], []);
 			expect(result.initiativeBonus).toBe(2);
 			expect(result.initiativeDice).toBe(2);
 		});
@@ -1520,19 +1498,13 @@ describe('Initiative Modifiers', () => {
 		});
 
 		it('should calculate Boosted Reflexes (only dice)', () => {
-			const result = calculateInitiativeModifiers(
-				[{ name: 'Boosted Reflexes', rating: 1 }],
-				[]
-			);
+			const result = calculateInitiativeModifiers([{ name: 'Boosted Reflexes', rating: 1 }], []);
 			expect(result.initiativeBonus).toBe(0);
 			expect(result.initiativeDice).toBe(1);
 		});
 
 		it('should calculate Improved Reflexes adept power', () => {
-			const result = calculateInitiativeModifiers(
-				[],
-				[{ name: 'Improved Reflexes 2', rating: 2 }]
-			);
+			const result = calculateInitiativeModifiers([], [{ name: 'Improved Reflexes 2', rating: 2 }]);
 			expect(result.initiativeBonus).toBe(2);
 			expect(result.initiativeDice).toBe(2);
 		});
@@ -1553,10 +1525,7 @@ describe('Initiative Modifiers', () => {
 		});
 
 		it('should handle case-insensitive matching', () => {
-			const result = calculateInitiativeModifiers(
-				[{ name: 'WIRED REFLEXES 1', rating: 1 }],
-				[]
-			);
+			const result = calculateInitiativeModifiers([{ name: 'WIRED REFLEXES 1', rating: 1 }], []);
 			expect(result.initiativeBonus).toBe(1);
 			expect(result.initiativeDice).toBe(1);
 		});

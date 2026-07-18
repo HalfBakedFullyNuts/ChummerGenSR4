@@ -53,26 +53,40 @@
 	/** Get loyalty description. */
 	function getLoyaltyDesc(loyalty: number): string {
 		switch (loyalty) {
-			case 1: return 'Just Biz';
-			case 2: return 'Regular';
-			case 3: return 'Reliable';
-			case 4: return 'Loyal';
-			case 5: return 'Friend';
-			case 6: return 'Blood';
-			default: return '';
+			case 1:
+				return 'Just Biz';
+			case 2:
+				return 'Regular';
+			case 3:
+				return 'Reliable';
+			case 4:
+				return 'Loyal';
+			case 5:
+				return 'Friend';
+			case 6:
+				return 'Blood';
+			default:
+				return '';
 		}
 	}
 
 	/** Get connection description. */
 	function getConnectionDesc(connection: number): string {
 		switch (connection) {
-			case 1: return 'Limited';
-			case 2: return 'Minor';
-			case 3: return 'Average';
-			case 4: return 'Significant';
-			case 5: return 'Major';
-			case 6: return 'Powerful';
-			default: return '';
+			case 1:
+				return 'Limited';
+			case 2:
+				return 'Minor';
+			case 3:
+				return 'Average';
+			case 4:
+				return 'Significant';
+			case 5:
+				return 'Major';
+			case 6:
+				return 'Powerful';
+			default:
+				return '';
 		}
 	}
 
@@ -101,7 +115,8 @@
 			<div>
 				<label for="contact-name" class="block text-text-secondary text-sm mb-1">Name</label>
 				<input
-					id="contact-name" type="text"
+					id="contact-name"
+					type="text"
 					placeholder="Contact name..."
 					class="cw-input w-full"
 					bind:value={newName}
@@ -126,7 +141,8 @@
 				</label>
 				<div class="flex items-center gap-2">
 					<input
-						id="contact-loyalty" type="range"
+						id="contact-loyalty"
+						type="range"
 						min="1"
 						max="6"
 						class="flex-1"
@@ -144,7 +160,8 @@
 				</label>
 				<div class="flex items-center gap-2">
 					<input
-						id="contact-connection" type="range"
+						id="contact-connection"
+						type="range"
 						min="1"
 						max="6"
 						class="flex-1"
@@ -157,13 +174,10 @@
 
 		<div class="flex items-center justify-between">
 			<span class="text-text-muted text-sm">
-				Cost: <span class="text-primary-dark font-mono">{contactBP(newLoyalty, newConnection)}</span> BP
+				Cost: <span class="text-primary-dark font-mono">{contactBP(newLoyalty, newConnection)}</span
+				> BP
 			</span>
-			<button
-				class="cw-btn cw-btn-primary"
-				on:click={handleAddContact}
-				disabled={!newName.trim()}
-			>
+			<button class="cw-btn cw-btn-primary" on:click={handleAddContact} disabled={!newName.trim()}>
 				Add Contact
 			</button>
 		</div>
@@ -184,8 +198,8 @@
 								<span class="cw-badge cw-badge-ghost text-xs">{contact.type}</span>
 							</div>
 							<div class="text-text-muted text-xs mt-1">
-								Loyalty {contact.loyalty} ({getLoyaltyDesc(contact.loyalty)}) •
-								Connection {contact.connection} ({getConnectionDesc(contact.connection)})
+								Loyalty {contact.loyalty} ({getLoyaltyDesc(contact.loyalty)}) • Connection {contact.connection}
+								({getConnectionDesc(contact.connection)})
 							</div>
 						</div>
 

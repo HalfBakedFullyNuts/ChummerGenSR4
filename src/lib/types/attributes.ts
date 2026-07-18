@@ -7,9 +7,19 @@
 
 /** Attribute codes used throughout the system. */
 export type AttributeCode =
-	| 'bod' | 'agi' | 'rea' | 'str'
-	| 'cha' | 'int' | 'log' | 'wil'
-	| 'edg' | 'mag' | 'res' | 'ess' | 'ini';
+	| 'bod'
+	| 'agi'
+	| 'rea'
+	| 'str'
+	| 'cha'
+	| 'int'
+	| 'log'
+	| 'wil'
+	| 'edg'
+	| 'mag'
+	| 'res'
+	| 'ess'
+	| 'ini';
 
 /** Physical attributes (affected by cyberware/bioware). */
 export type PhysicalAttribute = 'bod' | 'agi' | 'rea' | 'str';
@@ -131,10 +141,7 @@ export function calculateAttributeTotal(value: AttributeValue): number {
  * Check if attribute is within metatype limits.
  * Returns true if value is between min and max.
  */
-export function isAttributeValid(
-	value: AttributeValue,
-	limits: AttributeLimits
-): boolean {
+export function isAttributeValid(value: AttributeValue, limits: AttributeLimits): boolean {
 	const total = calculateAttributeTotal(value);
 	/* Assert: limits should have min <= max */
 	if (limits.min > limits.max) {

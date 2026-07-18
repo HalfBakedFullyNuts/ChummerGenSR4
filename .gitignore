@@ -36,3 +36,13 @@ npm-debug.log*
 
 # Stale build artifacts
 chummer-web/
+
+# Stray local check/debug output (never commit these)
+nul
+check_output*
+svelte_check*.txt
+*_errors.txt
+
+# Local scratch dirs / nested git worktrees (never commit these)
+tmp/
+.claude/worktrees/

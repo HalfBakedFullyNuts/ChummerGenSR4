@@ -98,10 +98,18 @@
       "ess": 0.3,
       "capacity": "0",
       "avail": "8",
-      "cost": null,
+      "cost": 3000,
       "rating": 3,
       "source": "AU",
-      "page": 36
+      "page": 36,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Perception",
+            "bonus": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Commlink",
@@ -178,7 +186,10 @@
       "cost": 500,
       "rating": 0,
       "source": "SR4",
-      "page": 339
+      "page": 339,
+      "bonus": {
+        "skillsoftaccess": true
+      }
     },
     {
       "name": "Data Lock",
@@ -200,7 +211,15 @@
       "cost": 30000,
       "rating": 0,
       "source": "AU",
-      "page": 36
+      "page": 36,
+      "bonus": {
+        "skillattribute": {
+          "name": [
+            "LOG"
+          ],
+          "bonus": 1
+        }
+      }
     },
     {
       "name": "Encephalon Rating 2",
@@ -211,7 +230,25 @@
       "cost": 75000,
       "rating": 0,
       "source": "AU",
-      "page": 36
+      "page": 36,
+      "bonus": {
+        "skillattribute": {
+          "name": [
+            "LOG"
+          ],
+          "bonus": 1
+        },
+        "skillgroup": [
+          {
+            "name": "Cracking",
+            "bonus": 1
+          },
+          {
+            "name": "Electronics",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Invoked Memory Stimulator",
@@ -241,7 +278,7 @@
       "ess": 0.2,
       "capacity": "[2]",
       "avail": "Rating * 4",
-      "cost": null,
+      "cost": 1000,
       "rating": 6,
       "source": "SR4",
       "page": 339
@@ -255,7 +292,15 @@
       "cost": 1250,
       "rating": 0,
       "source": "AU",
-      "page": 36
+      "page": 36,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Navigation",
+            "bonus": 2
+          }
+        ]
+      }
     },
     {
       "name": "Radar Sensor",
@@ -263,7 +308,7 @@
       "ess": 0.3,
       "capacity": "[2]",
       "avail": "12",
-      "cost": null,
+      "cost": 3000,
       "rating": 4,
       "source": "AU",
       "page": 36
@@ -277,7 +322,11 @@
       "cost": 2000,
       "rating": 0,
       "source": "SR4",
-      "page": 339
+      "page": 339,
+      "bonus": {
+        "matrixinitiativepass": 1,
+        "skillsoftaccess": true
+      }
     },
     {
       "name": "Sim Module (Hot-Sim Modified)",
@@ -288,7 +337,11 @@
       "cost": 5000,
       "rating": 0,
       "source": "SR4",
-      "page": 339
+      "page": 339,
+      "bonus": {
+        "matrixinitiativepass": 2,
+        "skillsoftaccess": true
+      }
     },
     {
       "name": "Simsense Booster",
@@ -299,7 +352,10 @@
       "cost": 65000,
       "rating": 0,
       "source": "AU",
-      "page": 37
+      "page": 37,
+      "bonus": {
+        "matrixinitiativepassadd": 1
+      }
     },
     {
       "name": "Taste Booster",
@@ -307,7 +363,7 @@
       "ess": 0.2,
       "capacity": "0",
       "avail": "Rating * 4",
-      "cost": null,
+      "cost": 1500,
       "rating": 6,
       "source": "SR4",
       "page": 339
@@ -373,7 +429,7 @@
       "ess": 0,
       "capacity": "0",
       "avail": "(Rating * 3)F",
-      "cost": null,
+      "cost": 5000,
       "rating": 6,
       "source": "SR4",
       "page": 339
@@ -381,13 +437,19 @@
     {
       "name": "Cybereyes Basic System",
       "category": "Eyeware",
-      "ess": null,
+      "ess": 0.1,
       "capacity": "(Rating * 4)",
       "avail": "FixedValues(0,4,6,8)",
-      "cost": null,
+      "cost": 500,
       "rating": 4,
       "source": "SR4",
-      "page": 340
+      "page": 340,
+      "costByRating": [
+        500,
+        750,
+        1000,
+        1500
+      ]
     },
     {
       "name": "Eye Laser Designator",
@@ -406,7 +468,7 @@
       "ess": 0,
       "capacity": "[0]",
       "avail": "12R",
-      "cost": null,
+      "cost": 500,
       "rating": 3,
       "source": "AU",
       "page": 39
@@ -469,13 +531,18 @@
     {
       "name": "Eyeband",
       "category": "Eyeware",
-      "ess": null,
+      "ess": 0.1,
       "capacity": "FixedValues(6,8,12)",
       "avail": "(Rating * 2) + 2",
-      "cost": null,
+      "cost": 800,
       "rating": 3,
       "source": "AU",
-      "page": 37
+      "page": 37,
+      "costByRating": [
+        800,
+        1000,
+        1250
+      ]
     },
     {
       "name": "Flare Compensation",
@@ -549,7 +616,7 @@
       "ess": 0.1,
       "capacity": "[1]",
       "avail": "16F",
-      "cost": null,
+      "cost": 15000,
       "rating": 6,
       "source": "SR4",
       "page": 340
@@ -557,13 +624,22 @@
     {
       "name": "Single Cybereye",
       "category": "Eyeware",
-      "ess": null,
+      "ess": 0.05,
       "capacity": "Rating * 2/[Rating]",
       "avail": "FixedValues(0,4,6,8)",
-      "cost": null,
+      "cost": 300,
       "rating": 4,
       "source": "AU",
-      "page": 38
+      "page": 38,
+      "costByRating": [
+        300,
+        450,
+        600,
+        900
+      ],
+      "bonus": {
+        "selectside": true
+      }
     },
     {
       "name": "Smartlink",
@@ -574,7 +650,10 @@
       "cost": 1000,
       "rating": 0,
       "source": "SR4",
-      "page": 340
+      "page": 340,
+      "bonus": {
+        "smartlink": true
+      }
     },
     {
       "name": "Thermographic Vision",
@@ -593,7 +672,7 @@
       "ess": 0.1,
       "capacity": "[Rating]",
       "avail": "Rating * 3",
-      "cost": null,
+      "cost": 1500,
       "rating": 3,
       "source": "SR4",
       "page": 340
@@ -612,13 +691,19 @@
     {
       "name": "Cyberears",
       "category": "Earware",
-      "ess": null,
+      "ess": 0.1,
       "capacity": "Rating * 4",
       "avail": "FixedValues(0,4,6,8)",
-      "cost": null,
+      "cost": 500,
       "rating": 4,
       "source": "SR4",
-      "page": 341
+      "page": 341,
+      "costByRating": [
+        500,
+        750,
+        1000,
+        1500
+      ]
     },
     {
       "name": "Audio Enhancement",
@@ -626,7 +711,7 @@
       "ess": 0.1,
       "capacity": "[Rating]",
       "avail": "Rating * 3",
-      "cost": null,
+      "cost": 1500,
       "rating": 3,
       "source": "SR4",
       "page": 341
@@ -681,7 +766,7 @@
       "ess": 0.1,
       "capacity": "[Rating]",
       "avail": "Rating * 3",
-      "cost": null,
+      "cost": 1000,
       "rating": 6,
       "source": "SR4",
       "page": 341
@@ -711,7 +796,7 @@
     {
       "name": "Essence Hole",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 0.01,
       "capacity": "0",
       "avail": "0",
       "cost": 0,
@@ -725,7 +810,7 @@
       "ess": 0.05,
       "capacity": "[0]",
       "avail": "8",
-      "cost": null,
+      "cost": 100,
       "rating": 6,
       "source": "AU",
       "page": 39
@@ -736,7 +821,7 @@
       "ess": 0.1,
       "capacity": "[0]",
       "avail": "4",
-      "cost": null,
+      "cost": 100,
       "rating": 6,
       "source": "AU",
       "page": 39
@@ -783,7 +868,13 @@
       "cost": 15000,
       "rating": 0,
       "source": "SR4",
-      "page": 341
+      "page": 341,
+      "bonus": {
+        "armor": {
+          "i": 1
+        },
+        "damageresistance": 2
+      }
     },
     {
       "name": "Bone Lacing (Ceramic)",
@@ -794,7 +885,13 @@
       "cost": 22500,
       "rating": 0,
       "source": "AU",
-      "page": 39
+      "page": 39,
+      "bonus": {
+        "armor": {
+          "i": 2
+        },
+        "damageresistance": 2
+      }
     },
     {
       "name": "Bone Lacing (Kevlar)",
@@ -805,7 +902,13 @@
       "cost": 10000,
       "rating": 0,
       "source": "AU",
-      "page": 39
+      "page": 39,
+      "bonus": {
+        "armor": {
+          "b": 1
+        },
+        "damageresistance": 1
+      }
     },
     {
       "name": "Bone Lacing (Plastic)",
@@ -816,7 +919,10 @@
       "cost": 5000,
       "rating": 0,
       "source": "SR4",
-      "page": 341
+      "page": 341,
+      "bonus": {
+        "damageresistance": 1
+      }
     },
     {
       "name": "Bone Lacing (Titanium)",
@@ -827,7 +933,14 @@
       "cost": 40000,
       "rating": 0,
       "source": "SR4",
-      "page": 341
+      "page": 341,
+      "bonus": {
+        "armor": {
+          "b": 1,
+          "i": 1
+        },
+        "damageresistance": 3
+      }
     },
     {
       "name": "Cyber Safety",
@@ -849,29 +962,60 @@
       "cost": 3500,
       "rating": 0,
       "source": "AU",
-      "page": 39
+      "page": 39,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Swimming",
+            "bonus": 2
+          }
+        ],
+        "swimpercent": 50
+      }
     },
     {
       "name": "Dermal Plating",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 0.5,
       "capacity": "0",
       "avail": "(Rating * 5)R",
-      "cost": null,
+      "cost": 5000,
       "rating": 3,
       "source": "SR4",
-      "page": 342
+      "page": 342,
+      "bonus": {
+        "armor": {
+          "b": "Rating",
+          "i": "Rating"
+        }
+      }
     },
     {
       "name": "Dermal Sheath",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 0.6,
       "capacity": "0",
       "avail": "(Rating * 4) + 4",
-      "cost": null,
+      "cost": 10000,
       "rating": 3,
       "source": "AU",
-      "page": 40
+      "page": 40,
+      "essByRating": [
+        0.6,
+        1,
+        1.6
+      ],
+      "costByRating": [
+        10000,
+        20000,
+        40000
+      ],
+      "bonus": {
+        "armor": {
+          "b": "Rating",
+          "i": "Rating+1"
+        }
+      }
     },
     {
       "name": "Dermal Sheath, Ruthenium Polymer Coating",
@@ -915,7 +1059,15 @@
       "cost": 3500,
       "rating": 0,
       "source": "AU",
-      "page": 40
+      "page": 40,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Escape Artist",
+            "bonus": 2
+          }
+        ]
+      }
     },
     {
       "name": "Foot Anchor",
@@ -986,24 +1138,64 @@
     {
       "name": "Move-by-Wire System",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 2,
       "capacity": "0",
       "avail": "FixedValues(12R,18R,25R)",
-      "cost": null,
+      "cost": 50000,
       "rating": 3,
       "source": "AU",
-      "page": 40
+      "page": 40,
+      "essByRating": [
+        2,
+        3,
+        5
+      ],
+      "costByRating": [
+        50000,
+        85000,
+        175000
+      ],
+      "bonus": {
+        "initiativepass": "Rating",
+        "skillwire": "FixedValues(2,4,5)",
+        "specificattribute": [
+          {
+            "name": "REA",
+            "precedence": "1",
+            "val": "2 * Rating"
+          }
+        ],
+        "specificskill": [
+          {
+            "name": "Dodge",
+            "bonus": "Rating",
+            "applytorating": "yes"
+          }
+        ]
+      }
     },
     {
       "name": "Muscle Replacement",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 1,
       "capacity": "0",
       "avail": "(Rating * 5)R",
-      "cost": null,
+      "cost": 5000,
       "rating": 4,
       "source": "SR4",
-      "page": 342
+      "page": 342,
+      "bonus": {
+        "specificattribute": [
+          {
+            "name": "AGI",
+            "val": "Rating"
+          },
+          {
+            "name": "STR",
+            "val": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "OXSYS Cybergill",
@@ -1019,13 +1211,22 @@
     {
       "name": "Reaction Enhancers",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 0.3,
       "capacity": "0",
       "avail": "(Rating * 5)R",
-      "cost": null,
+      "cost": 10000,
       "rating": 3,
       "source": "SR4",
-      "page": 342
+      "page": 342,
+      "bonus": {
+        "specificattribute": [
+          {
+            "name": "REA",
+            "precedence": "1",
+            "val": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Retractable Climbing Claws",
@@ -1036,7 +1237,15 @@
       "cost": 2200,
       "rating": 0,
       "source": "AU",
-      "page": 42
+      "page": 42,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Climbing",
+            "bonus": 2
+          }
+        ]
+      }
     },
     {
       "name": "Simrig",
@@ -1047,7 +1256,10 @@
       "cost": 5000,
       "rating": 0,
       "source": "SR4",
-      "page": 342
+      "page": 342,
+      "bonus": {
+        "matrixinitiativepass": 1
+      }
     },
     {
       "name": "Skillwire Expert System",
@@ -1063,13 +1275,16 @@
     {
       "name": "Skillwires",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 0.2,
       "capacity": "0",
       "avail": "(Rating * 4)",
-      "cost": null,
+      "cost": 2000,
       "rating": 5,
       "source": "SR4",
-      "page": 342
+      "page": 342,
+      "bonus": {
+        "skillwire": "Rating"
+      }
     },
     {
       "name": "Skinlink",
@@ -1091,7 +1306,23 @@
       "cost": 15000,
       "rating": 0,
       "source": "AU",
-      "page": 42
+      "page": 42,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Escape Artist",
+            "bonus": 2
+          },
+          {
+            "name": "Gymnastics",
+            "bonus": 1
+          },
+          {
+            "name": "Climbing",
+            "bonus": 2
+          }
+        ]
+      }
     },
     {
       "name": "Smuggling Compartment",
@@ -1118,13 +1349,33 @@
     {
       "name": "Wired Reflexes",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 2,
       "capacity": "0",
       "avail": "FixedValues(8R,12R,20R)",
-      "cost": null,
+      "cost": 11000,
       "rating": 3,
       "source": "SR4",
-      "page": 342
+      "page": 342,
+      "essByRating": [
+        2,
+        3,
+        5
+      ],
+      "costByRating": [
+        11000,
+        32000,
+        100000
+      ],
+      "bonus": {
+        "initiativepass": "Rating",
+        "specificattribute": [
+          {
+            "name": "REA",
+            "precedence": "1",
+            "val": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Fingerprint Morphing",
@@ -1132,7 +1383,7 @@
       "ess": 0.2,
       "capacity": "[0]",
       "avail": "12F",
-      "cost": null,
+      "cost": 10000,
       "rating": 10,
       "source": "SG",
       "page": 151
@@ -1146,7 +1397,13 @@
       "cost": 15000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Obvious Full Leg",
@@ -1157,7 +1414,13 @@
       "cost": 15000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Obvious Foot",
@@ -1168,7 +1431,13 @@
       "cost": 5000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Obvious Hand",
@@ -1179,7 +1448,13 @@
       "cost": 5000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Obvious Lower Arm",
@@ -1190,7 +1465,13 @@
       "cost": 10000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Obvious Lower Leg",
@@ -1201,7 +1482,13 @@
       "cost": 10000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Obvious Torso",
@@ -1212,7 +1499,12 @@
       "cost": 20000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        }
+      }
     },
     {
       "name": "Obvious Skull",
@@ -1223,18 +1515,35 @@
       "cost": 10000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        }
+      }
     },
     {
       "name": "Jigsaw Skull",
       "category": "Cyberlimb",
-      "ess": null,
+      "ess": 0.6,
       "capacity": "4",
       "avail": "12 + Rating",
-      "cost": null,
+      "cost": 15000,
       "rating": 4,
       "source": "SG",
-      "page": 144
+      "page": 144,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "specificskill": [
+          {
+            "name": "Disguise",
+            "bonus": "Rating",
+            "@_precedence": "2"
+          }
+        ]
+      }
     },
     {
       "name": "Synthetic Full Arm",
@@ -1245,7 +1554,13 @@
       "cost": 20000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Synthetic Full Leg",
@@ -1256,7 +1571,13 @@
       "cost": 20000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Synthetic Foot",
@@ -1267,7 +1588,13 @@
       "cost": 6000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Synthetic Hand",
@@ -1278,7 +1605,13 @@
       "cost": 6000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Synthetic Lower Arm",
@@ -1289,7 +1622,13 @@
       "cost": 12000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Synthetic Lower Leg",
@@ -1300,7 +1639,13 @@
       "cost": 12000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Synthetic Torso",
@@ -1311,7 +1656,12 @@
       "cost": 25000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        }
+      }
     },
     {
       "name": "Synthetic Skull",
@@ -1322,7 +1672,12 @@
       "cost": 15000,
       "rating": 0,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        }
+      }
     },
     {
       "name": "Armor",
@@ -1330,10 +1685,16 @@
       "ess": 0,
       "capacity": "[Rating * 2]",
       "avail": "Rating * 5",
-      "cost": null,
+      "cost": 300,
       "rating": 4,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "bonus": {
+        "armor": {
+          "b": "Rating",
+          "i": "Rating"
+        }
+      }
     },
     {
       "name": "Bulk Modification",
@@ -1341,7 +1702,7 @@
       "ess": 0,
       "capacity": "[-Rating]",
       "avail": "+Rating",
-      "cost": null,
+      "cost": 1000,
       "rating": 4,
       "source": "AU",
       "page": 44
@@ -1355,7 +1716,8 @@
       "cost": null,
       "rating": 20,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "costFormula": "(Rating - 3) * 1500"
     },
     {
       "name": "Customized Strength",
@@ -1366,7 +1728,8 @@
       "cost": null,
       "rating": 20,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "costFormula": "(Rating - 3) * 1500"
     },
     {
       "name": "Customized Agility",
@@ -1377,7 +1740,8 @@
       "cost": null,
       "rating": 20,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "costFormula": "(Rating - 3) * 1500"
     },
     {
       "name": "Enhanced Body",
@@ -1385,7 +1749,7 @@
       "ess": 0,
       "capacity": "[Rating * 1]",
       "avail": "(Rating * 3)R",
-      "cost": null,
+      "cost": 200,
       "rating": 7,
       "source": "SR4",
       "page": 344
@@ -1396,7 +1760,7 @@
       "ess": 0,
       "capacity": "[Rating * 1]",
       "avail": "(Rating * 3)R",
-      "cost": null,
+      "cost": 250,
       "rating": 7,
       "source": "SR4",
       "page": 344
@@ -1407,7 +1771,7 @@
       "ess": 0,
       "capacity": "[Rating * 1]",
       "avail": "(Rating * 3)R",
-      "cost": null,
+      "cost": 250,
       "rating": 7,
       "source": "SR4",
       "page": 344
@@ -1418,7 +1782,7 @@
       "ess": 0,
       "capacity": "[0]",
       "avail": "(Rating * 5)F",
-      "cost": null,
+      "cost": 3000,
       "rating": 3,
       "source": "RC",
       "page": 35
@@ -1432,7 +1796,15 @@
       "cost": 5000,
       "rating": 10,
       "source": "AU",
-      "page": 44
+      "page": 44,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Climbing",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Optimized: Evo Kali",
@@ -1443,7 +1815,15 @@
       "cost": 5000,
       "rating": 10,
       "source": "AU",
-      "page": 44
+      "page": 44,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Blades",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Optimized: Ferrari Sprinter",
@@ -1454,7 +1834,15 @@
       "cost": 5000,
       "rating": 10,
       "source": "AU",
-      "page": 44
+      "page": 44,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Running",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Optimized: Louisville Slugger",
@@ -1465,7 +1853,15 @@
       "cost": 5000,
       "rating": 10,
       "source": "AU",
-      "page": 44
+      "page": 44,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Clubs",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Optimized: Nightengale Feet of Fury",
@@ -1487,7 +1883,15 @@
       "cost": 5000,
       "rating": 10,
       "source": "AU",
-      "page": 44
+      "page": 44,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Unarmed Combat",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Optimized: Yankee Pitcher",
@@ -1498,7 +1902,15 @@
       "cost": 5000,
       "rating": 10,
       "source": "AU",
-      "page": 44
+      "page": 44,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Throwing Weapons",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Rotational Joints",
@@ -1509,7 +1921,15 @@
       "cost": 5000,
       "rating": 0,
       "source": "SG",
-      "page": 144
+      "page": 144,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Escape Artist",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Cyber Holster",
@@ -1553,7 +1973,10 @@
       "cost": 325,
       "rating": 0,
       "source": "AU",
-      "page": 45
+      "page": 45,
+      "bonus": {
+        "movementpercent": 25
+      }
     },
     {
       "name": "Hydraulic Jacks",
@@ -1561,7 +1984,7 @@
       "ess": 0,
       "capacity": "[Rating]",
       "avail": "9",
-      "cost": null,
+      "cost": 1000,
       "rating": 6,
       "source": "SR4",
       "page": 344
@@ -1586,7 +2009,8 @@
       "cost": null,
       "rating": 0,
       "source": "AU",
-      "page": 45
+      "page": 45,
+      "costFormula": "*1.1"
     },
     {
       "name": "Modular Plug-in Adaptation",
@@ -1605,7 +2029,7 @@
       "ess": 0,
       "capacity": "[2]",
       "avail": "6R",
-      "cost": null,
+      "cost": 500,
       "rating": 4,
       "source": "AU",
       "page": 45
@@ -1927,7 +2351,8 @@
       "cost": null,
       "rating": 6,
       "source": "AU",
-      "page": 33
+      "page": 33,
+      "costFormula": "500+((Rating-1) * 100)"
     },
     {
       "name": "Cyberlimb Casemod Full Arm",
@@ -2103,7 +2528,8 @@
       "cost": null,
       "rating": 0,
       "source": "AU",
-      "page": 35
+      "page": 35,
+      "costFormula": "Variable(450+)"
     },
     {
       "name": "Horn Implants",
@@ -2155,7 +2581,7 @@
       "ess": 0,
       "capacity": "[0]",
       "avail": "7",
-      "cost": null,
+      "cost": 100,
       "rating": 6,
       "source": "AU",
       "page": 46
@@ -2224,7 +2650,16 @@
       "cost": 12500,
       "rating": 0,
       "source": "AU",
-      "page": 47
+      "page": 47,
+      "bonus": {
+        "movementpercent": 25,
+        "specificskill": [
+          {
+            "name": "Gymnastics",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Skimmer Discs",
@@ -2235,7 +2670,10 @@
       "cost": 2500,
       "rating": 0,
       "source": "AU",
-      "page": 47
+      "page": 47,
+      "bonus": {
+        "movementpercent": 50
+      }
     },
     {
       "name": "Vacuum Pump",
@@ -2257,7 +2695,10 @@
       "cost": 1500,
       "rating": 0,
       "source": "AU",
-      "page": 48
+      "page": 48,
+      "bonus": {
+        "swimpercent": 100
+      }
     },
     {
       "name": "Welding Laser",
@@ -2295,13 +2736,41 @@
     {
       "name": "Stirrup Interface",
       "category": "Biodrone Control",
-      "ess": null,
+      "ess": 2.5,
       "capacity": "0",
       "avail": "FixedValues(15R,21R,28R)",
-      "cost": null,
+      "cost": 45000,
       "rating": 3,
       "source": "AU",
-      "page": 153
+      "page": 153,
+      "essByRating": [
+        2.5,
+        3.5,
+        5.5
+      ],
+      "costByRating": [
+        45000,
+        80000,
+        100000
+      ],
+      "bonus": {
+        "initiativepass": "Rating",
+        "skillwire": "FixedValues(2,4,5)",
+        "specificattribute": [
+          {
+            "name": "REA",
+            "precedence": "1",
+            "val": 2
+          }
+        ],
+        "specificskill": [
+          {
+            "name": "Dodge",
+            "bonus": 1,
+            "applytorating": "yes"
+          }
+        ]
+      }
     },
     {
       "name": "TRACES",
@@ -2312,7 +2781,19 @@
       "cost": 25000,
       "rating": 0,
       "source": "AU",
-      "page": 153
+      "page": 153,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Dodge",
+            "bonus": 2
+          },
+          {
+            "name": "Unarmed Combat",
+            "bonus": 2
+          }
+        ]
+      }
     },
     {
       "name": "SEIES",
@@ -2331,7 +2812,7 @@
       "ess": 0.2,
       "capacity": "0",
       "avail": "12F",
-      "cost": null,
+      "cost": 1000,
       "rating": 10,
       "source": "AU",
       "page": 112
@@ -2361,10 +2842,10 @@
     {
       "name": "Nanohive",
       "category": "Nanocybernetics",
-      "ess": null,
+      "ess": 0.25,
       "capacity": "[2]",
       "avail": "Rating * 5",
-      "cost": null,
+      "cost": 10000,
       "rating": 6,
       "source": "AU",
       "page": 112
@@ -2375,7 +2856,7 @@
       "ess": 0.2,
       "capacity": "0",
       "avail": "16F",
-      "cost": null,
+      "cost": 5000,
       "rating": 10,
       "source": "AU",
       "page": 112
@@ -2383,10 +2864,10 @@
     {
       "name": "Smart Skin",
       "category": "Nanocybernetics",
-      "ess": null,
+      "ess": 0.5,
       "capacity": "0",
       "avail": "Rating * 5",
-      "cost": null,
+      "cost": 10000,
       "rating": 3,
       "source": "AU",
       "page": 113
@@ -2397,7 +2878,7 @@
       "ess": 0.2,
       "capacity": "0",
       "avail": "16F",
-      "cost": null,
+      "cost": 3000,
       "rating": 10,
       "source": "AU",
       "page": 113
@@ -2416,10 +2897,10 @@
     {
       "name": "Chipjack (2050)",
       "category": "Headware",
-      "ess": null,
+      "ess": 0.1,
       "capacity": "0",
       "avail": "3",
-      "cost": null,
+      "cost": 2000,
       "rating": 4,
       "source": "2050",
       "page": 183
@@ -2463,10 +2944,11 @@
       "ess": null,
       "capacity": "Rating",
       "avail": "2",
-      "cost": null,
+      "cost": 500,
       "rating": 60,
       "source": "2050",
-      "page": 184
+      "page": 184,
+      "essFormula": "ceiling(Rating div 20) * 0.1"
     },
     {
       "name": "Radio (2050)",
@@ -2680,13 +3162,20 @@
     {
       "name": "Boosted Reflexes (2050)",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 0.9,
       "capacity": "0",
       "avail": "3R",
-      "cost": null,
+      "cost": 20000,
       "rating": 6,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "bonus": {
+        "initiative": {
+          "value": "Rating",
+          "precedence": "1"
+        },
+        "initiativepass": "Rating div 2"
+      }
     },
     {
       "name": "Obvious Full Arm (2050)",
@@ -2697,7 +3186,13 @@
       "cost": 45000,
       "rating": 0,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Obvious Full Leg (2050)",
@@ -2708,7 +3203,13 @@
       "cost": 45000,
       "rating": 0,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Synthetic Full Arm (2050)",
@@ -2719,7 +3220,13 @@
       "cost": 50000,
       "rating": 0,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Synthetic Full Leg (2050)",
@@ -2730,7 +3237,13 @@
       "cost": 50000,
       "rating": 0,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        },
+        "selectside": true
+      }
     },
     {
       "name": "Customized Body (2050)",
@@ -2738,7 +3251,7 @@
       "ess": 0,
       "capacity": "[0]",
       "avail": "+(Rating)",
-      "cost": null,
+      "cost": 2000,
       "rating": 20,
       "source": "2050",
       "page": 186
@@ -2749,7 +3262,7 @@
       "ess": 0,
       "capacity": "[0]",
       "avail": "+(Rating)",
-      "cost": null,
+      "cost": 2000,
       "rating": 20,
       "source": "2050",
       "page": 186
@@ -2760,7 +3273,7 @@
       "ess": 0,
       "capacity": "[0]",
       "avail": "+(Rating)",
-      "cost": null,
+      "cost": 2000,
       "rating": 20,
       "source": "2050",
       "page": 186
@@ -2771,7 +3284,7 @@
       "ess": 0,
       "capacity": "[Rating]",
       "avail": "(Rating)R",
-      "cost": null,
+      "cost": 300,
       "rating": 3,
       "source": "2050",
       "page": 186
@@ -2782,7 +3295,7 @@
       "ess": 0,
       "capacity": "[Rating]",
       "avail": "(Rating)R",
-      "cost": null,
+      "cost": 350,
       "rating": 3,
       "source": "2050",
       "page": 186
@@ -2793,7 +3306,7 @@
       "ess": 0,
       "capacity": "[Rating]",
       "avail": "(Rating)R",
-      "cost": null,
+      "cost": 400,
       "rating": 3,
       "source": "2050",
       "page": 186
@@ -2804,10 +3317,16 @@
       "ess": 0,
       "capacity": "[Rating * 2]",
       "avail": "Rating * 3",
-      "cost": null,
+      "cost": 500,
       "rating": 3,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "bonus": {
+        "armor": {
+          "b": "Rating",
+          "i": "Rating"
+        }
+      }
     },
     {
       "name": "Cosmetic Modifications, Bodyware (2050)",
@@ -2818,26 +3337,33 @@
       "cost": null,
       "rating": 0,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "costFormula": "Variable(2000-10000)"
     },
     {
       "name": "Dermal Plating (2050)",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 0.5,
       "capacity": "0",
       "avail": "(Rating * 4)R",
-      "cost": null,
+      "cost": 5000,
       "rating": 3,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "bonus": {
+        "armor": {
+          "b": "Rating",
+          "i": "Rating"
+        }
+      }
     },
     {
       "name": "Filtration System, Air (2050)",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 0.1,
       "capacity": "0",
       "avail": "6",
-      "cost": null,
+      "cost": 15000,
       "rating": 6,
       "source": "2050",
       "page": 186
@@ -2845,10 +3371,10 @@
     {
       "name": "Filtration System, Blood (2050)",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 0.2,
       "capacity": "0",
       "avail": "6",
-      "cost": null,
+      "cost": 10000,
       "rating": 6,
       "source": "2050",
       "page": 186
@@ -2903,7 +3429,7 @@
       "ess": 0.2,
       "capacity": "[0]",
       "avail": "6",
-      "cost": null,
+      "cost": 1000,
       "rating": 6,
       "source": "2050",
       "page": 187
@@ -2911,24 +3437,39 @@
     {
       "name": "Muscle Replacement (2050)",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 1,
       "capacity": "0",
       "avail": "4R",
-      "cost": null,
+      "cost": 20000,
       "rating": 4,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "bonus": {
+        "specificattribute": [
+          {
+            "name": "AGI",
+            "val": "Rating"
+          },
+          {
+            "name": "STR",
+            "val": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Skillwires (2050)",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 0.2,
       "capacity": "0",
       "avail": "(Rating * 2)",
-      "cost": null,
+      "cost": 50000,
       "rating": 5,
       "source": "2050",
-      "page": 187
+      "page": 187,
+      "bonus": {
+        "skillwire": "Rating"
+      }
     },
     {
       "name": "Smartlink (2050)",
@@ -2939,7 +3480,10 @@
       "cost": 2500,
       "rating": 0,
       "source": "2050",
-      "page": 187
+      "page": 187,
+      "bonus": {
+        "smartlink": true
+      }
     },
     {
       "name": "Spur (2050)",
@@ -2966,13 +3510,23 @@
     {
       "name": "Vehicle Control Rig (2050)",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 2,
       "capacity": "0",
       "avail": "FixedValues(6,8,8)",
-      "cost": null,
+      "cost": 12000,
       "rating": 3,
       "source": "2050",
-      "page": 187
+      "page": 187,
+      "essByRating": [
+        2,
+        3,
+        5
+      ],
+      "costByRating": [
+        12000,
+        60000,
+        300000
+      ]
     },
     {
       "name": "Voice Modulator (2050)",
@@ -3010,13 +3564,33 @@
     {
       "name": "Wired Reflexes (2050)",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 2,
       "capacity": "0",
       "avail": "FixedValues(4R,4R,8R)",
-      "cost": null,
+      "cost": 55000,
       "rating": 3,
       "source": "2050",
-      "page": 187
+      "page": 187,
+      "essByRating": [
+        2,
+        3,
+        5
+      ],
+      "costByRating": [
+        55000,
+        165000,
+        500000
+      ],
+      "bonus": {
+        "initiativepass": "Rating",
+        "specificattribute": [
+          {
+            "name": "REA",
+            "precedence": "1",
+            "val": "Rating"
+          }
+        ]
+      }
     },
     {
       "name": "Holdout Pistol (2050)",
@@ -3087,13 +3661,25 @@
     {
       "name": "Boosted Reflexes",
       "category": "Bodyware",
-      "ess": null,
+      "ess": 0.9,
       "capacity": "0",
       "avail": "2R",
-      "cost": null,
+      "cost": 15000,
       "rating": 3,
       "source": "WS",
-      "page": 14
+      "page": 14,
+      "costByRating": [
+        15000,
+        32000,
+        47000
+      ],
+      "bonus": {
+        "initiative": {
+          "value": "Rating",
+          "precedence": "1"
+        },
+        "initiativepass": "Rating div 2"
+      }
     },
     {
       "name": "Arm Blade",
@@ -3115,7 +3701,14 @@
       "cost": 0,
       "rating": 1,
       "source": "AU",
-      "page": 158
+      "page": 158,
+      "bonus": {
+        "conditionmonitor": {
+          "thresholdoffset": 6
+        },
+        "cyborgessence": true,
+        "matrixinitiativepassadd": 1
+      }
     }
   ]
 }

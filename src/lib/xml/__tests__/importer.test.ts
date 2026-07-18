@@ -305,21 +305,30 @@ describe('XML Importer', () => {
 			expect(result.character?.equipment.armor[0]?.equipped).toBe(true);
 		});
 
-		it('should parse cyberware', () => {
+		it('should parse cyberware and nested children', () => {
 			const xml = `<?xml version="1.0" encoding="utf-8"?>
 <character>
 	<name>Test</name>
 	<cyberwares>
 		<cyberware>
-			<name>Wired Reflexes</name>
-			<category>Bodyware</category>
-			<grade>Alphaware</grade>
-			<rating>2</rating>
-			<ess>1.6</ess>
-			<cost>32000</cost>
-			<capacity>0</capacity>
-			<location></location>
-			<notes></notes>
+			<name>Cyberarm (Right)</name>
+			<category>Cyberlimb</category>
+			<grade>Standard</grade>
+			<rating>0</rating>
+			<ess>1.0</ess>
+			<cost>15000</cost>
+			<capacity>15</capacity>
+			<children>
+				<cyberware>
+					<name>Cybergun</name>
+					<category>Cyberweapon</category>
+					<grade>Standard</grade>
+					<rating>0</rating>
+					<ess>0</ess>
+					<cost>2000</cost>
+					<capacity>2</capacity>
+				</cyberware>
+			</children>
 		</cyberware>
 	</cyberwares>
 </character>`;
@@ -327,11 +336,12 @@ describe('XML Importer', () => {
 			const result = importFromChummer(xml, 'user-123');
 
 			expect(result.success).toBe(true);
-			expect(result.character?.equipment.cyberware).toHaveLength(1);
-			expect(result.character?.equipment.cyberware[0]?.name).toBe('Wired Reflexes');
-			expect(result.character?.equipment.cyberware[0]?.grade).toBe('Alphaware');
-			expect(result.character?.equipment.cyberware[0]?.rating).toBe(2);
-			expect(result.character?.equipment.cyberware[0]?.essence).toBe(1.6);
+			const cyberwareList = result.character?.equipment.cyberware;
+			expect(cyberwareList).toHaveLength(1);
+			expect(cyberwareList?.[0]?.name).toBe('Cyberarm (Right)');
+			expect(cyberwareList?.[0]?.children).toHaveLength(1);
+			expect(cyberwareList?.[0]?.children[0]?.name).toBe('Cybergun');
+			expect(cyberwareList?.[0]?.children[0]?.cost).toBe(2000);
 		});
 
 		it('should default unknown cyberware grade to Standard', () => {
@@ -351,6 +361,41 @@ describe('XML Importer', () => {
 
 			expect(result.success).toBe(true);
 			expect(result.character?.equipment.cyberware[0]?.grade).toBe('Standard');
+		});
+
+		it('should parse gear and nested children', () => {
+			const xml = `<?xml version="1.0" encoding="utf-8"?>
+<character>
+	<name>Test</name>
+	<gears>
+		<gear>
+			<name>Commlink</name>
+			<category>Commlink</category>
+			<rating>6</rating>
+			<qty>1</qty>
+			<cost>2000</cost>
+			<children>
+				<gear>
+					<name>Sim Module</name>
+					<category>Commlink Accessories</category>
+					<rating>0</rating>
+					<qty>1</qty>
+					<cost>100</cost>
+				</gear>
+			</children>
+		</gear>
+	</gears>
+</character>`;
+
+			const result = importFromChummer(xml, 'user-123');
+
+			expect(result.success).toBe(true);
+			const gearList = result.character?.equipment.gear;
+			expect(gearList).toHaveLength(1);
+			expect(gearList?.[0]?.name).toBe('Commlink');
+			expect(gearList?.[0]?.children).toHaveLength(1);
+			expect(gearList?.[0]?.children[0]?.name).toBe('Sim Module');
+			expect(gearList?.[0]?.children[0]?.cost).toBe(100);
 		});
 
 		it('should parse magic data', () => {

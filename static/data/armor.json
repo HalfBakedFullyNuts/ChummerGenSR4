@@ -95,7 +95,10 @@
       "avail": "8",
       "cost": 3000,
       "source": "AR",
-      "page": 45
+      "page": 45,
+      "bonus": {
+        "concealability": -2
+      }
     },
     {
       "name": "Mortimer of London: Ulysses Line",
@@ -106,7 +109,10 @@
       "avail": "8",
       "cost": 2800,
       "source": "AR",
-      "page": 45
+      "page": 45,
+      "bonus": {
+        "concealability": -2
+      }
     },
     {
       "name": "Vashon Island: Aces High Jacket Line",
@@ -183,7 +189,10 @@
       "avail": "8",
       "cost": 800,
       "source": "AR",
-      "page": 46
+      "page": 46,
+      "bonus": {
+        "concealability": -2
+      }
     },
     {
       "name": "Vashon Island: Synergist Short Jacket",
@@ -227,7 +236,10 @@
       "avail": "8",
       "cost": 1300,
       "source": "AR",
-      "page": 46
+      "page": 46,
+      "bonus": {
+        "concealability": -4
+      }
     },
     {
       "name": "Victory: Globetrotter Camouflage Jacket",
@@ -700,7 +712,10 @@
       "avail": "8",
       "cost": 1500,
       "source": "SR4",
-      "page": 326
+      "page": 326,
+      "bonus": {
+        "concealability": -2
+      }
     },
     {
       "name": "Armor Clothing",
@@ -854,7 +869,10 @@
       "avail": "2",
       "cost": 700,
       "source": "SR4",
-      "page": 326
+      "page": 326,
+      "bonus": {
+        "concealability": -2
+      }
     },
     {
       "name": "Padded Leather Armor",
@@ -953,7 +971,15 @@
       "avail": "8",
       "cost": 1000,
       "source": "AR",
-      "page": 52
+      "page": 52,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Climbing",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Security Spacesuit",
@@ -1228,7 +1254,15 @@
       "avail": "2",
       "cost": 275,
       "source": "AT",
-      "page": 155
+      "page": 155,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Intimidation",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "6 Tees casualwear (Horizon)",
@@ -1965,7 +1999,15 @@
       "avail": "18R",
       "cost": 10000,
       "source": "HP",
-      "page": 167
+      "page": 167,
+      "bonus": {
+        "specificskill": [
+          {
+            "name": "Climbing",
+            "bonus": 1
+          }
+        ]
+      }
     },
     {
       "name": "Ares Armored Coldsuit",

@@ -17,10 +17,12 @@ export {
 	getWoundModifier,
 	calculateInitiative,
 	calculateInitiativeDice,
-	calculateInitiativeBonus,
 	calculateWalkSpeed,
 	calculateRunSpeed,
-	calculateSprintBonus,
+	calculateMovement,
+	parseMovementString,
+	DEFAULT_MOVEMENT,
+	type MovementRates,
 	calculatePhysicalLimit,
 	calculateMentalLimit,
 	calculateSocialLimit,
@@ -33,6 +35,8 @@ export {
 	calculateDodge,
 	calculateArmorBallistic,
 	calculateArmorImpact,
+	calculateDamageSoakBallistic,
+	calculateDamageSoakImpact,
 	calculateDrainResist,
 	calculateAstralInitiative,
 	calculateAstralInitiativeDice,
@@ -53,20 +57,3 @@ export {
 	type ValidationIssue,
 	type ValidationResult
 } from './validation';
-
-// Improvements - bonuses from cyberware, qualities, powers, etc.
-export {
-	getCyberwareImprovements,
-	getQualityImprovements,
-	getAdeptPowerImprovements,
-	getAllImprovements,
-	getTotalImprovement,
-	getImprovementsForTarget,
-	getImprovementsBySource,
-	getStackedValue,
-	getImprovementSummary,
-	type ImprovementTarget,
-	type ImprovementSource,
-	type Improvement,
-	type ImprovementSummary
-} from './improvements';

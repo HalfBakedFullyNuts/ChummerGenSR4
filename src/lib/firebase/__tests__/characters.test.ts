@@ -157,7 +157,7 @@ describe('Firebase Characters Service', () => {
 			];
 
 			(getDocs as ReturnType<typeof vi.fn>).mockResolvedValue({
-				forEach: (cb: (doc: typeof mockDocs[0]) => void) => mockDocs.forEach(cb)
+				forEach: (cb: (doc: (typeof mockDocs)[0]) => void) => mockDocs.forEach(cb)
 			});
 
 			const result = await listUserCharacters('user-123');
@@ -192,7 +192,7 @@ describe('Firebase Characters Service', () => {
 			];
 
 			(getDocs as ReturnType<typeof vi.fn>).mockResolvedValue({
-				forEach: (cb: (doc: typeof mockDocs[0]) => void) => mockDocs.forEach(cb)
+				forEach: (cb: (doc: (typeof mockDocs)[0]) => void) => mockDocs.forEach(cb)
 			});
 
 			const result = await listUserCharacters('user-123');

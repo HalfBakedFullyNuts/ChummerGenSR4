@@ -24,6 +24,28 @@ export {
 	isAttributeValid
 } from './attributes';
 
+/* Improvement types */
+export type {
+	ImprovementType,
+	ImprovementSource,
+	Improvement,
+	BonusValue,
+	BonusData,
+	QualityBonus,
+	AttributeBonusEntry,
+	SkillBonusEntry,
+	SkillGroupBonusEntry,
+	SkillCategoryBonusEntry,
+	ConditionMonitorBonus,
+	ArmorBonus,
+	PrecedenceBonusValue,
+	NameEntry,
+	SkillAttributeBonus,
+	WeaponCategoryDVBonus,
+	SpellCategoryBonus,
+	LivingPersonaBonus
+} from './improvements';
+
 /* Skill types */
 export type {
 	SkillCategoryType,
@@ -66,7 +88,6 @@ export type {
 	CharacterSpell,
 	CharacterPower,
 	BoundSpirit,
-	Focus,
 	CharacterResonance,
 	ComplexForm,
 	CompiledSprite,
@@ -97,18 +118,23 @@ export type {
 	CharacterCyberware,
 	BiowareCategory,
 	BiowareGrade,
+	GameBioware,
 	CharacterBioware,
 	VehicleCategory,
 	CharacterVehicle,
 	VehicleMod,
+	GameVehicle,
 	CharacterMartialArt,
+	GameMartialArt,
 	GearCategory,
 	GameGear,
 	CharacterGear,
 	LifestyleLevel,
 	GameLifestyle,
 	CharacterLifestyle,
-	CharacterEquipment
+	CharacterEquipment,
+	CharacterFocus,
+	StackedFocus
 } from './equipment';
 
 export {

@@ -655,7 +655,11 @@
       "avail": "0",
       "cost": null,
       "source": "SR4",
-      "page": 328
+      "page": 328,
+      "bonus": {
+        "matrixinitiativepass": 1,
+        "skillsoftaccess": true
+      }
     },
     {
       "name": "Sim Module (Hot)",
@@ -664,7 +668,12 @@
       "avail": "4F",
       "cost": null,
       "source": "SR4",
-      "page": 328
+      "page": 328,
+      "bonus": {
+        "matrixinitiative": 1,
+        "matrixinitiativepass": 2,
+        "skillsoftaccess": true
+      }
     },
     {
       "name": "Simrig",
@@ -673,7 +682,10 @@
       "avail": "12",
       "cost": 1000,
       "source": "SR4",
-      "page": 328
+      "page": 328,
+      "bonus": {
+        "matrixinitiativepass": 1
+      }
     },
     {
       "name": "Subvocal Microphone",
@@ -799,7 +811,10 @@
       "avail": "(Rating * 3)F",
       "cost": null,
       "source": "SR4",
-      "page": 332
+      "page": 332,
+      "bonus": {
+        "selectrestricted": true
+      }
     },
     {
       "name": "Fake SIN",
@@ -808,7 +823,10 @@
       "avail": "(Rating * 3)F",
       "cost": null,
       "source": "SR4",
-      "page": 332
+      "page": 332,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "RFID Sensor",
@@ -1726,7 +1744,10 @@
       "avail": "10R",
       "cost": 1200,
       "source": "WAR",
-      "page": 164
+      "page": 164,
+      "bonus": {
+        "flyspeed": 200
+      }
     },
     {
       "name": "Biomonitor",
@@ -1825,7 +1846,10 @@
       "avail": "Rating",
       "cost": null,
       "source": "SR4",
-      "page": 338
+      "page": 338,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Stimulant Patch",
@@ -2050,7 +2074,10 @@
       "avail": "(Rating * 4)R",
       "cost": null,
       "source": "SR4",
-      "page": 199
+      "page": 199,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Binding Focus",
@@ -2059,7 +2086,10 @@
       "avail": "(Rating * 4)R",
       "cost": null,
       "source": "SR4",
-      "page": 199
+      "page": 199,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Counterspelling Focus (Combat)",
@@ -2113,7 +2143,19 @@
       "avail": "(Rating * 5)R",
       "cost": null,
       "source": "SR4",
-      "page": 199
+      "page": 199,
+      "bonus": {
+        "skillattribute": {
+          "name": [
+            {
+              "value": "MAG",
+              "precedence": "0"
+            }
+          ],
+          "bonus": "Rating",
+          "exclude": "Counterspelling"
+        }
+      }
     },
     {
       "name": "Spellcasting Focus (Combat)",
@@ -2122,7 +2164,18 @@
       "avail": "(Rating * 4)R",
       "cost": null,
       "source": "SR4",
-      "page": 199
+      "page": 199,
+      "bonus": {
+        "spellcategory": {
+          "name": [
+            {
+              "value": "Combat",
+              "precedence": "0"
+            }
+          ],
+          "val": "Rating"
+        }
+      }
     },
     {
       "name": "Spellcasting Focus (Detection)",
@@ -2131,7 +2184,18 @@
       "avail": "(Rating * 4)R",
       "cost": null,
       "source": "SR4",
-      "page": 199
+      "page": 199,
+      "bonus": {
+        "spellcategory": {
+          "name": [
+            {
+              "value": "Detection",
+              "precedence": "0"
+            }
+          ],
+          "val": "Rating"
+        }
+      }
     },
     {
       "name": "Spellcasting Focus (Health)",
@@ -2140,7 +2204,18 @@
       "avail": "(Rating * 4)R",
       "cost": null,
       "source": "SR4",
-      "page": 199
+      "page": 199,
+      "bonus": {
+        "spellcategory": {
+          "name": [
+            {
+              "value": "Health",
+              "precedence": "0"
+            }
+          ],
+          "val": "Rating"
+        }
+      }
     },
     {
       "name": "Spellcasting Focus (Illusion)",
@@ -2149,7 +2224,18 @@
       "avail": "(Rating * 4)R",
       "cost": null,
       "source": "SR4",
-      "page": 199
+      "page": 199,
+      "bonus": {
+        "spellcategory": {
+          "name": [
+            {
+              "value": "Illusion",
+              "precedence": "0"
+            }
+          ],
+          "val": "Rating"
+        }
+      }
     },
     {
       "name": "Spellcasting Focus (Manipulation)",
@@ -2158,7 +2244,18 @@
       "avail": "(Rating * 4)R",
       "cost": null,
       "source": "SR4",
-      "page": 199
+      "page": 199,
+      "bonus": {
+        "spellcategory": {
+          "name": [
+            {
+              "value": "Manipulation",
+              "precedence": "0"
+            }
+          ],
+          "val": "Rating"
+        }
+      }
     },
     {
       "name": "Summoning Focus",
@@ -2167,7 +2264,10 @@
       "avail": "(Rating * 4)R",
       "cost": null,
       "source": "SR4",
-      "page": 199
+      "page": 199,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Sustaining Focus (Combat)",
@@ -2221,7 +2321,10 @@
       "avail": "(Rating * 5)R",
       "cost": null,
       "source": "SR4",
-      "page": 199
+      "page": 199,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Anchoring Focus (Combat)",
@@ -2302,7 +2405,10 @@
       "avail": "(Rating * 10)R",
       "cost": null,
       "source": "DG",
-      "page": 7
+      "page": 7,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Masking Focus",
@@ -2392,7 +2498,10 @@
       "avail": "14",
       "cost": 15000,
       "source": "UN",
-      "page": 198
+      "page": 198,
+      "bonus": {
+        "matrixinitiativepassadd": 1
+      }
     },
     {
       "name": "Optimization",
@@ -2401,7 +2510,10 @@
       "avail": "6",
       "cost": 500,
       "source": "UN",
-      "page": 198
+      "page": 198,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Customized Interface",
@@ -2410,7 +2522,10 @@
       "avail": "6",
       "cost": 250,
       "source": "UN",
-      "page": 198
+      "page": 198,
+      "bonus": {
+        "matrixinitiative": 1
+      }
     },
     {
       "name": "Armor Case",
@@ -2671,7 +2786,10 @@
       "avail": "Rating * 4",
       "cost": null,
       "source": "UN",
-      "page": 196
+      "page": 196,
+      "bonus": {
+        "matrixinitiative": "Rating"
+      }
     },
     {
       "name": "Ghoul Caps",
@@ -3058,7 +3176,10 @@
       "avail": "6",
       "cost": null,
       "source": "2050",
-      "page": 183
+      "page": 183,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Stimulant Patch (2050)",

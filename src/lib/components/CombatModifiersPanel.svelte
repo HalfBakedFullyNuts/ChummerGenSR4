@@ -26,7 +26,9 @@
 	let selectedCalledShot: string | null = null;
 
 	/** Group modifiers by category. */
-	function getModifiersByCategory(category: CombatModifier['category']): [string, CombatModifier][] {
+	function getModifiersByCategory(
+		category: CombatModifier['category']
+	): [string, CombatModifier][] {
 		return Object.entries(COMBAT_MODIFIERS).filter(([_, mod]) => mod.category === category);
 	}
 
@@ -42,7 +44,7 @@
 	/** Toggle a modifier. */
 	function toggleModifier(key: string): void {
 		if (selectedModifiers.includes(key)) {
-			selectedModifiers = selectedModifiers.filter(m => m !== key);
+			selectedModifiers = selectedModifiers.filter((m) => m !== key);
 		} else {
 			selectedModifiers = [...selectedModifiers, key];
 		}
@@ -87,7 +89,13 @@
 		<div class="flex items-center gap-3">
 			<div class="text-sm">
 				<span class="text-text-muted">Total:</span>
-				<span class="font-mono font-bold {totalModifier < 0 ? 'text-error-main' : totalModifier > 0 ? 'text-success-main' : 'text-text-primary'}">
+				<span
+					class="font-mono font-bold {totalModifier < 0
+						? 'text-error-main'
+						: totalModifier > 0
+							? 'text-success-main'
+							: 'text-text-primary'}"
+				>
 					{totalModifier >= 0 ? '+' : ''}{totalModifier}
 				</span>
 			</div>
@@ -107,13 +115,17 @@
 						type="button"
 						class="w-full text-left text-xs py-1 px-2 rounded transition-colors
 							{selectedModifiers.includes(key)
-								? 'bg-primary-main/20 text-primary-dark border border-primary-main/50'
-								: 'bg-surface-variant text-text-secondary hover:bg-surface'}"
+							? 'bg-primary-main/20 text-primary-dark border border-primary-main/50'
+							: 'bg-surface-variant text-text-secondary hover:bg-surface'}"
 						on:click={() => toggleModifier(key)}
 						title={mod.description}
 					>
 						<span class="truncate">{mod.name}</span>
-						<span class="float-right font-mono {mod.modifier < 0 ? 'text-error-main' : 'text-success-main'}">
+						<span
+							class="float-right font-mono {mod.modifier < 0
+								? 'text-error-main'
+								: 'text-success-main'}"
+						>
 							{mod.modifier >= 0 ? '+' : ''}{mod.modifier}
 						</span>
 					</button>
@@ -131,8 +143,8 @@
 					type="button"
 					class="text-xs py-1 px-2 rounded transition-colors
 						{selectedCalledShot === key
-							? 'bg-warning-main/20 text-warning-main border border-warning-main/50'
-							: 'bg-surface-variant text-text-secondary hover:bg-surface'}"
+						? 'bg-warning-main/20 text-warning-main border border-warning-main/50'
+						: 'bg-surface-variant text-text-secondary hover:bg-surface'}"
 					on:click={() => selectCalledShot(key)}
 					title={shot.effect}
 				>
@@ -155,7 +167,10 @@
 				Active:
 				{#each selectedModifiers as mod, i}
 					{#if COMBAT_MODIFIERS[mod]}
-						<span class="text-text-secondary">{COMBAT_MODIFIERS[mod]?.name}</span>{i < selectedModifiers.length - 1 ? ', ' : ''}
+						<span class="text-text-secondary">{COMBAT_MODIFIERS[mod]?.name}</span>{i <
+						selectedModifiers.length - 1
+							? ', '
+							: ''}
 					{/if}
 				{/each}
 				{#if selectedCalledShot && CALLED_SHOTS[selectedCalledShot]}

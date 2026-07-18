@@ -84,8 +84,22 @@ describe('XML Exporter', () => {
 			const modified = {
 				...character,
 				knowledgeSkills: [
-					{ id: 'ks1', name: 'History', category: 'Academic' as const, attribute: 'LOG' as const, rating: 3, specialization: null },
-					{ id: 'ks2', name: 'Urban Brawl', category: 'Interest' as const, attribute: 'INT' as const, rating: 2, specialization: null }
+					{
+						id: 'ks1',
+						name: 'History',
+						category: 'Academic' as const,
+						attribute: 'LOG' as const,
+						rating: 3,
+						specialization: null
+					},
+					{
+						id: 'ks2',
+						name: 'Urban Brawl',
+						category: 'Interest' as const,
+						attribute: 'INT' as const,
+						rating: 2,
+						specialization: null
+					}
 				]
 			};
 
@@ -104,7 +118,14 @@ describe('XML Exporter', () => {
 			const modified = {
 				...character,
 				contacts: [
-					{ id: 'c1', name: 'Fixer Mike', type: 'Fixer', loyalty: 4, connection: 3, notes: 'Reliable' }
+					{
+						id: 'c1',
+						name: 'Fixer Mike',
+						type: 'Fixer',
+						loyalty: 4,
+						connection: 3,
+						notes: 'Reliable'
+					}
 				]
 			};
 
@@ -140,6 +161,7 @@ describe('XML Exporter', () => {
 							conceal: 0,
 							cost: 350,
 							accessories: [],
+							modifications: [],
 							notes: ''
 						}
 					]
@@ -188,7 +210,7 @@ describe('XML Exporter', () => {
 			expect(xml).toContain('</armors>');
 		});
 
-		it('should export cyberware with grade', () => {
+		it('should export cyberware and nested children', () => {
 			const character = createEmptyCharacter('test-id', 'user-123', 'bp');
 			const modified = {
 				...character,
@@ -206,7 +228,22 @@ describe('XML Exporter', () => {
 							capacity: 0,
 							capacityUsed: 0,
 							location: '',
-							subsystems: [],
+							children: [
+								{
+									id: 'cy-child-1',
+									name: 'Cybergun',
+									category: 'Cyberweapon',
+									grade: 'Standard' as const,
+									rating: 0,
+									essence: 0,
+									cost: 2000,
+									capacity: 2,
+									capacityUsed: 0,
+									location: '',
+									children: [],
+									notes: ''
+								}
+							],
 							notes: ''
 						}
 					]
@@ -219,7 +256,63 @@ describe('XML Exporter', () => {
 			expect(xml).toContain('<name>Wired Reflexes</name>');
 			expect(xml).toContain('<grade>Alphaware</grade>');
 			expect(xml).toContain('<rating>2</rating>');
+			expect(xml).toContain('<children>');
+			expect(xml).toContain('<name>Cybergun</name>');
+			expect(xml).toContain('</children>');
 			expect(xml).toContain('</cyberwares>');
+		});
+
+		it('should export gear and nested children', () => {
+			const character = createEmptyCharacter('test-id', 'user-123', 'bp');
+			const modified = {
+				...character,
+				equipment: {
+					...character.equipment,
+					gear: [
+						{
+							id: 'gear-1',
+							name: 'Commlink',
+							category: 'Commlink',
+							rating: 6,
+							quantity: 1,
+							cost: 2000,
+							location: '',
+							notes: '',
+							capacity: 0,
+							capacityUsed: 0,
+							capacityCost: 0,
+							containerId: null,
+							containedItems: [],
+							children: [
+								{
+									id: 'gear-child-1',
+									name: 'Sim Module',
+									category: 'Commlink Accessories',
+									rating: 0,
+									quantity: 1,
+									cost: 100,
+									location: '',
+									notes: '',
+									capacity: 0,
+									capacityUsed: 0,
+									capacityCost: 0,
+									containerId: null,
+									containedItems: [],
+									children: []
+								}
+							]
+						}
+					]
+				}
+			};
+
+			const xml = exportToChummer(modified);
+			expect(xml).toContain('<gears>');
+			expect(xml).toContain('<name>Commlink</name>');
+			expect(xml).toContain('<children>');
+			expect(xml).toContain('<name>Sim Module</name>');
+			expect(xml).toContain('</children>');
+			expect(xml).toContain('</gears>');
 		});
 
 		it('should export qualities', () => {
@@ -312,6 +405,26 @@ describe('XML Exporter', () => {
 			const xml = exportToChummer(character);
 
 			expect(xml).toContain('<created>False</created>');
+		});
+
+		it('should export real Uneducated/Uncouth/Infirm flags from improvements (issue #67)', () => {
+			const character = createEmptyCharacter('test-id', 'user-123', 'bp');
+			const modified = {
+				...character,
+				improvements: [
+					{
+						id: 'i1', type: 'Uneducated' as const, improvedName: '', source: 'Quality' as const, sourceName: 'Uneducated',
+						val: 1, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+						exclude: '', uniqueName: '', addToRating: false, enabled: true
+					}
+				]
+			};
+
+			const xml = exportToChummer(modified);
+
+			expect(xml).toContain('<uneducated>True</uneducated>');
+			expect(xml).toContain('<uncouth>False</uncouth>');
+			expect(xml).toContain('<infirm>False</infirm>');
 		});
 	});
 });

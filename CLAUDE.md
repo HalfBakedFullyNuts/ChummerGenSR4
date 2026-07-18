@@ -1,107 +1,66 @@
-# ChummerWeb Development Guidelines
+# CLAUDE.md
 
-## Project Overview
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-ChummerWeb is a modern web-based reimplementation of Chummer, the Shadowrun 4th Edition character generator. The goal is feature parity with the desktop application while providing a modern, accessible web interface.
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
-## Test-Driven Development
+## 1. Think Before Coding
 
-**All features must be validated against the desktop Chummer application.**
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-### Testing Philosophy
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-1. **Behavior Parity**: Tests should verify that calculations, rules, and mechanics work identically to desktop Chummer
-2. **Test First**: Write tests before implementing new features when possible
-3. **Reference Data**: Use the original Chummer XML data files as the source of truth for game data
-4. **Edge Cases**: Pay special attention to edge cases that desktop Chummer handles
+## 2. Simplicity First
 
-### What to Test
+**Minimum code that solves the problem. Nothing speculative.**
 
-- **BP Calculations**: Verify BP costs match desktop Chummer exactly
-  - Metatype costs
-  - Attribute costs (10 BP per point above racial minimum)
-  - Skill costs (4 BP per rating, 2 BP for specialization)
-  - Quality costs (positive and negative)
-  - Spell costs (5 BP each)
-  - Contact costs (Loyalty + Connection)
-  - Resource/Nuyen conversion rates
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
 
-- **Attribute Limits**: Verify min/max/augmented limits per metatype
-- **Essence Calculations**: Cyberware essence costs with grade modifiers
-- **Skill Maximums**: Rating 6 max during creation, group rating 4 max
-- **Quality Restrictions**: 35 BP max positive, 35 BP max negative
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-### Test Structure
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
 
 ```
-chummer-web/
-├── src/
-│   └── lib/
-│       ├── stores/
-│       │   └── __tests__/     # Store unit tests
-│       └── types/
-│           └── __tests__/     # Type/calculation tests
-└── tests/
-    ├── unit/                  # Unit tests
-    ├── integration/           # Integration tests
-    └── validation/            # Tests comparing to desktop Chummer
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
 ```
 
-### Running Tests
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-```bash
-npm run test        # Run all tests
-npm run test:watch  # Watch mode
-npm run test:coverage  # With coverage report
-```
+---
 
-## SR4 Rules Reference
-
-### Build Points (Standard)
-- Starting BP: 400
-- Metatype: 0 (Human) to 40+ (other metatypes)
-- Attributes: 10 BP per point above racial minimum
-- Active Skills: 4 BP per rating point
-- Skill Groups: 10 BP per rating point
-- Specialization: 2 BP
-- Positive Qualities: Cost BP (max 35 BP total)
-- Negative Qualities: Give BP back (max 35 BP total)
-- Spells: 5 BP each
-- Complex Forms: 5 BP each
-- Contacts: Loyalty + Connection per contact
-- Resources: 0-50 BP (see conversion table)
-
-### BP to Nuyen Conversion
-| BP | Nuyen |
-|----|-------|
-| 0 | 0 |
-| 5 | 20,000 |
-| 10 | 50,000 |
-| 20 | 90,000 |
-| 30 | 150,000 |
-| 40 | 225,000 |
-| 50 | 275,000 |
-
-### Cyberware Grades
-| Grade | Essence | Cost | Avail |
-|-------|---------|------|-------|
-| Standard | 1.0x | 1x | +0 |
-| Alphaware | 0.8x | 2x | +0 |
-| Betaware | 0.7x | 4x | +0 |
-| Deltaware | 0.5x | 10x | +0 |
-| Used | 1.2x | 0.5x | -1 |
-
-## Code Style
-
-- TypeScript strict mode enabled
-- Svelte components use `<script lang="ts">`
-- Prefer immutable data structures
-- Use readonly arrays/objects in types
-- Follow existing patterns in codebase
-
-## Component Guidelines
-
-- Use Tailwind CSS with custom `cw-*` utility classes
-- Follow the "corp blue" color scheme
-- Keep components focused and single-purpose
-- Extract reusable logic into stores
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

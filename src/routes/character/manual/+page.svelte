@@ -2,11 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { user } from '$stores/user';
-	import {
-		character,
-		startManualCharacter,
-		saveCurrentCharacter
-	} from '$stores/character';
+	import { character, startManualCharacter, saveCurrentCharacter } from '$stores/character';
 	import { metatypes, skills as skillsStore, qualities as qualitiesStore } from '$stores/gamedata';
 	import ManualEntryForm from '$lib/components/manual/ManualEntryForm.svelte';
 
@@ -71,9 +67,7 @@
 	<div class="flex items-center justify-between mb-6">
 		<div>
 			<h1 class="text-2xl font-bold text-primary-dark">Manual Character Entry</h1>
-			<p class="text-text-muted text-sm mt-1">
-				Quick entry mode - no restrictions or validation
-			</p>
+			<p class="text-text-muted text-sm mt-1">Quick entry mode - no restrictions or validation</p>
 		</div>
 		<div class="flex items-center gap-3">
 			{#if success}
@@ -88,11 +82,7 @@
 					{error}
 				</span>
 			{/if}
-			<button
-				class="cw-btn"
-				on:click={handleQuickSave}
-				disabled={saving || !$character}
-			>
+			<button class="cw-btn" on:click={handleQuickSave} disabled={saving || !$character}>
 				{#if saving}
 					<span class="material-icons text-sm animate-spin">sync</span>
 				{:else}
@@ -100,11 +90,7 @@
 				{/if}
 				Quick Save
 			</button>
-			<button
-				class="cw-btn cw-btn-primary"
-				on:click={handleSave}
-				disabled={saving || !$character}
-			>
+			<button class="cw-btn cw-btn-primary" on:click={handleSave} disabled={saving || !$character}>
 				{#if saving}
 					<span class="material-icons text-sm animate-spin">sync</span>
 				{:else}
@@ -133,8 +119,12 @@
 
 <style>
 	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	:global(.animate-spin) {

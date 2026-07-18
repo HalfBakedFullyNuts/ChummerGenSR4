@@ -27,8 +27,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "adept"
@@ -171,8 +171,8 @@
             "name": "MAG",
             "min": 1,
             "max": 1,
-            "val": 1,
-            "aug": 1
+            "aug": 1,
+            "val": 1
           }
         ],
         "specificskill": [
@@ -306,7 +306,8 @@
       "mutant": false,
       "limit": true,
       "bonus": {
-        "blackmarketdiscount": true
+        "blackmarketdiscount": true,
+        "selecttext": true
       },
       "effect": "Black market access"
     },
@@ -391,11 +392,13 @@
         "specificskill": [
           {
             "name": "Infiltration",
-            "bonus": 1
+            "bonus": 1,
+            "applytorating": "yes"
           },
           {
             "name": "Shadowing",
-            "bonus": 1
+            "bonus": 1,
+            "applytorating": "yes"
           }
         ]
       },
@@ -592,6 +595,9 @@
       "page": 90,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "selecttext": true
+      },
       "effect": "Receives a +2 dice pool modifier to a specified Matrix action."
     },
     {
@@ -606,7 +612,8 @@
         "skillcategory": [
           {
             "name": "Academic",
-            "bonus": 1
+            "bonus": 1,
+            "applytorating": "yes"
           }
         ]
       },
@@ -660,6 +667,11 @@
       "page": 112,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "armor": {
+          "i": 2
+        }
+      },
       "effect": "Character possesses bark-like skin granting natural armor or resistance bonuses."
     },
     {
@@ -690,6 +702,12 @@
       "page": 112,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "armor": {
+          "b": 3,
+          "i": 3
+        }
+      },
       "effect": "Character possesses rock-like skin granting significant natural armor."
     },
     {
@@ -700,6 +718,12 @@
       "page": 112,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "armor": {
+          "b": 2,
+          "i": 5
+        }
+      },
       "effect": "Character possesses thick, leathery skin granting natural armor."
     },
     {
@@ -710,6 +734,12 @@
       "page": 112,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "armor": {
+          "b": 1,
+          "i": 1
+        }
+      },
       "effect": "Character possesses tough, sinewy deposits under the skin that count as 1 natural Ballistic/Impact Armor, cumulative with worn armor."
     },
     {
@@ -793,8 +823,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -894,6 +924,11 @@
       "limit": true,
       "bonus": {
         "selectattribute": {
+          "excludeattribute": [
+            "EDG",
+            "MAG",
+            "RES"
+          ],
           "max": 1
         }
       },
@@ -1041,6 +1076,9 @@
       "page": 98,
       "mutant": false,
       "limit": false,
+      "bonus": {
+        "selecttext": true
+      },
       "effect": "Grants a +1 dice pool bonus to all Piloting Tests for a specific vehicle type."
     },
     {
@@ -1051,6 +1089,9 @@
       "page": 98,
       "mutant": false,
       "limit": false,
+      "bonus": {
+        "selecttext": true
+      },
       "effect": "Grants a +2 dice pool bonus to all Piloting Tests for a category of vehicles."
     },
     {
@@ -1101,7 +1142,8 @@
         "skillcategory": [
           {
             "name": "Social Active",
-            "bonus": 3
+            "bonus": 3,
+            "exclude": "Intimidation"
           }
         ]
       },
@@ -1155,6 +1197,14 @@
       "page": 91,
       "mutant": true,
       "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "thresholdoffset": {
+            "value": 1,
+            "precedence": "0"
+          }
+        }
+      },
       "effect": "Can ignore 1 box of damage when calculating wound modifiers."
     },
     {
@@ -1165,6 +1215,14 @@
       "page": 91,
       "mutant": true,
       "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "thresholdoffset": {
+            "value": 2,
+            "precedence": "0"
+          }
+        }
+      },
       "effect": "Can ignore 2 boxes of damage when calculating wound modifiers."
     },
     {
@@ -1175,6 +1233,14 @@
       "page": 91,
       "mutant": true,
       "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "thresholdoffset": {
+            "value": 3,
+            "precedence": "0"
+          }
+        }
+      },
       "effect": "Can ignore 3 boxes of damage when calculating wound modifiers."
     },
     {
@@ -1185,6 +1251,9 @@
       "page": 91,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "selecttext": true
+      },
       "effect": "Provides a +2 dice pool modifier for all Active Skill Tests and a +4 modifier for relevant Knowledge skills within the character's home turf."
     },
     {
@@ -1206,10 +1275,12 @@
       "mutant": false,
       "limit": true,
       "bonus": {
+        "selecttext": true,
         "specificskill": [
           {
             "name": "Artisan",
-            "bonus": 2
+            "bonus": 2,
+            "applytorating": "yes"
           }
         ]
       },
@@ -1238,26 +1309,26 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
         "specificattribute": [
           {
             "name": "CHA",
-            "min": -2,
-            "max": -2
+            "max": -2,
+            "min": -2
           },
           {
             "name": "LOG",
-            "min": -1,
-            "max": -1
+            "max": -1,
+            "min": -1
           },
           {
             "name": "WIL",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "ESS",
@@ -1282,8 +1353,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -1292,13 +1363,13 @@
         "specificattribute": [
           {
             "name": "INT",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "WIL",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "ESS",
@@ -1323,38 +1394,42 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
+        "armor": {
+          "b": 3,
+          "i": 3
+        },
         "enabletab": "critter",
         "initiative": 2,
         "initiativepass": 1,
         "specificattribute": [
           {
             "name": "BOD",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "REA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "STR",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "CHA",
-            "min": -1,
-            "max": -1
+            "max": -1,
+            "min": -1
           },
           {
             "name": "WIL",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "ESS",
@@ -1379,37 +1454,41 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
+        "armor": {
+          "b": 2,
+          "i": 2
+        },
         "enabletab": "critter",
         "initiative": 1,
         "specificattribute": [
           {
             "name": "BOD",
-            "min": 3,
-            "max": 3
+            "max": 3,
+            "min": 3
           },
           {
             "name": "REA",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "STR",
-            "min": 3,
-            "max": 3
+            "max": 3,
+            "min": 3
           },
           {
             "name": "CHA",
-            "min": -2,
-            "max": -2
+            "max": -2,
+            "min": -2
           },
           {
             "name": "WIL",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "ESS",
@@ -1434,8 +1513,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -1443,33 +1522,33 @@
         "specificattribute": [
           {
             "name": "BOD",
-            "min": 4,
-            "max": 4
+            "max": 4,
+            "min": 4
           },
           {
             "name": "REA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "STR",
-            "min": 3,
-            "max": 3
+            "max": 3,
+            "min": 3
           },
           {
             "name": "CHA",
-            "min": -2,
-            "max": -2
+            "max": -2,
+            "min": -2
           },
           {
             "name": "LOG",
-            "min": -1,
-            "max": -1
+            "max": -1,
+            "min": -1
           },
           {
             "name": "WIL",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "ESS",
@@ -1494,8 +1573,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -1504,33 +1583,33 @@
         "specificattribute": [
           {
             "name": "BOD",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "REA",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "STR",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "CHA",
-            "min": -2,
-            "max": -2
+            "max": -2,
+            "min": -2
           },
           {
             "name": "LOG",
-            "min": -2,
-            "max": -2
+            "max": -2,
+            "min": -2
           },
           {
             "name": "WIL",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "ESS",
@@ -1555,36 +1634,36 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
         "specificattribute": [
           {
             "name": "BOD",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "STR",
-            "min": 4,
-            "max": 4
+            "max": 4,
+            "min": 4
           },
           {
             "name": "CHA",
-            "min": -2,
-            "max": -2
+            "max": -2,
+            "min": -2
           },
           {
             "name": "LOG",
-            "min": -1,
-            "max": -1
+            "max": -1,
+            "min": -1
           },
           {
             "name": "WIL",
-            "min": -1,
-            "max": 1
+            "max": 1,
+            "min": -1
           },
           {
             "name": "ESS",
@@ -1609,8 +1688,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -1619,43 +1698,43 @@
         "specificattribute": [
           {
             "name": "BOD",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "AGI",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "REA",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "STR",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "CHA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "INT",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "LOG",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "WIL",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "ESS",
@@ -1680,8 +1759,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -1690,28 +1769,28 @@
         "specificattribute": [
           {
             "name": "AGI",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "REA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "CHA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "INT",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "WIL",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "ESS",
@@ -1742,22 +1821,27 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
-        "enabletab": "critter",
+        "enabletab": {
+          "name": [
+            "critter",
+            "magician"
+          ]
+        },
         "initiativepass": 1,
         "specificattribute": [
           {
             "name": "AGI",
-            "min": -1,
-            "max": -1
+            "max": -1,
+            "min": -1
           },
           {
             "name": "CHA",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "ESS",
@@ -1782,8 +1866,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -1792,28 +1876,28 @@
         "specificattribute": [
           {
             "name": "AGI",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "REA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "CHA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "INT",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "WIL",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "ESS",
@@ -1844,8 +1928,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -1854,28 +1938,28 @@
         "specificattribute": [
           {
             "name": "AGI",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "REA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "CHA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "INT",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "WIL",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "ESS",
@@ -1906,42 +1990,46 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
+        "armor": {
+          "b": 1,
+          "i": 1
+        },
         "enabletab": "critter",
         "initiative": 2,
         "specificattribute": [
           {
             "name": "BOD",
-            "min": 4,
-            "max": 4
+            "max": 4,
+            "min": 4
           },
           {
             "name": "REA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "STR",
-            "min": 3,
-            "max": 3
+            "max": 3,
+            "min": 3
           },
           {
             "name": "CHA",
-            "min": -2,
-            "max": -2
+            "max": -2,
+            "min": -2
           },
           {
             "name": "LOG",
-            "min": -1,
-            "max": -1
+            "max": -1,
+            "min": -1
           },
           {
             "name": "WIL",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "ESS",
@@ -1966,8 +2054,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -1975,33 +2063,33 @@
         "specificattribute": [
           {
             "name": "BOD",
-            "min": 4,
-            "max": 4
+            "max": 4,
+            "min": 4
           },
           {
             "name": "REA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "STR",
-            "min": 3,
-            "max": 3
+            "max": 3,
+            "min": 3
           },
           {
             "name": "CHA",
-            "min": -2,
-            "max": -2
+            "max": -2,
+            "min": -2
           },
           {
             "name": "LOG",
-            "min": -1,
-            "max": -1
+            "max": -1,
+            "min": -1
           },
           {
             "name": "WIL",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "ESS",
@@ -2026,8 +2114,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -2036,28 +2124,28 @@
         "specificattribute": [
           {
             "name": "AGI",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "REA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "CHA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "INT",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "WIL",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "ESS",
@@ -2088,8 +2176,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -2098,33 +2186,33 @@
         "specificattribute": [
           {
             "name": "BOD",
-            "min": 4,
-            "max": 4
+            "max": 4,
+            "min": 4
           },
           {
             "name": "REA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "STR",
-            "min": 3,
-            "max": 3
+            "max": 3,
+            "min": 3
           },
           {
             "name": "CHA",
-            "min": -2,
-            "max": -2
+            "max": -2,
+            "min": -2
           },
           {
             "name": "LOG",
-            "min": -1,
-            "max": -1
+            "max": -1,
+            "min": -1
           },
           {
             "name": "WIL",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "ESS",
@@ -2149,8 +2237,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
@@ -2159,28 +2247,28 @@
         "specificattribute": [
           {
             "name": "AGI",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "REA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "CHA",
-            "min": 2,
-            "max": 2
+            "max": 2,
+            "min": 2
           },
           {
             "name": "INT",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "WIL",
-            "min": 1,
-            "max": 1
+            "max": 1,
+            "min": 1
           },
           {
             "name": "ESS",
@@ -2198,7 +2286,10 @@
       "source": "UN",
       "page": 37,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Juryrigger",
@@ -2279,7 +2370,8 @@
         "skillcategory": [
           {
             "name": "Language",
-            "bonus": 2
+            "bonus": 2,
+            "applytorating": "yes"
           }
         ]
       },
@@ -2356,8 +2448,8 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "magician"
@@ -2427,7 +2519,10 @@
       "source": "SR4",
       "page": 92,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selectmentorspirit": true
+      }
     },
     {
       "name": "Metagenetic Improvement",
@@ -2439,8 +2534,13 @@
       "limit": false,
       "bonus": {
         "selectattribute": {
-          "min": 1,
-          "max": 1
+          "excludeattribute": [
+            "EDG",
+            "MAG",
+            "RES"
+          ],
+          "max": 1,
+          "min": 1
         }
       },
       "effect": "Attribute bonus (selected)"
@@ -2504,11 +2604,16 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
-        "enabletab": "magician"
+        "enabletab": {
+          "name": [
+            "magician",
+            "adept"
+          ]
+        }
       },
       "effect": "Grants Magic attribute; Enables Spellcasting"
     },
@@ -2542,11 +2647,13 @@
         "specificskill": [
           {
             "name": "Running",
-            "bonus": 1
+            "bonus": 1,
+            "applytorating": "yes"
           },
           {
             "name": "Gymnastics",
-            "bonus": 1
+            "bonus": 1,
+            "applytorating": "yes"
           }
         ]
       },
@@ -2559,7 +2666,12 @@
       "source": "SR4",
       "page": 92,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "livingpersona": {
+          "biofeedback": 1
+        }
+      }
     },
     {
       "name": "Natural Immunity (Natural)",
@@ -2633,7 +2745,8 @@
         "skillgroup": [
           {
             "name": "Outdoors",
-            "bonus": 1
+            "bonus": 1,
+            "applytorating": "yes"
           }
         ]
       },
@@ -2646,7 +2759,10 @@
       "source": "UN",
       "page": 37,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selectparagon": true
+      }
     },
     {
       "name": "Perceptive (+1 Bonus)",
@@ -2790,7 +2906,12 @@
       "source": "UN",
       "page": 169,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 2
+        }
+      }
     },
     {
       "name": "Resistance to Pathogens",
@@ -2979,7 +3100,8 @@
         "skillcategory": [
           {
             "name": "Street",
-            "bonus": 1
+            "bonus": 1,
+            "applytorating": "yes"
           }
         ]
       },
@@ -3067,8 +3189,8 @@
             "name": "MAG",
             "min": 1,
             "max": 1,
-            "val": 1,
-            "aug": 1
+            "aug": 1,
+            "val": 1
           }
         ]
       },
@@ -3081,7 +3203,10 @@
       "source": "SR4",
       "page": 93,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Spirit Knack",
@@ -3097,8 +3222,8 @@
             "name": "MAG",
             "min": 1,
             "max": 1,
-            "val": 1,
-            "aug": 1
+            "aug": 1,
+            "val": 1
           }
         ]
       },
@@ -3179,7 +3304,8 @@
         "skillcategory": [
           {
             "name": "Professional",
-            "bonus": 1
+            "bonus": 1,
+            "applytorating": "yes"
           }
         ]
       },
@@ -3199,8 +3325,8 @@
             "name": "RES",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "technomancer"
@@ -3340,7 +3466,12 @@
       "source": "RC",
       "page": 101,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 1
+        }
+      }
     },
     {
       "name": "Tough as Nails (Rating 2)",
@@ -3349,7 +3480,12 @@
       "source": "RC",
       "page": 101,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 2
+        }
+      }
     },
     {
       "name": "Tough as Nails (Rating 3)",
@@ -3358,7 +3494,12 @@
       "source": "RC",
       "page": 101,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": 3
+        }
+      }
     },
     {
       "name": "Toughness",
@@ -3400,7 +3541,11 @@
       "mutant": false,
       "limit": true,
       "bonus": {
-        "selectskill": {}
+        "selectskill": {
+          "val": 1,
+          "applytorating": "yes",
+          "skillgroup": "Influence"
+        }
       }
     },
     {
@@ -3415,7 +3560,8 @@
         "skillgroup": [
           {
             "name": "Influence",
-            "bonus": 1
+            "bonus": 1,
+            "applytorating": "yes"
           }
         ]
       },
@@ -3508,6 +3654,11 @@
       "page": 93,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "overflow": 1
+        }
+      },
       "effect": "Gains 1 additional Damage Overflow Box."
     },
     {
@@ -3518,6 +3669,11 @@
       "page": 93,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "overflow": 2
+        }
+      },
       "effect": "Gains 2 additional Damage Overflow Boxes."
     },
     {
@@ -3528,6 +3684,11 @@
       "page": 93,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "overflow": 3
+        }
+      },
       "effect": "Gains 3 additional Damage Overflow Boxes."
     },
     {
@@ -3539,7 +3700,8 @@
       "mutant": false,
       "limit": false,
       "bonus": {
-        "notoriety": 1
+        "notoriety": 1,
+        "selecttext": true
       },
       "effect": "+1 Notoriety"
     },
@@ -3552,7 +3714,8 @@
       "mutant": false,
       "limit": false,
       "bonus": {
-        "notoriety": 1
+        "notoriety": 1,
+        "selecttext": true
       },
       "effect": "+1 Notoriety"
     },
@@ -3565,7 +3728,8 @@
       "mutant": false,
       "limit": false,
       "bonus": {
-        "notoriety": 1
+        "notoriety": 1,
+        "selecttext": true
       },
       "effect": "+1 Notoriety"
     },
@@ -3578,7 +3742,14 @@
       "mutant": false,
       "limit": false,
       "bonus": {
-        "notoriety": 1
+        "notoriety": 1,
+        "selecttext": true,
+        "specificattribute": [
+          {
+            "name": "ESS",
+            "val": -1
+          }
+        ]
       },
       "effect": "+1 Notoriety"
     },
@@ -3654,7 +3825,10 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Allergy (Uncommon, Moderate)",
@@ -3663,7 +3837,10 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Allergy (Uncommon, Severe)",
@@ -3672,7 +3849,10 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Allergy (Common, Mild)",
@@ -3681,7 +3861,10 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Allergy (Common, Moderate)",
@@ -3690,7 +3873,10 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Allergy (Common, Severe)",
@@ -3699,7 +3885,10 @@
       "source": "SR4",
       "page": 94,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Amnesia (Past)",
@@ -3798,6 +3987,7 @@
       "mutant": false,
       "limit": true,
       "bonus": {
+        "selecttext": true,
         "specificskill": [
           {
             "name": "Assensing",
@@ -3824,6 +4014,7 @@
       "mutant": false,
       "limit": true,
       "bonus": {
+        "selecttext": true,
         "specificskill": [
           {
             "name": "Assensing",
@@ -4057,7 +4248,10 @@
       "source": "AU",
       "page": 21,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Buggy 'Ware (Rating 2)",
@@ -4066,7 +4260,10 @@
       "source": "AU",
       "page": 21,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Buggy 'Ware (Rating 3)",
@@ -4075,7 +4272,10 @@
       "source": "AU",
       "page": 21,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Buggy 'Ware (Rating 4)",
@@ -4084,7 +4284,10 @@
       "source": "AU",
       "page": 21,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Carrier",
@@ -4093,7 +4296,10 @@
       "source": "RC",
       "page": 82,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Cephalopoidal Skull",
@@ -4122,6 +4328,9 @@
       "page": 94,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "selecttext": true
+      },
       "effect": "Character always has trouble with a particular Matrix action, receiving a -2 dice pool modifier anytime they attempt it."
     },
     {
@@ -4328,7 +4537,10 @@
       "source": "AU",
       "page": 163,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Dementia",
@@ -4505,7 +4717,10 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Flashbacks (Common)",
@@ -4514,7 +4729,10 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Focus Addiction (Mild)",
@@ -4578,6 +4796,9 @@
       "page": 27,
       "mutant": false,
       "limit": false,
+      "bonus": {
+        "selecttext": true
+      },
       "effect": "A restriction the Awakened character voluntarily imposes on his own magical power; if the restriction is broken, the character's Magic attribute is reduced by 1 point."
     },
     {
@@ -4706,6 +4927,11 @@
       "limit": false,
       "bonus": {
         "selectattribute": {
+          "excludeattribute": [
+            "EDG",
+            "MAG",
+            "RES"
+          ],
           "max": -1
         }
       },
@@ -4728,7 +4954,10 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "nuyenamt": 5000
+      }
     },
     {
       "name": "In Debt (10,000¥)",
@@ -4737,7 +4966,10 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "nuyenamt": 10000
+      }
     },
     {
       "name": "In Debt (15,000¥)",
@@ -4746,7 +4978,10 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "nuyenamt": 15000
+      }
     },
     {
       "name": "In Debt (20,000¥)",
@@ -4755,7 +4990,10 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "nuyenamt": 20000
+      }
     },
     {
       "name": "In Debt (25,000¥)",
@@ -4764,7 +5002,10 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "nuyenamt": 25000
+      }
     },
     {
       "name": "In Debt (30,000¥)",
@@ -4773,7 +5014,10 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "nuyenamt": 30000
+      }
     },
     {
       "name": "Incompetent",
@@ -4858,7 +5102,10 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Low Pain Tolerance",
@@ -4867,7 +5114,12 @@
       "source": "SR4",
       "page": 95,
       "mutant": true,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "threshold": -1
+        }
+      }
     },
     {
       "name": "Mania/Phobia (Uncommon, Mild)",
@@ -4876,7 +5128,10 @@
       "source": "AU",
       "page": 164,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Mania/Phobia (Uncommon, Moderate)",
@@ -4885,7 +5140,10 @@
       "source": "AU",
       "page": 164,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Mania/Phobia (Uncommon, Severe)",
@@ -4894,7 +5152,10 @@
       "source": "AU",
       "page": 164,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Mania/Phobia (Common, Mild)",
@@ -4903,7 +5164,10 @@
       "source": "AU",
       "page": 164,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Mania/Phobia (Common, Moderate)",
@@ -4912,7 +5176,10 @@
       "source": "AU",
       "page": 164,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Mania/Phobia (Common, Severe)",
@@ -4921,7 +5188,10 @@
       "source": "AU",
       "page": 164,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Media Junkie (Mild)",
@@ -4966,7 +5236,23 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillattribute": [
+          {
+            "name": [
+              "LOG"
+            ],
+            "bonus": -1
+          },
+          {
+            "name": [
+              "WIL"
+            ],
+            "bonus": -1
+          }
+        ]
+      }
     },
     {
       "name": "Mental Handicap (Rating 2)",
@@ -4975,7 +5261,23 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillattribute": [
+          {
+            "name": [
+              "LOG"
+            ],
+            "bonus": -2
+          },
+          {
+            "name": [
+              "WIL"
+            ],
+            "bonus": -2
+          }
+        ]
+      }
     },
     {
       "name": "Mental Handicap (Rating 3)",
@@ -4984,7 +5286,23 @@
       "source": "RC",
       "page": 105,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "skillattribute": [
+          {
+            "name": [
+              "LOG"
+            ],
+            "bonus": -3
+          },
+          {
+            "name": [
+              "WIL"
+            ],
+            "bonus": -3
+          }
+        ]
+      }
     },
     {
       "name": "Mood Hair",
@@ -5078,6 +5396,11 @@
       "page": 117,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "conditionmonitor": {
+          "physical": -2
+        }
+      },
       "effect": "Reduces the character's default Physical Condition Monitor due to retaining childlike physical traits, making them easily mistaken for children."
     },
     {
@@ -5218,7 +5541,10 @@
       "source": "RC",
       "page": 107,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Poor Self Control (Compulsive - Moderate Danger)",
@@ -5227,7 +5553,10 @@
       "source": "RC",
       "page": 107,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Poor Self Control (Compulsive - High Danger)",
@@ -5236,7 +5565,10 @@
       "source": "RC",
       "page": 107,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Poor Self Control (Vindictive)",
@@ -5263,7 +5595,10 @@
       "source": "RC",
       "page": 108,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Prejudiced (Common, Outspoken)",
@@ -5272,7 +5607,10 @@
       "source": "RC",
       "page": 108,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Prejudiced (Common, Active)",
@@ -5281,7 +5619,10 @@
       "source": "RC",
       "page": 108,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Prejudiced (Common, Radical)",
@@ -5290,7 +5631,10 @@
       "source": "RC",
       "page": 108,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Prejudiced (Specific, Biased)",
@@ -5299,7 +5643,10 @@
       "source": "RC",
       "page": 108,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Prejudiced (Specific, Outspoken)",
@@ -5308,7 +5655,10 @@
       "source": "RC",
       "page": 108,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Prejudiced (Specific, Active)",
@@ -5317,7 +5667,10 @@
       "source": "RC",
       "page": 108,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Prejudiced (Specific, Radical)",
@@ -5326,7 +5679,10 @@
       "source": "RC",
       "page": 108,
       "mutant": false,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Progeria",
@@ -5381,7 +5737,10 @@
       "source": "RC",
       "page": 109,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Reduced Sense (Partial)",
@@ -5390,7 +5749,10 @@
       "source": "RC",
       "page": 108,
       "mutant": true,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Reduced Sense (Partial, Neurological)",
@@ -5399,7 +5761,10 @@
       "source": "RC",
       "page": 108,
       "mutant": true,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Reduced Sense (Complete)",
@@ -5408,7 +5773,10 @@
       "source": "RC",
       "page": 108,
       "mutant": true,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Reduced Sense (Complete, Neurological)",
@@ -5417,7 +5785,10 @@
       "source": "RC",
       "page": 108,
       "mutant": true,
-      "limit": false
+      "limit": false,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Scales",
@@ -5522,6 +5893,9 @@
       "page": 95,
       "mutant": false,
       "limit": true,
+      "bonus": {
+        "selecttext": true
+      },
       "effect": "Character was born with or acquired a legal System Identification Number (SIN), meaning their identity is stored and accessible in numerous databanks."
     },
     {
@@ -5533,7 +5907,8 @@
       "mutant": false,
       "limit": true,
       "bonus": {
-        "notoriety": 1
+        "notoriety": 1,
+        "selecttext": true
       },
       "effect": "+1 Notoriety"
     },
@@ -5584,7 +5959,8 @@
       "mutant": false,
       "limit": true,
       "bonus": {
-        "notoriety": 1
+        "notoriety": 1,
+        "selecttext": true
       },
       "effect": "+1 Notoriety"
     },
@@ -5773,7 +6149,10 @@
       "source": "RC",
       "page": 110,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Weak Immune System",
@@ -5818,7 +6197,10 @@
       "source": "RW",
       "page": 197,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "Fnord",
@@ -5845,7 +6227,10 @@
       "source": "RW",
       "page": 197,
       "mutant": false,
-      "limit": true
+      "limit": true,
+      "bonus": {
+        "selecttext": true
+      }
     },
     {
       "name": "POKEr",
@@ -5922,7 +6307,8 @@
         "skillcategory": [
           {
             "name": "Street",
-            "bonus": 1
+            "bonus": 1,
+            "applytorating": "yes"
           }
         ]
       },
@@ -5994,15 +6380,16 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
         "flyspeed": -2,
         "specificattribute": [
           {
-            "name": "EDG"
+            "name": "EDG",
+            "max": "8-natural"
           },
           {
             "name": "ESS",
@@ -6027,15 +6414,16 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
         "flyspeed": -2,
         "specificattribute": [
           {
-            "name": "EDG"
+            "name": "EDG",
+            "max": "8-natural"
           },
           {
             "name": "ESS",
@@ -6060,15 +6448,16 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
         "flyspeed": -2,
         "specificattribute": [
           {
-            "name": "EDG"
+            "name": "EDG",
+            "max": "8-natural"
           },
           {
             "name": "ESS",
@@ -6093,15 +6482,16 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
         "flyspeed": -2,
         "specificattribute": [
           {
-            "name": "EDG"
+            "name": "EDG",
+            "max": "8-natural"
           },
           {
             "name": "ESS",
@@ -6126,15 +6516,16 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
         "flyspeed": -2,
         "specificattribute": [
           {
-            "name": "EDG"
+            "name": "EDG",
+            "max": "8-natural"
           },
           {
             "name": "ESS",
@@ -6159,15 +6550,16 @@
             "name": "MAG",
             "min": 1,
             "max": 6,
-            "val": 1,
-            "aug": 6
+            "aug": 6,
+            "val": 1
           }
         ],
         "enabletab": "critter",
         "flyspeed": -2,
         "specificattribute": [
           {
-            "name": "EDG"
+            "name": "EDG",
+            "max": "8-natural"
           },
           {
             "name": "ESS",
@@ -6214,7 +6606,8 @@
       "mutant": false,
       "limit": true,
       "bonus": {
-        "blackmarketdiscount": true
+        "blackmarketdiscount": true,
+        "selecttext": true
       },
       "effect": "Black market access"
     },
@@ -6227,7 +6620,8 @@
       "mutant": false,
       "limit": true,
       "bonus": {
-        "blackmarketdiscount": true
+        "blackmarketdiscount": true,
+        "selecttext": true
       },
       "effect": "Black market access"
     },
@@ -6240,7 +6634,8 @@
       "mutant": false,
       "limit": true,
       "bonus": {
-        "blackmarketdiscount": true
+        "blackmarketdiscount": true,
+        "selecttext": true
       },
       "effect": "Black market access"
     },
@@ -6253,7 +6648,8 @@
       "mutant": false,
       "limit": true,
       "bonus": {
-        "blackmarketdiscount": true
+        "blackmarketdiscount": true,
+        "selecttext": true
       },
       "effect": "Black market access"
     },

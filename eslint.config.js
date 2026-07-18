@@ -9,12 +9,7 @@ export default [
 	js.configs.recommended,
 	prettier,
 	{
-		ignores: [
-			'.svelte-kit/**',
-			'build/**',
-			'node_modules/**',
-			'*.config.js'
-		]
+		ignores: ['.svelte-kit/**', 'build/**', 'node_modules/**', '*.config.js']
 	},
 	{
 		files: ['**/*.ts'],
@@ -35,7 +30,7 @@ export default [
 			'@typescript-eslint/strict-boolean-expressions': 'error',
 			'no-console': ['warn', { allow: ['warn', 'error'] }],
 			'max-lines-per-function': ['error', { max: 60, skipBlankLines: true, skipComments: true }],
-			'complexity': ['error', 10],
+			complexity: ['error', 10],
 			'max-depth': ['error', 3]
 		}
 	},
