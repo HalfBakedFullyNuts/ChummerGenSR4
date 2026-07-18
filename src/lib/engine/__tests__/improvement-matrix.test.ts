@@ -11,7 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { PRODUCIBLE_TYPES } from '../improvementManager';
 import type { ImprovementType } from '$types';
 
-/** Every type actually read via valueOf(...) today (calculations.ts, equipment.ts, AttributeAllocator.svelte). */
+/** Every type actually read via valueOf(...)/skillPoolBonus(...) today (calculations.ts, equipment.ts, AttributeAllocator.svelte). */
 const CONSUMED: readonly ImprovementType[] = [
     'Attribute',
     'PhysicalCM',
@@ -35,14 +35,15 @@ const CONSUMED: readonly ImprovementType[] = [
     'SpecialTab',
     'CyberwareEssCost',
     'BiowareEssCost',
-    'SensitiveSystem'
+    'SensitiveSystem',
+    // wired in issue #65 via calculateDicePool/skillPoolBonus:
+    'Skill',
+    'SkillGroup',
+    'SkillCategory'
 ];
 
 /** Types produced but not yet consumed, with the issue (or follow-up note) tracking the remaining wiring. */
 const DEFERRED: Partial<Record<ImprovementType, string>> = {
-    Skill: '#65',
-    SkillGroup: '#65',
-    SkillCategory: '#65',
     CMThreshold: '#64-followup', // condition-monitor threshold modifiers: no consumer yet
     CMThresholdOffset: '#64-followup',
     Notoriety: '#90',

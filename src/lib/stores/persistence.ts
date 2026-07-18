@@ -8,6 +8,7 @@
 import { get, derived, type Readable } from 'svelte/store';
 import { type Character, type BuildMethod, createEmptyCharacter } from '$types';
 import { characterStore, currentStepStore, generateId, character } from './character';
+import { gameData, type GameData } from './gamedata';
 import {
 	saveCharacter as firebaseSave,
 	loadCharacter as firebaseLoad,
@@ -16,6 +17,25 @@ import {
 	duplicateCharacter as firebaseDuplicate,
 	type CharacterSummary
 } from '$lib/firebase';
+
+/**
+ * Backfill CharacterSkill.category/group for saves persisted before issue
+ * #65 added them (name-lookup against loaded game data). A no-op once every
+ * skill already carries both fields — cheap to call unconditionally on load.
+ */
+export function backfillSkillMeta(char: Character, data: GameData): Character {
+	const needsBackfill = char.skills.some((s) => s.category === undefined || s.group === undefined);
+	if (!needsBackfill) return char;
+
+	const skills = char.skills.map((s) => {
+		if (s.category !== undefined && s.group !== undefined) return s;
+		const def = data.skills.find((d) => d.name === s.name);
+		if (!def) return s;
+		return { ...s, category: def.category, group: def.skillgroup };
+	});
+
+	return { ...char, skills };
+}
 
 interface AsyncResult<T = void> {
 	success: boolean;
@@ -40,8 +60,9 @@ export async function loadSavedCharacter(
 	const result = await firebaseLoad(characterId);
 
 	if (result.success && result.data) {
-		characterStore.set(result.data);
-		if (result.data.status === 'creation') {
+		const backfilled = backfillSkillMeta(result.data, get(gameData));
+		characterStore.set(backfilled);
+		if (backfilled.status === 'creation') {
 			currentStepStore.set('finalize');
 		}
 	}
@@ -51,8 +72,9 @@ export async function loadSavedCharacter(
 
 /** Load an imported character (e.g. from XML) into the store. */
 export function loadImportedCharacter(importedChar: Character): void {
-	characterStore.set(importedChar);
-	if (importedChar.status === 'creation') {
+	const backfilled = backfillSkillMeta(importedChar, get(gameData));
+	characterStore.set(backfilled);
+	if (backfilled.status === 'creation') {
 		currentStepStore.set('finalize');
 	}
 }

@@ -13,8 +13,6 @@ import {
 	startNewCharacter,
 	addQuality,
 	removeQuality,
-	setSkill,
-	removeSkill,
 	addContact,
 	removeContact,
 	setResourcesBP,
@@ -25,6 +23,7 @@ import {
 	reloadWeapon,
 	setAmmo
 } from '../character';
+import { setSkill, removeSkill } from '../skills';
 import { addWeapon } from '../equipment';
 
 describe('Character Store - BP Management', () => {

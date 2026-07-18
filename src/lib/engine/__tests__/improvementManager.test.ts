@@ -3,7 +3,8 @@ import {
     valueOf,
     removeImprovements,
     createImprovementsFromBonus,
-    resolveBonusValue
+    resolveBonusValue,
+    skillPoolBonus
 } from '../improvementManager';
 import type { Improvement } from '$types';
 
@@ -116,7 +117,11 @@ describe('ImprovementManager', () => {
     });
 
     it('filters by improvedName successfully', () => {
-        expect(valueOf(mockImprovements, 'Skill', 'Pistols')).toBe(1);
+        // imp-4 (Aptitude (Pistols)) is addToRating:true (issue #65), so the
+        // default addToRating:false query no longer matches it — query
+        // addToRating explicitly to reach it.
+        expect(valueOf(mockImprovements, 'Skill', 'Pistols', 'val', true)).toBe(1);
+        expect(valueOf(mockImprovements, 'Skill', 'Pistols')).toBe(0);
         expect(valueOf(mockImprovements, 'Skill', 'Longarms')).toBe(0);
     });
 
@@ -172,6 +177,55 @@ describe('ImprovementManager', () => {
                 attr({ id: 'p0b', val: 5, uniqueName: 'precedence0' })
             ];
             expect(valueOf(imps, 'Attribute', 'rea')).toBe(5);
+        });
+    });
+
+    describe('skillPoolBonus (issue #65)', () => {
+        const skillImp = (overrides: Partial<Improvement>): Improvement => ({
+            id: overrides.id ?? 'imp',
+            type: 'Skill',
+            source: 'Quality',
+            sourceName: 'src',
+            improvedName: 'Pistols',
+            val: 0,
+            min: 0,
+            max: 0,
+            aug: 0,
+            augMax: 0,
+            rating: 1,
+            exclude: '',
+            uniqueName: '',
+            addToRating: false,
+            enabled: true,
+            ...overrides
+        });
+
+        it('sums Skill + SkillGroup + SkillCategory bonuses for the named skill', () => {
+            const imps = [
+                skillImp({ id: 's', type: 'Skill', improvedName: 'Pistols', val: 2 }),
+                skillImp({ id: 'g', type: 'SkillGroup', improvedName: 'Firearms', val: 1 }),
+                skillImp({ id: 'c', type: 'SkillCategory', improvedName: 'Combat Active', val: 3 })
+            ];
+            const total = skillPoolBonus(imps, { name: 'Pistols', group: 'Firearms', category: 'Combat Active' });
+            expect(total).toBe(6);
+        });
+
+        it('honors exclude on SkillGroup/SkillCategory improvements', () => {
+            const imps = [
+                skillImp({ id: 'c', type: 'SkillCategory', improvedName: 'Combat Active', val: 3, exclude: 'Dodge' })
+            ];
+            expect(skillPoolBonus(imps, { name: 'Dodge', category: 'Combat Active' })).toBe(0);
+            expect(skillPoolBonus(imps, { name: 'Pistols', category: 'Combat Active' })).toBe(3);
+        });
+
+        it('addToRating true/false are disjoint query modes', () => {
+            const imps = [skillImp({ id: 'r', val: 1, addToRating: true })];
+            expect(skillPoolBonus(imps, { name: 'Pistols' }, true)).toBe(1);
+            expect(skillPoolBonus(imps, { name: 'Pistols' }, false)).toBe(0);
+        });
+
+        it('returns 0 for a skill with no group/category and no matching improvements', () => {
+            expect(skillPoolBonus([], { name: 'Pistols' })).toBe(0);
         });
     });
 
@@ -237,6 +291,28 @@ describe('ImprovementManager', () => {
             expect(imps[0]!.improvedName).toBe('Firearms');
             expect(imps[1]!.type).toBe('SkillCategory');
             expect(imps[1]!.improvedName).toBe('Combat');
+        });
+
+        it('parses applytorating on specificskill/selectskill (issue #65)', () => {
+            const bonusData = {
+                specificskill: [
+                    { name: 'Infiltration', bonus: 1, applytorating: 'yes' },
+                    { name: 'Shadowing', bonus: 1 }
+                ],
+                selectskill: { bonus: 1, applytorating: 'yes' }
+            };
+            const imps = createImprovementsFromBonus('Quality', 'Test', bonusData, 1, 'Con');
+            expect(imps.find(i => i.improvedName === 'Infiltration')!.addToRating).toBe(true);
+            expect(imps.find(i => i.improvedName === 'Shadowing')!.addToRating).toBe(false);
+            expect(imps.find(i => i.improvedName === 'Con')!.addToRating).toBe(true);
+        });
+
+        it('parses exclude on skillgroup/skillcategory (issue #65, Glamour)', () => {
+            const bonusData = {
+                skillcategory: [{ name: 'Social Active', bonus: 3, exclude: 'Intimidation' }]
+            };
+            const imps = createImprovementsFromBonus('Quality', 'Glamour', bonusData);
+            expect(imps[0]!.exclude).toBe('Intimidation');
         });
 
         it('parses prop mappings', () => {

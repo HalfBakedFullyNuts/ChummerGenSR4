@@ -53,12 +53,14 @@ export function setSkill(name: string, rating: number, specialization: string | 
 			i === existingIndex ? { ...s, rating, specialization } : s
 		);
 	} else {
+		const skillDef = get(skillsStore).find((s) => s.name === name);
 		const newSkill: CharacterSkill = {
 			name,
 			rating,
 			specialization,
 			bonus: 0,
-			karmaSpent: 0
+			karmaSpent: 0,
+			...(skillDef !== undefined ? { category: skillDef.category, group: skillDef.skillgroup } : {})
 		};
 		newSkills = [...char.skills, newSkill];
 	}

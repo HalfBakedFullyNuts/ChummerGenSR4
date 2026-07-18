@@ -24,11 +24,11 @@ import {
 	getExpenseLog,
 	isCareerMode,
 	KARMA_COSTS,
-	setSkill,
 	addQuality,
 	initializeMagic,
 	setAttribute
 } from '../character';
+import { setSkill } from '../skills';
 
 describe('Career Mode', () => {
 	beforeEach(() => {

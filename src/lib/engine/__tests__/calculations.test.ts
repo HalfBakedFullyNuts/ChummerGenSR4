@@ -274,7 +274,66 @@ describe('calculations engine', () => {
             }];
             char.condition.physicalCurrent = 3; // -1 modifier
 
-            expect(calculations.calculateDicePool(char, 'Pistols', 'agi')).toBe(7); // 4 (AGI) + 3 (Rating) + 1 (Bonus) - 1 (Wound) = 7
+            // skill.bonus (deprecated, issue #65) no longer counts — improvements are
+            // the sole source of skill bonuses now: 4 (AGI) + 3 (Rating) - 1 (Wound) = 6
+            expect(calculations.calculateDicePool(char, 'Pistols', 'agi')).toBe(6);
+        });
+
+        it('calculateDicePool applies Skill/SkillGroup/SkillCategory improvements (issue #65)', () => {
+            char.attributes.agi.base = 4;
+            char.skills = [{
+                id: 's1', name: 'Pistols', rating: 3, bonus: 0, base: 3, karma: 0,
+                isKnowledge: false, isLanguage: false,
+                skillgroup: 'Firearms', category: 'Combat Active', default: true, specs: [],
+                group: 'Firearms'
+            }];
+            char.improvements = [
+                {
+                    id: 'i1', type: 'Skill', improvedName: 'Pistols', source: 'Quality', sourceName: 'Aptitude',
+                    val: 2, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                    exclude: '', uniqueName: '', addToRating: false, enabled: true
+                },
+                {
+                    id: 'i2', type: 'SkillCategory', improvedName: 'Combat Active', source: 'Quality', sourceName: 'Glamour',
+                    val: 3, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                    exclude: 'Dodge', uniqueName: '', addToRating: false, enabled: true
+                }
+            ];
+            // 4 (AGI) + 3 (Rating) + 2 (Skill bonus) + 3 (Category bonus, not excluded) = 12
+            expect(calculations.calculateDicePool(char, 'Pistols', 'agi')).toBe(12);
+        });
+
+        it('calculateDicePool honors SkillCategory exclude', () => {
+            char.attributes.agi.base = 4;
+            char.skills = [{
+                id: 's1', name: 'Dodge', rating: 2, bonus: 0, base: 2, karma: 0,
+                isKnowledge: false, isLanguage: false,
+                skillgroup: '', category: 'Combat Active', default: true, specs: [],
+                group: ''
+            }];
+            char.improvements = [{
+                id: 'i1', type: 'SkillCategory', improvedName: 'Combat Active', source: 'Quality', sourceName: 'Glamour',
+                val: 3, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                exclude: 'Dodge', uniqueName: '', addToRating: false, enabled: true
+            }];
+            // Dodge is on the exclude list, so the Combat Active bonus does not apply: 4 (AGI) + 2 (Rating) = 6
+            expect(calculations.calculateDicePool(char, 'Dodge', 'agi')).toBe(6);
+        });
+
+        it('calculateDicePool addToRating improvements raise effective rating, not the pool bonus directly', () => {
+            char.attributes.agi.base = 4;
+            char.skills = [{
+                id: 's1', name: 'Pistols', rating: 3, bonus: 0, base: 3, karma: 0,
+                isKnowledge: false, isLanguage: false,
+                skillgroup: '', category: '', default: true, specs: [], group: ''
+            }];
+            char.improvements = [{
+                id: 'i1', type: 'Skill', improvedName: 'Pistols', source: 'Quality', sourceName: 'Aptitude (Pistols)',
+                val: 1, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                exclude: '', uniqueName: '', addToRating: true, enabled: true
+            }];
+            // effective rating 3+1=4; pool = 4 (AGI) + 4 (effective rating) = 8
+            expect(calculations.calculateDicePool(char, 'Pistols', 'agi')).toBe(8);
         });
 
         it('calculateDicePool without skill allowing default', () => {

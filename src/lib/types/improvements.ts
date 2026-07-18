@@ -203,18 +203,24 @@ export interface SkillBonusEntry {
     readonly name: string;
     readonly bonus?: BonusValue;
     readonly max?: BonusValue;
+    /** `<applytorating>yes</applytorating>` — the bonus adds to skill rating, not the dice pool. */
+    readonly applytorating?: string;
 }
 
 /** Skill group modifier entry (`<skillgroup>`). */
 export interface SkillGroupBonusEntry {
     readonly name: string;
     readonly bonus?: BonusValue;
+    /** Comma/space-separated skill names this group bonus does not apply to. */
+    readonly exclude?: string;
 }
 
 /** Skill category modifier entry (`<skillcategory>`). */
 export interface SkillCategoryBonusEntry {
     readonly name: string;
     readonly bonus?: BonusValue;
+    /** Comma/space-separated skill names this category bonus does not apply to. */
+    readonly exclude?: string;
 }
 
 /** A bonus value carrying a `precedence` attribute (e.g. `<thresholdoffset precedence="0">1</thresholdoffset>`). */

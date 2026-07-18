@@ -197,18 +197,24 @@ function sumWithUniqueNameGrouping(
  * Optionally filter by improvedName (e.g., getting bonuses for a specific skill).
  * Matches exactly (desktop clsImprovement.cs:911-916) — an improvement with an
  * empty improvedName is never a fallback match for a named query.
+ * `addToRating` (desktop `ValueOf(type, blnAddToRating, improvedName)`): pool
+ * bonuses and rating bonuses are disjoint query modes — an improvement whose
+ * `addToRating` doesn't match the requested mode is excluded entirely.
  */
 export function valueOf(
     improvements: readonly Improvement[] | undefined,
     type: ImprovementType,
     improvedName?: string,
-    propertyToSum: 'val' | 'min' | 'max' | 'aug' | 'augMax' = 'val'
+    propertyToSum: 'val' | 'min' | 'max' | 'aug' | 'augMax' = 'val',
+    addToRating = false
 ): number {
     if (!improvements || improvements.length === 0) {
         return 0;
     }
 
-    let activeImprovements = improvements.filter((imp) => imp.enabled && imp.type === type);
+    let activeImprovements = improvements.filter(
+        (imp) => imp.enabled && imp.type === type && imp.addToRating === addToRating
+    );
 
     if (improvedName !== undefined) {
         // e.g. `type: 'Skill', improvedName: 'Pistols'`
@@ -226,6 +232,59 @@ export function valueOf(
     }
 
     return sumWithUniqueNameGrouping(activeImprovements, propertyToSum);
+}
+
+/** Does an improvement's `exclude` list (comma/space-separated skill names) cover this skill? */
+function excludesSkill(imp: Improvement, skillName: string): boolean {
+    if (!imp.exclude) return false;
+    return imp.exclude
+        .split(',')
+        .map((s) => s.trim())
+        .includes(skillName);
+}
+
+/** Sum a SkillGroup/SkillCategory improvement group, honoring desktop's per-skill `exclude` list. */
+function sumExcludableSkillBonus(
+    improvements: readonly Improvement[],
+    type: 'SkillGroup' | 'SkillCategory',
+    improvedName: string,
+    skillName: string,
+    addToRating: boolean
+): number {
+    const active = improvements.filter(
+        (imp) =>
+            imp.enabled &&
+            imp.type === type &&
+            imp.improvedName === improvedName &&
+            imp.addToRating === addToRating &&
+            !excludesSkill(imp, skillName)
+    );
+    return sumWithUniqueNameGrouping(active, 'val');
+}
+
+/**
+ * Total dice-pool (or rating, if `addToRating`) bonus for a skill from its
+ * Skill + SkillGroup + SkillCategory improvements, honoring `exclude` (desktop:
+ * an improvement whose exclude list names this skill is skipped for group/
+ * category bonuses — e.g. Glamour's Social Active +3 excluding Intimidation).
+ */
+export function skillPoolBonus(
+    improvements: readonly Improvement[] | undefined,
+    skill: { name: string; group?: string; category?: string },
+    addToRating = false
+): number {
+    if (!improvements || improvements.length === 0) return 0;
+
+    let total = valueOf(improvements, 'Skill', skill.name, 'val', addToRating);
+
+    if (skill.group !== undefined && skill.group !== '') {
+        total += sumExcludableSkillBonus(improvements, 'SkillGroup', skill.group, skill.name, addToRating);
+    }
+    if (skill.category !== undefined && skill.category !== '') {
+        total += sumExcludableSkillBonus(improvements, 'SkillCategory', skill.category, skill.name, addToRating);
+    }
+
+    return total;
 }
 
 /**
@@ -443,27 +502,33 @@ export function createImprovementsFromBonus(
         for (const skill of bonusData.specificskill) {
             b('Skill', skill.name, {
                 val: r(skill.bonus) ?? 0,
-                max: r(skill.max) ?? 0
+                max: r(skill.max) ?? 0,
+                // desktop: <applytorating>yes</applytorating> routes the bonus to skill
+                // rating instead of the dice pool (clsImprovement.cs:1690-1712)
+                addToRating: skill.applytorating === 'yes'
             });
         }
     }
     if (bonusData.selectskill && selectedSkill) {
         b('Skill', selectedSkill, {
             val: r(bonusData.selectskill.bonus) ?? 0,
-            max: r(bonusData.selectskill.max) ?? 0
+            max: r(bonusData.selectskill.max) ?? 0,
+            addToRating: bonusData.selectskill.applytorating === 'yes'
         });
     }
     if (bonusData.skillgroup) {
         for (const group of bonusData.skillgroup) {
             b('SkillGroup', group.name, {
-                val: r(group.bonus) ?? 0
+                val: r(group.bonus) ?? 0,
+                exclude: group.exclude ?? ''
             });
         }
     }
     if (bonusData.skillcategory) {
         for (const cat of bonusData.skillcategory) {
             b('SkillCategory', cat.name, {
-                val: r(cat.bonus) ?? 0
+                val: r(cat.bonus) ?? 0,
+                exclude: cat.exclude ?? ''
             });
         }
     }

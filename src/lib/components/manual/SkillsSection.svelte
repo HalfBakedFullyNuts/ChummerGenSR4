@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Character, SkillDefinition } from '$types';
-	import { setSkill, removeSkill } from '$stores/character';
+	import { setSkill, removeSkill } from '$stores';
 
 	export let character: Character;
 	export let skills: readonly SkillDefinition[];

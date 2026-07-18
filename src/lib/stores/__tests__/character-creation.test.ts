@@ -13,7 +13,6 @@ import {
 	bpBreakdown,
 	startNewCharacter,
 	addQuality,
-	setSkill,
 	addContact,
 	setResourcesBP,
 	initializeMagic,
@@ -21,6 +20,7 @@ import {
 	magicType,
 	currentEssence
 } from '../character';
+import { setSkill } from '../skills';
 import { setMetatype } from '../creation';
 import { addCyberware } from '../equipment';
 import type { GameData } from '../gamedata';

@@ -6,7 +6,7 @@
 		decrementSkillGroup,
 		setSkillWithGroupCheck,
 		setSkillSpecialization
-	} from '$stores/character';
+	} from '$stores';
 	import type { SkillDefinition, SkillGroupName } from '$types';
 	import { MAX_SKILL_GROUP_RATING } from '$types';
 

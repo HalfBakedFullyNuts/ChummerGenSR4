@@ -9,7 +9,7 @@
  */
 
 import type { Character, CharacterSkill } from '$types';
-import { valueOf } from './improvementManager';
+import { valueOf, skillPoolBonus } from './improvementManager';
 
 /* ============================================
  * Attribute Helpers
@@ -197,7 +197,14 @@ function findSkill(char: Character, skillName: string): CharacterSkill | undefin
 	return char.skills.find((s) => s.name.toLowerCase() === skillName.toLowerCase());
 }
 
-/** Calculate dice pool for a skill + attribute test. */
+/**
+ * Calculate dice pool for a skill + attribute test.
+ * Skill/SkillGroup/SkillCategory improvements apply in two disjoint modes
+ * (desktop `ValueOf(type, blnAddToRating, improvedName)`): `addToRating`
+ * improvements raise the effective skill rating, everything else adds
+ * straight to the pool. `skill.bonus` is deprecated and no longer summed
+ * here — improvements are the sole source of skill bonuses now (issue #65).
+ */
 export function calculateDicePool(
 	char: Character,
 	skillName: string,
@@ -207,16 +214,16 @@ export function calculateDicePool(
 	const attr = getAttributeTotal(char, attributeCode);
 
 	if (!skill) {
-		// Defaulting: attribute - 1 (if skill allows defaulting)
+		// Defaulting: attribute - 1. Improvements do not apply when a character
+		// lacks the skill entirely (documented divergence — see issue #65 risks).
 		return Math.max(0, attr - 1);
 	}
 
-	let pool = skill.rating + attr + skill.bonus;
+	const ratingBonus = skillPoolBonus(char.improvements, skill, true);
+	const poolBonus = skillPoolBonus(char.improvements, skill, false);
+	const effectiveRating = skill.rating + ratingBonus;
 
-	// Add wound modifier
-	pool += getWoundModifier(char);
-
-	return Math.max(0, pool);
+	return Math.max(0, effectiveRating + attr + poolBonus + getWoundModifier(char));
 }
 
 export function calculateComposure(char: Character): number {
