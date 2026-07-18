@@ -23,6 +23,7 @@ import {
 	calculateAttributeTotal
 } from '$types';
 import { gameData } from './gamedata';
+import { calculateSkillsBP } from './skills';
 import {
 	createImprovementsFromBonus,
 	removeImprovements
@@ -580,14 +581,19 @@ export function addQuality(
 		};
 	}
 
+	const updatedImprovements = [...char.improvements, ...newImprovements];
+
 	const updated: Character = {
 		...char,
 		qualities: [...char.qualities, newQuality],
-		improvements: [...char.improvements, ...newImprovements],
+		improvements: updatedImprovements,
 		attributes,
 		buildPointsSpent: {
 			...char.buildPointsSpent,
-			qualities: char.buildPointsSpent.qualities + bp
+			qualities: char.buildPointsSpent.qualities + bp,
+			// Uneducated/Uncouth/Infirm (issue #67) double per-rating skill BP costs —
+			// reprice immediately so taking the quality after buying skills still applies.
+			skills: calculateSkillsBP(char.skills, updatedImprovements)
 		},
 		updatedAt: new Date().toISOString()
 	};
@@ -691,14 +697,17 @@ export function removeQuality(qualityId: string): void {
 		};
 	}
 
+	const updatedImprovements = removeImprovements(char.improvements, 'Quality', quality.name);
+
 	const updated: Character = {
 		...char,
 		qualities: remainingQualities,
-		improvements: removeImprovements(char.improvements, 'Quality', quality.name),
+		improvements: updatedImprovements,
 		attributes,
 		buildPointsSpent: {
 			...char.buildPointsSpent,
-			qualities: char.buildPointsSpent.qualities - quality.bp
+			qualities: char.buildPointsSpent.qualities - quality.bp,
+			skills: calculateSkillsBP(char.skills, updatedImprovements)
 		},
 		updatedAt: new Date().toISOString()
 	};
@@ -1954,122 +1963,6 @@ export function improveAttribute(attributeKey: string): { success: boolean; erro
 					base: oldAttr.base + 1
 				}
 			},
-			updatedAt: new Date().toISOString()
-		};
-	});
-
-	return { success: true };
-}
-
-/**
- * Calculate karma cost to improve a skill.
- */
-export function getSkillImprovementCost(skillName: string): number | null {
-	const char = get(characterStore);
-	if (!char) return null;
-
-	const skill = char.skills.find((s) => s.name === skillName);
-	if (!skill) return KARMA_COSTS.NEW_SKILL;
-
-	const newRating = skill.rating + 1;
-	if (newRating > 6) return null; /* Max skill rating */
-
-	return newRating * KARMA_COSTS.IMPROVE_SKILL_MULTIPLIER;
-}
-
-/**
- * Improve a skill with karma.
- */
-export function improveSkill(skillName: string): { success: boolean; error?: string } {
-	const char = get(characterStore);
-	if (!char) {
-		return { success: false, error: 'No character loaded' };
-	}
-	if (char.status !== 'career') {
-		return { success: false, error: 'Character must be in career mode' };
-	}
-
-	const skillIndex = char.skills.findIndex((s) => s.name === skillName);
-	if (skillIndex === -1) {
-		return { success: false, error: 'Skill not found. Use learnNewSkill to add a new skill.' };
-	}
-
-	const skill = char.skills[skillIndex]!;
-	const newRating = skill.rating + 1;
-
-	if (newRating > 6) {
-		return { success: false, error: 'Skill already at maximum (6)' };
-	}
-
-	const cost = newRating * KARMA_COSTS.IMPROVE_SKILL_MULTIPLIER;
-	if (char.karma < cost) {
-		return { success: false, error: `Not enough karma (need ${cost}, have ${char.karma})` };
-	}
-
-	/* Spend karma */
-	const spendResult = spendKarmaInternal(cost, `Improved ${skillName} to ${newRating}`);
-	if (!spendResult.success) return spendResult;
-
-	/* Update skill */
-	characterStore.update((c) => {
-		if (!c) return c;
-		const skills = [...c.skills];
-		skills[skillIndex] = {
-			...skill,
-			rating: newRating,
-			karmaSpent: skill.karmaSpent + cost
-		};
-		return {
-			...c,
-			skills,
-			updatedAt: new Date().toISOString()
-		};
-	});
-
-	return { success: true };
-}
-
-/**
- * Learn a new skill (rating 1) with karma.
- */
-export function learnNewSkill(skillName: string): { success: boolean; error?: string } {
-	const char = get(characterStore);
-	if (!char) {
-		return { success: false, error: 'No character loaded' };
-	}
-	if (char.status !== 'career') {
-		return { success: false, error: 'Character must be in career mode' };
-	}
-
-	/* Check if already has skill */
-	if (char.skills.some((s) => s.name === skillName)) {
-		return { success: false, error: 'Already has this skill. Use improveSkill instead.' };
-	}
-
-	const cost = KARMA_COSTS.NEW_SKILL;
-	if (char.karma < cost) {
-		return { success: false, error: `Not enough karma (need ${cost}, have ${char.karma})` };
-	}
-
-	/* Spend karma */
-	const spendResult = spendKarmaInternal(cost, `Learned ${skillName} at rating 1`);
-	if (!spendResult.success) return spendResult;
-
-	/* Add skill */
-	characterStore.update((c) => {
-		if (!c) return c;
-		return {
-			...c,
-			skills: [
-				...c.skills,
-				{
-					name: skillName,
-					rating: 1,
-					specialization: null,
-					bonus: 0,
-					karmaSpent: cost
-				}
-			],
 			updatedAt: new Date().toISOString()
 		};
 	});

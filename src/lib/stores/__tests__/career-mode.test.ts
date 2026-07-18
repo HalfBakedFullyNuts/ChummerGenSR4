@@ -14,8 +14,6 @@ import {
 	awardNuyen,
 	spendNuyen,
 	improveAttribute,
-	improveSkill,
-	learnNewSkill,
 	addSpecialization,
 	learnKnowledgeSkill,
 	improveKnowledgeSkill,
@@ -29,6 +27,8 @@ import {
 	setAttribute
 } from '../character';
 import { setSkill } from '../skills';
+import { improveSkill, learnNewSkill } from '../career';
+import { setGameDataForTesting } from '../gamedata';
 
 describe('Career Mode', () => {
 	beforeEach(() => {
@@ -236,6 +236,30 @@ describe('Career Mode', () => {
 
 			expect(result.success).toBe(false);
 			expect(result.error).toContain('maximum');
+		});
+	});
+
+	describe('improveSkill karma cost doubling (issue #67)', () => {
+		it('doubles karma cost when Uneducated applies to a Technical Active skill', () => {
+			setGameDataForTesting({
+				skills: [
+					{ name: 'Hacking', attribute: 'log', category: 'Technical Active', default: false, skillgroup: 'Cracking', specializations: [], source: 'SR4', page: 128 }
+				],
+				qualities: [
+					{ name: 'Uneducated', category: 'Negative', bp: -20, mutant: false, limit: false, bonus: { uneducated: true }, source: 'SR4', page: 94 }
+				]
+			});
+			setSkill('Hacking', 3);
+			addQuality('Uneducated', 'Negative', -20);
+			enterCareerMode();
+			awardKarma(100, 'Test karma');
+
+			const karmaBefore = get(character)!.karma;
+			const result = improveSkill('Hacking');
+
+			expect(result.success).toBe(true);
+			// newRating(4) * IMPROVE_SKILL_MULTIPLIER(2) * doubling(2) = 16
+			expect(karmaBefore - get(character)!.karma).toBe(16);
 		});
 	});
 

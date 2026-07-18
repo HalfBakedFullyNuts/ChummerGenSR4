@@ -11,10 +11,12 @@ import {
 	type CharacterSkill,
 	type CharacterSkillGroup,
 	type SkillGroupName,
+	type Improvement,
 	MAX_SKILL_GROUP_RATING
 } from '$types';
 import { skills as skillsStore } from './gamedata';
 import { characterStore } from './character';
+import { hasFlag } from '../engine/improvementManager';
 
 /** BP cost per skill point. */
 const SKILL_BP_PER_POINT = 4;
@@ -25,9 +27,31 @@ const SKILL_GROUP_BP_PER_POINT = 10;
 /** BP/Karma cost per skill specialization. */
 const SPECIALIZATION_BP_COST = 2;
 
+/**
+ * SR4 p.94-95 / desktop clsUnique.cs:3150-3200: ×2 cost per rating point when
+ * a cost-doubling quality flag applies to this skill's category. Desktop
+ * doubles only non-grouped active skills — skill GROUP costs are never
+ * doubled (clsUnique.cs `!_blnIsGrouped`), so this only applies per-skill.
+ */
+export function skillCostMultiplier(
+	improvements: readonly Improvement[] | undefined,
+	category: CharacterSkill['category']
+): 1 | 2 {
+	if (category === 'Technical Active' && hasFlag(improvements, 'Uneducated')) return 2;
+	if (category === 'Social Active' && hasFlag(improvements, 'Uncouth')) return 2;
+	if (category === 'Physical Active' && hasFlag(improvements, 'Infirm')) return 2;
+	return 1;
+}
+
 /** Calculate total BP spent on individual skills. */
-export function calculateSkillsBP(skills: readonly CharacterSkill[]): number {
-	return skills.reduce((sum, s) => sum + s.rating * SKILL_BP_PER_POINT, 0);
+export function calculateSkillsBP(
+	skills: readonly CharacterSkill[],
+	improvements?: readonly Improvement[]
+): number {
+	return skills.reduce(
+		(sum, s) => sum + s.rating * SKILL_BP_PER_POINT * skillCostMultiplier(improvements, s.category),
+		0
+	);
 }
 
 /** Calculate total BP spent on skill groups. */
@@ -72,7 +96,7 @@ export function setSkill(name: string, rating: number, specialization: string | 
 		skills: newSkills,
 		buildPointsSpent: {
 			...char.buildPointsSpent,
-			skills: calculateSkillsBP(newSkills),
+			skills: calculateSkillsBP(newSkills, char.improvements),
 			specializations: calculateSpecializationsBP(newSkills)
 		},
 		updatedAt: new Date().toISOString()
@@ -93,7 +117,7 @@ export function removeSkill(name: string): void {
 		skills: newSkills,
 		buildPointsSpent: {
 			...char.buildPointsSpent,
-			skills: calculateSkillsBP(newSkills),
+			skills: calculateSkillsBP(newSkills, char.improvements),
 			specializations: calculateSpecializationsBP(newSkills)
 		},
 		updatedAt: new Date().toISOString()

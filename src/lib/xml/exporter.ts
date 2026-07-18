@@ -5,6 +5,7 @@
  */
 
 import type { Character } from '$types';
+import { hasFlag } from '../engine/improvementManager';
 
 /**
  * Export a character to Chummer XML format.
@@ -72,9 +73,9 @@ export function exportToChummer(character: Character): string {
 	lines.push(`\t<technomancer>${hasResonance ? 'True' : 'False'}</technomancer>`);
 	lines.push(`\t<initiationoverride>False</initiationoverride>`);
 	lines.push(`\t<critter>False</critter>`);
-	lines.push(`\t<uneducated>False</uneducated>`);
-	lines.push(`\t<uncouth>False</uncouth>`);
-	lines.push(`\t<infirm>False</infirm>`);
+	lines.push(`\t<uneducated>${hasFlag(character.improvements, 'Uneducated') ? 'True' : 'False'}</uneducated>`);
+	lines.push(`\t<uncouth>${hasFlag(character.improvements, 'Uncouth') ? 'True' : 'False'}</uncouth>`);
+	lines.push(`\t<infirm>${hasFlag(character.improvements, 'Infirm') ? 'True' : 'False'}</infirm>`);
 
 	/* Attributes */
 	lines.push(`\t<attributes>`);

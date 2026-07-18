@@ -8,6 +8,8 @@
 import { get, derived, type Readable } from 'svelte/store';
 import { type Character, type ExpenseEntry, getKnowledgeSkillAttribute } from '$types';
 import { characterStore, generateId } from './character';
+import { skills as skillsStore } from './gamedata';
+import { skillCostMultiplier } from './skills';
 
 /* ========================================
  * Constants
@@ -293,7 +295,7 @@ export function getSkillImprovementCost(skillName: string): number | null {
 	const newRating = skill.rating + 1;
 	if (newRating > 6) return null;
 
-	return newRating * KARMA_COSTS.IMPROVE_SKILL_MULTIPLIER;
+	return newRating * KARMA_COSTS.IMPROVE_SKILL_MULTIPLIER * skillCostMultiplier(char.improvements, skill.category);
 }
 
 /** Improve a skill with karma. */
@@ -311,7 +313,8 @@ export function improveSkill(skillName: string): { success: boolean; error?: str
 
 	if (newRating > 6) return { success: false, error: 'Skill already at maximum (6)' };
 
-	const cost = newRating * KARMA_COSTS.IMPROVE_SKILL_MULTIPLIER;
+	const cost =
+		newRating * KARMA_COSTS.IMPROVE_SKILL_MULTIPLIER * skillCostMultiplier(char.improvements, skill.category);
 	if (char.karma < cost)
 		return { success: false, error: `Not enough karma (need ${cost}, have ${char.karma})` };
 
@@ -347,7 +350,10 @@ export function learnNewSkill(skillName: string): { success: boolean; error?: st
 		return { success: false, error: 'Already has this skill. Use improveSkill instead.' };
 	}
 
-	const cost = KARMA_COSTS.NEW_SKILL;
+	// Denormalize category/group from the skill definition (issue #65) so
+	// calculateDicePool/skillCostMultiplier work for career-learned skills too.
+	const skillDef = get(skillsStore).find((s) => s.name === skillName);
+	const cost = KARMA_COSTS.NEW_SKILL * skillCostMultiplier(char.improvements, skillDef?.category);
 	if (char.karma < cost)
 		return { success: false, error: `Not enough karma (need ${cost}, have ${char.karma})` };
 
@@ -365,7 +371,8 @@ export function learnNewSkill(skillName: string): { success: boolean; error?: st
 					rating: 1,
 					specialization: null,
 					bonus: 0,
-					karmaSpent: cost
+					karmaSpent: cost,
+					...(skillDef !== undefined ? { category: skillDef.category, group: skillDef.skillgroup } : {})
 				}
 			],
 			updatedAt: new Date().toISOString()

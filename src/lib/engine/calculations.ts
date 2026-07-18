@@ -8,8 +8,8 @@
  * - Dice pools for common tests
  */
 
-import type { Character, CharacterSkill } from '$types';
-import { valueOf, skillPoolBonus } from './improvementManager';
+import type { Character, CharacterSkill, SkillCategory } from '$types';
+import { valueOf, skillPoolBonus, hasFlag } from './improvementManager';
 
 /* ============================================
  * Attribute Helpers
@@ -204,16 +204,28 @@ function findSkill(char: Character, skillName: string): CharacterSkill | undefin
  * improvements raise the effective skill rating, everything else adds
  * straight to the pool. `skill.bonus` is deprecated and no longer summed
  * here — improvements are the sole source of skill bonuses now (issue #65).
+ * `defaultCategory` (issue #67): when the character lacks the skill, SR4
+ * forbids defaulting on Technical Active skills for Uneducated characters
+ * and Social Active skills for Uncouth characters — callers that know the
+ * skill's game-data category may pass it to enforce this; omitted, defaulting
+ * behaves as before (attribute - 1).
  */
 export function calculateDicePool(
 	char: Character,
 	skillName: string,
-	attributeCode: 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil'
+	attributeCode: 'bod' | 'agi' | 'rea' | 'str' | 'cha' | 'int' | 'log' | 'wil',
+	defaultCategory?: SkillCategory
 ): number {
 	const skill = findSkill(char, skillName);
 	const attr = getAttributeTotal(char, attributeCode);
 
 	if (!skill) {
+		if (
+			(defaultCategory === 'Technical Active' && hasFlag(char.improvements, 'Uneducated')) ||
+			(defaultCategory === 'Social Active' && hasFlag(char.improvements, 'Uncouth'))
+		) {
+			return 0; // SR4 p.94-95: cannot default on these categories with the flag active
+		}
 		// Defaulting: attribute - 1. Improvements do not apply when a character
 		// lacks the skill entirely (documented divergence — see issue #65 risks).
 		return Math.max(0, attr - 1);

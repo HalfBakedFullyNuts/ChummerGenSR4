@@ -406,5 +406,25 @@ describe('XML Exporter', () => {
 
 			expect(xml).toContain('<created>False</created>');
 		});
+
+		it('should export real Uneducated/Uncouth/Infirm flags from improvements (issue #67)', () => {
+			const character = createEmptyCharacter('test-id', 'user-123', 'bp');
+			const modified = {
+				...character,
+				improvements: [
+					{
+						id: 'i1', type: 'Uneducated' as const, improvedName: '', source: 'Quality' as const, sourceName: 'Uneducated',
+						val: 1, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+						exclude: '', uniqueName: '', addToRating: false, enabled: true
+					}
+				]
+			};
+
+			const xml = exportToChummer(modified);
+
+			expect(xml).toContain('<uneducated>True</uneducated>');
+			expect(xml).toContain('<uncouth>False</uncouth>');
+			expect(xml).toContain('<infirm>False</infirm>');
+		});
 	});
 });

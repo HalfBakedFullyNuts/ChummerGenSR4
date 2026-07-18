@@ -234,6 +234,20 @@ export function valueOf(
     return sumWithUniqueNameGrouping(activeImprovements, propertyToSum);
 }
 
+/**
+ * Whether a boolean-flag improvement type (Uneducated, Uncouth, Infirm,
+ * SensitiveSystem, BlackMarketDiscount) is active. Desktop caches these as
+ * character-level booleans set/cleared by the improvement engine
+ * (clsImprovement.cs:1899-1903, :2653+); the web derives them on demand
+ * instead of maintaining a separate cached field.
+ */
+export function hasFlag(
+    improvements: readonly Improvement[] | undefined,
+    type: 'Uneducated' | 'Uncouth' | 'Infirm' | 'SensitiveSystem' | 'BlackMarketDiscount'
+): boolean {
+    return valueOf(improvements, type) > 0;
+}
+
 /** Does an improvement's `exclude` list (comma/space-separated skill names) cover this skill? */
 function excludesSkill(imp: Improvement, skillName: string): boolean {
     if (!imp.exclude) return false;

@@ -345,6 +345,30 @@ describe('calculations engine', () => {
             expect(calculations.calculateDicePool(char, 'Pistols', 'agi')).toBe(3);
         });
 
+        it('no defaulting on Technical Active skills when Uneducated (issue #67)', () => {
+            char.attributes.log.base = 4;
+            char.skills = []; // no Hacking skill
+            char.improvements = [{
+                id: 'f', type: 'Uneducated', improvedName: '', source: 'Quality', sourceName: 'Uneducated',
+                val: 1, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                exclude: '', uniqueName: '', addToRating: false, enabled: true
+            }];
+
+            expect(calculations.calculateDicePool(char, 'Hacking', 'log', 'Technical Active')).toBe(0);
+        });
+
+        it('no defaultCategory means defaulting behaves as before, even when Uneducated', () => {
+            char.attributes.log.base = 4;
+            char.skills = [];
+            char.improvements = [{
+                id: 'f', type: 'Uneducated', improvedName: '', source: 'Quality', sourceName: 'Uneducated',
+                val: 1, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                exclude: '', uniqueName: '', addToRating: false, enabled: true
+            }];
+
+            expect(calculations.calculateDicePool(char, 'Hacking', 'log')).toBe(3); // 4 - 1
+        });
+
         it('calculateComposure calculates CHA + WIL + improvement', () => {
             char.attributes.cha.base = 3;
             char.attributes.wil.base = 4;

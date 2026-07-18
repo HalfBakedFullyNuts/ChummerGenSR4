@@ -4,7 +4,8 @@ import {
     removeImprovements,
     createImprovementsFromBonus,
     resolveBonusValue,
-    skillPoolBonus
+    skillPoolBonus,
+    hasFlag
 } from '../improvementManager';
 import type { Improvement } from '$types';
 
@@ -226,6 +227,32 @@ describe('ImprovementManager', () => {
 
         it('returns 0 for a skill with no group/category and no matching improvements', () => {
             expect(skillPoolBonus([], { name: 'Pistols' })).toBe(0);
+        });
+    });
+
+    describe('hasFlag (issue #67)', () => {
+        const flagImp = (type: Improvement['type']): Improvement => ({
+            id: 'f', type, source: 'Quality', sourceName: 'src', improvedName: '',
+            val: 1, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+            exclude: '', uniqueName: '', addToRating: false, enabled: true
+        });
+
+        it('is true when a matching flag improvement is present and enabled', () => {
+            expect(hasFlag([flagImp('Uneducated')], 'Uneducated')).toBe(true);
+        });
+
+        it('is false when no matching improvement exists', () => {
+            expect(hasFlag([flagImp('Uncouth')], 'Uneducated')).toBe(false);
+        });
+
+        it('is false when the matching improvement is disabled', () => {
+            const imp = { ...flagImp('Infirm'), enabled: false };
+            expect(hasFlag([imp], 'Infirm')).toBe(false);
+        });
+
+        it('is false for an empty/undefined improvements list', () => {
+            expect(hasFlag(undefined, 'Uneducated')).toBe(false);
+            expect(hasFlag([], 'Uneducated')).toBe(false);
         });
     });
 

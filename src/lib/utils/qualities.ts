@@ -360,7 +360,7 @@ export function formatQualityBonus(bonus: QualityBonus | undefined): FormattedBo
 	}
 	if (bonus.infirm) {
 		results.push({
-			text: 'Physical attributes cost double',
+			text: 'Physical skills cost double',
 			positive: false
 		});
 	}
