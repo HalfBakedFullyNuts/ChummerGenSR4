@@ -912,7 +912,9 @@ function resolveGearCost(gear: GameGear, rating: number): number {
 		const resolved = resolveBonusValue(gear.costFormula, rating);
 		if (resolved !== undefined) return resolved;
 	}
-	return resolveByRating(gear.cost, gear.costByRating, rating);
+	// costFormula is already resolved above, so pass undefined for resolveByRating's
+	// formula parameter (widened to 4 args by the cyberware Rating-scaling PR #2).
+	return resolveByRating(gear.cost, gear.costByRating, undefined, rating);
 }
 
 /** Add gear to the character's equipment. `rating` defaults to the item's own rating field when omitted. */

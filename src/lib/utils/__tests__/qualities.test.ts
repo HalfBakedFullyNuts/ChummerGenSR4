@@ -47,7 +47,9 @@ describe('generateQualityTags enabletab handling', () => {
 		bp: 10,
 		category: 'Positive',
 		source: 'SR4',
-		page: 92
+		page: 92,
+		mutant: false,
+		limit: false
 	};
 
 	it('tags a multi-tab quality as magic without throwing', () => {
