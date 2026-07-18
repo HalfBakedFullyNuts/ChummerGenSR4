@@ -102,6 +102,7 @@
       "rating": 3,
       "source": "AU",
       "page": 36,
+      "costFormula": "Rating * 3000",
       "bonus": {
         "specificskill": [
           {
@@ -281,7 +282,8 @@
       "cost": 1000,
       "rating": 6,
       "source": "SR4",
-      "page": 339
+      "page": 339,
+      "costFormula": "Rating * 1000"
     },
     {
       "name": "Orientation System",
@@ -311,7 +313,8 @@
       "cost": 3000,
       "rating": 4,
       "source": "AU",
-      "page": 36
+      "page": 36,
+      "costFormula": "Rating * 3000"
     },
     {
       "name": "Sim Module",
@@ -366,7 +369,8 @@
       "cost": 1500,
       "rating": 6,
       "source": "SR4",
-      "page": 339
+      "page": 339,
+      "costFormula": "Rating * 1500"
     },
     {
       "name": "Tooth Storage Compartment",
@@ -432,18 +436,20 @@
       "cost": 5000,
       "rating": 6,
       "source": "SR4",
-      "page": 339
+      "page": 339,
+      "costFormula": "Rating * 5000"
     },
     {
       "name": "Cybereyes Basic System",
       "category": "Eyeware",
-      "ess": 0.1,
+      "ess": 0.2,
       "capacity": "(Rating * 4)",
       "avail": "FixedValues(0,4,6,8)",
       "cost": 500,
       "rating": 4,
       "source": "SR4",
       "page": 340,
+      "essFormula": "(Rating * 0.1) + 0.1",
       "costByRating": [
         500,
         750,
@@ -471,7 +477,8 @@
       "cost": 500,
       "rating": 3,
       "source": "AU",
-      "page": 39
+      "page": 39,
+      "costFormula": "Rating * 500"
     },
     {
       "name": "Eye Laser Range Finder",
@@ -531,13 +538,14 @@
     {
       "name": "Eyeband",
       "category": "Eyeware",
-      "ess": 0.1,
+      "ess": 0.3,
       "capacity": "FixedValues(6,8,12)",
       "avail": "(Rating * 2) + 2",
       "cost": 800,
       "rating": 3,
       "source": "AU",
       "page": 37,
+      "essFormula": "(Rating * 0.1) + 0.2",
       "costByRating": [
         800,
         1000,
@@ -619,18 +627,20 @@
       "cost": 15000,
       "rating": 6,
       "source": "SR4",
-      "page": 340
+      "page": 340,
+      "costFormula": "Rating * 15000"
     },
     {
       "name": "Single Cybereye",
       "category": "Eyeware",
-      "ess": 0.05,
+      "ess": 0.1,
       "capacity": "Rating * 2/[Rating]",
       "avail": "FixedValues(0,4,6,8)",
       "cost": 300,
       "rating": 4,
       "source": "AU",
       "page": 38,
+      "essFormula": "(Rating * 0.05) + 0.05",
       "costByRating": [
         300,
         450,
@@ -675,7 +685,8 @@
       "cost": 1500,
       "rating": 3,
       "source": "SR4",
-      "page": 340
+      "page": 340,
+      "costFormula": "Rating * 1500"
     },
     {
       "name": "Vision Magnification",
@@ -691,13 +702,14 @@
     {
       "name": "Cyberears",
       "category": "Earware",
-      "ess": 0.1,
+      "ess": 0.2,
       "capacity": "Rating * 4",
       "avail": "FixedValues(0,4,6,8)",
       "cost": 500,
       "rating": 4,
       "source": "SR4",
       "page": 341,
+      "essFormula": "(Rating * 0.1) + 0.1",
       "costByRating": [
         500,
         750,
@@ -714,7 +726,8 @@
       "cost": 1500,
       "rating": 3,
       "source": "SR4",
-      "page": 341
+      "page": 341,
+      "costFormula": "Rating * 1500"
     },
     {
       "name": "Balance Augmenter",
@@ -769,7 +782,8 @@
       "cost": 1000,
       "rating": 6,
       "source": "SR4",
-      "page": 341
+      "page": 341,
+      "costFormula": "Rating * 1000"
     },
     {
       "name": "Sound Link",
@@ -802,7 +816,8 @@
       "cost": 0,
       "rating": 600,
       "source": "SR4",
-      "page": 0
+      "page": 0,
+      "essFormula": "Rating * 0.01"
     },
     {
       "name": "Auto-Injector (One-shot)",
@@ -810,10 +825,11 @@
       "ess": 0.05,
       "capacity": "[0]",
       "avail": "8",
-      "cost": 100,
+      "cost": 700,
       "rating": 6,
       "source": "AU",
-      "page": 39
+      "page": 39,
+      "costFormula": "600 + (Rating * 100)"
     },
     {
       "name": "Auto-Injector (Reusable)",
@@ -821,10 +837,11 @@
       "ess": 0.1,
       "capacity": "[0]",
       "avail": "4",
-      "cost": 100,
+      "cost": 500,
       "rating": 6,
       "source": "AU",
-      "page": 39
+      "page": 39,
+      "costFormula": "400 + (Rating * 100)"
     },
     {
       "name": "Balance Tail",
@@ -983,6 +1000,8 @@
       "rating": 3,
       "source": "SR4",
       "page": 342,
+      "essFormula": "Rating * 0.5",
+      "costFormula": "Rating * 5000",
       "bonus": {
         "armor": {
           "b": "Rating",
@@ -1184,6 +1203,8 @@
       "rating": 4,
       "source": "SR4",
       "page": 342,
+      "essFormula": "Rating * 1",
+      "costFormula": "Rating * 5000",
       "bonus": {
         "specificattribute": [
           {
@@ -1218,6 +1239,8 @@
       "rating": 3,
       "source": "SR4",
       "page": 342,
+      "essFormula": "Rating * 0.3",
+      "costFormula": "Rating * 10000",
       "bonus": {
         "specificattribute": [
           {
@@ -1282,6 +1305,8 @@
       "rating": 5,
       "source": "SR4",
       "page": 342,
+      "essFormula": "Rating * 0.2",
+      "costFormula": "Rating * 2000",
       "bonus": {
         "skillwire": "Rating"
       }
@@ -1386,7 +1411,8 @@
       "cost": 10000,
       "rating": 10,
       "source": "SG",
-      "page": 151
+      "page": 151,
+      "costFormula": "Rating * 10000"
     },
     {
       "name": "Obvious Full Arm",
@@ -1532,6 +1558,8 @@
       "rating": 4,
       "source": "SG",
       "page": 144,
+      "essFormula": "Rating * 0.6",
+      "costFormula": "Rating * 15000",
       "bonus": {
         "conditionmonitor": {
           "physical": 1
@@ -1689,6 +1717,7 @@
       "rating": 4,
       "source": "SR4",
       "page": 344,
+      "costFormula": "Rating * 300",
       "bonus": {
         "armor": {
           "b": "Rating",
@@ -1705,7 +1734,8 @@
       "cost": 1000,
       "rating": 4,
       "source": "AU",
-      "page": 44
+      "page": 44,
+      "costFormula": "Rating * 1000"
     },
     {
       "name": "Customized Body",
@@ -1713,7 +1743,7 @@
       "ess": 0,
       "capacity": "[0]",
       "avail": "+(Rating - 3)",
-      "cost": null,
+      "cost": -3000,
       "rating": 20,
       "source": "SR4",
       "page": 344,
@@ -1725,7 +1755,7 @@
       "ess": 0,
       "capacity": "[0]",
       "avail": "+(Rating - 3)",
-      "cost": null,
+      "cost": -3000,
       "rating": 20,
       "source": "SR4",
       "page": 344,
@@ -1737,7 +1767,7 @@
       "ess": 0,
       "capacity": "[0]",
       "avail": "+(Rating - 3)",
-      "cost": null,
+      "cost": -3000,
       "rating": 20,
       "source": "SR4",
       "page": 344,
@@ -1752,7 +1782,8 @@
       "cost": 200,
       "rating": 7,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "costFormula": "Rating * 200"
     },
     {
       "name": "Enhanced Strength",
@@ -1763,7 +1794,8 @@
       "cost": 250,
       "rating": 7,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "costFormula": "Rating * 250"
     },
     {
       "name": "Enhanced Agility",
@@ -1774,7 +1806,8 @@
       "cost": 250,
       "rating": 7,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "costFormula": "Rating * 250"
     },
     {
       "name": "MDS Subdermal Sheath",
@@ -1785,7 +1818,8 @@
       "cost": 3000,
       "rating": 3,
       "source": "RC",
-      "page": 35
+      "page": 35,
+      "costFormula": "Rating * 3000"
     },
     {
       "name": "Optimized: Body+Tech Verticalist",
@@ -1987,7 +2021,8 @@
       "cost": 1000,
       "rating": 6,
       "source": "SR4",
-      "page": 344
+      "page": 344,
+      "costFormula": "Rating * 1000"
     },
     {
       "name": "Large Smuggling Compartment",
@@ -2032,7 +2067,8 @@
       "cost": 500,
       "rating": 4,
       "source": "AU",
-      "page": 45
+      "page": 45,
+      "costFormula": "Rating * 500"
     },
     {
       "name": "Snake Fingers",
@@ -2348,7 +2384,7 @@
       "ess": 0.1,
       "capacity": "[1]",
       "avail": "4",
-      "cost": null,
+      "cost": 500,
       "rating": 6,
       "source": "AU",
       "page": 33,
@@ -2581,10 +2617,11 @@
       "ess": 0,
       "capacity": "[0]",
       "avail": "7",
-      "cost": 100,
+      "cost": 1100,
       "rating": 6,
       "source": "AU",
-      "page": 46
+      "page": 46,
+      "costFormula": "1000 + (Rating * 100)"
     },
     {
       "name": "Drone Hand",
@@ -2815,7 +2852,8 @@
       "cost": 1000,
       "rating": 10,
       "source": "AU",
-      "page": 112
+      "page": 112,
+      "costFormula": "Rating * 1000"
     },
     {
       "name": "Flashback System",
@@ -2842,13 +2880,15 @@
     {
       "name": "Nanohive",
       "category": "Nanocybernetics",
-      "ess": 0.25,
+      "ess": 0.75,
       "capacity": "[2]",
       "avail": "Rating * 5",
       "cost": 10000,
       "rating": 6,
       "source": "AU",
-      "page": 112
+      "page": 112,
+      "essFormula": "0.5 + (Rating * 0.25)",
+      "costFormula": "Rating * 10000"
     },
     {
       "name": "Retinal Adjusters",
@@ -2859,7 +2899,8 @@
       "cost": 5000,
       "rating": 10,
       "source": "AU",
-      "page": 112
+      "page": 112,
+      "costFormula": "Rating * 5000"
     },
     {
       "name": "Smart Skin",
@@ -2870,7 +2911,9 @@
       "cost": 10000,
       "rating": 3,
       "source": "AU",
-      "page": 113
+      "page": 113,
+      "essFormula": "Rating * 0.5",
+      "costFormula": "Rating * 10000"
     },
     {
       "name": "Voice Mimic",
@@ -2881,7 +2924,8 @@
       "cost": 3000,
       "rating": 10,
       "source": "AU",
-      "page": 113
+      "page": 113,
+      "costFormula": "Rating * 3000"
     },
     {
       "name": "Freefall Balance Augmenter",
@@ -2903,7 +2947,9 @@
       "cost": 2000,
       "rating": 4,
       "source": "2050",
-      "page": 183
+      "page": 183,
+      "essFormula": "Rating * 0.1",
+      "costFormula": "Rating * 2000"
     },
     {
       "name": "Cortex Bomb (2050)",
@@ -2948,7 +2994,8 @@
       "rating": 60,
       "source": "2050",
       "page": 184,
-      "essFormula": "ceiling(Rating div 20) * 0.1"
+      "essFormula": "ceiling(Rating div 20) * 0.1",
+      "costFormula": "Rating * 500"
     },
     {
       "name": "Radio (2050)",
@@ -3169,6 +3216,8 @@
       "rating": 6,
       "source": "2050",
       "page": 186,
+      "essFormula": "Rating * 0.9",
+      "costFormula": "Rating * 20000",
       "bonus": {
         "initiative": {
           "value": "Rating",
@@ -3254,7 +3303,8 @@
       "cost": 2000,
       "rating": 20,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "costFormula": "Rating * 2000"
     },
     {
       "name": "Customized Strength (2050)",
@@ -3265,7 +3315,8 @@
       "cost": 2000,
       "rating": 20,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "costFormula": "Rating * 2000"
     },
     {
       "name": "Customized Agility (2050)",
@@ -3276,7 +3327,8 @@
       "cost": 2000,
       "rating": 20,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "costFormula": "Rating * 2000"
     },
     {
       "name": "Enhanced Body (2050)",
@@ -3287,7 +3339,8 @@
       "cost": 300,
       "rating": 3,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "costFormula": "Rating * 300"
     },
     {
       "name": "Enhanced Strength (2050)",
@@ -3298,7 +3351,8 @@
       "cost": 350,
       "rating": 3,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "costFormula": "Rating * 350"
     },
     {
       "name": "Enhanced Agility (2050)",
@@ -3309,7 +3363,8 @@
       "cost": 400,
       "rating": 3,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "costFormula": "Rating * 400"
     },
     {
       "name": "Armor (2050)",
@@ -3321,6 +3376,7 @@
       "rating": 3,
       "source": "2050",
       "page": 186,
+      "costFormula": "Rating * 500",
       "bonus": {
         "armor": {
           "b": "Rating",
@@ -3350,6 +3406,8 @@
       "rating": 3,
       "source": "2050",
       "page": 186,
+      "essFormula": "Rating * 0.5",
+      "costFormula": "Rating * 5000",
       "bonus": {
         "armor": {
           "b": "Rating",
@@ -3366,7 +3424,9 @@
       "cost": 15000,
       "rating": 6,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "essFormula": "Rating * 0.1",
+      "costFormula": "Rating * 15000"
     },
     {
       "name": "Filtration System, Blood (2050)",
@@ -3377,7 +3437,9 @@
       "cost": 10000,
       "rating": 6,
       "source": "2050",
-      "page": 186
+      "page": 186,
+      "essFormula": "Rating * 0.2",
+      "costFormula": "Rating * 10000"
     },
     {
       "name": "Filtration System, Cybergill (2050)",
@@ -3432,7 +3494,8 @@
       "cost": 1000,
       "rating": 6,
       "source": "2050",
-      "page": 187
+      "page": 187,
+      "costFormula": "Rating * 1000"
     },
     {
       "name": "Muscle Replacement (2050)",
@@ -3444,6 +3507,8 @@
       "rating": 4,
       "source": "2050",
       "page": 186,
+      "essFormula": "Rating * 1",
+      "costFormula": "Rating * 20000",
       "bonus": {
         "specificattribute": [
           {
@@ -3467,6 +3532,8 @@
       "rating": 5,
       "source": "2050",
       "page": 187,
+      "essFormula": "Rating * 0.2",
+      "costFormula": "Rating * 50000",
       "bonus": {
         "skillwire": "Rating"
       }
@@ -3668,6 +3735,7 @@
       "rating": 3,
       "source": "WS",
       "page": 14,
+      "essFormula": "Rating * 0.9",
       "costByRating": [
         15000,
         32000,
