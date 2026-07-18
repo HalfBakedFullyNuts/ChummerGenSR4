@@ -46,3 +46,7 @@ svelte_check*.txt
 # Local scratch dirs / nested git worktrees (never commit these)
 tmp/
 .claude/worktrees/
+
+# Local Claude tooling config (proprietary context / personal dev-server setup)
+.claude/claude.md
+.claude/launch.json
