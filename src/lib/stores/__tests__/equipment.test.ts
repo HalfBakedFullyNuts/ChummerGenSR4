@@ -22,6 +22,7 @@ import {
 	addCyberware,
 	removeCyberware,
 	addGear,
+	addGearToGear,
 	removeGear,
 	setLifestyle,
 	removeLifestyle,
@@ -81,6 +82,42 @@ const mockGear: GameGear = {
 	cost: 700,
 	source: 'SR4',
 	page: 328
+};
+
+/** Mirrors gear.xml's "Fake SIN" (cost formula "Rating * 1000"). */
+const mockRatingMultipliedGear: GameGear = {
+	name: 'Fake SIN',
+	category: 'ID/Credsticks',
+	rating: 6,
+	avail: '(Rating * 3)F',
+	cost: 1000,
+	costFormula: 'Rating * 1000',
+	source: 'SR4',
+	page: 332
+};
+
+/** Mirrors gear.xml's "Certified Credstick, Standard" (cost formula "25 + Rating"). */
+const mockRatingAdditiveGear: GameGear = {
+	name: 'Certified Credstick, Standard',
+	category: 'ID/Credsticks',
+	rating: 5000,
+	avail: '0',
+	cost: 26,
+	costFormula: '25 + Rating',
+	source: 'SR4',
+	page: 331
+};
+
+/** Mirrors cyberware-style FixedValues gear (per-rating cost table, no formula). */
+const mockFixedValuesGear: GameGear = {
+	name: 'Tiered Gadget',
+	category: 'Sensors',
+	rating: 3,
+	avail: '4',
+	cost: 500,
+	costByRating: [500, 1000, 2000],
+	source: 'SR4',
+	page: 300
 };
 
 describe('Equipment Store - Weapon Purchases', () => {
@@ -502,6 +539,78 @@ describe('Equipment Store - Gear Purchases', () => {
 
 		// Should refund 700 * 3 = 2100
 		expect(get(character)?.equipment.gear).toHaveLength(0);
+	});
+});
+
+describe('Equipment Store - Gear Cost Formulas (issue #72)', () => {
+	beforeEach(() => {
+		startNewCharacter('test-user', 'bp');
+		setResourcesBP(50);
+	});
+
+	it('resolves a "Rating * X" cost formula against the purchased rating', () => {
+		const initialNuyen = get(remainingNuyen);
+
+		addGear(mockRatingMultipliedGear, 1, null, 3);
+
+		// Rating 3 * 1000 = 3000, not the catalog rating-1 baseline of 1000
+		expect(get(remainingNuyen)).toBe(initialNuyen - 3000);
+		expect(get(character)?.equipment.gear[0]?.cost).toBe(3000);
+		expect(get(character)?.equipment.gear[0]?.rating).toBe(3);
+	});
+
+	it('defaults to the item\'s own rating when none is passed', () => {
+		const initialNuyen = get(remainingNuyen);
+
+		addGear(mockRatingMultipliedGear);
+
+		// Falls back to gear.rating (6): 6 * 1000 = 6000
+		expect(get(remainingNuyen)).toBe(initialNuyen - 6000);
+		expect(get(character)?.equipment.gear[0]?.rating).toBe(6);
+	});
+
+	it('resolves an additive "X + Rating" cost formula against the purchased rating', () => {
+		const initialNuyen = get(remainingNuyen);
+
+		addGear(mockRatingAdditiveGear, 1, null, 5);
+
+		// 25 + 5 = 30
+		expect(get(remainingNuyen)).toBe(initialNuyen - 30);
+		expect(get(character)?.equipment.gear[0]?.cost).toBe(30);
+	});
+
+	it('resolves a costByRating (FixedValues) table over the flat cost', () => {
+		const initialNuyen = get(remainingNuyen);
+
+		addGear(mockFixedValuesGear, 1, null, 2);
+
+		expect(get(remainingNuyen)).toBe(initialNuyen - 1000);
+		expect(get(character)?.equipment.gear[0]?.cost).toBe(1000);
+	});
+
+	it('refunds the rating-scaled cost, not the catalog flat cost, on removal', () => {
+		addGear(mockRatingMultipliedGear, 1, null, 4);
+		const afterPurchase = get(remainingNuyen);
+
+		const gearId = get(character)?.equipment.gear[0]?.id;
+		if (gearId) removeGear(gearId);
+
+		expect(get(remainingNuyen)).toBe(afterPurchase + 4000);
+	});
+
+	it('resolves cost formulas for gear nested inside other gear', () => {
+		addGear(mockGear); // container-less parent, just needs an id
+		const parentId = get(character)?.equipment.gear[0]?.id;
+		expect(parentId).toBeDefined();
+
+		const initialNuyen = get(remainingNuyen);
+		addGearToGear(parentId!, mockRatingMultipliedGear, 1, 2);
+
+		// 2 * 1000 = 2000
+		expect(get(remainingNuyen)).toBe(initialNuyen - 2000);
+		const child = get(character)?.equipment.gear[0]?.children[0];
+		expect(child?.cost).toBe(2000);
+		expect(child?.rating).toBe(2);
 	});
 });
 

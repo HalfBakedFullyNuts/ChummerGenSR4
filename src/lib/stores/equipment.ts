@@ -33,6 +33,7 @@ import {
 	createImprovementsFromBonus,
 	removeImprovements,
 	removeImprovementsForTree,
+	resolveBonusValue,
 	valueOf
 } from '../engine/improvementManager';
 
@@ -883,16 +884,33 @@ export function removeMartialArtTechnique(artId: string, technique: string): voi
  * Gear
  * ============================================ */
 
-/** Add gear to the character's equipment. */
+/**
+ * Resolve a GameGear's per-unit cost at a purchased rating: a Rating-based
+ * `costFormula` expression (e.g. "Rating * 500", "25 + Rating") takes
+ * priority, falling back to a `costByRating` FixedValues table, then the
+ * flat `cost`.
+ */
+function resolveGearCost(gear: GameGear, rating: number): number {
+	if (gear.costFormula) {
+		const resolved = resolveBonusValue(gear.costFormula, rating);
+		if (resolved !== undefined) return resolved;
+	}
+	return resolveByRating(gear.cost, gear.costByRating, rating);
+}
+
+/** Add gear to the character's equipment. `rating` defaults to the item's own rating field when omitted. */
 export function addGear(
 	gear: GameGear,
 	quantity: number = 1,
-	containerId: string | null = null
+	containerId: string | null = null,
+	rating?: number
 ): void {
 	const char = get(characterStore);
 	if (!char) return;
 
-	const totalCost = gear.cost * quantity;
+	const purchasedRating = rating ?? gear.rating ?? 1;
+	const unitCost = resolveGearCost(gear, purchasedRating);
+	const totalCost = unitCost * quantity;
 	if (char.nuyen < totalCost) return;
 
 	if (containerId) {
@@ -920,9 +938,9 @@ export function addGear(
 			id: generateId(),
 			name: gear.name,
 			category: gear.category,
-			rating: gear.rating,
+			rating: purchasedRating,
 			quantity,
-			cost: gear.cost,
+			cost: unitCost,
 			location: '',
 			notes: '',
 			capacity: gear.capacity ?? 0,
@@ -934,7 +952,7 @@ export function addGear(
 		};
 		newGear = [...char.equipment.gear, newItem];
 		newImprovements = gear.bonus
-			? createImprovementsFromBonus('Gear', newItem.id, gear.bonus, gear.rating || 1)
+			? createImprovementsFromBonus('Gear', newItem.id, gear.bonus, purchasedRating || 1)
 			: [];
 
 		if (containerId) {
@@ -1097,21 +1115,28 @@ export function moveGearToContainer(
 	return { success: true };
 }
 
-/** Add a gear child directly to a parent gear (nesting, not just container). */
-export function addGearToGear(parentId: string, gear: GameGear, quantity: number = 1): void {
+/** Add a gear child directly to a parent gear (nesting, not just container). `rating` defaults to the item's own rating field when omitted. */
+export function addGearToGear(
+	parentId: string,
+	gear: GameGear,
+	quantity: number = 1,
+	rating?: number
+): void {
 	const char = get(characterStore);
 	if (!char) return;
 
-	const totalCost = gear.cost * quantity;
+	const purchasedRating = rating ?? gear.rating ?? 1;
+	const unitCost = resolveGearCost(gear, purchasedRating);
+	const totalCost = unitCost * quantity;
 	if (char.nuyen < totalCost) return;
 
 	const newChild: CharacterGear = {
 		id: generateId(),
 		name: gear.name,
 		category: gear.category,
-		rating: gear.rating,
+		rating: purchasedRating,
 		quantity,
-		cost: gear.cost,
+		cost: unitCost,
 		location: '',
 		notes: '',
 		capacity: gear.capacity ?? 0,
@@ -1123,7 +1148,7 @@ export function addGearToGear(parentId: string, gear: GameGear, quantity: number
 	};
 
 	const newImprovements = gear.bonus
-		? createImprovementsFromBonus('Gear', newChild.id, gear.bonus, gear.rating || 1)
+		? createImprovementsFromBonus('Gear', newChild.id, gear.bonus, purchasedRating || 1)
 		: [];
 
 	const updated: Character = {

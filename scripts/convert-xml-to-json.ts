@@ -10,6 +10,7 @@ import { XMLParser } from 'fast-xml-parser';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import { resolveBonusValue } from '../src/lib/engine/improvementManager';
 
 /* ESM compatibility for __dirname */
 const __filename = fileURLToPath(import.meta.url);
@@ -1259,7 +1260,9 @@ function convertGear(): ConversionResult {
 		category: string;
 		rating: number;
 		avail: string;
-		cost: number;
+		cost: number | null;
+		costFormula?: string;
+		costByRating?: number[];
 		source: string;
 		page: number;
 		bonus?: Record<string, unknown>;
@@ -1278,15 +1281,46 @@ function convertGear(): ConversionResult {
 			continue;
 		}
 
+		/*
+		 * Cost is frequently a Rating-based expression ("Rating * 500",
+		 * "25 + Rating", "9000 + (Rating * 500)") rather than a numeric
+		 * literal or FixedValues(...) tuple. parseFormulaValue only handles
+		 * plain numbers and FixedValues; anything else is preserved verbatim
+		 * as costFormula (resolved per-purchase-rating at runtime via
+		 * resolveBonusValue in equipment.ts) with a rating-1 baseline stored
+		 * in cost for catalog display. Genuinely non-formulaic prices (e.g.
+		 * "Variable(100-250)", user-priced) stay null. A handful of items use
+		 * desktop's tiered `<cost3>`/`<cost6>` tags instead of `<cost>` at
+		 * all (e.g. Camouflage, Fetch Module) — out of scope here, so a
+		 * missing tag falls back to 0 (unchanged from prior behavior)
+		 * rather than surfacing as a new null.
+		 */
+		const costRaw = g['cost'];
+		const costParsed = parseFormulaValue(costRaw);
+		let cost: number | null = 0;
+		let costFormula: string | undefined;
+		let costByRating: number[] | undefined;
+		if (typeof costParsed === 'number') {
+			cost = costParsed;
+		} else if (Array.isArray(costParsed)) {
+			costByRating = costParsed;
+			cost = costParsed[0] ?? 0;
+		} else if (costRaw !== undefined && costRaw !== null && costRaw !== '') {
+			costFormula = String(costRaw);
+			cost = resolveBonusValue(costFormula, 1) ?? null;
+		}
+
 		const gearItem: GearItem = {
 			name: String(g['name'] ?? ''),
 			category,
 			rating: Number(g['rating'] ?? 0),
 			avail: String(g['avail'] ?? '0'),
-			cost: Number(g['cost'] ?? 0),
+			cost,
 			source: String(g['source'] ?? ''),
 			page: Number(g['page'] ?? 0)
 		};
+		if (costFormula) gearItem.costFormula = costFormula;
+		if (costByRating) gearItem.costByRating = costByRating;
 		const bonus = extractBonus(g['bonus']);
 		if (bonus) gearItem.bonus = bonus;
 		gear.push(gearItem);

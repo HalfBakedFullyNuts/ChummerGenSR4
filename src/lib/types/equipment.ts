@@ -406,6 +406,10 @@ export interface GameGear {
 	readonly rating: number;
 	readonly avail: string;
 	readonly cost: number;
+	/** Rating-based cost expression (desktop `Rating * X`, `X + Rating`, etc.) preserved when `cost` can't be parsed as a plain number or FixedValues table — `cost` is the rating-1 baseline. */
+	readonly costFormula?: string;
+	/** Per-rating nuyen cost table (desktop `FixedValues(...)`) — `cost` is just index 0. */
+	readonly costByRating?: readonly number[];
 	readonly source: string;
 	readonly page: number;
 	readonly capacity?: number;
