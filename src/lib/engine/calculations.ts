@@ -294,6 +294,16 @@ export function calculateArmorImpact(char: Character): number {
 	return total;
 }
 
+/** SR4 ballistic damage soak: BOD + ballistic armor + DamageResistance improvements (e.g. Toughness). */
+export function calculateDamageSoakBallistic(char: Character): number {
+	return getAttributeTotal(char, 'bod') + calculateArmorBallistic(char) + valueOf(char.improvements, 'DamageResistance');
+}
+
+/** SR4 impact damage soak: BOD + impact armor + DamageResistance improvements (e.g. Toughness). */
+export function calculateDamageSoakImpact(char: Character): number {
+	return getAttributeTotal(char, 'bod') + calculateArmorImpact(char) + valueOf(char.improvements, 'DamageResistance');
+}
+
 /* ============================================
  * Magic Values
  * ============================================ */
@@ -377,6 +387,8 @@ export interface CharacterCalculations {
 	defense: number;
 	armorBallistic: number;
 	armorImpact: number;
+	damageSoakBallistic: number;
+	damageSoakImpact: number;
 
 	// Special Attributes
 	composure: number;
@@ -414,6 +426,8 @@ export function calculateAll(char: Character): CharacterCalculations {
 		defense: calculateDefense(char),
 		armorBallistic: calculateArmorBallistic(char),
 		armorImpact: calculateArmorImpact(char),
+		damageSoakBallistic: calculateDamageSoakBallistic(char),
+		damageSoakImpact: calculateDamageSoakImpact(char),
 
 		composure: calculateComposure(char),
 		judgeIntentions: calculateJudgeIntentions(char),

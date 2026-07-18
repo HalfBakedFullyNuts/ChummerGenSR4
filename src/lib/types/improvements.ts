@@ -217,13 +217,25 @@ export interface SkillCategoryBonusEntry {
     readonly bonus?: BonusValue;
 }
 
+/** A bonus value carrying a `precedence` attribute (e.g. `<thresholdoffset precedence="0">1</thresholdoffset>`). */
+export interface PrecedenceBonusValue {
+    readonly value: BonusValue;
+    readonly precedence?: string;
+}
+
 /** Condition monitor bonus (`<conditionmonitor>`) — physical/stun/threshold/overflow boxes. */
 export interface ConditionMonitorBonus {
     readonly physical?: BonusValue;
     readonly stun?: BonusValue;
-    readonly threshold?: BonusValue;
-    readonly thresholdoffset?: BonusValue;
+    readonly threshold?: BonusValue | PrecedenceBonusValue;
+    readonly thresholdoffset?: BonusValue | PrecedenceBonusValue;
     readonly overflow?: BonusValue;
+}
+
+/** Armor bonus (`<armor><b>N</b><i>N</i></armor>`) — flat ballistic/impact armor add. */
+export interface ArmorBonus {
+    readonly b?: BonusValue;
+    readonly i?: BonusValue;
 }
 
 /**
@@ -247,6 +259,9 @@ export interface BonusData {
     readonly initiative?: BonusValue;
     readonly initiativepass?: BonusValue;
     readonly conditionmonitor?: ConditionMonitorBonus;
+    readonly armor?: ArmorBonus;
+    readonly memory?: BonusValue;
+    readonly fadingresist?: BonusValue;
     readonly notoriety?: BonusValue;
     readonly composure?: BonusValue;
     readonly judgeintentions?: BonusValue;

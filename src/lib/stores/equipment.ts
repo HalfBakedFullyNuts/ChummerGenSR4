@@ -24,11 +24,31 @@ import {
 	type GameVehicle,
 	type GameGear,
 	type CyberwareGrade,
-	type BiowareGrade
+	type BiowareGrade,
+	type Improvement
 } from '$types';
 import { characterStore, generateId } from './character';
 import { type GameMartialArt } from './gamedata';
-import { createImprovementsFromBonus, removeImprovements, removeImprovementsForTree } from '../engine/improvementManager';
+import {
+	createImprovementsFromBonus,
+	removeImprovements,
+	removeImprovementsForTree,
+	valueOf
+} from '../engine/improvementManager';
+
+/**
+ * Essence-cost multiplier from CyberwareEssCost/BiowareEssCost improvements
+ * (e.g. Biocompatability: cyberwareessmultiplier 90 ⇒ ×0.9 essence cost),
+ * reading only improvements the character already has — desktop does not
+ * retroactively adjust previously-installed items when the multiplier
+ * quality is added later (see issue #64 risk notes).
+ */
+function essenceMultiplier(imps: readonly Improvement[], kind: 'Cyberware' | 'Bioware'): number {
+	const type = kind === 'Cyberware' ? 'CyberwareEssCost' : 'BiowareEssCost';
+	let pct = valueOf(imps, type) || 100;
+	if (kind === 'Cyberware' && valueOf(imps, 'SensitiveSystem') > 0) pct *= 2; // SR4: doubles cyberware essence cost
+	return pct / 100;
+}
 
 /* ============================================
  * Resources
@@ -286,7 +306,7 @@ export function addCyberware(cyber: GameCyberware, grade: CyberwareGrade = 'Stan
 	};
 
 	const multiplier = gradeMultipliers[grade];
-	const essenceCost = cyber.ess * multiplier.ess;
+	const essenceCost = cyber.ess * multiplier.ess * essenceMultiplier(char.improvements, 'Cyberware');
 	const nuyenCost = Math.floor(cyber.cost * multiplier.cost);
 
 	if (char.nuyen < nuyenCost) return;
@@ -383,7 +403,7 @@ export function addChildCyberware(
 
 	const multiplier = gradeMultipliers[grade];
 	// Child cyberware essence is inherently reduced in some rules, but standard calculation here is base.
-	const essenceCost = cyber.ess * multiplier.ess;
+	const essenceCost = cyber.ess * multiplier.ess * essenceMultiplier(char.improvements, 'Cyberware');
 	const nuyenCost = Math.floor(cyber.cost * multiplier.cost);
 
 	if (char.nuyen < nuyenCost) return;
@@ -482,7 +502,7 @@ export function addBioware(
 	};
 
 	const multiplier = gradeMultipliers[grade];
-	const essenceCost = bio.ess * multiplier.ess * rating;
+	const essenceCost = bio.ess * multiplier.ess * rating * essenceMultiplier(char.improvements, 'Bioware');
 	const nuyenCost = Math.floor(bio.cost * multiplier.cost * rating);
 
 	if (char.nuyen < nuyenCost) return;

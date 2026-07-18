@@ -8,7 +8,17 @@
 
 
 
-import type { Improvement, ImprovementType, ImprovementSource, BonusValue } from '$types';
+import type {
+    Improvement,
+    ImprovementType,
+    ImprovementSource,
+    BonusValue,
+    ConditionMonitorBonus,
+    ArmorBonus
+} from '$types';
+
+/** Signature of the `b(...)` improvement-builder closure inside createImprovementsFromBonus. */
+type ImprovementBuilder = (type: ImprovementType, improvedName: string, overrides?: Partial<Improvement>) => void;
 
 /**
  * Tokenize an arithmetic expression (post "Rating" substitution) into
@@ -255,6 +265,110 @@ function generateImprovementId(): string {
     return `imp-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
 }
 
+/** Resolve a plain-or-precedence-carrying condition-monitor value, e.g. Will to Live's
+ * plain `overflow: 1` vs High Pain Tolerance's `thresholdoffset: { value: 1, precedence: '0' }`. */
+function resolveConditionMonitorEntry(
+    raw: BonusValue | { value: BonusValue; precedence?: string } | undefined,
+    r: (raw: BonusValue | undefined) => number | undefined
+): { val: number; uniqueName: string } | undefined {
+    if (raw === undefined) return undefined;
+    if (typeof raw === 'object') {
+        const val = r(raw.value);
+        return val === undefined
+            ? undefined
+            : { val, uniqueName: raw.precedence !== undefined ? `precedence${raw.precedence}` : '' };
+    }
+    const val = r(raw);
+    return val === undefined ? undefined : { val, uniqueName: '' };
+}
+
+/**
+ * Desktop `<conditionmonitor>` (clsImprovement.cs:1628-1663) — physical/stun/overflow
+ * are plain numeric add-ons; threshold/thresholdoffset can carry a `precedence`
+ * attribute (e.g. High Pain Tolerance) driving valueOf's precedence0/1 stacking.
+ */
+function applyConditionMonitorBonus(
+    cm: ConditionMonitorBonus,
+    r: (raw: BonusValue | undefined) => number | undefined,
+    b: ImprovementBuilder
+): void {
+    const physical = r(cm.physical);
+    if (physical !== undefined) b('PhysicalCM', '', { val: physical });
+
+    const stun = r(cm.stun);
+    if (stun !== undefined) b('StunCM', '', { val: stun });
+
+    const overflow = r(cm.overflow);
+    if (overflow !== undefined) b('CMOverflow', '', { val: overflow });
+
+    const threshold = resolveConditionMonitorEntry(cm.threshold, r);
+    if (threshold) b('CMThreshold', '', { val: threshold.val, uniqueName: threshold.uniqueName });
+
+    const thresholdOffset = resolveConditionMonitorEntry(cm.thresholdoffset, r);
+    if (thresholdOffset) b('CMThresholdOffset', '', { val: thresholdOffset.val, uniqueName: thresholdOffset.uniqueName });
+}
+
+/** Desktop `<armor><b>N</b><i>N</i></armor>` (clsImprovement.cs:1785-1795) — flat armor add-on. */
+function applyArmorBonus(
+    armor: ArmorBonus,
+    r: (raw: BonusValue | undefined) => number | undefined,
+    b: ImprovementBuilder
+): void {
+    const ballistic = r(armor.b);
+    if (ballistic !== undefined) b('BallisticArmor', '', { val: ballistic });
+
+    const impact = r(armor.i);
+    if (impact !== undefined) b('ImpactArmor', '', { val: impact });
+}
+
+/**
+ * Every ImprovementType that `createImprovementsFromBonus` can currently emit.
+ * Maintained by hand alongside the parser (not derived by reflection) so a
+ * PR that adds a new producer must also update this list — the drift guard
+ * in `engine/__tests__/improvement-matrix.test.ts` fails otherwise (issue #64).
+ */
+export const PRODUCIBLE_TYPES: readonly ImprovementType[] = [
+    'Attribute',
+    'Skill',
+    'SkillGroup',
+    'SkillCategory',
+    'PhysicalCM',
+    'StunCM',
+    'CMOverflow',
+    'CMThreshold',
+    'CMThresholdOffset',
+    'BallisticArmor',
+    'ImpactArmor',
+    'Initiative',
+    'InitiativePass',
+    'Composure',
+    'JudgeIntentions',
+    'DamageResistance',
+    'DrainResistance',
+    'FadingResistance',
+    'Notoriety',
+    'LifestyleCost',
+    'Reach',
+    'UnarmedDV',
+    'MovementPercent',
+    'SwimPercent',
+    'FlySpeed',
+    'RestrictedItemCount',
+    'NuyenMaxBP',
+    'FreePositiveQualities',
+    'FreeNegativeQualities',
+    'Skillwire',
+    'Memory',
+    'CyberwareEssCost',
+    'BiowareEssCost',
+    'Uneducated',
+    'Uncouth',
+    'Infirm',
+    'SensitiveSystem',
+    'BlackMarketDiscount',
+    'SpecialTab'
+];
+
 /**
  * Extract improvements from parsed bonus block data.
  * @param source The general category of item providing it
@@ -354,15 +468,18 @@ export function createImprovementsFromBonus(
         }
     }
 
+    if (bonusData.conditionmonitor) applyConditionMonitorBonus(bonusData.conditionmonitor, r, b);
+    if (bonusData.armor) applyArmorBonus(bonusData.armor, r, b);
+
     // Simple numeric properties
     const propMappings: Record<string, ImprovementType> = {
         initiative: 'Initiative',
         initiativepass: 'InitiativePass',
-        conditionmonitor: 'ConditionMonitor',
         composure: 'Composure',
         judgeintentions: 'JudgeIntentions',
         damageresistance: 'DamageResistance',
         drainresist: 'DrainResistance',
+        fadingresist: 'FadingResistance',
         notoriety: 'Notoriety',
         lifestylecost: 'LifestyleCost',
         reach: 'Reach',
@@ -375,6 +492,7 @@ export function createImprovementsFromBonus(
         freepositivequalities: 'FreePositiveQualities',
         freenegativequalities: 'FreeNegativeQualities',
         skillwire: 'Skillwire',
+        memory: 'Memory',
         cyberwareessmultiplier: 'CyberwareEssCost',
         biowareessmultiplier: 'BiowareEssCost'
     };

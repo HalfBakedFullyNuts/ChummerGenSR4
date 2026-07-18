@@ -36,7 +36,9 @@ export type {
 	SkillBonusEntry,
 	SkillGroupBonusEntry,
 	SkillCategoryBonusEntry,
-	ConditionMonitorBonus
+	ConditionMonitorBonus,
+	ArmorBonus,
+	PrecedenceBonusValue
 } from './improvements';
 
 /* Skill types */

@@ -345,6 +345,22 @@ describe('calculations engine', () => {
             // highest 5 + Math.floor(2/2) = 6
             expect(calculations.calculateArmorImpact(char)).toBe(6);
         });
+
+        it('Toughness (DamageResistance) adds to damage soak, not condition monitor (issue #64)', () => {
+            char.attributes.bod.base = 4;
+            char.equipment.armor = [
+                { id: 'a1', name: 'Jacket', ballistic: 8, impact: 6, capacity: 0, cost: 0, equipable: true, equipped: true, armorCapacity: 0 }
+            ];
+            char.improvements = [{
+                id: 'imp-1', type: 'DamageResistance', improvedName: '', source: 'Quality', sourceName: 'Toughness',
+                val: 1, min: 0, max: 0, aug: 0, augMax: 0, rating: 1,
+                exclude: '', uniqueName: '', addToRating: false, enabled: true
+            }];
+            // BOD 4 + ballistic 8 + DamageResistance 1 = 13
+            expect(calculations.calculateDamageSoakBallistic(char)).toBe(13);
+            // Toughness does not touch the physical condition monitor
+            expect(calculations.calculatePhysicalCM(char)).toBe(10); // ceil(4/2) + 8, no bonus
+        });
     });
 
     describe('Magic and Matrix', () => {

@@ -13,7 +13,7 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { get } from 'svelte/store';
-import { character, startNewCharacter } from '../character';
+import { character, startNewCharacter, addQuality } from '../character';
 import {
 	addCyberware,
 	removeCyberware,
@@ -26,6 +26,7 @@ import {
 	removeGear,
 	setResourcesBP
 } from '../equipment';
+import { setGameDataForTesting } from '../gamedata';
 import type { GameCyberware, GameBioware, GameArmor, GameGear } from '$types';
 
 const WIRED_REFLEXES: GameCyberware = {
@@ -218,5 +219,80 @@ describe('Equipment improvement wiring (issue #62c)', () => {
 		expect(char.equipment.gear).toHaveLength(1);
 		expect(char.equipment.gear[0]!.quantity).toBe(2);
 		expect(char.improvements).toHaveLength(1); // still just the original item's improvements
+	});
+});
+
+describe('Essence-multiplier improvements (issue #64)', () => {
+	const DATAJACK: GameCyberware = {
+		name: 'Datajack',
+		category: 'Headware',
+		ess: 0.1,
+		capacity: '0',
+		avail: '2',
+		cost: 500,
+		source: 'SR4',
+		page: 347,
+		rating: 1,
+		minRating: 1,
+		maxRating: 1
+	};
+
+	beforeEach(() => {
+		startNewCharacter('test-user', 'bp');
+		setResourcesBP(10);
+	});
+
+	it('Biocompatability (Cyberware) reduces essence cost by its multiplier', () => {
+		setGameDataForTesting({
+			qualities: [
+				{
+					name: 'Biocompatability (Cyberware)',
+					category: 'Positive',
+					bp: 5,
+					mutant: false,
+					limit: false,
+					bonus: { cyberwareessmultiplier: 90 },
+					source: 'SR4',
+					page: 88
+				}
+			]
+		});
+		addQuality('Biocompatability (Cyberware)', 'Positive', 5);
+		const essenceBefore = get(character)!.attributes.ess;
+
+		addCyberware(DATAJACK, 'Standard');
+
+		const char = get(character)!;
+		// 0.1 * 0.9 = 0.09
+		expect(char.equipment.cyberware[0]!.essence).toBeCloseTo(0.09);
+		expect(char.attributes.ess).toBeCloseTo(essenceBefore - 0.09);
+	});
+
+	it('Sensitive System doubles cyberware essence cost', () => {
+		setGameDataForTesting({
+			qualities: [
+				{
+					name: 'Sensitive System',
+					category: 'Negative',
+					bp: -15,
+					mutant: false,
+					limit: false,
+					bonus: { sensitivesystem: true },
+					source: 'SR4',
+					page: 95
+				}
+			]
+		});
+		addQuality('Sensitive System', 'Negative', -15);
+
+		addCyberware(DATAJACK, 'Standard');
+
+		// 0.1 * 2 = 0.2
+		expect(get(character)!.equipment.cyberware[0]!.essence).toBeCloseTo(0.2);
+	});
+
+	it('with no essence-multiplier qualities, essence cost is unaffected', () => {
+		addCyberware(DATAJACK, 'Standard');
+		expect(get(character)!.equipment.cyberware[0]!.essence).toBeCloseTo(0.1);
 	});
 });

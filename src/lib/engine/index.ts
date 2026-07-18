@@ -32,6 +32,8 @@ export {
 	calculateDodge,
 	calculateArmorBallistic,
 	calculateArmorImpact,
+	calculateDamageSoakBallistic,
+	calculateDamageSoakImpact,
 	calculateDrainResist,
 	calculateAstralInitiative,
 	calculateAstralInitiativeDice,

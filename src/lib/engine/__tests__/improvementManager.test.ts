@@ -288,6 +288,54 @@ describe('ImprovementManager', () => {
             expect(imps[0]!.uniqueName).toBe('');
         });
 
+        it('parses conditionmonitor.overflow (issue #64, Will to Live)', () => {
+            const bonusData = { conditionmonitor: { overflow: 1 } };
+            const imps = createImprovementsFromBonus('Quality', 'Will to Live (Rating 1)', bonusData);
+            expect(imps).toEqual([
+                expect.objectContaining({ type: 'CMOverflow', val: 1, uniqueName: '' })
+            ]);
+        });
+
+        it('parses conditionmonitor.thresholdoffset with a precedence attribute (issue #64, High Pain Tolerance)', () => {
+            const bonusData = {
+                conditionmonitor: { thresholdoffset: { value: 1, precedence: '0' } }
+            };
+            const imps = createImprovementsFromBonus('Quality', 'High Pain Tolerance (Rating 1)', bonusData);
+            expect(imps).toEqual([
+                expect.objectContaining({ type: 'CMThresholdOffset', val: 1, uniqueName: 'precedence0' })
+            ]);
+        });
+
+        it('parses conditionmonitor.physical/stun/threshold', () => {
+            const bonusData = { conditionmonitor: { physical: 2, stun: 1, threshold: -1 } };
+            const imps = createImprovementsFromBonus('Quality', 'Test', bonusData);
+            expect(imps.find(i => i.type === 'PhysicalCM')!.val).toBe(2);
+            expect(imps.find(i => i.type === 'StunCM')!.val).toBe(1);
+            expect(imps.find(i => i.type === 'CMThreshold')!.val).toBe(-1);
+        });
+
+        it('parses armor bonus into BallisticArmor/ImpactArmor (issue #64, Troll metatype)', () => {
+            const bonusData = { armor: { b: 1, i: 1 } };
+            const imps = createImprovementsFromBonus('Metatype', 'Troll', bonusData);
+            expect(imps).toEqual([
+                expect.objectContaining({ type: 'BallisticArmor', val: 1 }),
+                expect.objectContaining({ type: 'ImpactArmor', val: 1 })
+            ]);
+        });
+
+        it('parses memory and fadingresist prop mappings (issue #64)', () => {
+            const bonusData = { memory: 1, fadingresist: 2 };
+            const imps = createImprovementsFromBonus('Quality', 'Test', bonusData);
+            expect(imps.find(i => i.type === 'Memory')!.val).toBe(1);
+            expect(imps.find(i => i.type === 'FadingResistance')!.val).toBe(2);
+        });
+
+        it('no longer produces the dead ConditionMonitor type', () => {
+            const bonusData = { conditionmonitor: { overflow: 1 } };
+            const imps = createImprovementsFromBonus('Quality', 'Test', bonusData);
+            expect(imps.some(i => (i.type as string) === 'ConditionMonitor')).toBe(false);
+        });
+
         it('rating upgrade is remove-then-recreate, never in-place mutation', () => {
             const bonusData = { initiativepass: 'Rating' };
             const rating2 = createImprovementsFromBonus('Cyberware', 'Wired Reflexes', bonusData, 2);
